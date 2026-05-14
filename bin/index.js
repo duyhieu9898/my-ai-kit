@@ -7,16 +7,12 @@ import { downloadTemplate } from 'giget';
 import path from 'path';
 import fs from 'fs';
 import readline from 'readline';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 // ============================================================================
 // CONSTANTS
 // ============================================================================
 
-const REPO = 'github:vudovn/antigravity-kit';
+const REPO = 'github:duyhieu9898/my-antigravity-kit';
 const TEMPLATES_FOLDER = 'templates';
 const AGENT_FOLDER = '.agent';
 const TEMP_FOLDER = '.temp_ag_kit';
@@ -148,19 +144,28 @@ const initCommand = async (options) => {
     }
 
     const spinner = ora({
-        text: 'Installing...',
+        text: 'Downloading...',
         color: 'cyan',
     }).start();
 
     try {
-        // Local path to the templates folder within the package
-        const localTemplatePath = path.join(__dirname, '..');
+        // Download repository using giget
+        const repoSource = options.branch ? `${REPO}#${options.branch}` : REPO;
+        await downloadTemplate(repoSource, {
+            dir: tempDir,
+            force: true,
+        });
 
-        // Copy .agent folder directly from internal templates
-        copyAgentFolder(localTemplatePath, agentDir);
+        spinner.text = 'Installing...';
+
+        // Copy .agent folder
+        copyAgentFolder(tempDir, agentDir);
 
         // Update .gitignore
         const gitignoreUpdated = updateGitignore(targetDir);
+
+        // Cleanup
+        cleanup(tempDir);
 
         spinner.succeed(chalk.green('Installation successful!'));
 
