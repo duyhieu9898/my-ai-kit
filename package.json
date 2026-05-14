@@ -13,11 +13,11 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vudovn/antigravity-kit.git"
+    "url": "git+https://github.com/duyhieu9898/my-antigravity-kit.git"
   },
-  "homepage": "https://github.com/vudovn/antigravity-kit#readme",
+  "homepage": "https://github.com/duyhieu9898/my-antigravity-kit#readme",
   "bugs": {
-    "url": "https://github.com/vudovn/antigravity-kit/issues"
+    "url": "https://github.com/duyhieu9898/my-antigravity-kit/issues"
   },
   "keywords": [
     "antigravity",
@@ -27,7 +27,7 @@
     "gemini",
     "skills"
   ],
-  "author": "Do Van Vu",
+  "author": "Duy Hieu",
   "license": "MIT",
   "dependencies": {
     "chalk": "^5.6.2",
