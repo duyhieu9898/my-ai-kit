@@ -1,11 +1,11 @@
 {
-  "name": "@vudovn/antigravity-kit",
-  "version": "1.0.7",
-  "description": "CLI tool to setup Antigravity Kit skills and MCPs",
+  "name": "hieund-ag-kit",
+  "version": "1.0.0",
+  "description": "Custom CLI tool to setup Hieund AG Kit skills and MCPs",
   "main": "bin/index.js",
   "type": "module",
   "bin": {
-    "ag-kit": "./bin/index.js"
+    "hieund-ag-kit": "./bin/index.js"
   },
   "files": [
     "bin",

@@ -7,6 +7,10 @@ import { downloadTemplate } from 'giget';
 import path from 'path';
 import fs from 'fs';
 import readline from 'readline';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // ============================================================================
 // CONSTANTS
@@ -27,7 +31,7 @@ const TEMP_FOLDER = '.temp_ag_kit';
 const showBanner = () => {
     console.log(chalk.blueBright(`
     ╔══════════════════════════════════════╗
-    ║      🚀 ANTIGRAVITY KIT CLI 🚀       ║
+    ║      🚀 HIEUND AG KIT CLI 🚀         ║
     ╚══════════════════════════════════════╝
     `));
 };
@@ -144,28 +148,19 @@ const initCommand = async (options) => {
     }
 
     const spinner = ora({
-        text: 'Downloading...',
+        text: 'Installing...',
         color: 'cyan',
     }).start();
 
     try {
-        // Download repository using giget
-        const repoSource = options.branch ? `${REPO}#${options.branch}` : REPO;
-        await downloadTemplate(repoSource, {
-            dir: tempDir,
-            force: true,
-        });
+        // Local path to the templates folder within the package
+        const localTemplatePath = path.join(__dirname, '..');
 
-        spinner.text = 'Installing...';
-
-        // Copy .agent folder
-        copyAgentFolder(tempDir, agentDir);
+        // Copy .agent folder directly from internal templates
+        copyAgentFolder(localTemplatePath, agentDir);
 
         // Update .gitignore
         const gitignoreUpdated = updateGitignore(targetDir);
-
-        // Cleanup
-        cleanup(tempDir);
 
         spinner.succeed(chalk.green('Installation successful!'));
 
@@ -197,7 +192,7 @@ const updateCommand = async (options) => {
     // Check if .agent exists
     if (!fs.existsSync(agentDir)) {
         console.log(chalk.red(`❌ Could not find ${AGENT_FOLDER} folder at: ${targetDir}`));
-        console.log(chalk.yellow(`💡 Tip: Run ${chalk.cyan('ag-kit init')} to install first.`));
+        console.log(chalk.yellow(`💡 Tip: Run ${chalk.cyan('hieund-ag-kit init')} to install first.`));
         process.exit(1);
     }
 
@@ -236,7 +231,7 @@ const statusCommand = (options) => {
         console.log(chalk.gray('────────────────────────────────────────\n'));
     } else {
         console.log(chalk.red('❌ Not installed'));
-        console.log(chalk.yellow(`💡 Run ${chalk.cyan('ag-kit init')} to install.\n`));
+        console.log(chalk.yellow(`💡 Run ${chalk.cyan('hieund-ag-kit init')} to install.\n`));
     }
 };
 
@@ -247,8 +242,8 @@ const statusCommand = (options) => {
 const program = new Command();
 
 program
-    .name('ag-kit')
-    .description('CLI tool to install and manage Antigravity Kit')
+    .name('hieund-ag-kit')
+    .description('Custom CLI tool to install and manage Hieund AG Kit')
     .version('1.0.0', '-v, --version', 'Display version number');
 
 // Command: init
