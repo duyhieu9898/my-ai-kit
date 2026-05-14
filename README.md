@@ -1,308 +1,74 @@
-# 🚀 Antigravity Kit
+# 🚀 Hieund AG Kit
 
-> **AI Agent Capability Expansion Toolkit** - A comprehensive collection of skills, rules, and workflows to supercharge AI coding assistants.
-
-[![Skills](https://img.shields.io/badge/Skills-35+-blue)](#-skills)
-[![Rules](https://img.shields.io/badge/Rules-10-green)](#-rules)
-[![Workflows](https://img.shields.io/badge/Workflows-2-orange)](#-workflows)
+> **Custom AI Agent Capability Expansion Toolkit** - Bộ công cụ tối ưu hóa năng lực cho AI Agent với các skill, rule và workflow cá nhân hóa.
 
 ---
 
-## 📋 Table of Contents
+## 📋 Giới thiệu
 
-- [Introduction](#-introduction)
-- [Skills](#-skills)
-- [Rules](#-rules)
-- [Workflows](#-workflows)
-- [Installation](#-installation)
-- [Usage](#-usage)
-- [Credits](#-credits)
-- [Contributing](#-contributing)
+**Hieund AG Kit** là phiên bản tùy chỉnh của Antigravity Kit, được thiết kế để giúp AI Agent của bạn thông minh hơn, làm việc có quy trình và hiểu sâu về các công nghệ bạn đang sử dụng.
+
+Bộ công cụ bao gồm:
+- **Skills**: Các module kiến thức chuyên sâu (React, Node.js, Database, Testing, UI/UX...).
+- **Rules**: Các quy tắc và ràng buộc định hướng hành vi của Agent.
+- **Workflows**: Quy trình từng bước cho các tác vụ phức tạp.
 
 ---
 
-## 🎯 Introduction
+## 📦 Cài đặt
 
-**Antigravity Kit** is a comprehensive collection of:
+### 1. Cài đặt cục bộ (Dành cho máy hiện tại)
 
-- **Skills** - Domain-specific expertise (React, Node.js, Database, Testing, UI/UX...)
-- **Rules** - Guidelines and constraints for agent behavior
-- **Workflows** - Step-by-step procedures for common tasks
-
-This toolkit combines the best of:
-- 🎨 **[UI UX Pro Max](https://ui-ux-pro-max-skill.nextlevelbuilder.io/)** - Design Intelligence with 50 styles, 21 palettes, 50 font pairings
-- 🛠️ **[ClaudeKit](https://claudekit.cc/)** - Production-ready AI subagents, workflows, and integrations
-
-Designed to integrate with AI agents supporting the **Agent Skills** standard.
-
----
-
-## 🧠 Skills
-
-Skills are domain-specific expertise modules. The agent automatically identifies and uses the appropriate skill for each task.
-
-### Frontend
-
-| Skill | Description |
-|-------|-------------|
-| `react-expert` | React 18/19, hooks, patterns, performance |
-| `nextjs-expert` | App Router, Server Components, SSR |
-| `css-expert` | CSS architecture, responsive, design systems |
-| `state-management-expert` | Redux, Zustand, React Query |
-| `ui-ux-pro-max` | 50 styles, 21 palettes, 50 font pairings |
-
-### Backend
-
-| Skill | Description |
-|-------|-------------|
-| `nodejs-expert` | Async patterns, modules, performance |
-| `nestjs-expert` | Module architecture, DI, testing |
-| `rest-api-expert` | RESTful design, HTTP semantics |
-| `auth-expert` | JWT, OAuth 2.0, RBAC, security |
-
-### Database
-
-| Skill | Description |
-|-------|-------------|
-| `prisma-expert` | Schema design, migrations, queries |
-| `database-expert` | General database optimization |
-| `postgres-expert` | PostgreSQL-specific patterns |
-| `mongodb-expert` | MongoDB document modeling |
-
-### Testing
-
-| Skill | Description |
-|-------|-------------|
-| `testing-expert` | General testing strategies |
-| `jest-expert` | Jest framework, mocking |
-| `vitest-expert` | Vitest, Vite integration |
-| `playwright-expert` | E2E testing, browser automation |
-
-### DevOps & Tools
-
-| Skill | Description |
-|-------|-------------|
-| `devops-expert` | CI/CD, infrastructure |
-| `docker-expert` | Containerization, Compose |
-| `github-actions-expert` | GitHub Actions workflows |
-| `git-expert` | Git workflows, conflicts |
-
-### Code Quality
-
-| Skill | Description |
-|-------|-------------|
-| `code-review` | Comprehensive code review |
-| `refactoring-expert` | Code smell detection, refactoring |
-| `typescript-expert` | TypeScript patterns, type system |
-| `accessibility-expert` | WCAG compliance, a11y |
-
----
-
-## 📏 Rules
-
-Rules are guidelines that direct agent behavior. There are 3 activation types:
-
-- **always_on** - Always applied
-- **model_decision** - Agent decides when to apply
-- **glob** - Applied based on file pattern
-
-### Rules List
-
-| # | File | Activation | Description |
-|---|------|------------|-------------|
-| 1 | `01-identity.md` | Always On | Role & working principles |
-| 2 | `02-task-classification.md` | Always On | 4 task types classification |
-| 3 | `03-mode-consulting.md` | Model Decision | Consulting process |
-| 4 | `04-mode-build.md` | Model Decision | Build process |
-| 5 | `05-mode-debug.md` | Model Decision | Debug process |
-| 6 | `06-mode-optimize.md` | Model Decision | Optimization process |
-| 7 | `07-technical-standards.md` | Always On | Coding standards |
-| 8 | `08-communication.md` | Always On | Communication style |
-| 9 | `09-checklist.md` | Always On | Pre-delivery checklist |
-| 10 | `10-special-situations.md` | Always On | Special situation handling |
-
----
-
-## 🔄 Workflows
-
-Workflows are step-by-step procedures. Invoke with slash command `/workflow-name`.
-
-| Workflow | Command | Description |
-|----------|---------|-------------|
-| Request Handler | `/request` | Full-stack engineer task handling |
-| UI/UX Pro Max | `/ui-ux-pro-max` | Design UI with 50 styles, 21 palettes |
-
----
-
-## 📦 Installation
-
-### Install Global (Recommended)
+Để sử dụng lệnh `hieund-ag-kit` ở bất kỳ đâu trên máy tính của bạn:
 
 ```bash
-# Install globally
-npm install -g @vudovn/antigravity-kit
-
-# Then use commands anywhere
-# Navigate to your project
-cd your-project
-
-# Install .agent folder
-ag-kit init
-
-# Update to the latest version
-ag-kit update
-
-# Check installation status
-ag-kit status
+cd /home/hieund/Documents/hieund-ag-kit-cli
+npm link
 ```
 
-### Using npx (No Install)
+### 2. Khởi tạo trong dự án mới
+
+Sau khi đã link, bạn chỉ cần di chuyển đến thư mục dự án mới và chạy:
 
 ```bash
-# Navigate to your project
-cd your-project
-
-# Install .agent folder
-npx @vudovn/antigravity-kit init
+hieund-ag-kit init
 ```
 
-### CLI Commands
+Lệnh này sẽ tự động tải bộ cấu hình `.agent` từ GitHub [duyhieu9898/my-antigravity-kit](https://github.com/duyhieu9898/my-antigravity-kit) về dự án của bạn.
 
-| Command | Description |
+---
+
+## 🛠️ Lệnh CLI
+
+| Lệnh | Mô tả |
 |---------|-------------|
-| `ag-kit init` | Install `.agent` folder into current directory |
-| `ag-kit update` | Update `.agent` to the latest version |
-| `ag-kit status` | Check installation status |
-
-#### Command Options
-
-```bash
-# init options
-ag-kit init [options]
-  -f, --force           # Overwrite if folder already exists
-  -p, --path <dir>      # Path to the project directory
-  -b, --branch <name>   # Select repository branch
-
-# update options
-ag-kit update [options]
-  -f, --force           # Skip confirmation prompt
-  -p, --path <dir>      # Path to the project directory
-  -b, --branch <name>   # Select repository branch
-
-# status options
-ag-kit status [options]
-  -p, --path <dir>      # Path to the project directory
-```
+| `hieund-ag-kit init` | Cài đặt thư mục `.agent` vào dự án hiện tại |
+| `hieund-ag-kit update` | Cập nhật `.agent` lên phiên bản mới nhất từ GitHub |
+| `hieund-ag-kit status` | Kiểm tra tình trạng cài đặt |
 
 ---
 
-## 🚀 Usage
+## 🤝 Tùy chỉnh (Personalization)
 
-### Skills
+Để thêm skill hoặc rule mới cho bộ kit của bạn:
 
-Skills are automatically applied. The agent reads the skill when it identifies a related task:
-
-```
-User: "Fix bug in this React component"
-Agent: (automatically uses react-expert skill)
-```
-
-### Rules
-
-Rules apply based on activation type:
-- **always_on**: Always active
-- **model_decision**: Agent decides when to apply
-- **glob**: Applied when working with files matching pattern
-
-### Workflows
-
-Invoke workflows with slash commands:
-
-```
-User: Prompt
-Agent: (follows the workflow)
-```
-
----
-
-## 🙏 Credits
-
-This project is built upon and inspired by:
-
-| Project | Description | Link |
-|---------|-------------|------|
-| **UI UX Pro Max** | Design Intelligence for Claude Code - 50 styles, 21 color palettes, 50 font pairings, 20 chart types | [ui-ux-pro-max-skill.nextlevelbuilder.io](https://ui-ux-pro-max-skill.nextlevelbuilder.io/) |
-| **ClaudeKit** | Production-ready AI subagents, workflows, and integrations for software development | [claudekit.cc](https://claudekit.cc/) |
-
-Special thanks to the creators of these amazing tools for making AI-assisted development more powerful and accessible.
-
----
-
-## 🤝 Contributing
-
-### Adding a New Skill
-
-1. Create folder: `.agent/skills/your-skill/`
-2. Create `SKILL.md` with format:
-
-```markdown
----
-name: your-skill
-description: Skill description. Use when X or Y.
----
-
-# Your Skill
-
-Instructions for the agent...
-```
-
-### Adding a New Rule
-
-1. Create file: `.agent/rules/your-rule.md`
-2. Add frontmatter:
-
-```markdown
----
-activation: always_on | model_decision | glob
-glob: "**/*.tsx"  # if using glob
-description: When to apply  # if using model_decision
----
-
-# Your Rule
-
-Content...
-```
-
-### Adding a New Workflow
-
-1. Create file: `.agent/workflows/your-workflow.md`
-2. Format:
-
-```markdown
----
-description: Workflow description
----
-
-# Your Workflow
-
-## Step 1: ...
-## Step 2: ...
-```
+1.  Chỉnh sửa trong thư mục `templates/.agent/` của repo này.
+2.  Push thay đổi lên GitHub:
+    ```bash
+    git add .
+    git commit -m "Add new custom skill"
+    git push origin main
+    ```
+3.  Sử dụng lệnh `update` ở các dự án đã cài đặt để cập nhật cấu hình mới nhất.
 
 ---
 
 ## 📄 License
 
-MIT License - See [LICENSE](LICENSE) for details.
+MIT License
 
 ---
 
 <p align="center">
-  Made with ❤️ by <a href="https://github.com/vudovn">VudoVN</a>
-</p>
-
-<p align="center">
-  <a href="https://img.vietqr.io/image/mbbank-0779440918-compact2.jpg">
-    <img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-ffdd00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black" alt="Buy Me a Coffee" />
-  </a>
+  Made with ❤️ by <b>Hieu Nguyen Duy</b>
 </p>
