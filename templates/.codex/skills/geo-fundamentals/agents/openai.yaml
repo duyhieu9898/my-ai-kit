@@ -1,0 +1,8 @@
+interface:
+  display_name: "GEO Fundamentals"
+  short_description: "Generative Engine Optimization, AI citation factors, schema, and crawler controls."
+  brand_color: "#D97706"
+  default_prompt: "$geo-fundamentals"
+
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,8 @@
+interface:
+  display_name: "Plan Writing"
+  short_description: "Structured task planning with breakdowns and verification criteria"
+  brand_color: "#8B5CF6"
+  default_prompt: "$plan-writing"
+
+policy:
+  allow_implicit_invocation: true

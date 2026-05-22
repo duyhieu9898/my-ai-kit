@@ -1,0 +1,8 @@
+interface:
+  display_name: "Red Team Tactics"
+  short_description: "MITRE ATT&CK simulation, privilege escalation, evasion, and penetration testing."
+  brand_color: "#7F1D1D"
+  default_prompt: "$red-team-tactics"
+
+policy:
+  allow_implicit_invocation: false

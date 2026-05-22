@@ -1,0 +1,8 @@
+interface:
+  display_name: "Code Archaeologist"
+  short_description: "Expert in legacy code, refactoring, and understanding undocumented systems. U..."
+  brand_color: "#6B7280"
+  default_prompt: "$code-archaeologist"
+
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,8 @@
+interface:
+  display_name: "Project Planner"
+  short_description: "Smart project planning agent. Breaks down user requests into tasks, plans fil..."
+  brand_color: "#7C3AED"
+  default_prompt: "$project-planner"
+
+policy:
+  allow_implicit_invocation: true

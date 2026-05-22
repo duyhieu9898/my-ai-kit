@@ -1,0 +1,8 @@
+interface:
+  display_name: "MCP Builder"
+  short_description: "Model Context Protocol tool design, URI schemas, and Claude Desktop configs."
+  brand_color: "#10B981"
+  default_prompt: "$mcp-builder"
+
+policy:
+  allow_implicit_invocation: true

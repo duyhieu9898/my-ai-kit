@@ -1,0 +1,8 @@
+interface:
+  display_name: "Test Engineer"
+  short_description: "Expert in testing, TDD, and test automation. Use for writing tests, improving..."
+  brand_color: "#10B981"
+  default_prompt: "$test-engineer"
+
+policy:
+  allow_implicit_invocation: true

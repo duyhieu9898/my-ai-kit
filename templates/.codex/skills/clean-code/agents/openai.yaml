@@ -1,0 +1,8 @@
+interface:
+  display_name: "Clean Code"
+  short_description: "Pragmatic coding standards, SRP, DRY, KISS, YAGNI, early returns"
+  brand_color: "#10B981"
+  default_prompt: "$clean-code"
+
+policy:
+  allow_implicit_invocation: true

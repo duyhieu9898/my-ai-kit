@@ -1,0 +1,8 @@
+interface:
+  display_name: "Devops Engineer"
+  short_description: "Expert in deployment, server management, CI/CD, and production operations. CR..."
+  brand_color: "#0D9488"
+  default_prompt: "$devops-engineer"
+
+policy:
+  allow_implicit_invocation: true

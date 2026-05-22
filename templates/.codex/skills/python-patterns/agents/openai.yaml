@@ -1,0 +1,8 @@
+interface:
+  display_name: "Python Patterns"
+  short_description: "Framework selection, async patterns, type hints, and project structure in Python."
+  brand_color: "#3776AB"
+  default_prompt: "$python-patterns"
+
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,8 @@
+interface:
+  display_name: "Playwright Pitfalls"
+  short_description: "7 critical Playwright pitfalls: timing, locators, assertions, isolation"
+  brand_color: "#EF4444"
+  default_prompt: "$playwright-pitfalls"
+
+policy:
+  allow_implicit_invocation: true

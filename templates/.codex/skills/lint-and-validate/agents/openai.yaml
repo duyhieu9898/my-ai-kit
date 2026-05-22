@@ -1,0 +1,8 @@
+interface:
+  display_name: "Lint & Validate"
+  short_description: "Unified lint check, type coverage, and static analysis"
+  brand_color: "#10B981"
+  default_prompt: "$lint-and-validate"
+
+policy:
+  allow_implicit_invocation: true

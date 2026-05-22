@@ -1,0 +1,8 @@
+interface:
+  display_name: "Systematic Debugging"
+  short_description: "Evidence-based 4-phase debugging and root cause analysis."
+  brand_color: "#DC2626"
+  default_prompt: "$systematic-debugging"
+
+policy:
+  allow_implicit_invocation: true

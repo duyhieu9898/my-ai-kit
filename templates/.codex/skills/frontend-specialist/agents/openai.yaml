@@ -1,0 +1,8 @@
+interface:
+  display_name: "Frontend Specialist"
+  short_description: "Senior Frontend Architect who builds maintainable React/Next.js systems with ..."
+  brand_color: "#EC4899"
+  default_prompt: "$frontend-specialist"
+
+policy:
+  allow_implicit_invocation: true

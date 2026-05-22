@@ -1,0 +1,8 @@
+interface:
+  display_name: "Architecture"
+  short_description: "Architectural decision-making framework, ADRs, trade-off evaluation"
+  brand_color: "#3B82F6"
+  default_prompt: "$architecture"
+
+policy:
+  allow_implicit_invocation: true

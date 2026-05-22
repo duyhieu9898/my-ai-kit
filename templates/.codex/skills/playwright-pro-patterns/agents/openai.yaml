@@ -1,0 +1,8 @@
+interface:
+  display_name: "Playwright Pro Patterns"
+  short_description: "Professional standards for writing new Playwright E2E tests"
+  brand_color: "#10B981"
+  default_prompt: "$playwright-pro-patterns"
+
+policy:
+  allow_implicit_invocation: true

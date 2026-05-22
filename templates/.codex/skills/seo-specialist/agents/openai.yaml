@@ -1,0 +1,8 @@
+interface:
+  display_name: "Seo Specialist"
+  short_description: "SEO and GEO (Generative Engine Optimization) expert. Handles SEO audits, Core..."
+  brand_color: "#F59E0B"
+  default_prompt: "$seo-specialist"
+
+policy:
+  allow_implicit_invocation: true

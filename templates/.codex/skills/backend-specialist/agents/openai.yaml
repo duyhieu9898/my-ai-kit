@@ -1,0 +1,8 @@
+interface:
+  display_name: "Backend Specialist"
+  short_description: "Expert backend architect for Node.js, Python, and modern serverless/edge syst..."
+  brand_color: "#3B82F6"
+  default_prompt: "$backend-specialist"
+
+policy:
+  allow_implicit_invocation: true

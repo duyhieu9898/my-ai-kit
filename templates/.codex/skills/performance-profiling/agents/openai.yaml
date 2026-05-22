@@ -1,0 +1,8 @@
+interface:
+  display_name: "Performance Profiling"
+  short_description: "Core Web Vitals profiling, Lighthouse audit, bundle analysis"
+  brand_color: "#EF4444"
+  default_prompt: "$performance-profiling"
+
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,8 @@
+interface:
+  display_name: "API Patterns"
+  short_description: "API design principles, REST, GraphQL, tRPC, and auth patterns."
+  brand_color: "#3B82F6"
+  default_prompt: "$api-patterns"
+
+policy:
+  allow_implicit_invocation: true

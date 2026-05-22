@@ -1,0 +1,8 @@
+interface:
+  display_name: "TDD Workflow"
+  short_description: "RED-GREEN-REFACTOR cycle and Test-Driven Development loops."
+  brand_color: "#DC2626"
+  default_prompt: "$tdd-workflow"
+
+policy:
+  allow_implicit_invocation: true

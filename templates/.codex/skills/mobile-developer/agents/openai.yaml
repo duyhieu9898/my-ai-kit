@@ -1,0 +1,8 @@
+interface:
+  display_name: "Mobile Developer"
+  short_description: "Expert in React Native and Flutter mobile development. Use for cross-platform..."
+  brand_color: "#EC4899"
+  default_prompt: "$mobile-developer"
+
+policy:
+  allow_implicit_invocation: true

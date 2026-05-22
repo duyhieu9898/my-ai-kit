@@ -1,0 +1,8 @@
+interface:
+  display_name: "Server Management"
+  short_description: "Server process management, logs, health checks, and scaling."
+  brand_color: "#6B7280"
+  default_prompt: "$server-management"
+
+policy:
+  allow_implicit_invocation: false

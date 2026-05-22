@@ -1,0 +1,8 @@
+interface:
+  display_name: "Penetration Tester"
+  short_description: "Expert in offensive security, penetration testing, red team operations, and v..."
+  brand_color: "#B91C1C"
+  default_prompt: "$penetration-tester"
+
+policy:
+  allow_implicit_invocation: true

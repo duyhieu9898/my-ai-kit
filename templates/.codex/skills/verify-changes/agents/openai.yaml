@@ -1,0 +1,8 @@
+interface:
+  display_name: "Verify Changes"
+  short_description: "Run-to-verify protocols and evidence collection for code changes."
+  brand_color: "#10B981"
+  default_prompt: "$verify-changes"
+
+policy:
+  allow_implicit_invocation: true

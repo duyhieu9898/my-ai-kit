@@ -1,0 +1,8 @@
+interface:
+  display_name: "Debugger"
+  short_description: "Expert in systematic debugging, root cause analysis, and crash investigation...."
+  brand_color: "#DC2626"
+  default_prompt: "$debugger"
+
+policy:
+  allow_implicit_invocation: true

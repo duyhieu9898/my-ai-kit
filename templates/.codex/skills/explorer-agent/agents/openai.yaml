@@ -1,0 +1,8 @@
+interface:
+  display_name: "Explorer Agent"
+  short_description: "Advanced codebase discovery, deep architectural analysis, and proactive resea..."
+  brand_color: "#4B5563"
+  default_prompt: "$explorer-agent"
+
+policy:
+  allow_implicit_invocation: true

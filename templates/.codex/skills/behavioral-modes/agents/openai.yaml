@@ -1,0 +1,8 @@
+interface:
+  display_name: "Behavioral Modes"
+  short_description: "Adapts agent operating modes (brainstorm, implement, debug, review, teach, ship)."
+  brand_color: "#8B5CF6"
+  default_prompt: "$behavioral-modes"
+
+policy:
+  allow_implicit_invocation: true

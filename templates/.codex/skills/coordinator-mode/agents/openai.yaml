@@ -1,0 +1,8 @@
+interface:
+  display_name: "Coordinator Mode"
+  short_description: "Multi-agent orchestration, synthesis protocols, and fork semantics."
+  brand_color: "#1E3A8A"
+  default_prompt: "$coordinator-mode"
+
+policy:
+  allow_implicit_invocation: false

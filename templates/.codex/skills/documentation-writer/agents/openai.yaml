@@ -1,0 +1,8 @@
+interface:
+  display_name: "Documentation Writer"
+  short_description: "Expert in technical documentation. Use ONLY when user explicitly requests doc..."
+  brand_color: "#6B7280"
+  default_prompt: "$documentation-writer"
+
+policy:
+  allow_implicit_invocation: true

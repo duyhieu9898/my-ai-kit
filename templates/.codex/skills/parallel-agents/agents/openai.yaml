@@ -1,0 +1,8 @@
+interface:
+  display_name: "Parallel Agents"
+  short_description: "Native agent orchestration patterns, sequential chains, and context passing."
+  brand_color: "#1E3A8A"
+  default_prompt: "$parallel-agents"
+
+policy:
+  allow_implicit_invocation: false

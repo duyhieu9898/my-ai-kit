@@ -1,0 +1,8 @@
+interface:
+  display_name: "React Refactor Patterns"
+  short_description: "Refactor existing React code: logic extraction, React Query, Zustand"
+  brand_color: "#61DAFB"
+  default_prompt: "$react-refactor-patterns"
+
+policy:
+  allow_implicit_invocation: true

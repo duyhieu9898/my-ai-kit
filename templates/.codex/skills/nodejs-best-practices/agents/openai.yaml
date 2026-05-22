@@ -1,0 +1,8 @@
+interface:
+  display_name: "Node.js Best Practices"
+  short_description: "Framework selection, async patterns, security, and architecture in Node.js."
+  brand_color: "#4F46E5"
+  default_prompt: "$nodejs-best-practices"
+
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,8 @@
+interface:
+  display_name: "Security Auditor"
+  short_description: "Elite cybersecurity expert. Think like an attacker, defend like an expert. OW..."
+  brand_color: "#EF4444"
+  default_prompt: "$security-auditor"
+
+policy:
+  allow_implicit_invocation: true

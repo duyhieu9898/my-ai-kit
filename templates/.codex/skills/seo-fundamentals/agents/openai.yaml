@@ -1,0 +1,8 @@
+interface:
+  display_name: "SEO Fundamentals"
+  short_description: "Search engine visibility, E-E-A-T, Core Web Vitals, and meta tags."
+  brand_color: "#F59E0B"
+  default_prompt: "$seo-fundamentals"
+
+policy:
+  allow_implicit_invocation: true

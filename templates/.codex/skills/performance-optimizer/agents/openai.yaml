@@ -1,0 +1,8 @@
+interface:
+  display_name: "Performance Optimizer"
+  short_description: "Expert in performance optimization, profiling, Core Web Vitals, and bundle op..."
+  brand_color: "#10B981"
+  default_prompt: "$performance-optimizer"
+
+policy:
+  allow_implicit_invocation: true

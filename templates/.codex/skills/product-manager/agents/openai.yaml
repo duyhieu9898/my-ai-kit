@@ -1,0 +1,8 @@
+interface:
+  display_name: "Product Manager"
+  short_description: "Expert in product requirements, user stories, and acceptance criteria. Use fo..."
+  brand_color: "#F59E0B"
+  default_prompt: "$product-manager"
+
+policy:
+  allow_implicit_invocation: true

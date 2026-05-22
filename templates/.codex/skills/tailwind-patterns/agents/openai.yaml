@@ -1,0 +1,8 @@
+interface:
+  display_name: "Tailwind CSS Patterns"
+  short_description: "Tailwind CSS v4 CSS-first themes, container queries, grids, dark modes, and OKLCH color spacing."
+  brand_color: "#38BDF8"
+  default_prompt: "$tailwind-patterns"
+
+policy:
+  allow_implicit_invocation: true

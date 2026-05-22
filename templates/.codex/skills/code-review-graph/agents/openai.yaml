@@ -1,0 +1,8 @@
+interface:
+  display_name: "Code Review Graph"
+  short_description: "Token-efficient code review using Tree-sitter AST graphs and MCP"
+  brand_color: "#3B82F6"
+  default_prompt: "$code-review-graph"
+
+policy:
+  allow_implicit_invocation: true

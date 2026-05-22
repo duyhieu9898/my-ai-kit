@@ -1,0 +1,8 @@
+interface:
+  display_name: "Skillify"
+  short_description: "Auto-create new skills from repetitive workflows."
+  brand_color: "#EC4899"
+  default_prompt: "$skillify"
+
+policy:
+  allow_implicit_invocation: true

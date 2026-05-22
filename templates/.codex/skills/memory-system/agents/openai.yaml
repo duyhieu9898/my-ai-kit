@@ -1,0 +1,8 @@
+interface:
+  display_name: "Memory System"
+  short_description: "Cross-session memory management, topic files, and session start protocols."
+  brand_color: "#1E3B8A"
+  default_prompt: "$memory-system"
+
+policy:
+  allow_implicit_invocation: true

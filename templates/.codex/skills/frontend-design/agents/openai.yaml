@@ -1,0 +1,8 @@
+interface:
+  display_name: "Frontend Design System"
+  short_description: "Design thinking, colors, typography, layout, animations for web UI"
+  brand_color: "#3B82F6"
+  default_prompt: "$frontend-design"
+
+policy:
+  allow_implicit_invocation: true

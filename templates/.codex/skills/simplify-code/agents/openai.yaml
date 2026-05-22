@@ -1,0 +1,8 @@
+interface:
+  display_name: "Simplify Code"
+  short_description: "Identify and eliminate unnecessary complexity, abstractions, dead code"
+  brand_color: "#10B981"
+  default_prompt: "$simplify-code"
+
+policy:
+  allow_implicit_invocation: true

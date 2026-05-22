@@ -1,0 +1,8 @@
+interface:
+  display_name: "Game Developer"
+  short_description: "Game development across all platforms (PC, Web, Mobile, VR/AR). Use when buil..."
+  brand_color: "#EC4899"
+  default_prompt: "$game-developer"
+
+policy:
+  allow_implicit_invocation: true

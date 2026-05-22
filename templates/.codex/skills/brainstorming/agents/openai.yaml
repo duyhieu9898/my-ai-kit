@@ -1,0 +1,8 @@
+interface:
+  display_name: "Brainstorming"
+  short_description: "Socratic questioning, dynamic trade-offs, and communication guidelines."
+  brand_color: "#EC4899"
+  default_prompt: "$brainstorming"
+
+policy:
+  allow_implicit_invocation: true

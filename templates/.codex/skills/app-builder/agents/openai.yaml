@@ -1,0 +1,8 @@
+interface:
+  display_name: "App Builder"
+  short_description: "Full-stack application building orchestrator and multi-agent pipeline."
+  brand_color: "#2563EB"
+  default_prompt: "$app-builder"
+
+policy:
+  allow_implicit_invocation: false

@@ -1,0 +1,8 @@
+interface:
+  display_name: "Qa Automation Engineer"
+  short_description: "Specialist in test automation infrastructure and E2E testing. Focuses on Play..."
+  brand_color: "#059669"
+  default_prompt: "$qa-automation-engineer"
+
+policy:
+  allow_implicit_invocation: true
