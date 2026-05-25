@@ -7,286 +7,268 @@ description: >-
 allowed-tools: Read Write Edit Glob Grep
 ---
 
-# Architecture Refactor Skill
+# ⚛️ React Refactor Patterns Skill
 
-Activate this skill when refactoring, optimizing structure, or detecting code that violates logic layer boundaries.
+> Strategic guidelines and architectural patterns for refactoring, modularizing, and decoupling business logic in React applications.
 
----
+## 📑 Content Map
 
-## 1. Before/After — Business Logic
+| File / Resource | Description | When to Read |
+|:---|:---|:---|
+| `SKILL.md` | Core React refactoring guidelines and code split patterns | Active throughout refactoring tasks |
+| `agents/openai.yaml` | Codex UI and implicit invocation policy configuration | During skill indexing or UI setup |
 
-**❌ Before:** Calculation logic inside `useEffect` + `setState`
-```tsx
-export function AssessmentResult({ results }) {
-  const [score, setScore] = useState(0);
-  const [rating, setRating] = useState("");
+## 🔗 Related Skills
 
-  useEffect(() => {
-    const successCount = results.filter(r => r.status === "passed").length;
-    const percentage = Math.round((successCount / results.length) * 100);
-    setScore(percentage);
-    if (percentage >= 90) setRating("Excellent");
-    else if (percentage >= 70) setRating("Good");
-    else setRating("Needs Improvement");
-  }, [results]);
-
-  return <div>{rating} — {score}%</div>;
-}
-```
-
-**✅ After:** Pure function in `utils/`, component only calls and renders
-```ts
-// utils/assessment.utils.ts — No React import
-export function calculateResult(results: Result[]): FinalScore {
-  const successCount = results.filter(r => r.status === "passed").length;
-  const percentage = Math.round((successCount / results.length) * 100);
-  const rating = percentage >= 90 ? "Excellent" : percentage >= 70 ? "Good" : "Needs Improvement";
-  return { percentage, rating, summary: `${successCount}/${results.length} (${percentage}%)` };
-}
-```
-```tsx
-// Component — no useState needed, no useEffect needed
-export function AssessmentResult({ results }) {
-  const { percentage, rating, summary } = calculateResult(results);
-  return <div>{rating} — {summary}</div>;
-}
-```
+| Skill | Relationship | When to Collaborate |
+|:---|:---|:---|
+| `frontend-specialist` | Parent Persona | For complete UX/UI and component architectural changes |
+| `clean-code` | Quality Foundation | To ensure strict clean code, typing, and safety standards |
+| `simplify-code` | Refactor Companion | When dealing with redundant loops, nested conditions, or long blocks |
 
 ---
 
-## 2. Before/After — Data Logic (API → React Query)
+## 🛠️ Instructions / Procedures
 
-**❌ Before:** `axios` + `useEffect` + manual loading/error/cancel management
-```tsx
-export function ResourceList({ groupId }) {
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+Activate this skill when refactoring, optimizing structure, or detecting code that violates logic layer boundaries. Always apply the following modularization layers to separate concerns:
 
-  useEffect(() => {
-    let cancelled = false;
-    axios.get(`/api/groups/${groupId}/resources`)
-      .then(res => { if (!cancelled) setItems(res.data); })
-      .catch(() => { if (!cancelled) setError("Error"); })
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
-  }, [groupId]);
+### 1. Business Logic Extraction (React Component ➜ Utils)
+Ensure calculation logic is written as pure functions without React imports.
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>{error}</p>;
-  return <ul>{items.map(item => <li key={item.id}>{item.name}</li>)}</ul>;
-}
-```
+*   **❌ Legacy Pattern (Component-bound):** Calculation logic inside `useEffect` + `setState`
+    ```tsx
+    export function AssessmentResult({ results }) {
+      const [score, setScore] = useState(0);
+      const [rating, setRating] = useState("");
 
-**✅ After:** Split into 3 layers
-```ts
-// services/resource.service.ts — Pure HTTP, no React
-export async function getResources(groupId: string): Promise<Resource[]> {
-  const res = await httpClient.get<Resource[]>(`/api/groups/${groupId}/resources`);
-  return res.data;
-}
-```
-```ts
-// hooks/queryKeys.ts — Query Key Factory
-export const queryKeys = {
-  resources: {
-    all: ["resources"] as const,
-    list: (groupId: string) => [...queryKeys.resources.all, "list", groupId] as const,
-  },
-};
-```
-```ts
-// hooks/useResources.ts — React Query wrapper
-export function useResourceList(groupId: string) {
-  return useQuery({
-    queryKey: queryKeys.resources.list(groupId),
-    queryFn: () => getResources(groupId),
-    staleTime: 5 * 60 * 1000,
-  });
-}
+      useEffect(() => {
+        const successCount = results.filter(r => r.status === "passed").length;
+        const percentage = Math.round((successCount / results.length) * 100);
+        setScore(percentage);
+        if (percentage >= 90) setRating("Excellent");
+        else if (percentage >= 70) setRating("Good");
+        else setRating("Needs Improvement");
+      }, [results]);
 
-export function useCreateResource(groupId: string) {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (dto: CreateDto) => createResource(groupId, dto),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.resources.all }),
-  });
-}
-```
-```tsx
-// Component — 1-line hook, React Query handles everything
-export function ResourceList({ groupId }) {
-  const { data: items, isPending, error } = useResourceList(groupId);
-  if (isPending) return <p>Loading...</p>;
-  if (error) return <p>Error</p>;
-  return <ul>{items.map(item => <li key={item.id}>{item.name}</li>)}</ul>;
-}
-```
+      return <div>{rating} — {score}%</div>;
+    }
+    ```
 
----
+*   **✅ Refactored Pattern (Decoupled Layer):** Pure function in `utils/`, component only calls and renders.
+    ```ts
+    // utils/assessment.utils.ts — No React import
+    export function calculateResult(results: Result[]): FinalScore {
+      const successCount = results.filter(r => r.status === "passed").length;
+      const percentage = Math.round((successCount / results.length) * 100);
+      const rating = percentage >= 90 ? "Excellent" : percentage >= 70 ? "Good" : "Needs Improvement";
+      return { percentage, rating, summary: `${successCount}/${results.length} (${percentage}%)` };
+    }
+    ```
+    ```tsx
+    // Component — no useState needed, no useEffect needed
+    export function AssessmentResult({ results }) {
+      const { percentage, rating, summary } = calculateResult(results);
+      return <div>{rating} — {summary}</div>;
+    }
+    ```
 
-## 3. Before/After — UI Logic (Custom Hook)
+### 2. Data Logic Extraction (API Fetching ➜ React Query)
+Separate network requests, cache keys, and React Query orchestration into individual layers.
 
-When a component has **≥ 3 interleaved useState** for the same feature → extract custom hook.
+*   **❌ Legacy Pattern (Direct Fetching):** `axios` + `useEffect` + manual state management.
+    ```tsx
+    export function ResourceList({ groupId }) {
+      const [items, setItems] = useState([]);
+      const [loading, setLoading] = useState(true);
+      const [error, setError] = useState(null);
 
-**❌ Before:** 5 useState + 4 useEffect for search + debounce + keyboard nav
-```tsx
-// 80+ lines of mixed logic in component
-const [query, setQuery] = useState("");
-const [debouncedQuery, setDebouncedQuery] = useState("");
-const [results, setResults] = useState([]);
-const [isOpen, setIsOpen] = useState(false);
-const [activeIndex, setActiveIndex] = useState(-1);
-// ... useEffect debounce, useEffect filter, useCallback keyboard, useEffect scroll
-```
+      useEffect(() => {
+        let cancelled = false;
+        axios.get(`/api/groups/${groupId}/resources`)
+          .then(res => { if (!cancelled) setItems(res.data); })
+          .catch(() => { if (!cancelled) setError("Error"); })
+          .finally(() => { if (!cancelled) setLoading(false); });
+        return () => { cancelled = true; };
+      }, [groupId]);
 
-**✅ After:** Generic custom hook, component only renders
-```ts
-// useSearchInput.ts — encapsulates all behavior
-export function useSearchInput<T>({ items, filterFn, onSelect, debounceMs = 300 }) {
-  // All state + effect resides in the hook
-  return { query, setQuery, results, isOpen, activeIndex, listRef, handleKeyDown };
-}
-```
-```tsx
-// Component — call hook, attach to JSX
-const { query, setQuery, results, isOpen, activeIndex, listRef, handleKeyDown } = useSearchInput({
-  items,
-  filterFn: (item, q) => item.name.toLowerCase().includes(q.toLowerCase()),
-  onSelect: (item) => setQuery(item.name),
-});
-```
+      if (loading) return <p>Loading...</p>;
+      if (error) return <p>{error}</p>;
+      return <ul>{items.map(item => <li key={item.id}>{item.name}</li>)}</ul>;
+    }
+    ```
 
-> **When to extract hook?**
-> - ✅ Mandatory: same logic repeated in ≥ 2 components
-> - ⚠️ Consider: component is too large, many interleaved states
-> - 🔄 Prioritize splitting components before considering hooks
+*   **✅ Refactored Pattern (3-Tier Data Architecture):**
+    ```ts
+    // 1. services/resource.service.ts — Pure HTTP, no React
+    export async function getResources(groupId: string): Promise<Resource[]> {
+      const res = await httpClient.get<Resource[]>(`/api/groups/${groupId}/resources`);
+      return res.data;
+    }
+    ```
+    ```ts
+    // 2. hooks/queryKeys.ts — Query Key Factory
+    export const queryKeys = {
+      resources: {
+        all: ["resources"] as const,
+        list: (groupId: string) => [...queryKeys.resources.all, "list", groupId] as const,
+      },
+    };
+    ```
+    ```ts
+    // 3. hooks/useResources.ts — React Query wrapper
+    export function useResourceList(groupId: string) {
+      return useQuery({
+        queryKey: queryKeys.resources.list(groupId),
+        queryFn: () => getResources(groupId),
+        staleTime: 5 * 60 * 1000,
+      });
+    }
 
----
+    export function useCreateResource(groupId: string) {
+      const queryClient = useQueryClient();
+      return useMutation({
+        mutationFn: (dto: CreateDto) => createResource(groupId, dto),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.resources.all }),
+      });
+    }
+    ```
+    ```tsx
+    // Component — 1-line hook, React Query handles everything
+    export function ResourceList({ groupId }) {
+      const { data: items, isPending, error } = useResourceList(groupId);
+      if (isPending) return <p>Loading...</p>;
+      if (error) return <p>Error</p>;
+      return <ul>{items.map(item => <li key={item.id}>{item.name}</li>)}</ul>;
+    }
+    ```
 
-## 4. Before/After — Application Logic (Context → Zustand)
+### 3. UI Interaction Logic Extraction (Custom Hooks)
+When a component has **≥ 3 interleaved useState** for the same feature, extract it into a custom hook.
 
-**❌ Before:** Context + Provider + manual localStorage
-```tsx
-// AuthProvider manages state, calls API, and reads/writes localStorage
-// → "Provider hell" when adding Theme, Sidebar, Notification...
-// → All children re-render when any field changes
-// → Cannot access auth outside React (axios interceptor)
-```
+*   **❌ Legacy Pattern (Complex Interleaved UI State):** 5 useState + 4 useEffect for search + keyboard navigation inlined.
+    ```tsx
+    // 80+ lines of mixed UI behaviors inlined in component
+    const [query, setQuery] = useState("");
+    const [debouncedQuery, setDebouncedQuery] = useState("");
+    const [results, setResults] = useState([]);
+    const [isOpen, setIsOpen] = useState(false);
+    const [activeIndex, setActiveIndex] = useState(-1);
+    // ... useEffect debounce, useEffect filter, useCallback keyboard, useEffect scroll
+    ```
 
-**✅ After:** Zustand store + persist middleware
-```ts
-// stores/auth.store.ts
-export const useAuthStore = create<AuthState & AuthActions>()(
-  persist(
-    (set) => ({
-      user: null, token: null, isAuthenticated: false,
-      setAuth: (user, token) => set({ user, token, isAuthenticated: true }),
-      logout: () => set({ user: null, token: null, isAuthenticated: false }),
-    }),
-    { name: "auth-storage", partialize: (s) => ({ user: s.user, token: s.token, isAuthenticated: s.isAuthenticated }) }
-  )
-);
-```
-```tsx
-// Component — selector only re-renders when field changes
-const user = useAuthStore((s) => s.user);
-const logout = useAuthStore((s) => s.logout);
-```
-```ts
-// Outside React (axios interceptor) — use getState()
-const token = useAuthStore.getState().token;
-```
+*   **✅ Refactored Pattern (Custom Hook encapsulation):**
+    ```ts
+    // useSearchInput.ts — encapsulates all UI behavior
+    export function useSearchInput<T>({ items, filterFn, onSelect, debounceMs = 300 }) {
+      // All search, selection, and keyboard event state resides here
+      return { query, setQuery, results, isOpen, activeIndex, listRef, handleKeyDown };
+    }
+    ```
+    ```tsx
+    // Component — call hook, attach returned handlers to JSX
+    const { query, setQuery, results, isOpen, activeIndex, listRef, handleKeyDown } = useSearchInput({
+      items,
+      filterFn: (item, q) => item.name.toLowerCase().includes(q.toLowerCase()),
+      onSelect: (item) => setQuery(item.name),
+    });
+    ```
 
----
+    > **When to extract a custom hook?**
+    > *   ✅ **Mandatory:** The same UI behavior/logic is repeated in ≥ 2 components.
+    > *   ⚠️ **Consider:** Component size exceeds 150 lines, or has many interleaved reactive variables.
+    > *   🔄 **Rule of thumb:** Prioritize splitting monolithic components into smaller components before writing custom hooks.
 
-## 5. React Query vs Zustand — Boundaries
+### 4. Global Client State Migration (React Context ➜ Zustand)
+Ensure client state is globally accessible and performant.
 
-The only question: **"Does this data originate from the server?"**
+*   **❌ Legacy Pattern (Context Overuse):** Context + Provider hell causing frequent full-tree re-renders and blocking state access outside of React lifecycles.
+*   **✅ Refactored Pattern (Zustand store + persist middleware):**
+    ```ts
+    // stores/auth.store.ts
+    export const useAuthStore = create<AuthState & AuthActions>()(
+      persist(
+        (set) => ({
+          user: null, token: null, isAuthenticated: false,
+          setAuth: (user, token) => set({ user, token, isAuthenticated: true }),
+          logout: () => set({ user: null, token: null, isAuthenticated: false }),
+        }),
+        { name: "auth-storage", partialize: (s) => ({ user: s.user, token: s.token, isAuthenticated: s.isAuthenticated }) }
+      )
+    );
+    ```
+    ```tsx
+    // Component — selector only triggers re-renders when the specific field changes
+    const user = useAuthStore((s) => s.user);
+    const logout = useAuthStore((s) => s.logout);
+    ```
+    ```ts
+    // Outside React context (e.g., Axios / Fetch Interceptors)
+    const token = useAuthStore.getState().token;
+    ```
+
+### 5. Architectural Boundaries: React Query vs Zustand
+Clearly separate Server State (caching) from Client State (UI control).
+Rule: **"Does this data originate from the server?"**
 
 | Criterion | React Query (Server State) | Zustand (Client State) |
-|---|---|---|
-| Origin | Server / API | Created by Client |
-| Ownership | Server — client only caches | Client — source of truth |
-| Sync | Background refetch, stale-while-revalidate | No sync needed |
-| Stale? | Yes — other users can change it | No — client is always right |
-| Persistence | Automatic cache (staleTime, gcTime) | Zustand persist middleware |
+|:---|:---|:---|
+| **Origin** | Server / API database | Created locally by Client |
+| **Ownership** | Server (client only caches a snapshot) | Client is the absolute source of truth |
+| **Sync** | Background refetch, stale-while-revalidate | No sync needed |
+| **Persistence** | Automatic cache (staleTime, gcTime) | Zustand persist middleware (localStorage) |
 
-**Confusing cases:**
+**Mapping Complex Scenarios:**
+*   *Shopping cart before checkout:* **Zustand** (Client-created, offline data).
+*   *Shopping cart after checkout:* **React Query** (Committed on server, needs querying).
+*   *User profile from API:* **React Query** (Server data, requires caching).
+*   *Theme preferences:* **Zustand** (User interface settings).
+*   *Unsubmitted form drafts:* **useState / Zustand** (Client-created input).
 
-| Scenario | Answer | Reason |
-|---|---|---|
-| Shopping cart before checkout | Zustand | Client-created, not yet sent to server |
-| Shopping cart after checkout | React Query | Already exists on server |
-| User profile from API | React Query | Data from server, needs caching |
-| Theme dark/light | Zustand | User preference, client-only |
-| Unsubmitted form draft | useState/Zustand | Client-created, not yet sent |
+### 6. Component Responsibility Checklist
 
----
+| Tier / Directory | Allowed Responsibilities | Prohibited Actions |
+|:---|:---|:---|
+| **`utils/` (Pure)** | Calculations, formatting, mapping, transforms | React Hooks, API calls, side-effects |
+| **React Query** | Fetching, caching, caching mutations, syncing | Global UI state management (theme, menus) |
+| **Zustand** | UI state, dark mode, auth tokens, modals | Caching direct server API responses |
+| **Custom Hooks** | Reactive React state composition, debounces | Pure calculations (move to `utils/`) |
+| **`services/`** | Raw HTTP requests (axios instances, clients) | Local state storage, cache invalidation |
 
-## 6. Stack Role Reference
+*   **Belongs inside the Component:** JSX layouting, conditional elements, hook usage (`useResourceList`), event handler delegation.
+*   **Must be Extracted:** Reusable calculations > 10 lines (`utils/`), directly inlined fetch requests (`services/`), interleaved state machines (custom hooks), global state shared across features (`stores/`).
 
-| Tool | Used for | NOT used for |
-|---|---|---|
-| `utils/` (pure fn) | Calculation, transform, validation | UI state, API call |
-| React Query | Fetch, cache, sync server data | Client state (theme, sidebar) |
-| Zustand | Global client state (auth, theme) | Server data (use RQ) |
-| Custom hooks | Encapsulate complex React logic | Pure business logic (use utils) |
-| `services/` | Pure HTTP call (axios/fetch) | Caching, state management |
+### 7. File Naming Conventions
+*Prefer grouping files by features (e.g. `src/features/auth/*`) rather than placing them in separate global technical layer folders.*
 
----
+*   **Hooks:** `use[Name].ts` (e.g., `useResource.ts`)
+*   **Services:** `[name].service.ts` (e.g., `auth.service.ts`)
+*   **Stores:** `[name].store.ts` (e.g., `auth.store.ts`)
+*   **Utils:** `[name].utils.ts` (e.g., `math.utils.ts`)
+*   **Types:** `[name].types.ts` (e.g., `auth.types.ts`)
+*   **Components:** `[PascalCase].tsx` (e.g., `ResourceList.tsx`)
 
-## 7. Component Rule — Checklist
-
-**Belongs to component:**
-- JSX, conditional rendering
-- Hook composition: `useResourceList(id)`, `useAuthStore(s => s.user)`
-- Event handler delegation: `onClick={() => mutation.mutate(data)}`
-- Simple derived value: `const isReady = data && !isPending`
-
-**Needs to be extracted:**
-- Complex or reusable calculation > 10 lines → `utils/`
-- API call → `services/` + `hooks/` (React Query)
-- ≥ 3 interleaved useState for the same feature → Custom hook
-- Shared state → `stores/` (Zustand)
-
-**NOT needed to be extracted:**
-- Simple UI feedback (confetti, toast) in event handler
-- 1-2 simple useState (toggle, local input)
-- 1-line derived value
+### 8. Error Handling Strategy
+1.  **Service Layer:** Always throw clean, structured Error objects rather than string catch statements.
+2.  **Hook Layer:** Use React Query's built-in error states. Orchestrate error-based UI side-effects (e.g. Toast alerts) via the mutation `onError` callbacks.
+3.  **UI Layer:** Render local error feedback cards nearby the failed component rather than crash-blocking the entire viewport. Use React Error Boundaries for unhandled UI exceptions.
 
 ---
 
-## 8. File Naming Convention
+## ❌ Anti-Patterns
 
-*Prefer grouping these files into feature directories (e.g., `src/features/auth/*`) over global layer folders.*
+*   ❌ **Fat Component:** A single file performing calculations, API fetching, and DOM rendering simultaneously. Separated logic layers must be enforced.
+*   ❌ **Business Logic in Hooks:** Placing pure validation, mapping, or transformations inside `useEffect` or React Query `select` callbacks. This must reside in `utils/` using the **Mapper Pattern** to format data.
+*   ❌ **Prop Drilling:** Passing props down ≥ 3 nested levels. Subcomponents should query data directly using React Query hooks or Zustand selectors.
+*   ❌ **Mixed State (Duplication):** Saving a copy of React Query's server cache inside a Zustand store. This causes sync bugs and memory leaks. Keep them separate.
 
-| Type | Pattern | Example |
-|---|---|---|
-| Hooks | `use*.ts` | `useResource.ts` |
-| Services | `*.service.ts` | `auth.service.ts` |
-| Stores | `*.store.ts` | `auth.store.ts` |
-| Utils | `*.utils.ts` | `math.utils.ts` |
-| Types | `*.types.ts` | `auth.types.ts` |
-| Components | `PascalCase.tsx` | `ResourceList.tsx` |
+---
 
-## 9. Anti-Patterns
+## ✅ Quality Audit Checklist
 
-1. **Fat Component** — Performs calculation, fetching, and rendering simultaneously.
-   → Separate by logic layer (§1-4).
+The agent must perform this self-audit before finalizing React refactoring tasks:
 
-2. **Business Logic in Hook** — Placing validation/transform in `useEffect` or React Query `select`.
-   → Extract to pure function in `utils/` (use **Mapper pattern** to transform raw API data to UI models).
-
-3. **Prop Drilling** — Props passed through ≥ 3 intermediate levels.
-   → Zustand or child component fetches itself using React Query hook.
-
-4. **Mixed State** — Using Zustand to cache server data, or React Query for client state.
-   → Server data → React Query. Client state → Zustand. Never copy server data into Zustand.
-
-## 10. Error Handling Strategy
-
-1. **Service Layer** — Services should throw clean error objects (not just strings).
-2. **Hook Layer** — React Query handles error state. Use `onError` in mutations for side-effects (toasts).
-3. **UI Layer** — Use Error Boundaries for unexpected crashes. For API errors, prefer displaying local error states (from RQ) near the affected UI.
-4. **Consistency** — Standardize the error response shape in `services/` to simplify catch blocks in hooks.
+*   [ ] **Pure Utils:** All functions under `utils/` are completely free of React hooks, JSX, or state imports, allowing easy unit testing.
+*   [ ] **Server State separation:** Checked that server data is fetched and cached exclusively via React Query hooks; no server data is duplicated into Zustand stores.
+*   [ ] **Component word count:** Monolithic components are split into subcomponents of under 150 lines.
+*   [ ] **Custom Hook boundaries:** Any custom hook created does not contain pure data transformations that could be decoupled into a pure util function.
+*   [ ] **Strict Typing:** All DTOs, parameters, and store actions are strictly typed with TypeScript interface definitions; no `any` types remain.
