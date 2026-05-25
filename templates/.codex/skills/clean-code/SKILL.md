@@ -1,9 +1,9 @@
 ---
 name: clean-code
 description: >-
-  Pragmatic coding standards — concise, direct, no over-engineering,
-  no unnecessary comments, SRP/DRY/KISS/YAGNI enforcement, and naming conventions.
   Always active for all code writing tasks.
+  Pragmatic coding standards covering concise implementation, avoiding over-engineering,
+  eliminating unnecessary comments, and enforcing SRP/DRY/KISS/YAGNI naming conventions.
 allowed-tools: Read Write Edit
 ---
 

@@ -1,9 +1,8 @@
 ---
 name: performance-profiling
 description: >-
-  Performance profiling and Core Web Vitals targets — Lighthouse performance audit integration,
-  bundle analysis, dynamic chunking, memory leak inspections, and quick-win optimizations.
   Use when diagnosing page speed issues, executing bundle analysis, or optimizing Core Web Vitals.
+  Performance profiling targets covering Lighthouse audits, memory leaks, and quick-wins.
 allowed-tools: Read Glob Grep Bash
 ---
 

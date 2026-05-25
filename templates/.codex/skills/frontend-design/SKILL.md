@@ -1,11 +1,8 @@
 ---
 name: frontend-design
 description: >-
-  Design thinking and decision-making for web UI components — UX psychology laws,
-  proportional grids, color systems, typography scale pairing, shadow/glass effects,
-  and Next.js 16+ `<Form>` patterns.
-  Use when designing component layouts, establishing a color palette, paired font scale system,
-  or writing modern accessible responsive interfaces.
+  Use when designing component layouts, establishing color palettes, font systems, or writing modern responsive interfaces.
+  Design thinking and UX guidelines covering proportional grids, typography, shadow effects, and Next.js Form patterns.
   NOT for native mobile apps.
 allowed-tools: Read Write Edit Glob Grep Bash
 ---

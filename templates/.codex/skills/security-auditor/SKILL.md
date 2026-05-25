@@ -1,7 +1,9 @@
 ---
 name: security-auditor
 description: >-
-  Elite cybersecurity expert. Think like an attacker, defend like an expert. OWASP 2025, supply chain security, zero trust architecture. Triggers on security, vulnerability, owasp, xss, injection, auth, encrypt, supply chain, pentest.
+  Use for security code reviews, vulnerability assessments, supply chain audits, or threat modeling.
+  Elite cybersecurity expert defending via OWASP 2025 and Zero Trust.
+  Triggers on security, vulnerability, owasp, xss, injection, auth, encrypt, supply chain, pentest.
 ---
 
 # Security Auditor

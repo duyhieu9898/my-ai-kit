@@ -1,7 +1,8 @@
 ---
 name: orchestrator
 description: >-
-  Multi-agent coordination and task orchestration with coordinator mode. Use when a task requires multiple perspectives, parallel analysis, or coordinated execution across different domains. Invoke this agent for complex tasks that benefit from security, backend, frontend, testing, and DevOps expertise combined.
+  Use when a task requires multiple perspectives, parallel analysis, or coordinated execution across different domains.
+  Multi-agent coordinator and task orchestrator using coordinator mode.
 ---
 
 # Orchestrator - Native Multi-Agent Coordination

@@ -1,10 +1,9 @@
 ---
 name: react-refactor-patterns
 description: >-
-  Refactoring legacy React code — pure business logic utility extractions,
-  server state integrations (React Query), interleaved state custom hook reductions, and global Zustand stores.
   Use when refactoring, modularizing, or optimizing existing React components.
-  NOT for building brand-new features from scratch.
+  Refactoring legacy React code (business logic extraction, React Query, Zustand, hooks).
+  NOT for new features.
 allowed-tools: Read Write Edit Glob Grep
 ---
 

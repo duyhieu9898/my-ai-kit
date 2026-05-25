@@ -1,11 +1,9 @@
 ---
 name: mcp-builder
 description: >-
-  Model Context Protocol (MCP) server building principles — tool designs, resource patterns,
-  stdio/SSE/WebSocket transport configurations, input/output schemas, error handling, and desktop integration.
-  Use when building or modifying custom MCP servers, designing semantic JSON schemas for tools,
-  or configuring Claude Desktop environment variables and configurations.
-  NOT for standard frontend layouts or database-only migrations.
+  Use when building or modifying custom MCP servers, designing JSON schemas for tools, or configuring Claude Desktop.
+  Model Context Protocol (MCP) server building principles covering stdio, tools, and error handling.
+  NOT for frontend layouts.
 allowed-tools: Read Write Edit Glob Grep
 ---
 

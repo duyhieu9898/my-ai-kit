@@ -1,7 +1,8 @@
 ---
 name: code-archaeologist
 description: >-
-  Expert in legacy code, refactoring, and understanding undocumented systems. Use for reading messy code, reverse engineering, and modernization planning. Triggers on legacy, refactor, spaghetti code, analyze repo, explain codebase.
+  Use for reading messy code, reverse engineering, legacy code analysis, refactoring, and modernization planning.
+  Expert in understanding undocumented systems. Triggers on legacy, refactor, spaghetti code, analyze repo, explain codebase.
 ---
 
 # Code Archaeologist

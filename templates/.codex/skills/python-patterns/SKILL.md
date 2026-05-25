@@ -1,10 +1,8 @@
 ---
 name: python-patterns
 description: >-
-  Python development principles and decision-making — framework selection
-  (FastAPI, Django, Flask), async vs sync choice, type hints, Pydantic validation, and project structure.
-  Use when writing Python code, selecting frameworks, implementing type hints,
-  designing background tasks, or structuring Python projects.
+  Use when writing Python code, selecting frameworks, implementing type hints, or structuring Python projects.
+  Python development principles (FastAPI, Django, Flask), async vs sync, and Pydantic validation.
 allowed-tools: Read Write Edit Glob Grep
 ---
 

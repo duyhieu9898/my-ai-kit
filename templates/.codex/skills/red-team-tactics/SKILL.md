@@ -1,10 +1,9 @@
 ---
 name: red-team-tactics
 description: >-
-  Red team tactics and adversary simulation principles based on the MITRE ATT&CK framework —
-  reconnaissance, initial access, privilege escalation, defense evasion, lateral movement, and ethical reporting.
-  Use when conducting penetration testing, adversary simulation, assessing attack surfaces, or evaluating threat detection coverage.
-  NOT for standard code audits or defensive software development.
+  Use when conducting penetration testing, adversary simulation, assessing attack surfaces, or evaluating threat detection.
+  Red team tactics and adversary simulation based on MITRE ATT&CK.
+  NOT for standard audits.
 allowed-tools: Read Glob Grep
 ---
 

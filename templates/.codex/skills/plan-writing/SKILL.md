@@ -1,10 +1,8 @@
 ---
 name: plan-writing
 description: >-
-  Structured task planning — small verifiable breakdown tasks, dynamic naming,
-  dependency ordering, and project-specific verification command configurations.
-  Use when implementing new features, preparing bug fixes, planning multi-file refactors,
-  or generating a lightweight action plan.
+  Use when implementing new features, preparing bug fixes, planning multi-file refactors, or generating action plans.
+  Structured task planning framework for small verifiable breakdowns.
 allowed-tools: Read Glob Grep
 ---
 

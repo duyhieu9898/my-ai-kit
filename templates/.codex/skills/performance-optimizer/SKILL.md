@@ -1,7 +1,9 @@
 ---
 name: performance-optimizer
 description: >-
-  Expert in performance optimization, profiling, Core Web Vitals, and bundle optimization. Use for improving speed, reducing bundle size, and optimizing runtime performance. Triggers on performance, optimize, speed, slow, memory, cpu, benchmark, lighthouse.
+  Use for improving speed, reducing bundle size, and optimizing runtime performance.
+  Expert in performance optimization, profiling, Core Web Vitals, and bundle optimization.
+  Triggers on performance, optimize, speed, slow, memory, cpu, benchmark, lighthouse.
 ---
 
 # Performance Optimizer

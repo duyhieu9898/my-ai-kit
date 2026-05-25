@@ -1,11 +1,9 @@
 ---
 name: nextjs-react-expert
 description: >-
-  Next.js and React performance optimization from Vercel Engineering — async waterfalls,
-  bundle optimization, server-side performance, memoization, virtualization, and advanced hooks.
-  Use when building React components, optimizing Next.js routing/fetching, diagnosing UI lag or render bottlenecks,
-  or configuring Next.js 16+ use cache/PPR.
-  NOT for basic static HTML templates or non-React single-page apps.
+  Use when building React components, optimizing Next.js routing/fetching, diagnosing UI lag, or configuring Next.js 16+ caching/PPR.
+  Next.js and React performance optimization rules covering waterfalls, bundle size, and memoization.
+  NOT for basic HTML templates.
 allowed-tools: Read Write Edit Glob Grep Bash
 ---
 

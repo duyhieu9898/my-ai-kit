@@ -1,9 +1,8 @@
 ---
 name: documentation-templates
 description: >-
-  Documentation templates and structure guidelines — README structures, API documentation templates,
-  code comment (JSDoc/TSDoc) guidelines, Changelog templates, Architecture Decision Records (ADRs), and AI-friendly (llms.txt) guidelines.
-  Use when writing project READMEs, documenting API endpoints, structuring developer manuals, commenting code, or configuring llms.txt files.
+  Use when writing project READMEs, documenting API endpoints, structuring developer manuals, commenting code, or configuring llms.txt.
+  Standard structures and templates for READMEs, APIs, JSDoc comments, Changelogs, and ADRs.
   NOT for general writing tasks unrelated to software development.
 allowed-tools: Read Glob Grep
 ---

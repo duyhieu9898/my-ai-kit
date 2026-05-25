@@ -1,11 +1,9 @@
 ---
 name: geo-fundamentals
 description: >-
-  Generative Engine Optimization (GEO) fundamentals for AI search engines —
-  citable data strategies, RAG retrieval factors, Entity Building, AI Crawler access control, and citation metrics.
-  Use when optimizing content for ChatGPT, Claude, Perplexity, or Gemini citations,
-  structuring FAQ schema, or configuring robots.txt rules for AI crawlers.
-  NOT for standard keyword SEO optimization or application state logic.
+  Use when optimizing content for ChatGPT, Claude, Perplexity, or Gemini citations, structuring FAQ schema, or configuring robots.txt.
+  Generative Engine Optimization (GEO) principles covering citable data, RAG retrieval, and AI Crawler access.
+  NOT for standard keyword SEO.
 allowed-tools: Read Glob Grep
 ---
 

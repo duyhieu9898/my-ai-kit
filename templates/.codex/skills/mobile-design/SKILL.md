@@ -1,11 +1,9 @@
 ---
 name: mobile-design
 description: >-
-  Mobile-first design thinking and decision-making for iOS and Android apps —
-  touch interaction, performance patterns, platform conventions (HIG and Material 3), and mobile UX psychology.
-  Use when designing mobile app interfaces (React Native, Flutter, native iOS/Android),
-  optimizing touch target sizes, or defining mobile navigation and color schemes.
-  NOT for standard desktop or responsive web applications.
+  Use when designing mobile app interfaces (React Native, Flutter, native), optimizing touch target sizes, or defining mobile navigation.
+  Mobile-first design principles covering touch UX, gesture psychology, and HIG/Material 3 conventions.
+  NOT for desktop.
 allowed-tools: Read Glob Grep Bash
 ---
 

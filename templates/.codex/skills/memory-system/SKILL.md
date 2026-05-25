@@ -1,11 +1,9 @@
 ---
 name: memory-system
 description: >-
-  Persistent cross-session memory management — structured MEMORY.md index, topic files,
-  save/recall/search/pruning protocols, session start protocols, and memory taxonomy rules.
-  Use when the user explicitly triggers 'remember', 'save for later', or 'don't forget',
-  or when starting a new session to recall user-preferences/project-conventions.
-  NOT for standard short-term variable storage or file-based caching.
+  Use when the user triggers 'remember', 'save for later', or 'don't forget', or when starting a session to recall preferences.
+  Persistent cross-session memory management using MEMORY.md index and topic files.
+  NOT for short-term variables.
 allowed-tools: Read Write Grep Glob
 ---
 

@@ -1,10 +1,8 @@
 ---
 name: code-review-graph
 description: >-
-  Token-efficient code review using Tree-sitter AST graphs and MCP —
-  blast radius calculations, SQLite graph indexing, risk-scored change detections, and dead code identification.
-  Use when analyzing large projects (500+ files), computing blast radius of commits/PRs,
-  re-indexing AST databases, or diagnosing high token costs.
+  Use when analyzing large projects (500+ files), computing blast radius of commits/PRs, re-indexing AST databases, or diagnosing high token costs.
+  Token-efficient code review using Tree-sitter AST graphs and SQLite database MCP server.
   NOT for small codebases under 200 files or purely dynamic codebases.
 allowed-tools: Read Grep Glob Bash
 ---

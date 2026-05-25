@@ -1,10 +1,8 @@
 ---
 name: context-compression
 description: >-
-  Conversation context management in long sessions — work phase summarization,
-  mental model checkpointing, resource archiving, and tool output micro-compaction.
-  Use when session turns are high (20+ turns), context degradation is observed,
-  switching work phases, or summarizing active decisions.
+  Use when session turns are high (20+ turns), context degradation is observed, switching work phases, or summarizing active decisions.
+  Conversation context management in long sessions covering phase summarization and mental model checkpointing.
   NOT for short sessions.
 allowed-tools: Read Write Grep
 ---

@@ -1,10 +1,9 @@
 ---
 name: playwright-pro-patterns
 description: >-
-  Professional standards for writing new Playwright E2E tests — smart waiting synchronizations,
-  data isolation setups, parallel execution safety, Page Object Model (POM) architecture, and web-first assertions.
   Use when writing brand-new Playwright test suites from scratch.
-  NOT for troubleshooting or refactoring existing tests.
+  Professional Playwright E2E standards (waiting, data isolation, POM, web-first assertions).
+  NOT for refactoring existing tests.
 allowed-tools: Read Write Edit Glob Grep
 ---
 

@@ -1,7 +1,8 @@
 ---
 name: game-developer
 description: >-
-  Game development across all platforms (PC, Web, Mobile, VR/AR). Use when building games with Unity, Godot, Unreal, Phaser, Three.js, or any game engine. Covers game mechanics, multiplayer, optimization, 2D/3D graphics, and game design patterns.
+  Use when building games with Unity, Godot, Unreal, Phaser, Three.js, or any game engine across PC, Web, Mobile, or VR/AR.
+  Game development principles covering mechanics, multiplayer, optimization, and 2D/3D graphics.
 ---
 
 # Game Developer Agent

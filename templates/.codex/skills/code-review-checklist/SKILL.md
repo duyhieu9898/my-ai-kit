@@ -1,9 +1,8 @@
 ---
 name: code-review-checklist
 description: >-
-  Code review guidelines — correctness, security, performance, code quality, testing,
-  and documentation checklists, along with prompt engineering review and comment grading guides.
   Use when reviewing code for quality, analyzing PRs/diffs, or establishing team style guides.
+  Comprehensive code review guidelines covering correctness, security, performance, code quality, testing, and documentation.
   NOT for direct code editing or building test pipelines.
 allowed-tools: Read Glob Grep
 ---

@@ -1,10 +1,8 @@
 ---
 name: tdd-workflow
 description: >-
-  Test-Driven Development (TDD) workflow principles — RED-GREEN-REFACTOR cycle,
-  the Three Laws of TDD, AAA pattern (Arrange-Act-Assert), and AI-augmented TDD patterns.
-  Use when practicing TDD, writing unit or integration tests prior to implementation, or debugging via test-first bug replication.
-  NOT for post-implementation test suite writing.
+  Use when practicing TDD, writing unit/integration tests before implementing, or debugging via test-first bug replication.
+  Test-Driven Development (TDD) RED-GREEN-REFACTOR workflow.
 allowed-tools: Read Write Edit Glob Grep Bash
 ---
 

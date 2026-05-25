@@ -1,10 +1,9 @@
 ---
 name: i18n-localization
 description: >-
-  Internationalization and localization patterns — detecting hardcoded strings, managing translation locales,
-  React (react-i18next) / Next.js (next-intl) / Python (gettext) implementations, ICU message formatting, and RTL layouts.
-  Use when internationalizing an application, structuring locale JSON directories, formatting locale-sensitive dates/numbers, or implementing RTL support.
-  NOT for single-language local UI wording or string formatting logic.
+  Use when internationalizing an application, structuring locale JSON directories, formatting locale-sensitive dates/numbers, or implementing RTL.
+  Internationalization (i18n) and localization covering hardcoded strings, Next.js, and ICU formatting.
+  NOT for single-language UI.
 allowed-tools: Read Glob Grep
 ---
 

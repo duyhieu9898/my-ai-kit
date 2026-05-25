@@ -1,9 +1,8 @@
 ---
 name: deployment-procedures
 description: >-
-  Production deployment principles and decision-making — safe deployment workflows,
-  rollback strategies, post-deployment verification, and emergency procedures.
   Use when deploying code to production, planning rollbacks, setting up CI/CD, or handling service outages.
+  Production deployment principles covering safe workflows, post-deployment verification, and emergencies.
   NOT for local environment setup or configuration.
 allowed-tools: Read Glob Grep Bash
 ---

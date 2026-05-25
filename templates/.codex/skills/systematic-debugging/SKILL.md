@@ -1,10 +1,8 @@
 ---
 name: systematic-debugging
 description: >-
-  A 4-phase systematic debugging methodology (Reproduce, Isolate, Understand, Fix & Verify)
-  designed to prevent random guessing and ensure evidence-based root cause analysis.
-  Use when debugging complex bugs, resolving unexpected errors, conducting root cause
-  analysis (5 Whys), or setting up regression verification tests.
+  Use when debugging complex bugs, resolving unexpected errors, conducting root cause (5 Whys), or setting up regression tests.
+  Systematic debugging methodology (Reproduce, Isolate, Understand, Fix & Verify).
 allowed-tools: Read Glob Grep
 ---
 

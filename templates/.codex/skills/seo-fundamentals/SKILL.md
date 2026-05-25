@@ -1,11 +1,9 @@
 ---
 name: seo-fundamentals
 description: >-
-  SEO fundamentals, E-E-A-T framework, Core Web Vitals (LCP, INP, CLS), Schema markup,
-  technical and content SEO optimizations, and AI-content guidelines.
-  Use when optimizing web pages for search visibility, configuring meta tags/titles/descriptions,
-  improving page speed and layout stability, or building XML sitemaps and robots.txt.
-  NOT for general visual layout styling or application state logic.
+  Use when optimizing web pages for search visibility, meta tags, page speed, sitemaps or robots.txt.
+  SEO fundamentals covering E-E-A-T, Core Web Vitals, and Schema.
+  NOT for visual layout styling.
 allowed-tools: Read Glob Grep
 ---
 

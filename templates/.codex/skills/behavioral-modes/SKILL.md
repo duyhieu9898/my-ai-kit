@@ -1,9 +1,8 @@
 ---
 name: behavioral-modes
 description: >-
-  AI operational and behavioral modes — Socratic brainstorming, concise implementation guidelines,
-  systematic debugging steps, constructive peer code reviews, pedagogic teaching, and pre-deployment ship verification.
-  Use when explicitly selecting or adapting AI agent personas/operating modes (brainstorm, implement, debug, review, teach, ship).
+  Use when explicitly selecting or adapting AI agent personas or operating modes (brainstorm, implement, debug, review, teach, ship).
+  AI operational and behavioral modes covering Socratic brainstorming, concise implementation, systematic debugging, peer reviews, pedagogic teaching, and ship verification.
   NOT for standard algorithmic logic or tool scripting.
 allowed-tools: Read Glob Grep
 ---

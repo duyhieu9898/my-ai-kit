@@ -1,9 +1,8 @@
 ---
 name: game-development
 description: >-
-  Game development orchestrator — core game loops, design patterns, input abstractions,
-  performance budgets, AI state machine/behavior tree designs, and platform/specialty sub-skill routing.
   Use when designing, architecture-planning, or implementing 2D/3D games across PC, mobile, web, or VR/AR.
+  Game development orchestrator covering loops, design patterns, input abstractions, and platform routing.
   NOT for standard business non-game applications.
 allowed-tools: Read Write Edit Glob Grep Bash
 ---

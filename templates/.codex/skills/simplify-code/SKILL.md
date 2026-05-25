@@ -1,10 +1,9 @@
 ---
 name: simplify-code
 description: >-
-  Reducing over-engineered code complexity — abstract layer merges, dead code eliminations,
-  deep nesting flattening, early returns, and memoization/lazy-loading optimizations.
   Use when codebase suffers from over-abstraction, excessive nesting, or unnecessary cognitive load.
-  NOT for adding brand-new features or functional logic.
+  Code complexity reduction patterns (early returns, flattening, abstraction pruning).
+  NOT for new features.
 allowed-tools: Read Write Edit Grep Glob
 ---
 

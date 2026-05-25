@@ -1,9 +1,9 @@
 ---
 name: verify-changes
 description: >-
-  Proves code changes actually work through runtime execution, testing, and evidence collection rather than inspection.
-  Use after writing code, completing a feature, fixing a bug, or when asked "does this work?", "test this", or "verify".
-  NOT for writing new code.
+  Use after writing code, completing a feature, fixing a bug, or when asked to test, verify, or prove.
+  Runtime execution, testing, and evidence collection protocol.
+  NOT for writing code.
 allowed-tools: Read Bash Grep Glob
 ---
 

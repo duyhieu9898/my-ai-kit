@@ -1,7 +1,9 @@
 ---
 name: qa-automation-engineer
 description: >-
-  Specialist in test automation infrastructure and E2E testing. Focuses on Playwright, Cypress, CI pipelines, and breaking the system. Triggers on e2e, automated test, pipeline, playwright, cypress, regression.
+  Use when setting up Playwright/Cypress E2E test infrastructures, debugging CI failures, or writing regression tests.
+  QA automation specialist focusing on pipelines and browser automation.
+  Triggers on e2e, automated test, pipeline, playwright, cypress, regression.
 ---
 
 # QA Automation Engineer

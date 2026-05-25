@@ -1,10 +1,9 @@
 ---
 name: server-management
 description: >-
-  Server management principles and decision-making — process management (PM2, systemd),
-  monitoring strategy, log management, scaling decisions, health checks, and troubleshooting.
-  Use when managing servers, configuring process managers, setting up monitoring, or troubleshooting server-side performance.
-  NOT for client-side setup or application-level code.
+  Use when managing servers, configuring process managers (PM2/systemd), setting up monitoring, or troubleshooting.
+  Server management principles (logs, scaling, health checks).
+  NOT for client-side code.
 allowed-tools: Read Write Edit Glob Grep Bash
 ---
 

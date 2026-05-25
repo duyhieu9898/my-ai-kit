@@ -9,7 +9,7 @@
 Codex Kit is a modular, high-efficiency toolkit built strictly according to the **OpenAI Codex Standard**. It replaces the legacy multi-agent routing model with a unified, composable **Modular Skill Architecture**. 
 
 The kit contains:
-- **66 Composable Skills** - Direct domain-specific knowledge packages and expert personas under `skills/`.
+- **67 Composable Skills** - Direct domain-specific knowledge packages and expert personas under `skills/`.
 - **4 Master Scripts** - System-level automation and validation scripts under `scripts/`.
 - **Cascading Memory** - Cross-session state and persistence under `memory/`.
 
@@ -20,7 +20,7 @@ The kit contains:
 ```plaintext
 .codex/
 ├── ARCHITECTURE.md          # This file (Human-developer map)
-├── skills/                  # 66 Composable Skills (Expert Personas + Domain Knowledge)
+├── skills/                  # 67 Composable Skills (Expert Personas + Domain Knowledge)
 │   ├── {skill-name}/
 │   │   ├── SKILL.md         # Metadata, triggers, and prompt guidelines
 │   │   ├── agents/
@@ -33,7 +33,7 @@ The kit contains:
 
 ---
 
-## 🧩 The 66 Composable Skills
+## 🧩 The 67 Composable Skills
 
 In Codex, the boundary between "agents" and "skills" is dissolved. Every specialist capability or expert persona is implemented as a **Skill** that the unified AI engine can dynamically load into its context.
 
@@ -65,16 +65,16 @@ These skills contain specialized persona prompts, deep domain methodologies, and
 
 ---
 
-### 🧩 Domain Knowledge Skills (46)
+### 🧩 Domain Knowledge Skills (47)
 These skills provide specific instructions and toolsets to guide implementation in target technologies and patterns.
 
 | Domain Category | Skills Included |
 | :--- | :--- |
-| **Frontend & UI** | `react-refactor-patterns`, `web-design-guidelines`, `tailwind-patterns`, `frontend-design`, `seo-fundamentals`, `i18n-localization`, `playwright-pitfalls`, `playwright-pro-patterns`, `webapp-testing` |
-| **Backend & API** | `api-patterns`, `nodejs-best-practices`, `python-patterns`, `database-design`, `mcp-builder` |
-| **Testing & QA** | `testing-patterns`, `tdd-workflow`, `verify-changes`, `lint-and-validate` |
+| **Frontend & UI** | `react-refactor-patterns`, `web-design-guidelines`, `tailwind-patterns`, `frontend-design`, `seo-fundamentals`, `i18n-localization`, `playwright-pitfalls`, `playwright-pro-patterns`, `webapp-testing`, `game-development`, `mobile-design`, `nextjs-react-expert`, `ui-ux-pro-max` |
+| **Backend & API** | `api-patterns`, `nodejs-best-practices`, `python-patterns`, `database-design`, `mcp-builder`, `geo-fundamentals` |
+| **Testing & QA** | `testing-patterns`, `tdd-workflow`, `verify-changes`, `lint-and-validate`, `clean-code`, `performance-profiling`, `systematic-debugging` |
 | **Security & Audits** | `vulnerability-scanner`, `red-team-tactics`, `code-review-checklist`, `code-review-graph` |
-| **Planning & Design** | `app-builder`, `architecture`, `plan-writing`, `brainstorming` |
+| **Planning & Design** | `app-builder`, `architecture`, `plan-writing`, `brainstorming`, `documentation-templates` |
 | **Infrastructure** | `deployment-procedures`, `server-management` |
 | **System Operations** | `bash-linux`, `batch-operations`, `coordinator-mode`, `memory-system`, `context-compression`, `simplify-code`, `skillify`, `intelligent-routing`, `parallel-agents`, `behavioral-modes` |
 

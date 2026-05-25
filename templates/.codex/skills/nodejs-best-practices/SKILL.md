@@ -1,10 +1,8 @@
 ---
 name: nodejs-best-practices
 description: >-
-  Node.js development principles and decision-making — framework selection
-  (Express, Fastify, NestJS, Hono), async patterns, security, validation, and architecture.
-  Use when building Node.js backends, selecting frameworks, implementing async patterns,
-  designing layered architecture, or validating APIs.
+  Use when building Node.js backends, selecting frameworks, implementing async patterns, or validating APIs.
+  Node.js development principles (Express, Fastify, NestJS, Hono), security, and architecture.
 allowed-tools: Read Write Edit Glob Grep
 ---
 

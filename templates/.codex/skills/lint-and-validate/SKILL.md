@@ -1,9 +1,8 @@
 ---
 name: lint-and-validate
 description: >-
-  Automatic quality control and static analysis procedures — unified lint execution,
-  type coverage metrics, and static format checkers for Node.js/TypeScript and Python.
   Use after every code modification to ensure syntax correctness, type safety, and project standards.
+  Automatic quality control and static analysis procedures covering linting and type checking.
   NOT for local environment configuration or dependency management.
 allowed-tools: Read Glob Grep Bash
 ---

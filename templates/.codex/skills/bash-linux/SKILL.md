@@ -1,9 +1,8 @@
 ---
 name: bash-linux
 description: >-
-  Bash and Linux terminal patterns — critical commands, piping, error handling,
-  and scripting for macOS and Linux environments.
   Use when working on macOS/Linux systems, writing bash scripts, or running terminal commands.
+  Bash and Linux terminal patterns covering critical commands, piping, error handling, and scripting.
   NOT for Windows or PowerShell environments.
 allowed-tools: Read Write Edit Glob Grep Bash
 ---

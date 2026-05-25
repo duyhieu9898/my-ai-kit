@@ -1,10 +1,8 @@
 ---
 name: coordinator-mode
 description: >-
-  Advanced multi-agent orchestration — parallel workers, synthesis protocols,
-  concurrency rules, worker prompt writing guidelines, fork/spawn semantics, and coordinator lifecycle.
-  Use when coordinating multiple specialist agents, designing parallel developer pipelines,
-  synthesizing research findings across multiple domains, or managing complex distributed tasks.
+  Use when coordinating multiple specialist agents, designing parallel developer pipelines, synthesizing research across multiple domains, or managing complex tasks.
+  Advanced multi-agent orchestration covering concurrency rules, worker prompt writing guidelines, fork/spawn semantics, and synthesis protocols.
   NOT for simple, single-domain code edits or direct implementation tasks.
 allowed-tools: Read Grep Glob Bash Write Edit Agent
 ---

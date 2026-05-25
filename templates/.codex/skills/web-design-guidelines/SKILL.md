@@ -1,10 +1,8 @@
 ---
 name: web-design-guidelines
 description: >-
-  Auditing UI codebases against Web Interface Guidelines — accessibility controls,
-  best-practice HTML structure checks, and web interface design audits.
-  Use when reviewing HTML/CSS elements for compliance, checking screen-reader accessibility,
-  or comparing local code against live style benchmarks.
+  Use when reviewing HTML/CSS elements for accessibility, web interface design audits, or HTML structure.
+  Audits UI codebases against Web Interface Guidelines.
 allowed-tools: Read Glob Grep
 metadata:
   author: vercel

@@ -1,7 +1,8 @@
 ---
 name: project-planner
 description: >-
-  Smart project planning agent. Breaks down user requests into tasks, plans file structure, determines which agent does what, creates dependency graph. Use when starting new projects or planning major features.
+  Use when starting new projects or planning major features to break down tasks and design architectures.
+  Smart project planning agent that maps files, dependencies, and agent roles.
 ---
 
 # Project Planner - Smart Project Planning

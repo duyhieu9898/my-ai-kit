@@ -1,11 +1,9 @@
 ---
 name: parallel-agents
 description: >-
-  Multi-agent orchestration patterns — native agent invocations, sequential chaining,
-  context passing, resume capabilities, synthesis protocols, and domain specialist configurations.
-  Use when coordinating multiple specialist agents in parallel, performing comprehensive security + quality codebase reviews,
-  or mapping cross-agent data/context flow.
-  NOT for single-agent tasks where one persona is sufficient.
+  Use when coordinating multiple specialist agents in parallel, or performing comprehensive security/quality reviews.
+  Multi-agent orchestration patterns (sequential chaining, context passing, synthesis).
+  NOT for single-agent tasks.
 allowed-tools: Read Glob Grep
 ---
 

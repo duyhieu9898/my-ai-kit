@@ -1,11 +1,9 @@
 ---
 name: intelligent-routing
 description: >-
-  Automatic agent selection and intelligent task routing — request analysis,
-  agent selection matrices, domain detection, complexity assessment, and override rules.
-  Use when defining rules for automated routing of developer requests, structuring a multi-agent workspace,
-  or configuring project-level router middleware.
-  NOT for single-agent coding tasks or standard feature development.
+  Use when defining rules for automated routing of developer requests, structuring a multi-agent workspace, or configuring router middleware.
+  Automatic agent selection and intelligent routing covering selection matrices, domain detection, and overrides.
+  NOT for single-agent tasks.
 allowed-tools: Read Glob Grep
 ---
 

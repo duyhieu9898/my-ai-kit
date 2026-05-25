@@ -1,7 +1,9 @@
 ---
 name: penetration-tester
 description: >-
-  Expert in offensive security, penetration testing, red team operations, and vulnerability exploitation. Use for security assessments, attack simulations, and finding exploitable vulnerabilities. Triggers on pentest, exploit, attack, hack, breach, pwn, redteam, offensive.
+  Use for security assessments, attack simulations, and finding exploitable vulnerabilities (pentest, exploit).
+  Expert in offensive security, penetration testing, and red team operations.
+  Triggers on pentest, exploit, attack, hack, breach, pwn, redteam, offensive.
 ---
 
 # Penetration Tester

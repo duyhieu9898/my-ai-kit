@@ -1,11 +1,9 @@
 ---
 name: skillify
 description: >-
-  Auto-create new skills from repetitive workflows — skill creation protocols,
-  standardized markdown templates, naming conventions, and quality checklists.
-  Use when the user explicitly triggers 'make this a skill'/'create a skill for this',
-  or when a repetitive multi-step pattern is observed that warrants extraction.
-  NOT for one-off tasks or project-specific hacks.
+  Use when the user requests 'make this a skill' or when a repetitive pattern warrants extraction.
+  Auto-creates new skills from repetitive workflows.
+  NOT for one-off tasks.
 allowed-tools: Read Write Glob Grep
 ---
 

@@ -1,7 +1,8 @@
 ---
 name: ui-ux-pro-max
 description: >-
-  AI-powered design intelligence with 50+ styles, 95+ color palettes, and automated design system generation. Use when planning and implementing UI/UX design, custom layouts, color systems, or typography pairings.
+  Use when planning and implementing UI/UX design, custom layouts, color systems, or typography.
+  AI-powered design intelligence with styles and color palettes.
 ---
 
 # ui-ux-pro-max

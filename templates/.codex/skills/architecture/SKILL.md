@@ -1,10 +1,9 @@
 ---
 name: architecture
 description: >-
-  Architectural decision-making framework — requirements analysis, constraints identification,
-  trade-off evaluations, pattern selection trees, and ADR documentation.
   Use when making major architectural decisions, evaluating technical trade-offs,
   writing Architecture Decision Records (ADRs), or analyzing system designs.
+  Architectural decision-making framework covering requirements analysis, constraints identification, trade-offs, and patterns.
   NOT for direct code implementation.
 allowed-tools: Read Glob Grep
 ---

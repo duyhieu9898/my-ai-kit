@@ -1,10 +1,9 @@
 ---
 name: playwright-pitfalls
 description: >-
-  Critical Playwright test pitfalls — brittle timing resolutions, CSS vs semantic locators,
-  static vs web-first auto-retrying assertions, shared state isolations, and mocking structures.
   Use when refactoring, troubleshooting, or auditing existing Playwright test suites.
-  NOT for writing entirely new E2E tests from scratch.
+  Playwright pitfalls analysis covering timing, locators, assertions, and state isolation.
+  NOT for new suites.
 allowed-tools: Read Write Edit Glob Grep
 ---
 

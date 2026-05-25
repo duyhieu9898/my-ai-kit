@@ -1,10 +1,8 @@
 ---
 name: testing-patterns
 description: >-
-  Testing patterns and principles — testing pyramid, Arrange-Act-Assert (AAA) pattern,
-  unit and integration testing principles, mocking strategies, test organization, and data factories.
   Use when writing unit or integration tests, setting up mock stubs/spies/fakes, or designing test suites.
-  NOT for manual UI validation or end-to-end user acceptance testing alone.
+  Core testing patterns (Pyramid, AAA, mocking).
 allowed-tools: Read Write Edit Glob Grep Bash
 ---
 

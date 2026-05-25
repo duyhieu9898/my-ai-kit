@@ -1,11 +1,9 @@
 ---
 name: tailwind-patterns
 description: >-
-  Tailwind CSS v4 principles and architecture — CSS-first configuration theme tokens,
-  container queries, mobile-first responsive systems, dark modes, layout flex/grid patterns, and OKLCH color spaces.
-  Use when designing or coding modern responsive web layouts, configuring design token CSS schemas,
-  or extracting repetitive utilities to React components or CSS layers.
-  NOT for legacy Tailwind v3 JavaScript configurations or pure vanilla CSS without Tailwind.
+  Use when designing or coding modern responsive web layouts, CSS theme tokens, or container queries.
+  Tailwind CSS v4 CSS-first design and layout patterns.
+  NOT for legacy Tailwind v3 JS configs.
 allowed-tools: Read Write Edit Glob Grep
 ---
 

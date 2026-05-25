@@ -1,9 +1,8 @@
 ---
 name: webapp-testing
 description: >-
-  Systematic web application testing — testing pyramid structures, E2E browser test principles,
-  Playwright runner scripts, accessibility check patterns, and routing audits.
   Use when writing E2E web browser test flows or conducting deep web application routing audits.
+  Systematic web app testing (Playwright, accessibility).
 allowed-tools: Read Write Edit Glob Grep Bash
 ---
 
