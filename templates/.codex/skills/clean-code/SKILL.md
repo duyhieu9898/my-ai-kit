@@ -7,185 +7,145 @@ description: >-
 allowed-tools: Read Write Edit
 ---
 
-# Clean Code - Pragmatic AI Coding Standards
+# 🧼 Clean Code - Pragmatic AI Coding Standards
 
-> **CRITICAL SKILL** - Be **concise, direct, and solution-focused**.
+> Strict behavioral and implementation rules to write concise, self-documenting, and robust software directly, without over-engineering.
 
----
+## 📑 Content Map
 
-## Core Principles
+| File / Resource | Description | When to Read |
+|:---|:---|:---|
+| `SKILL.md` | Core clean code rules, AI styles, and validation procedures | Active throughout all coding tasks |
+| `agents/openai.yaml` | Codex UI and implicit invocation policy configuration | During skill indexing or UI setup |
 
-| Principle | Rule |
-|-----------|------|
-| **SRP** | Single Responsibility - each function/class does ONE thing |
-| **DRY** | Don't Repeat Yourself - extract duplicates, reuse |
-| **KISS** | Keep It Simple - simplest solution that works |
-| **YAGNI** | You Aren't Gonna Need It - don't build unused features |
-| **Boy Scout** | Leave code cleaner than you found it |
+## 🔗 Related Skills
 
----
-
-## Naming Rules
-
-| Element | Convention |
-|---------|------------|
-| **Variables** | Reveal intent: `userCount` not `n` |
-| **Functions** | Verb + noun: `getUserById()` not `user()` |
-| **Booleans** | Question form: `isActive`, `hasPermission`, `canEdit` |
-| **Constants** | SCREAMING_SNAKE: `MAX_RETRY_COUNT` |
-
-> **Rule:** If you need a comment to explain a name, rename it.
+| Skill | Relationship | When to Collaborate |
+|:---|:---|:---|
+| `simplify-code` | Optimization Companion | When refactoring loops, nested conditionals, or long blocks |
+| `lint-and-validate` | Quality Partner | To verify lint cleanliness, type coverage, and script success |
+| `debugger` | Trouble-shooting | When bug-fixing, tracking stack traces, or applying hotfixes |
 
 ---
 
-## Function Rules
+## 🛠️ Instructions / Procedures
+
+Be **concise, direct, and solution-focused**. All code implementations must strictly adhere to the following pragmatic standards:
+
+### 1. Core Principles
+
+| Principle | Rule Description |
+|:---|:---|
+| **SRP** | Single Responsibility - each function/class does ONE thing and does it well. |
+| **DRY** | Don't Repeat Yourself - extract duplicates, abstract logic wisely, and reuse. |
+| **KISS** | Keep It Simple - choose the simplest, most readable solution that works. |
+| **YAGNI** | You Aren't Gonna Need It - do not write speculative code or unused features. |
+| **Boy Scout** | Always leave code cleaner than you found it. |
+
+### 2. Naming Conventions
+
+| Element | Convention | Example |
+|:---|:---|:---|
+| **Variables** | Intent-revealing names | `userCount` instead of `n` |
+| **Functions** | Verb + noun | `getUserById()` instead of `user()` |
+| **Booleans** | Question form | `isActive`, `hasPermission`, `canEdit` |
+| **Constants** | SCREAMING_SNAKE | `MAX_RETRY_COUNT` |
+
+> 💡 **Naming Rule:** If you need a code comment to explain a name, rename the variable/function instead.
+
+### 3. Function Design Rules
 
 | Rule | Description |
-|------|-------------|
-| **Small** | Max 20 lines, ideally 5-10 |
-| **One Thing** | Does one thing, does it well |
-| **One Level** | One level of abstraction per function |
-| **Few Args** | Max 3 arguments, prefer 0-2 |
-| **No Side Effects** | Don't mutate inputs unexpectedly |
+|:---|:---|
+| **Small** | Maximum 20 lines (ideally 5–10 lines). |
+| **One Thing** | Solves exactly one problem at a single level of abstraction. |
+| **Few Arguments** | Maximum 3 arguments, with a strong preference for 0–2. |
+| **No Side Effects**| Never mutate global state or arguments unexpectedly. |
 
----
+### 4. Code Structure Patterns
+*   **Guard Clauses:** Use early returns to handle edge cases, empty states, and errors at the top of the function to prevent deep indentation.
+*   **Flat over Nested:** Avoid deep nesting of blocks (maximum 2 levels of nesting).
+*   **Composition:** Compose functions by piping small, focused utility methods together.
+*   **Colocation:** Keep related code, variables, and type definitions close to where they are consumed.
 
-## Code Structure
+### 5. AI Coding Communication Style
 
-| Pattern | Apply |
-|---------|-------|
-| **Guard Clauses** | Early returns for edge cases |
-| **Flat > Nested** | Avoid deep nesting (max 2 levels) |
-| **Composition** | Small functions composed together |
-| **Colocation** | Keep related code close |
+| Situation | Action Required |
+|:---|:---|
+| **User requests a feature** | Write the code directly. Do not write introductory tutorials. |
+| **User reports a bug** | Fix the bug immediately and show the clean code. Do not explain basic concepts. |
+| **Vague or incomplete spec**| Ask concise, targeted questions. Never make assumptions on core features. |
 
----
+### 6. Dependency & Impact Check Protocol (THINK FIRST!)
+Before changing *any* file, perform a mental impact review:
 
-## AI Coding Style
-
-| Situation | Action |
-|-----------|--------|
-| User asks for feature | Write it directly |
-| User reports bug | Fix it, don't explain |
-| No clear requirement | Ask, don't assume |
-
----
-
-## Anti-Patterns (DON'T)
-
-| ❌ Pattern | ✅ Fix |
-|-----------|-------|
-| Comment every line | Delete obvious comments |
-| Helper for one-liner | Inline the code |
-| Factory for 2 objects | Direct instantiation |
-| utils.ts with 1 function | Put code where used |
-| "First we import..." | Just write code |
-| Deep nesting | Guard clauses |
-| Magic numbers | Named constants |
-| God functions | Split by responsibility |
-
----
-
-## 🔴 Before Editing ANY File (THINK FIRST!)
-
-**Before changing a file, ask yourself:**
-
-| Question | Why |
-|----------|-----|
-| **What imports this file?** | They might break |
-| **What does this file import?** | Interface changes |
-| **What tests cover this?** | Tests might fail |
-| **Is this a shared component?** | Multiple places affected |
-
-**Quick Check:**
 ```
 File to edit: UserService.ts
 └── Who imports this? → UserController.ts, AuthController.ts
-└── Do they need changes too? → Check function signatures
+└── Do they need changes too? → Check signatures and import paths
 ```
 
-> 🔴 **Rule:** Edit the file + all dependent files in the SAME task.
-> 🔴 **Never leave broken imports or missing updates.**
+*   **Rule:** Edit the modified file and all dependent files in the **same task/turn**.
+*   **Safety:** Never leave broken import statements, missing parameters, or unaligned interfaces.
+
+### 7. Verification Script Orchestration
+
+> 🔴 **CRITICAL:** Run ONLY the validation scripts belonging to your active skill domain after completing work.
+
+| Skill / Domain | Verification Script Command |
+|:---|:---|
+| **frontend-specialist** | `python templates/.codex/skills/frontend-design/scripts/ux_audit.py .` |
+| **frontend-specialist** | `python templates/.codex/skills/frontend-design/scripts/accessibility_checker.py .` |
+| **backend-specialist** | `python templates/.codex/skills/api-patterns/scripts/api_validator.py .` |
+| **mobile-developer** | `python templates/.codex/skills/mobile-design/scripts/mobile_audit.py .` |
+| **database-architect** | `python templates/.codex/skills/database-design/scripts/schema_validator.py .` |
+| **security-auditor** | `python templates/.codex/skills/vulnerability-scanner/scripts/security_scan.py .` |
+| **performance-optimizer**| `python templates/.codex/skills/performance-profiling/scripts/lighthouse_audit.py <url>` |
+| **test-engineer** | `python templates/.codex/skills/webapp-testing/scripts/playwright_runner.py <url>` |
+| **Any Agent (Lint)** | `python templates/.codex/skills/lint-and-validate/scripts/lint_runner.py .` |
+| **Any Agent (Coverage)**| `python templates/.codex/skills/lint-and-validate/scripts/type_coverage.py .` |
+
+### 8. Verification Output Protocol (READ ➜ SUMMARIZE ➜ ASK)
+When executing any validation script, you must strictly follow this communication cycle:
+1.  **Execute the script** and capture the complete standard output.
+2.  **Analyze the logs** to isolate Errors, Warnings, and Passes.
+3.  **Summarize findings** to the user using this exact schema:
+    ```markdown
+    ## Script Results: [script_name.py]
+
+    ### ❌ Errors Found (X items)
+    - [File:Line] Error description
+
+    ### ⚠️ Warnings (Y items)
+    - [File:Line] Warning description
+
+    ### ✅ Passed (Z items)
+    - Check description
+
+    **Should I proceed to fix these X errors?**
+    ```
+4.  **Await confirmation** before performing fixes.
+5.  **Re-run and verify** after applying fixes to guarantee success.
 
 ---
 
-## Summary
+## ❌ Anti-Patterns
 
-| Do | Don't |
-|----|-------|
-| Write code directly | Write tutorials |
-| Let code self-document | Add obvious comments |
-| Fix bugs immediately | Explain the fix first |
-| Inline small things | Create unnecessary files |
-| Name things clearly | Use abbreviations |
-| Keep functions small | Write 100+ line functions |
-
-> **Remember: The user wants working code, not a programming lesson.**
+*   ❌ **Tutorial Writing:** Explaining basic syntax or lecturing the user. Just write direct, working code.
+*   ❌ **Comment Clutter:** Adding obvious comments to code lines (e.g. `// increment count`). Let the code self-document.
+*   ❌ **Over-Modularization:** Creating helpers or wrappers for single-line operations. Direct, idiomatic code is cleaner.
+*   ❌ **God Functions:** Writing long methods (>20 lines) with nested loops and complex branching. Split them by responsibility.
+*   ❌ **Ignoring Script Errors:** Running validation scripts and ignoring their failure outputs. This is considered a task failure.
 
 ---
 
-## 🔴 Self-Check Before Completing (MANDATORY)
+## ✅ Quality Audit Checklist
 
-**Before saying "task complete", verify:**
+The agent must perform this self-audit before declaring any code task complete:
 
-| Check | Question |
-|-------|----------|
-| ✅ **Goal met?** | Did I do exactly what user asked? |
-| ✅ **Files edited?** | Did I modify all necessary files? |
-| ✅ **Code works?** | Did I test/verify the change? |
-| ✅ **No errors?** | Lint and TypeScript pass? |
-| ✅ **Nothing forgotten?** | Any edge cases missed? |
-
-> 🔴 **Rule:** If ANY check fails, fix it before completing.
-
----
-
-## Verification Scripts (MANDATORY)
-
-> 🔴 **CRITICAL:** Each agent runs ONLY their own skill's scripts after completing work.
-
-### Agent → Script Mapping
-
-| Agent | Script | Command |
-|-------|--------|---------|
-| **frontend-specialist** | UX Audit | `python templates/.codex/skills/frontend-design/scripts/ux_audit.py .` |
-| **frontend-specialist** | A11y Check | `python templates/.codex/skills/frontend-design/scripts/accessibility_checker.py .` |
-| **backend-specialist** | API Validator | `python templates/.codex/skills/api-patterns/scripts/api_validator.py .` |
-| **mobile-developer** | Mobile Audit | `python templates/.codex/skills/mobile-design/scripts/mobile_audit.py .` |
-| **database-architect** | Schema Validate | `python templates/.codex/skills/database-design/scripts/schema_validator.py .` |
-| **security-auditor** | Security Scan | `python templates/.codex/skills/vulnerability-scanner/scripts/security_scan.py .` |
-| **performance-optimizer** | Lighthouse | `python templates/.codex/skills/performance-profiling/scripts/lighthouse_audit.py <url>` |
-| **test-engineer** | Playwright | `python templates/.codex/skills/webapp-testing/scripts/playwright_runner.py <url>` |
-| **Any agent** | Lint Check | `python templates/.codex/skills/lint-and-validate/scripts/lint_runner.py .` |
-| **Any agent** | Type Coverage | `python templates/.codex/skills/lint-and-validate/scripts/type_coverage.py .` |
-
----
-
-### 🔴 Script Output Handling (READ → SUMMARIZE → ASK)
-
-**When running a validation script, you MUST:**
-
-1. **Run the script** and capture ALL output
-2. **Parse the output** - identify errors, warnings, and passes
-3. **Summarize to user** in this format:
-
-```markdown
-## Script Results: [script_name.py]
-
-### ❌ Errors Found (X items)
-- [File:Line] Error description 1
-
-### ⚠️ Warnings (Y items)
-- [File:Line] Warning description
-
-### ✅ Passed (Z items)
-- Check 1 passed
-
-**Should I fix the X errors?**
-```
-
-4. **Wait for user confirmation** before fixing
-5. **After fixing** → Re-run script to confirm
-
-> 🔴 **VIOLATION:** Running script and ignoring output = FAILED task.
-> 🔴 **Rule:** Always READ output → SUMMARIZE → ASK → then fix.
+*   [ ] **Correctness:** Did I implement exactly what the user asked, meeting all requirements?
+*   [ ] **Safety & Dependency:** Did I identify and modify all files affected by import/signature changes?
+*   [ ] **Function Size:** Are all newly created or refactored functions under 20 lines?
+*   [ ] **Deep Indentation:** Are there guard clauses at the top of functions, keeping nesting under 2 levels?
+*   [ ] **Self-Documenting Names:** Variable, constant, and function names reveal their purpose clearly without requiring inline comments.
+*   [ ] **Verification Coverage:** Has the appropriate validation script been executed, summarized, and run to success?
