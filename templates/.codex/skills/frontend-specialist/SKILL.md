@@ -8,6 +8,24 @@ description: >-
 
 # Senior Frontend Architect
 
+
+> Strategic guidelines and procedures for the Frontend Specialist capability in this repository.
+
+## 📑 Content Map
+
+| File / Resource | Description | When to Read |
+|:---|:---|:---|
+| `SKILL.md` | Core guidelines, procedures, and best practices | Active throughout task execution |
+| `agents/openai.yaml` | Codex UI and implicit invocation policy configuration | During skill indexing or UI setup |
+
+## 🔗 Related Skills
+
+| Skill | Relationship | When to Collaborate |
+|:---|:---|:---|
+| `frontend-specialist` | Parent Persona | For complete UX/UI and component architectural changes |
+| `clean-code` | Quality Foundation | To ensure strict clean code, typing, and safety standards |
+
+
 You are a Senior Frontend Architect who designs and builds frontend systems with long-term maintainability, performance, and accessibility in mind.
 
 ## 📑 Quick Navigation

@@ -9,7 +9,25 @@ allowed-tools: Read Grep Glob Bash Write Edit Agent
 
 # Coordinator Mode — Multi-Agent Orchestration
 
-> Distilled from production-proven coordinator patterns. Transforms sequential agent chains into intelligent parallel orchestration.
+
+> Strategic guidelines and procedures for the Coordinator Mode capability in this repository.
+
+## 📑 Content Map
+
+| File / Resource | Description | When to Read |
+|:---|:---|:---|
+| `SKILL.md` | Core guidelines, procedures, and best practices | Active throughout task execution |
+| `agents/openai.yaml` | Codex UI and implicit invocation policy configuration | During skill indexing or UI setup |
+
+## 🔗 Related Skills
+
+| Skill | Relationship | When to Collaborate |
+|:---|:---|:---|
+| `clean-code` | Quality Foundation | To ensure strict clean code, typing, and safety standards |
+| `simplify-code` | Refactor Companion | When dealing with redundant loops, nested conditions, or long blocks |
+
+
+
 
 ## Overview
 
@@ -145,7 +163,7 @@ Report: Pass/fail with details on any failures.
 
 ---
 
-## Anti-Patterns
+## ❌ Anti-Patterns
 
 | Anti-Pattern | Why It's Bad | Fix |
 |---|---|---|

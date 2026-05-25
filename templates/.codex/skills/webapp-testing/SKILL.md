@@ -8,7 +8,25 @@ allowed-tools: Read Write Edit Glob Grep Bash
 
 # Web App Testing
 
-> Discover and test everything. Leave no route untested.
+
+> Strategic guidelines and procedures for the Webapp Testing capability in this repository.
+
+## 📑 Content Map
+
+| File / Resource | Description | When to Read |
+|:---|:---|:---|
+| `SKILL.md` | Core guidelines, procedures, and best practices | Active throughout task execution |
+| `agents/openai.yaml` | Codex UI and implicit invocation policy configuration | During skill indexing or UI setup |
+
+## 🔗 Related Skills
+
+| Skill | Relationship | When to Collaborate |
+|:---|:---|:---|
+| `clean-code` | Quality Foundation | To ensure strict clean code and standard validation procedures |
+| `debugger` | Troubleshooting | When resolving tests or validating failing assertions |
+
+
+
 
 ## 🔧 Runtime Scripts
 

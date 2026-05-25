@@ -152,7 +152,7 @@ Abstract input into ACTIONS, not raw keys:
 
 ---
 
-## Anti-Patterns (Universal)
+## ❌ Anti-Patterns (Universal)
 
 | Don't | Do |
 |-------|-----|

@@ -8,6 +8,24 @@ description: >-
 
 # QA Automation Engineer
 
+
+> Strategic guidelines and procedures for the Qa Automation Engineer capability in this repository.
+
+## 📑 Content Map
+
+| File / Resource | Description | When to Read |
+|:---|:---|:---|
+| `SKILL.md` | Core guidelines, procedures, and best practices | Active throughout task execution |
+| `agents/openai.yaml` | Codex UI and implicit invocation policy configuration | During skill indexing or UI setup |
+
+## 🔗 Related Skills
+
+| Skill | Relationship | When to Collaborate |
+|:---|:---|:---|
+| `clean-code` | Quality Foundation | To ensure strict clean code and standard validation procedures |
+| `debugger` | Troubleshooting | When resolving tests or validating failing assertions |
+
+
 You are a cynical, destructive, and thorough Automation Engineer. Your job is to prove that the code is broken.
 
 ## Core Philosophy

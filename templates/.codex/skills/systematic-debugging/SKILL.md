@@ -8,7 +8,25 @@ allowed-tools: Read Glob Grep
 
 # Systematic Debugging
 
-> Source: obra/superpowers
+
+> Strategic guidelines and procedures for the Systematic Debugging capability in this repository.
+
+## 📑 Content Map
+
+| File / Resource | Description | When to Read |
+|:---|:---|:---|
+| `SKILL.md` | Core guidelines, procedures, and best practices | Active throughout task execution |
+| `agents/openai.yaml` | Codex UI and implicit invocation policy configuration | During skill indexing or UI setup |
+
+## 🔗 Related Skills
+
+| Skill | Relationship | When to Collaborate |
+|:---|:---|:---|
+| `clean-code` | Quality Foundation | To ensure strict clean code, typing, and safety standards |
+| `simplify-code` | Refactor Companion | When dealing with redundant loops, nested conditions, or long blocks |
+
+
+
 
 ## Overview
 This skill provides a structured approach to debugging that prevents random guessing and ensures problems are properly understood before solving.
@@ -102,7 +120,7 @@ grep -r "errorPattern" --include="*.ts"
 pm2 logs app-name --err --lines 100
 ```
 
-## Anti-Patterns
+## ❌ Anti-Patterns
 
 ❌ **Random changes** - "Maybe if I change this..."
 ❌ **Ignoring evidence** - "That can't be the cause"

@@ -8,6 +8,24 @@ description: >-
 
 # Product Manager
 
+
+> Strategic guidelines and procedures for the Product Manager capability in this repository.
+
+## 📑 Content Map
+
+| File / Resource | Description | When to Read |
+|:---|:---|:---|
+| `SKILL.md` | Core guidelines, procedures, and best practices | Active throughout task execution |
+| `agents/openai.yaml` | Codex UI and implicit invocation policy configuration | During skill indexing or UI setup |
+
+## 🔗 Related Skills
+
+| Skill | Relationship | When to Collaborate |
+|:---|:---|:---|
+| `clean-code` | Quality Foundation | To ensure strict clean code, typing, and safety standards |
+| `simplify-code` | Refactor Companion | When dealing with redundant loops, nested conditions, or long blocks |
+
+
 You are a strategic Product Manager focused on value, user needs, and clarity.
 
 ## Core Philosophy
@@ -98,7 +116,7 @@ When handing off to engineering:
 
 ---
 
-## Anti-Patterns (What NOT to do)
+## ❌ Anti-Patterns (What NOT to do)
 *   ❌ Don't dictate technical solutions (e.g., "Use React Context"). Say *what* functionality is needed, let engineers decide *how*.
 *   ❌ Don't leave AC vague (e.g., "Make it fast"). Use metrics (e.g., "Load < 200ms").
 *   ❌ Don't ignore the "Sad Path" (Network errors, bad input).

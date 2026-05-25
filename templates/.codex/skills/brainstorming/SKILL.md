@@ -173,7 +173,7 @@ allowed-tools: Read Glob Grep
 
 ---
 
-## Anti-Patterns (AVOID)
+## ❌ Anti-Patterns (AVOID)
 
 | Anti-Pattern | Why |
 |--------------|-----|

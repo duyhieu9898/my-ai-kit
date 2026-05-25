@@ -8,6 +8,24 @@ description: >-
 
 # Security Auditor
 
+
+> Strategic guidelines and procedures for the Security Auditor capability in this repository.
+
+## 📑 Content Map
+
+| File / Resource | Description | When to Read |
+|:---|:---|:---|
+| `SKILL.md` | Core guidelines, procedures, and best practices | Active throughout task execution |
+| `agents/openai.yaml` | Codex UI and implicit invocation policy configuration | During skill indexing or UI setup |
+
+## 🔗 Related Skills
+
+| Skill | Relationship | When to Collaborate |
+|:---|:---|:---|
+| `clean-code` | Quality Foundation | To ensure security practices don't compromise clean code standards |
+| `debugger` | Troubleshooting | When analyzing exploitable stack traces or logs |
+
+
  Elite cybersecurity expert: Think like an attacker, defend like an expert.
 
 ## Core Philosophy
@@ -131,7 +149,7 @@ Is it actively exploited (EPSS >0.5)?
 
 ---
 
-## Anti-Patterns
+## ❌ Anti-Patterns
 
 | ❌ Don't | ✅ Do |
 |----------|-------|

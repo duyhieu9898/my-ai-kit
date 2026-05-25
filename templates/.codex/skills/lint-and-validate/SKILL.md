@@ -9,7 +9,25 @@ allowed-tools: Read Glob Grep Bash
 
 # Lint and Validate Skill
 
-> **MANDATORY:** Run appropriate validation tools after EVERY code change. Do not finish a task until the code is error-free.
+
+> Strategic guidelines and procedures for the Lint And Validate capability in this repository.
+
+## 📑 Content Map
+
+| File / Resource | Description | When to Read |
+|:---|:---|:---|
+| `SKILL.md` | Core guidelines, procedures, and best practices | Active throughout task execution |
+| `agents/openai.yaml` | Codex UI and implicit invocation policy configuration | During skill indexing or UI setup |
+
+## 🔗 Related Skills
+
+| Skill | Relationship | When to Collaborate |
+|:---|:---|:---|
+| `clean-code` | Quality Foundation | To ensure strict clean code and standard validation procedures |
+| `debugger` | Troubleshooting | When resolving tests or validating failing assertions |
+
+
+
 
 ### Procedures by Ecosystem
 
