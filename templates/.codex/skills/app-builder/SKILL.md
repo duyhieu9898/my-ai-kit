@@ -9,25 +9,7 @@ allowed-tools: Read Write Edit Glob Grep Bash Agent
 
 # App Builder - Application Building Orchestrator
 
-
-> Strategic guidelines and procedures for the App Builder capability in this repository.
-
-## 📑 Content Map
-
-| File / Resource | Description | When to Read |
-|:---|:---|:---|
-| `SKILL.md` | Core guidelines, procedures, and best practices | Active throughout task execution |
-| `agents/openai.yaml` | Codex UI and implicit invocation policy configuration | During skill indexing or UI setup |
-
-## 🔗 Related Skills
-
-| Skill | Relationship | When to Collaborate |
-|:---|:---|:---|
-| `frontend-specialist` | Parent Persona | For complete UX/UI and component architectural changes |
-| `clean-code` | Quality Foundation | To ensure strict clean code, typing, and safety standards |
-
-
-
+> Analyzes user's requests, determines tech stack, plans structure, and coordinates agents.
 
 ## 🎯 Selective Reading Rule
 

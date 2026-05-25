@@ -8,25 +8,7 @@ allowed-tools: Read Glob Grep
 
 # Plan Writing
 
-
-> Strategic guidelines and procedures for the Plan Writing capability in this repository.
-
-## 📑 Content Map
-
-| File / Resource | Description | When to Read |
-|:---|:---|:---|
-| `SKILL.md` | Core guidelines, procedures, and best practices | Active throughout task execution |
-| `agents/openai.yaml` | Codex UI and implicit invocation policy configuration | During skill indexing or UI setup |
-
-## 🔗 Related Skills
-
-| Skill | Relationship | When to Collaborate |
-|:---|:---|:---|
-| `clean-code` | Quality Foundation | To ensure strict clean code, typing, and safety standards |
-| `simplify-code` | Refactor Companion | When dealing with redundant loops, nested conditions, or long blocks |
-
-
-
+> Source: obra/superpowers
 
 ## Overview
 This skill provides a framework for breaking down work into clear, actionable tasks with verification criteria.

@@ -9,24 +9,6 @@ allowed-tools: Read Glob Grep
 
 # Code Review Checklist
 
-
-> Strategic guidelines and procedures for the Code Review Checklist capability in this repository.
-
-## 📑 Content Map
-
-| File / Resource | Description | When to Read |
-|:---|:---|:---|
-| `SKILL.md` | Core guidelines, procedures, and best practices | Active throughout task execution |
-| `agents/openai.yaml` | Codex UI and implicit invocation policy configuration | During skill indexing or UI setup |
-
-## 🔗 Related Skills
-
-| Skill | Relationship | When to Collaborate |
-|:---|:---|:---|
-| `clean-code` | Quality Foundation | To ensure strict clean code, typing, and safety standards |
-| `simplify-code` | Refactor Companion | When dealing with redundant loops, nested conditions, or long blocks |
-
-
 ## Quick Review Checklist
 
 ### Correctness
@@ -85,7 +67,7 @@ const response = await ai.generate({
 });
 ```
 
-## ❌ Anti-Patterns to Flag
+## Anti-Patterns to Flag
 
 ```typescript
 // ❌ Magic numbers

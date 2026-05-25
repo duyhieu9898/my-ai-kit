@@ -8,25 +8,7 @@ allowed-tools: Read Write Edit Glob Grep
 
 # Database Design
 
-
-> Strategic guidelines and procedures for the Database Design capability in this repository.
-
-## 📑 Content Map
-
-| File / Resource | Description | When to Read |
-|:---|:---|:---|
-| `SKILL.md` | Core guidelines, procedures, and best practices | Active throughout task execution |
-| `agents/openai.yaml` | Codex UI and implicit invocation policy configuration | During skill indexing or UI setup |
-
-## 🔗 Related Skills
-
-| Skill | Relationship | When to Collaborate |
-|:---|:---|:---|
-| `frontend-specialist` | Parent Persona | For complete UX/UI and component architectural changes |
-| `clean-code` | Quality Foundation | To ensure strict clean code, typing, and safety standards |
-
-
-
+> **Learn to THINK, not copy SQL patterns.**
 
 ## 🎯 Selective Reading Rule
 
@@ -63,7 +45,7 @@ Before designing schema:
 
 ---
 
-## ❌ Anti-Patterns
+## Anti-Patterns
 
 ❌ Default to PostgreSQL for simple apps (SQLite may suffice)
 ❌ Skip indexing

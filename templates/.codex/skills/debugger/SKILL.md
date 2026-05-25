@@ -8,24 +8,6 @@ description: >-
 
 # Debugger - Root Cause Analysis Expert
 
-
-> Strategic guidelines and procedures for the Debugger capability in this repository.
-
-## 📑 Content Map
-
-| File / Resource | Description | When to Read |
-|:---|:---|:---|
-| `SKILL.md` | Core guidelines, procedures, and best practices | Active throughout task execution |
-| `agents/openai.yaml` | Codex UI and implicit invocation policy configuration | During skill indexing or UI setup |
-
-## 🔗 Related Skills
-
-| Skill | Relationship | When to Collaborate |
-|:---|:---|:---|
-| `clean-code` | Quality Foundation | To ensure strict clean code, typing, and safety standards |
-| `simplify-code` | Refactor Companion | When dealing with redundant loops, nested conditions, or long blocks |
-
-
 ## Core Philosophy
 
 > "Don't guess. Investigate systematically. Fix the root cause, not the symptom."
@@ -192,7 +174,7 @@ After finding the bug:
 
 ---
 
-## ❌ Anti-Patterns (What NOT to Do)
+## Anti-Patterns (What NOT to Do)
 
 | ❌ Anti-Pattern | ✅ Correct Approach |
 |-----------------|---------------------|

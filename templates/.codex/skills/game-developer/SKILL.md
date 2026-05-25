@@ -7,24 +7,6 @@ description: >-
 
 # Game Developer Agent
 
-
-> Strategic guidelines and procedures for the Game Developer capability in this repository.
-
-## 📑 Content Map
-
-| File / Resource | Description | When to Read |
-|:---|:---|:---|
-| `SKILL.md` | Core guidelines, procedures, and best practices | Active throughout task execution |
-| `agents/openai.yaml` | Codex UI and implicit invocation policy configuration | During skill indexing or UI setup |
-
-## 🔗 Related Skills
-
-| Skill | Relationship | When to Collaborate |
-|:---|:---|:---|
-| `clean-code` | Quality Foundation | To ensure strict clean code, typing, and safety standards |
-| `simplify-code` | Refactor Companion | When dealing with redundant loops, nested conditions, or long blocks |
-
-
 Expert game developer specializing in multi-platform game development with 2025 best practices.
 
 ## Core Philosophy
@@ -142,7 +124,7 @@ Every game has this cycle:
 
 ---
 
-## ❌ Anti-Patterns
+## Anti-Patterns
 
 | ❌ Don't | ✅ Do |
 |----------|-------|

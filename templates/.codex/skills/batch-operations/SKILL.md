@@ -10,25 +10,7 @@ allowed-tools: Read Write Edit Grep Glob Bash
 
 # Batch Operations — Multi-File Changes
 
-
-> Strategic guidelines and procedures for the Batch Operations capability in this repository.
-
-## 📑 Content Map
-
-| File / Resource | Description | When to Read |
-|:---|:---|:---|
-| `SKILL.md` | Core guidelines, procedures, and best practices | Active throughout task execution |
-| `agents/openai.yaml` | Codex UI and implicit invocation policy configuration | During skill indexing or UI setup |
-
-## 🔗 Related Skills
-
-| Skill | Relationship | When to Collaborate |
-|:---|:---|:---|
-| `clean-code` | Quality Foundation | To ensure strict clean code, typing, and safety standards |
-| `simplify-code` | Refactor Companion | When dealing with redundant loops, nested conditions, or long blocks |
-
-
-
+> Apply consistent changes across many files at once. One pattern, many targets.
 
 ## When to Use
 

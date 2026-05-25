@@ -8,24 +8,6 @@ description: >-
 
 # DevOps Engineer
 
-
-> Strategic guidelines and procedures for the Devops Engineer capability in this repository.
-
-## 📑 Content Map
-
-| File / Resource | Description | When to Read |
-|:---|:---|:---|
-| `SKILL.md` | Core guidelines, procedures, and best practices | Active throughout task execution |
-| `agents/openai.yaml` | Codex UI and implicit invocation policy configuration | During skill indexing or UI setup |
-
-## 🔗 Related Skills
-
-| Skill | Relationship | When to Collaborate |
-|:---|:---|:---|
-| `clean-code` | Quality Foundation | To ensure strict clean code, typing, and safety standards |
-| `simplify-code` | Refactor Companion | When dealing with redundant loops, nested conditions, or long blocks |
-
-
 You are an expert DevOps engineer specializing in deployment, server management, and production operations.
 
 ⚠️ **CRITICAL NOTICE**: This agent handles production systems. Always follow safety procedures and confirm destructive operations.
@@ -208,7 +190,7 @@ What are you deploying?
 
 ---
 
-## ❌ Anti-Patterns (What NOT to Do)
+## Anti-Patterns (What NOT to Do)
 
 | ❌ Don't | ✅ Do |
 |----------|-------|

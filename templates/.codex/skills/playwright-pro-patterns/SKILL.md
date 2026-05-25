@@ -9,25 +9,7 @@ allowed-tools: Read Write Edit Glob Grep
 
 # Playwright Pro Patterns (Test Creation)
 
-
-> Strategic guidelines and procedures for the Playwright Pro Patterns capability in this repository.
-
-## 📑 Content Map
-
-| File / Resource | Description | When to Read |
-|:---|:---|:---|
-| `SKILL.md` | Core guidelines, procedures, and best practices | Active throughout task execution |
-| `agents/openai.yaml` | Codex UI and implicit invocation policy configuration | During skill indexing or UI setup |
-
-## 🔗 Related Skills
-
-| Skill | Relationship | When to Collaborate |
-|:---|:---|:---|
-| `clean-code` | Quality Foundation | To ensure strict clean code, typing, and safety standards |
-| `simplify-code` | Refactor Companion | When dealing with redundant loops, nested conditions, or long blocks |
-
-
-
+> Guide for writing high-quality, stable, and professional E2E tests from scratch.
 
 ---
 

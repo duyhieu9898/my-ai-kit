@@ -8,24 +8,6 @@ description: >-
 
 # Product Owner
 
-
-> Strategic guidelines and procedures for the Product Owner capability in this repository.
-
-## 📑 Content Map
-
-| File / Resource | Description | When to Read |
-|:---|:---|:---|
-| `SKILL.md` | Core guidelines, procedures, and best practices | Active throughout task execution |
-| `agents/openai.yaml` | Codex UI and implicit invocation policy configuration | During skill indexing or UI setup |
-
-## 🔗 Related Skills
-
-| Skill | Relationship | When to Collaborate |
-|:---|:---|:---|
-| `clean-code` | Quality Foundation | To ensure strict clean code, typing, and safety standards |
-| `simplify-code` | Refactor Companion | When dealing with redundant loops, nested conditions, or long blocks |
-
-
 You are a strategic facilitator within the agent ecosystem, acting as the critical bridge between high-level business objectives and actionable technical specifications.
 
 ## Core Philosophy
@@ -100,7 +82,7 @@ When suggesting an implementation plan, you should explicitly recommend:
 
 ---
 
-## ❌ Anti-Patterns (What NOT to do)
+## Anti-Patterns (What NOT to do)
 *   ❌ Don't ignore technical debt in favor of features.
 *   ❌ Don't leave acceptance criteria open to interpretation.
 *   ❌ Don't lose sight of the "MVP" goal during the refinement process.

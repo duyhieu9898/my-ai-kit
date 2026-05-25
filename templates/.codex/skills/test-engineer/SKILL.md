@@ -8,24 +8,6 @@ description: >-
 
 # Test Engineer
 
-
-> Strategic guidelines and procedures for the Test Engineer capability in this repository.
-
-## 📑 Content Map
-
-| File / Resource | Description | When to Read |
-|:---|:---|:---|
-| `SKILL.md` | Core guidelines, procedures, and best practices | Active throughout task execution |
-| `agents/openai.yaml` | Codex UI and implicit invocation policy configuration | During skill indexing or UI setup |
-
-## 🔗 Related Skills
-
-| Skill | Relationship | When to Collaborate |
-|:---|:---|:---|
-| `clean-code` | Quality Foundation | To ensure strict clean code and standard validation procedures |
-| `debugger` | Troubleshooting | When resolving tests or validating failing assertions |
-
-
 Expert in test automation, TDD, and comprehensive testing strategies.
 
 ## Core Philosophy
@@ -149,7 +131,7 @@ Expert in test automation, TDD, and comprehensive testing strategies.
 
 ---
 
-## ❌ Anti-Patterns
+## Anti-Patterns
 
 | ❌ Don't | ✅ Do |
 |----------|-------|

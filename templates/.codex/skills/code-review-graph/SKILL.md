@@ -9,25 +9,7 @@ allowed-tools: Read Grep Glob Bash
 
 # Code Review Graph — Token-Efficient Codebase Context via MCP
 
-
-> Strategic guidelines and procedures for the Code Review Graph capability in this repository.
-
-## 📑 Content Map
-
-| File / Resource | Description | When to Read |
-|:---|:---|:---|
-| `SKILL.md` | Core guidelines, procedures, and best practices | Active throughout task execution |
-| `agents/openai.yaml` | Codex UI and implicit invocation policy configuration | During skill indexing or UI setup |
-
-## 🔗 Related Skills
-
-| Skill | Relationship | When to Collaborate |
-|:---|:---|:---|
-| `clean-code` | Quality Foundation | To ensure strict clean code, typing, and safety standards |
-| `simplify-code` | Refactor Companion | When dealing with redundant loops, nested conditions, or long blocks |
-
-
-
+> Reduce AI token usage by **6.8x average** (up to **49x** on monorepos) by giving the AI a structural map of your codebase instead of letting it read everything.
 
 ## Overview
 
