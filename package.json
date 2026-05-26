@@ -1,11 +1,11 @@
 {
-  "name": "hieund-ag-kit",
+  "name": "hieund-ai-kit",
   "version": "1.0.0",
-  "description": "Custom CLI tool to setup Hieund AG Kit skills and MCPs",
+  "description": "Custom CLI tool to setup Hieund AI Kit skills and MCPs",
   "main": "bin/index.js",
   "type": "module",
   "bin": {
-    "hieund-ag-kit": "./bin/index.js"
+    "hieund-ai-kit": "./bin/index.js"
   },
   "files": [
     "bin",

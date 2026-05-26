@@ -61,7 +61,7 @@ const getFolderConfig = (isLegacy) => {
 const showBanner = (config) => {
     console.log(config.bannerColor(`
     ╔══════════════════════════════════════════════════════╗
-    ║             ⚡ HIEUND AG KIT CLI ⚡                  ║
+    ║             ⚡ HIEUND AI KIT CLI ⚡                  ║
     ╠══════════════════════════════════════════════════════╣
     ║  Target:   %-40s  ║
     ║  Format:   %-40s  ║
@@ -291,7 +291,7 @@ const updateCommand = async (options) => {
     // Check if folder exists
     if (!fs.existsSync(destDir)) {
         console.log(chalk.red(`❌ Could not find active ${chalk.cyan(config.installFolder)} folder at: ${targetDir}`));
-        console.log(chalk.yellow(`💡 Tip: Run ${chalk.cyan('hieund-ag-kit init' + (options.legacy ? ' --legacy' : ''))} to install first.`));
+        console.log(chalk.yellow(`💡 Tip: Run ${chalk.cyan('hieund-ai-kit init' + (options.legacy ? ' --legacy' : ''))} to install first.`));
         process.exit(1);
     }
 
@@ -355,8 +355,8 @@ const statusCommand = (options) => {
 
     if (!found) {
         console.log(chalk.red('❌ No active kits installed in this directory.'));
-        console.log(chalk.yellow(`💡 Run ${chalk.cyan('hieund-ag-kit init')} to install Codex into .agents.`));
-        console.log(chalk.yellow(`💡 Run ${chalk.cyan('hieund-ag-kit init --legacy')} to install Antigravity into .agents.\n`));
+        console.log(chalk.yellow(`💡 Run ${chalk.cyan('hieund-ai-kit init')} to install Codex into .agents.`));
+        console.log(chalk.yellow(`💡 Run ${chalk.cyan('hieund-ai-kit init --legacy')} to install Antigravity into .agents.\n`));
     }
 };
 
@@ -367,8 +367,8 @@ const statusCommand = (options) => {
 const program = new Command();
 
 program
-    .name('hieund-ag-kit')
-    .description('Custom CLI tool to install and manage Hieund AG and Codex Kits')
+    .name('hieund-ai-kit')
+    .description('Custom CLI tool to install and manage Hieund AI and Codex Kits')
     .version('1.0.0', '-v, --version', 'Display version number');
 
 // Command: init

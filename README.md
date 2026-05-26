@@ -1,4 +1,4 @@
-# ⚡ Hieund AG & Codex Kit CLI
+# ⚡ Hieund AI & Codex Kit CLI
 
 > **Bộ công cụ tối ưu hóa năng lực tối tân dành cho AI Agent & OpenAI Codex** - Tự động hóa việc cài đặt các skill, quy tắc (rules) và bộ nhớ ngữ cảnh để AI của bạn đạt hiệu suất vượt trội.
 
@@ -6,7 +6,7 @@
 
 ## 📋 Giới thiệu
 
-**Hieund AG & Codex Kit CLI** là công cụ dòng lệnh (CLI) tùy chỉnh giúp bạn dễ dàng khởi tạo môi trường mở rộng năng lực cho AI Agent trực tiếp trong dự án của mình. Bộ công cụ hỗ trợ hai kiến trúc tiên tiến nhất hiện nay:
+**Hieund AI & Codex Kit CLI** là công cụ dòng lệnh (CLI) tùy chỉnh giúp bạn dễ dàng khởi tạo môi trường mở rộng năng lực cho AI Agent trực tiếp trong dự án của mình. Bộ công cụ hỗ trợ hai kiến trúc tiên tiến nhất hiện nay:
 
 1. **✨ OpenAI Codex Standard (`.agents` - Mặc định/Khuyên dùng):** 
    * Kiến trúc **Composable Skills** hợp nhất toàn bộ Agent Persona và Domain Knowledge thành 66 Kỹ năng độc lập.
@@ -40,17 +40,17 @@ Nếu bạn muốn chỉnh sửa mã nguồn CLI hoặc chạy kiểm thử tr�
 
 ### Bước 1: Liên kết CLI với máy tính
 ```bash
-cd /home/hieund/Documents/hieund-ag-kit-cli
+cd /home/hieund/Documents/hieund-ai-kit-cli
 npm link
 ```
 
 ### Bước 2: Chạy trực tiếp từ bất kỳ thư mục dự án nào
 ```bash
 # Khởi tạo Codex mới
-hieund-ag-kit init
+hieund-ai-kit init
 
 # Khởi tạo Antigravity cũ
-hieund-ag-kit init --legacy
+hieund-ai-kit init --legacy
 ```
 
 ---
@@ -59,13 +59,13 @@ hieund-ag-kit init --legacy
 
 | Lệnh CLI | Tham số / Flags | Mô tả |
 | :--- | :--- | :--- |
-| `hieund-ag-kit init` | *Không có* | Cài đặt cấu hình Codex vào `.agents/` và `AGENTS.md` ở root dự án. |
+| `hieund-ai-kit init` | *Không có* | Cài đặt cấu hình Codex vào `.agents/` và `AGENTS.md` ở root dự án. |
 | | `--legacy` (hoặc `-l`) | Cài đặt cấu hình Antigravity vào `.agents/` và `GEMINI.md` ở root dự án. |
 | | `--force` (hoặc `-f`) | Buộc ghi đè nếu thư mục đích đã tồn tại. |
 | | `--path <dir>` (hoặc `-p`)| Chỉ định đường dẫn thư mục dự án mục tiêu. |
-| `hieund-ag-kit update`| *Không có* | Cập nhật cấu hình Codex trong `.agents/` lên phiên bản mới nhất từ GitHub. |
+| `hieund-ai-kit update`| *Không có* | Cập nhật cấu hình Codex trong `.agents/` lên phiên bản mới nhất từ GitHub. |
 | | `--legacy` (hoặc `-l`) | Cập nhật cấu hình Antigravity trong `.agents/` lên bản mới nhất. |
-| `hieund-ag-kit status`| *Không có* | Kiểm tra song song tình trạng cài đặt của cả bản Codex và Antigravity trong dự án. |
+| `hieund-ai-kit status`| *Không có* | Kiểm tra song song tình trạng cài đặt của cả bản Codex và Antigravity trong dự án. |
 
 ---
 
@@ -81,7 +81,7 @@ hieund-ag-kit init --legacy
    git commit -m "feat: add advanced nextjs performance patterns to codex"
    git push origin main
    ```
-4. **Cập nhật ở các dự án:** Di chuyển đến thư mục dự án của bạn và chạy `hieund-ag-kit update` để đồng bộ các cập nhật mới nhất!
+4. **Cập nhật ở các dự án:** Di chuyển đến thư mục dự án của bạn và chạy `hieund-ai-kit update` để đồng bộ các cập nhật mới nhất!
 
 ---
 
