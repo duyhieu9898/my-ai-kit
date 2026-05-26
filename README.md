@@ -24,12 +24,12 @@ Bạn có thể chạy trực tiếp bộ cài đặt của mình từ GitHub v�
 
 ### 1. Cài đặt OpenAI Codex thế hệ mới (Mặc định)
 ```bash
-npx -y github:duyhieu9898/my-antigravity-kit init
+npx -y github:duyhieu9898/my-ai-kit init
 ```
 
 ### 2. Cài đặt Antigravity cũ (Legacy)
 ```bash
-npx -y github:duyhieu9898/my-antigravity-kit init --legacy
+npx -y github:duyhieu9898/my-ai-kit init --legacy
 ```
 
 ---

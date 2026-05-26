@@ -12,7 +12,7 @@ import readline from 'readline';
 // CONSTANTS & CONFIGURATION
 // ============================================================================
 
-const REPO = 'github:duyhieu9898/my-antigravity-kit';
+const REPO = 'github:duyhieu9898/my-ai-kit';
 const TEMPLATES_FOLDER = 'templates';
 const TEMP_FOLDER = '.temp_ag_kit';
 

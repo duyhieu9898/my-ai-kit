@@ -13,11 +13,11 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/duyhieu9898/my-antigravity-kit.git"
+    "url": "git+https://github.com/duyhieu9898/my-ai-kit.git"
   },
-  "homepage": "https://github.com/duyhieu9898/my-antigravity-kit#readme",
+  "homepage": "https://github.com/duyhieu9898/my-ai-kit#readme",
   "bugs": {
-    "url": "https://github.com/duyhieu9898/my-antigravity-kit/issues"
+    "url": "https://github.com/duyhieu9898/my-ai-kit/issues"
   },
   "keywords": [
     "antigravity",
