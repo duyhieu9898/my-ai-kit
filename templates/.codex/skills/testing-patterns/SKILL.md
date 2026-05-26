@@ -2,13 +2,61 @@
 name: testing-patterns
 description: >-
   Use when writing unit or integration tests, setting up mock stubs/spies/fakes, or designing test suites.
-  Core testing patterns (Pyramid, AAA, mocking).
-allowed-tools: Read Write Edit Glob Grep Bash
+  Core testing patterns (Pyramid, AAA, mocking). NOT for manual QA planning without automated test implementation.
+allowed-tools:
+  - Read
+  - Write
+  - Edit
+  - Glob
+  - Grep
+  - Bash
 ---
 
 # Testing Patterns
 
 > Principles for reliable test suites.
+
+---
+
+## 📑 Content Map
+
+| File | Description | When to Read |
+|:---|:---|:---|
+| [scripts/test_runner.py](scripts/test_runner.py) | Python test runner execution utility | Execute when verifying/running tests |
+
+---
+
+## 🔗 Related Skills
+
+| Need | Skill |
+|:---|:---|
+| General QA automation architectures | [`test-engineer`](../test-engineer/SKILL.md) |
+| Specific Playwright E2E browser creations | [`playwright-pro-patterns`](../playwright-pro-patterns/SKILL.md) |
+
+---
+
+## 🛠️ Instructions / Procedures
+
+When tasked with writing unit/integration tests or designing mock boundaries, strictly follow this step-by-step procedure:
+
+### Step 1: Analyze Context & Test Target
+1. Review target functions, logic engines, or system integrations.
+2. Determine appropriate test scope (Pyramid Rule) using the Test Type Selection criteria.
+
+### Step 2: Design Assertions using AAA Pattern
+1. Draft the test framework layout (AAA Pattern).
+2. Configure **Arrange** steps: Prepare mock models, parameters, inputs, or database records.
+3. Configure **Act** steps: Execute the specific function or endpoint under test.
+4. Configure **Assert** steps: Verify outcome metrics, status codes, payload contracts, or exceptions.
+
+### Step 3: Configure Isolation & Mocking Boundaries
+1. Isolate test layers. Mock external endpoints, system databases (for unit tests), and random math functions (When to Mock).
+2. Employ distinct mock strategies (Stubs for static data, Spies to track invocations, Fakes for lightweight implementations).
+3. Ensure no module-level variable leakage occurs during parallel runner iterations.
+
+### Step 4: Validate Suite & State Teardowns
+1. Program required `afterEach`/`afterAll` hooks to purge mutated data files, drop database tables, and shut down mock ports.
+2. Verify all test files follow naming standards and pass run loops. Confirm compliance against the **Quality Audit Checklist**.
 
 ---
 
@@ -165,7 +213,7 @@ allowed-tools: Read Write Edit Glob Grep Bash
 
 ---
 
-## 10. Anti-Patterns
+## ❌ Anti-Patterns
 
 | ❌ Don't | ✅ Do |
 |----------|-------|
@@ -181,8 +229,20 @@ allowed-tools: Read Write Edit Glob Grep Bash
 
 | Script | Purpose | Command |
 |--------|---------|---------|
-| `scripts/test_runner.py` | Python test running utility | `python scripts/test_runner.py` |
+| [scripts/test_runner.py](scripts/test_runner.py) | Python test running utility | `python scripts/test_runner.py` |
 
 ---
 
 > **Remember:** Tests are documentation. If someone can't understand what the code does from the tests, rewrite them.
+
+---
+
+## ✅ Quality Audit Checklist
+
+Before concluding testing tasks or completing test coverage updates, verify compliance with the following:
+
+- [ ] **AAA Structure Applied**: Every test clearly structures code block setups using Arrange-Act-Assert separators.
+- [ ] **Unit Test Speed**: Fast unit assertions complete in <100ms and operate entirely free of external dependencies.
+- [ ] **Explicit Mocking Boundaries**: Stub/Spy mock components are confined to external network resources, database integrations, or random timers; core business algorithms are never mocked.
+- [ ] **Data Cleanup & Isolation**: Database mutations, fixtures, and file modifications are completely purged after test runs to ensure state isolation.
+- [ ] **No Implementation Testing**: Asserts verify expected behavioral contract outcomes rather than internal private method implementation details.

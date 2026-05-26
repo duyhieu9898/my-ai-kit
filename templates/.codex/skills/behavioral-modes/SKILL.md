@@ -4,15 +4,39 @@ description: >-
   Use when explicitly selecting or adapting AI agent personas or operating modes (brainstorm, implement, debug, review, teach, ship).
   AI operational and behavioral modes covering Socratic brainstorming, concise implementation, systematic debugging, peer reviews, pedagogic teaching, and ship verification.
   NOT for standard algorithmic logic or tool scripting.
-allowed-tools: Read Glob Grep
+allowed-tools:
+  - Read
+  - Glob
+  - Grep
 ---
 
 # Behavioral Modes - Adaptive AI Operating Modes
+
+> Operating mode selection for brainstorming, implementation, debugging, review, teaching, and shipping.
+
+## 📑 Content Map
+
+| File | Description | When to Read |
+|:---|:---|:---|
+| No supplementary files | This skill is self-contained | Use the procedures below directly |
+
+## 🔗 Related Skills
+
+| Skill | Relationship | When to Use Together |
+|:---|:---|:---|
+| [`brainstorming`](../brainstorming/SKILL.md) | Deeper ideation and option generation | When BRAINSTORM mode needs structured exploration |
+| [`clean-code`](../clean-code/SKILL.md) | Implementation quality standards | When IMPLEMENT mode writes or edits code |
+| [`debugger`](../debugger/SKILL.md) | Systematic troubleshooting | When DEBUG mode needs root-cause investigation |
+| [`code-review-checklist`](../code-review-checklist/SKILL.md) | Review criteria and severity framing | When REVIEW mode evaluates code changes |
+| [`documentation-writer`](../documentation-writer/SKILL.md) | Explanation and documentation quality | When TEACH mode produces user-facing docs |
+| [`verify-changes`](../verify-changes/SKILL.md) | Final verification before completion | When SHIP mode needs release readiness checks |
 
 ## Purpose
 This skill defines distinct behavioral modes that optimize AI performance for specific tasks. Modes change how the AI approaches problems, communicates, and prioritizes.
 
 ---
+
+## 🛠️ Instructions / Procedures
 
 ## Available Modes
 
@@ -239,3 +263,24 @@ Users can explicitly request a mode:
 /debug why login fails
 /review this pull request
 ```
+
+---
+
+## ❌ Anti-Patterns
+
+- Use a mode that conflicts with the user's explicit request.
+- Stay in brainstorming or teaching mode when the user asked for implementation.
+- Skip root-cause analysis in DEBUG mode and only patch symptoms.
+- Present REVIEW mode findings without severity or actionable fixes.
+- Use SHIP mode without verification steps for tests, security, and deployment readiness.
+
+---
+
+## ✅ Quality Audit Checklist
+
+- [ ] The selected mode matches the user's explicit or inferred intent.
+- [ ] Mode-specific output style is followed without unnecessary extra narration.
+- [ ] Implementation work follows `clean-code` standards.
+- [ ] Debugging includes symptom, root cause, fix, and prevention.
+- [ ] Reviews categorize findings by severity and include actionable guidance.
+- [ ] Ship readiness includes validation, security, and deployment checks.

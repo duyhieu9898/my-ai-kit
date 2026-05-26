@@ -1,6 +1,6 @@
 interface:
   display_name: "Penetration Tester"
-  short_description: "Expert in offensive security, penetration testing, red team operations, and v..."
+  short_description: "Authorized pentesting, red team assessment, and exploit validation."
   brand_color: "#B91C1C"
   default_prompt: "$penetration-tester"
 

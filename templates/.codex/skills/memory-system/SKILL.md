@@ -4,12 +4,61 @@ description: >-
   Use when the user triggers 'remember', 'save for later', or 'don't forget', or when starting a session to recall preferences.
   Persistent cross-session memory management using MEMORY.md index and topic files.
   NOT for short-term variables.
-allowed-tools: Read Write Grep Glob
+allowed-tools:
+  - Read
+  - Write
+  - Grep
+  - Glob
 ---
 
 # Memory System — Persistent Cross-Session Memory
 
 > Enables agents to remember across sessions. Never re-discover what was already learned.
+
+---
+
+## 📑 Content Map
+
+| File | Description | When to Read |
+|:---|:---|:---|
+| _No supplementary files_ | Main memory procedures are in this file | Use this file by default |
+
+---
+
+## 🔗 Related Skills
+
+| Need | Skill |
+|:---|:---|
+| Compressing context tokens efficiently | [`context-compression`](../context-compression/SKILL.md) |
+| Storing local backend configuration notes | [`nodejs-best-practices`](../nodejs-best-practices/SKILL.md) |
+
+---
+
+## 🛠️ Instructions / Procedures
+
+When tasked with saving user preferences, recalling project standards, or handling memory queries, strictly follow this step-by-step procedure:
+
+### Step 1: Session Start Protocol
+1. Check if `.agents/memory/MEMORY.md` index exists.
+2. If present, load relevant pointers silently without recitations.
+
+### Step 2: Categorize Memory Taxonomies
+1. Classify information into user preferences, feedback history, project standards, or reference indexes.
+2. Confirm absolutely no secrets, credentials, high-entropy tokens, or raw code are present.
+
+### Step 3: Manage Topic Files
+1. Check if a relevant topic markdown file already exists.
+2. Append to the existing file or write a new one with correct metadata frontmatter.
+
+### Step 4: Index the Pointer File
+1. Keep the MEMORY.md file under 200 total lines.
+2. Append a 150-character summary pointing to the topic path.
+
+### Step 5: Perform Search/Pruning & Verify Checklist
+1. Search via Grep across templates when requested by the user, and propose pruning when the index threshold is crossed.
+2. Confirm compliance against the **Quality Audit Checklist** before completing.
+
+---
 
 ## Overview
 
@@ -22,7 +71,7 @@ The Memory System provides **persistent, searchable memory** that survives acros
 ## Architecture
 
 ```
-templates/.codex/memory/
+.agents/memory/
 ├── MEMORY.md              ← Lightweight index (max 200 lines)
 ├── user-preferences.md    ← Topic file: user role, style, tools
 ├── project-conventions.md ← Topic file: coding standards, patterns
@@ -107,7 +156,7 @@ updated: 2026-04-01
 
 ---
 
-## What NOT to Save
+## ❌ Anti-Patterns
 
 | Don't Save | Why |
 |---|---|
@@ -133,14 +182,14 @@ updated: 2026-04-01
 
 ### Recall (Trigger: session start, or "what do you remember about X")
 
-1. Read `templates/.codex/memory/MEMORY.md` index
+1. Read `.agents/memory/MEMORY.md` index
 2. Scan for relevant entries matching the current task
 3. If match found → read the referenced topic file
 4. Apply recalled context silently (don't recite memories unless asked)
 
 ### Search (Trigger: "do I have any notes about X")
 
-1. Grep across `templates/.codex/memory/*.md` for the search term
+1. Grep across `.agents/memory/*.md` for the search term
 2. Return matching entries with file references
 3. Offer to read full topic file if user wants details
 
@@ -158,7 +207,7 @@ updated: 2026-04-01
 At the start of every session:
 
 ```
-1. Check: Does `templates/.codex/memory/MEMORY.md` exist?
+1. Check: Does `.agents/memory/MEMORY.md` exist?
    → YES: Read index. Apply relevant context silently.
    → NO: Continue without memory. Create on first "remember" trigger.
 
@@ -171,11 +220,23 @@ At the start of every session:
 
 ---
 
+## ✅ Quality Audit Checklist
+
+Before concluding a memory storage update, session recall operation, or memory index cleanup task, verify compliance with the following:
+
+- [ ] **No Secrets Saved**: Audited target content to ensure absolutely no API tokens, credentials, private keys, or passwords exist.
+- [ ] **Index Compact (<200 Lines)**: Verified that `.agents/memory/MEMORY.md` remains within the 200-line strict limit.
+- [ ] **Code Duplications Avoided**: Confirmed stored information does not duplicate dependency rules or code structures derivable directly from files.
+- [ ] **Topic Pointer Matches**: Verified every pointer in the main index correctly maps to a valid `.md` file inside the `memory/` subdirectory.
+- [ ] **Silent Application Enforced**: Applied the recalled preferences directly without announcing them to the user (no recitation unless asked).
+
+---
+
 ## Memory vs. Plan vs. Task
 
 | Artifact | Purpose | Lifespan | Location |
 |----------|---------|----------|----------|
-| **Memory** | Cross-session knowledge | Permanent until pruned | `templates/.codex/memory/` |
+| **Memory** | Cross-session knowledge | Permanent until pruned | `.agents/memory/` |
 | **Plan** | Task breakdown for current project | Until project complete | Project root |
 | **Task** | Progress tracker for current session | Until session ends | Artifact directory |
 

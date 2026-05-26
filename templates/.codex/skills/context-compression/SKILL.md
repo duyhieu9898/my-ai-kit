@@ -4,12 +4,59 @@ description: >-
   Use when session turns are high (20+ turns), context degradation is observed, switching work phases, or summarizing active decisions.
   Conversation context management in long sessions covering phase summarization and mental model checkpointing.
   NOT for short sessions.
-allowed-tools: Read Write Grep
+allowed-tools:
+  - Read
+  - Write
+  - Grep
 ---
 
 # Context Compression — Long Session Management
 
 > Keep sessions productive by compressing completed work while preserving key decisions.
+
+---
+
+## 📑 Content Map
+
+| File | Description | When to Read |
+|:---|:---|:---|
+| No supplementary files | This skill is self-contained | Use the procedures below directly |
+
+---
+
+## 🔗 Related Skills
+
+| Need | Skill |
+|:---|:---|
+| Orchestrating and partitioning large tasks | [`orchestrator`](../orchestrator/SKILL.md) |
+| Planning high-complexity project tracks | [`project-planner`](../project-planner/SKILL.md) |
+| Optimizing large-repository token usage | [`code-review-graph`](../code-review-graph/SKILL.md) |
+| Persisting key decisions across sessions | [`memory-system`](../memory-system/SKILL.md) |
+
+---
+
+## 🛠️ Instructions / Procedures
+
+When managing context windows, summarizing complex work phases, or constructing session checkpoints, strictly follow this step-by-step procedure:
+
+### Step 1: Monitor Context Saturation Signals
+1. Track active session turn counts and check for token degradation (repetitions, forgotten configs).
+2. Spot transition points (e.g. from research phase to codebase refactoring).
+
+### Step 2: Determine Appropriate Compression Level
+1. Use **Level 1: Micro-Compact** for massive grep, search, or shell command outputs (500+ lines).
+2. Use **Level 2: Phase Summary** when wrapping a completed stage of exploration.
+3. Use **Level 3: Session Checkpoint** to store deep mental models in long-running conversations (30+ turns).
+
+### Step 3: Extract Core Decisions & Discard Noise
+1. Isolate critical components (Decisions made, modified files, line bounds, and research summaries).
+2. Discard exploratory loops, raw terminal outputs, verbose stack traces, and full files contents.
+
+### Step 4: Present & Validate Checkpoints
+1. Notify the user prior to summarizing context to explain performance advantages.
+2. Formulate the summary. Confirm compliance against the **Quality Audit Checklist** before completing.
+
+---
 
 ## Overview
 
@@ -103,44 +150,32 @@ Full session summary for long-running work:
 
 ---
 
-## Compression Protocol
+## Best Practices
 
-### Step 1: Identify Completed Phases
-```
-What work is DONE and won't be revisited?
-→ Research findings already synthesized
-→ Implementation already verified
-→ Decisions already made and applied
-```
-
-### Step 2: Extract Key Information
-```
-From the completed phase, preserve:
-✅ Decisions made and WHY
-✅ File paths and line numbers of changes
-✅ Key findings that inform ongoing work
-✅ Error messages or test results (summarized)
-
-Discard:
-❌ Step-by-step tool invocation details
-❌ Full file contents that were read
-❌ Exploratory dead-ends that didn't lead anywhere
-❌ Verbose error stack traces (keep the message only)
-```
-
-### Step 3: Write Summary
-```
-Use the Phase Summary format above.
-Keep to 100-300 tokens per completed phase.
-Include enough detail to resume work without re-reading.
-```
+1. **Compress phases, not facts** — Individual decisions should stay, full transcripts should go.
+2. **Preserve "why" over "what"** — Why a decision was made matters more than the exact commands run.
+3. **Never auto-compress** — Always tell the user "I'm summarizing the completed research phase to keep context focused".
+4. **Keep file references** — Always preserve file paths and line numbers in summaries.
+5. **Checkpoint on phase transitions** — Natural compression point when switching from research to implementation.
 
 ---
 
-## Best Practices
+## ❌ Anti-Patterns
 
-1. **Compress phases, not facts** — Individual decisions should stay, full transcripts should go
-2. **Preserve "why" over "what"** — Why a decision was made matters more than the exact commands run
-3. **Never auto-compress** — Always tell the user "I'm summarizing the completed research phase to keep context focused"
-4. **Keep file references** — Always preserve file paths and line numbers in summaries
-5. **Checkpoint on phase transitions** — Natural compression point when switching from research to implementation
+- Compress active unresolved work before the current task state is clear.
+- Drop decision rationale, file paths, line numbers, or verification results.
+- Preserve large raw outputs when a semantic summary is enough.
+- Summarize user preferences inaccurately or without distinguishing assumptions from facts.
+- Auto-compress without telling the user why the summary is being introduced.
+
+---
+
+## ✅ Quality Audit Checklist
+
+Before concluding a Context Compression summary or session checkpoint, verify compliance with the following:
+
+- [ ] **Saturation Monitored**: Evaluated session turn counts and context saturation levels before compression.
+- [ ] **Decisions and "Whys" Saved**: Preserved the rationale for key architectural decisions rather than just raw code modifications.
+- [ ] **Full File Contents Discarded**: Excluded large raw tool outputs, package outputs, or stack traces from the summarized text.
+- [ ] **Active Code References Intact**: Kept exact file names, modified line numbers, and active branches fully referenced.
+- [ ] **Proactive Notification**: Notified the user before introducing summarized work phases to preserve visibility.

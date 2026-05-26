@@ -4,12 +4,63 @@ description: >-
   Use when analyzing large projects (500+ files), computing blast radius of commits/PRs, re-indexing AST databases, or diagnosing high token costs.
   Token-efficient code review using Tree-sitter AST graphs and SQLite database MCP server.
   NOT for small codebases under 200 files or purely dynamic codebases.
-allowed-tools: Read Grep Glob Bash
+allowed-tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash
 ---
 
 # Code Review Graph — Token-Efficient Codebase Context via MCP
 
 > Reduce AI token usage by **6.8x average** (up to **49x** on monorepos) by giving the AI a structural map of your codebase instead of letting it read everything.
+
+---
+
+## 📑 Content Map
+
+| File | Description | When to Read |
+|:---|:---|:---|
+| No supplementary files | This skill is self-contained | Use the procedures below directly |
+
+---
+
+## 🔗 Related Skills
+
+| Need | Skill |
+|:---|:---|
+| System architecture mapping and planning | [`architecture`](../architecture/SKILL.md) |
+| Planning high-complexity project tracks | [`project-planner`](../project-planner/SKILL.md) |
+| High-level task orchestration and delegation | [`orchestrator`](../orchestrator/SKILL.md) |
+
+---
+
+## 🛠️ Instructions / Procedures
+
+When managing codebase parsing, token optimization, or blast radius indexing, strictly follow this step-by-step procedure:
+
+### Step 1: Detect Codebase Dimensions & Local Setup
+1. Evaluate codebase scale. Check if project exceeds 200-500 files to justify AST graph indexing.
+2. Run a bootstrap shell verification step using your terminal tool: `which code-review-graph` or equivalent.
+3. Check for existence of the `.code-review-graph/` repository index.
+
+### Step 2: Establish Package Environment
+1. If the tool is missing but highly needed, proactively ask the user to proceed with installation (`pip install` or `pipx install`).
+2. Set up the `.code-review-graphignore` configuration file at the project root.
+
+### Step 3: Run Initial Build and Keep in Sync
+1. Execute `code-review-graph build` to index AST node databases.
+2. Launch watch processes (`code-review-graph watch`) or incremental updates (`code-review-graph update`) to maintain graph sync states.
+
+### Step 4: Optimize AI Context & Trace Blast Radius
+1. Before loading full multi-file contexts, query the SQLite database via MCP tools or CLI interfaces.
+2. Resolve node blast radiuses to retrieve only relevant changed dependencies.
+
+### Step 5: Verify System Integrations & Checklist
+1. Validate active status using client console tools.
+2. Run the **Quality Audit Checklist** before completing.
+
+---
 
 ## Overview
 
@@ -280,10 +331,10 @@ Generates markdown wiki of codebase structure — every module, its public API, 
 
 | AG Kit Skill | How It Complements |
 |-------------------|--------------------|
-| `context-compression` | Graph reduces input context; compression reduces output verbosity |
-| `coordinator-mode` | Graph-aware workers can be dispatched with precise file lists |
-| `verify-changes` | After graph-informed review, verify changes via execution |
-| `batch-operations` | Graph's blast radius informs which files need batch updates |
+| [`context-compression`](../context-compression/SKILL.md) | Graph reduces input context; compression reduces output verbosity |
+| [`coordinator-mode`](../coordinator-mode/SKILL.md) | Graph-aware workers can be dispatched with precise file lists |
+| [`verify-changes`](../verify-changes/SKILL.md) | After graph-informed review, verify changes via execution |
+| [`batch-operations`](../batch-operations/SKILL.md) | Graph's blast radius informs which files need batch updates |
 
 ### Recommended Session Architecture
 
@@ -306,3 +357,25 @@ Generates markdown wiki of codebase structure — every module, its public API, 
 5. **Use `.code-review-graphignore`** for build artifacts, `node_modules`, `dist/`
 6. **Keep sessions short** — fresh sessions + graph = optimal token efficiency
 7. **Multi-repo registration** for microservice architectures
+
+---
+
+## ❌ Anti-Patterns
+
+- Build or query the graph for small, isolated changes where direct file reads are cheaper.
+- Trust a stale graph after large refactors, generated code changes, or branch switches.
+- Index generated files, dependency directories, or build artifacts.
+- Treat static AST edges as complete truth for highly dynamic imports, reflection, or runtime code generation.
+- Read broad full-repository context before checking graph blast radius on large codebases.
+
+---
+
+## ✅ Quality Audit Checklist
+
+Before concluding a Code Review Graph analysis or build task, verify compliance with the following:
+
+- [ ] **Bootstrap Check Run**: Checked for `code-review-graph` commands and local index configurations.
+- [ ] **Exclude generated artifacts**: Ignored files configured using `.code-review-graphignore`.
+- [ ] **Incremental Synced**: Verified that incremental database updates run successfully or watch mode is active.
+- [ ] **Cross-module dependencies traced**: Mapped AST blast radius before reading full context blocks.
+- [ ] **Integration status active**: Verified MCP server endpoints and client connection statuses.

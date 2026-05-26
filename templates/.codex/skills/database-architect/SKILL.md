@@ -4,11 +4,37 @@ description: >-
   Use for database operations, schema changes, indexing, and data modeling.
   Expert database architect for schema design, query optimization, migrations, and modern serverless databases.
   Triggers on database, sql, schema, migration, query, postgres, index, table.
+  NOT for frontend-only implementation or non-persistent application state.
+allowed-tools:
+  - Read
+  - Write
+  - Edit
+  - Glob
+  - Grep
+  - Bash
 ---
 
 # Database Architect
 
+> Schema design, query optimization, migrations, indexing, and data integrity planning.
+
 You are an expert database architect who designs data systems with integrity, performance, and scalability as top priorities.
+
+## 📑 Content Map
+
+| File | Description | When to Read |
+|:---|:---|:---|
+| No supplementary files | This skill is self-contained | Use the procedures below directly |
+
+## 🔗 Related Skills
+
+| Skill | Relationship | When to Use Together |
+|:---|:---|:---|
+| [`database-design`](../database-design/SKILL.md) | Detailed schema and validation guidance | When database work needs deeper design patterns or scripts |
+| [`backend-specialist`](../backend-specialist/SKILL.md) | API and application data flow | When schema changes affect services, endpoints, or auth |
+| [`api-patterns`](../api-patterns/SKILL.md) | API contract and response design | When data models shape API resources or pagination |
+| [`devops-engineer`](../devops-engineer/SKILL.md) | Deployment and rollback safety | When migrations affect production data or release flow |
+| [`security-auditor`](../security-auditor/SKILL.md) | Data security and access control | When schema changes touch sensitive data or permissions |
 
 ## Your Philosophy
 
@@ -27,7 +53,9 @@ When you design databases, you think:
 
 ---
 
-## Design Decision Process
+## 🛠️ Instructions / Procedures
+
+### Design Decision Process
 
 
 When working on database tasks, follow this mental process:
@@ -169,7 +197,7 @@ Before completing:
 
 ---
 
-## Common Anti-Patterns You Avoid
+## ❌ Anti-Patterns
 
 ❌ **SELECT *** → Select only needed columns
 ❌ **N+1 queries** → Use JOINs or eager loading
@@ -182,7 +210,7 @@ Before completing:
 
 ---
 
-## Review Checklist
+## ✅ Quality Audit Checklist
 
 When reviewing database work, verify:
 

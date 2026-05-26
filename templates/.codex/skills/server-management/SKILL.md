@@ -4,13 +4,62 @@ description: >-
   Use when managing servers, configuring process managers (PM2/systemd), setting up monitoring, or troubleshooting.
   Server management principles (logs, scaling, health checks).
   NOT for client-side code.
-allowed-tools: Read Write Edit Glob Grep Bash
+allowed-tools:
+  - Read
+  - Write
+  - Edit
+  - Glob
+  - Grep
+  - Bash
 ---
 
 # Server Management
 
 > Server management principles for production operations.
 > **Learn to THINK, not memorize commands.**
+
+---
+
+## 📑 Content Map
+
+| File | Description | When to Read |
+|:---|:---|:---|
+| _No supplementary files_ | Main server management procedures are in this file | Use this file by default |
+
+---
+
+## 🔗 Related Skills
+
+| Need | Skill |
+|:---|:---|
+| Node.js backend patterns | [`nodejs-best-practices`](../nodejs-best-practices/SKILL.md) |
+| CPU/Memory profiling and core optimizations | [`performance-optimizer`](../performance-optimizer/SKILL.md) |
+
+---
+
+## 🛠️ Instructions / Procedures
+
+When tasked with deploying production instances, configuring auto-recovers, or troubleshooting server outages, strictly follow this step-by-step procedure:
+
+### Step 1: Establish Process Managers
+1. Map application types to proper supervisors (PM2 clustering for Node.js, systemd services for native binaries).
+2. Configure persistent system reboot settings.
+
+### Step 2: Implement Observability Alerts
+1. Setup key system indicators (availability, request throughput, CPU, and RAM limits).
+2. Integrate error telemetry (Sentry) and external uptime monitors.
+
+### Step 3: Set up structured Log Rotations
+1. Enforce structured JSON logging format.
+2. Establish custom log rotation size limits to prevent local disk space exhaustion.
+
+### Step 4: Configure Health Check Endpoints
+1. Code deep validation status targets checking active database connectors and external API integrations.
+2. Link endpoints with upstream load balancers.
+
+### Step 5: Tighten Security & Verify Checklist
+1. Restrict SSH setups to key authentication exclusively.
+2. Confirm compliance against the **Quality Audit Checklist** before completing.
 
 ---
 
@@ -149,7 +198,7 @@ When something's wrong:
 
 ---
 
-## 8. Anti-Patterns
+## ❌ Anti-Patterns
 
 | ❌ Don't | ✅ Do |
 |----------|-------|
@@ -158,6 +207,19 @@ When something's wrong:
 | Skip monitoring | Monitor from day one |
 | Manual restarts | Auto-restart config |
 | No backups | Regular backup schedule |
+
+---
+
+## ✅ Quality Audit Checklist
+
+Before concluding a server configuration, process management, or operational troubleshooting task, verify compliance with the following:
+
+- [ ] **Non-Root Execution**: Verified that all application processes execute under non-root users.
+- [ ] **Auto-Restart Configured**: Set up PM2 clustering or systemd configurations to recover processes automatically on crash.
+- [ ] **Log Rotation Policies Met**: Enforced structured JSON logging with custom log rotation limits to prevent disk fills.
+- [ ] **Health Check Endpoints Deep**: Implemented status endpoints monitoring database connectivity and dependencies.
+- [ ] **Observability Monitored**: Established availability, throughput, error rates, and CPU/memory alerts.
+- [ ] **SSH & Firewall Tightened**: Permitted SSH key authorization only, keeping non-essential ports blocked.
 
 ---
 

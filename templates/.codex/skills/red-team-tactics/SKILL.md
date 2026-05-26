@@ -4,12 +4,59 @@ description: >-
   Use when conducting penetration testing, adversary simulation, assessing attack surfaces, or evaluating threat detection.
   Red team tactics and adversary simulation based on MITRE ATT&CK.
   NOT for standard audits.
-allowed-tools: Read Glob Grep
+allowed-tools:
+  - Read
+  - Bash
+  - Grep
+  - Glob
 ---
 
 # Red Team Tactics
 
 > Adversary simulation principles based on MITRE ATT&CK framework.
+
+---
+
+## 📑 Content Map
+
+| File | Description | When to Read |
+|:---|:---|:---|
+| _No supplementary files_ | Main red team tactics procedures are in this file | Use this file by default |
+
+---
+
+## 🔗 Related Skills
+
+| Need | Skill |
+|:---|:---|
+| Penetration testing and validation assessments | [`penetration-tester`](../penetration-tester/SKILL.md) |
+| Defensive security code reviews | [`security-auditor`](../security-auditor/SKILL.md) |
+
+---
+
+## 🛠️ Instructions / Procedures
+
+When tasked with conducting adversary simulations, assessing threat detection gap telemetries, or mapping attack surfaces, strictly follow this step-by-step procedure:
+
+### Step 1: Validate ROE & Scopes
+1. Confirm active, written authorization and Rules of Engagement (ROE) from the user before executing any actions.
+2. Outline clear scan limits.
+
+### Step 2: Run Passive & Active Recon
+1. Review exposed domains and DNS ranges.
+2. Trace technology stacks to isolate potential vulnerability vectors without triggering active defenses early.
+
+### Step 3: Map Initial Access Vectors
+1. Determine appropriate initial vectors (exposed public CVEs, weak authentication).
+2. Trace access footholds.
+
+### Step 4: Trace Privilege Escalation & Lateral Paths
+1. Map privilege escalation scenarios (Windows unquoted service paths/tokens vs Linux SUID/Sudo configs).
+2. Map internal Active Directory paths (Kerberoasting, DCSync) and lateral movements (WinRM, RDP).
+
+### Step 5: Draft Detection Gaps & Verify Checklist
+1. Write detailed narratives on how initial access was gained and where defensive telemetry failed.
+2. Confirm compliance against the **Quality Audit Checklist** before completing.
 
 ---
 
@@ -169,26 +216,22 @@ For each successful technique:
 - How to improve detection
 
 ---
+---
 
-## 9. Ethical Boundaries
+## ✅ Quality Audit Checklist
 
-### Always
+Before concluding a red team exercise, adversary simulation, or detection gap reporting task, verify compliance with the following:
 
-- Stay within scope
-- Minimize impact
-- Report immediately if real threat found
-- Document all actions
-
-### Never
-
-- Destroy production data
-- Cause denial of service (unless scoped)
-- Access beyond proof of concept
-- Retain sensitive data
+- [ ] **Authorization Secured**: Verified active written authorization and Rules of Engagement before triggering any simulation step.
+- [ ] **Scope Enforced**: Ensured all probes, execution actions, and scans remain strictly within the defined scope.
+- [ ] **MITRE ATT&CK Framework Aligned**: Traced actions through structured phases (Recon -> Initial Access -> Privilege Escalation).
+- [ ] **Detection Gaps Documented**: Highlighted what telemetry controls should have detected the simulation and how to improve.
+- [ ] **Data Integrity Respected**: Avoided actual data destruction, modifications, or persistent exfiltrations.
+- [ ] **Clean-up Performed**: Removed active footholds, test files, and local log anomalies created during testing.
 
 ---
 
-## 10. Anti-Patterns
+## ❌ Anti-Patterns
 
 | ❌ Don't | ✅ Do |
 |----------|-------|

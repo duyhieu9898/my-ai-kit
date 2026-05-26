@@ -4,33 +4,67 @@ description: >-
   Use when refactoring, modularizing, or optimizing existing React components.
   Refactoring legacy React code (business logic extraction, React Query, Zustand, hooks).
   NOT for new features.
-allowed-tools: Read Write Edit Glob Grep
+allowed-tools:
+  - Read
+  - Write
+  - Edit
+  - Glob
+  - Grep
 ---
 
 # ⚛️ React Refactor Patterns Skill
 
 > Strategic guidelines and architectural patterns for refactoring, modularizing, and decoupling business logic in React applications.
 
+---
+
 ## 📑 Content Map
 
 | File / Resource | Description | When to Read |
 |:---|:---|:---|
-| `SKILL.md` | Core React refactoring guidelines and code split patterns | Active throughout refactoring tasks |
-| `agents/openai.yaml` | Codex UI and implicit invocation policy configuration | During skill indexing or UI setup |
+| _No supplementary files_ | Main React refactor procedures are in this file | Use this file by default |
+
+---
 
 ## 🔗 Related Skills
 
 | Skill | Relationship | When to Collaborate |
 |:---|:---|:---|
-| `frontend-specialist` | Parent Persona | For complete UX/UI and component architectural changes |
-| `clean-code` | Quality Foundation | To ensure strict clean code, typing, and safety standards |
-| `simplify-code` | Refactor Companion | When dealing with redundant loops, nested conditions, or long blocks |
+| [`frontend-specialist`](../frontend-specialist/SKILL.md) | Parent Persona | For complete UX/UI and component architectural changes |
+| [`clean-code`](../clean-code/SKILL.md) | Quality Foundation | To ensure strict clean code, typing, and safety standards |
+| [`simplify-code`](../simplify-code/SKILL.md) | Refactor Companion | When dealing with redundant loops, nested conditions, or long blocks |
 
 ---
 
 ## 🛠️ Instructions / Procedures
 
-Activate this skill when refactoring, optimizing structure, or detecting code that violates logic layer boundaries. Always apply the following modularization layers to separate concerns:
+When tasked with refactoring, optimizing, or modularizing existing React components, strictly follow this step-by-step procedure:
+
+### Step 1: Detect Boundary Violations & Code Smells
+1. Audit target components to identify inlined calculation engines, direct network fetches, interleaved state hook structures, or deep prop-drilling blocks.
+2. Formulate a modularization plan to map components to their designated tier (utils, queries, stores, hooks).
+
+### Step 2: Extract Pure Business Logic (Utils)
+1. Isolate algorithmic transforms, string parses, or data calculations.
+2. Extract them as pure, React-free functions located in `utils/` (Business Logic Extraction). Ensure they can be unit-tested without rendering contexts.
+
+### Step 3: Decouple Data Logic Layers (Queries & Services)
+1. Move direct inlined Axios or fetch calls into unified Service Classes (`services/`).
+2. Construct custom query hooks (`useQuery`, `useMutation`) with cached query-key factories (Data Logic Extraction).
+
+### Step 4: Extract Complex UI State (Custom Hooks)
+1. Identify components with interleaved state hooks or massive input/keyboard handlers.
+2. Move state orchestrations to Custom Hooks (`use[Name].ts`), leaving components to act as pure layout engines.
+
+### Step 5: Migrate Client Global States (Stores)
+1. Identify Context Providers that cause excessive rendering performance blocks.
+2. Migrate client-only global settings (auth tokens, themes, layout gates) to Zustand stores.
+
+### Step 6: Validate Refactored Components
+1. Confirm component line bounds and folder organization boundaries (Responsibility Checklist).
+2. Validate compliance using the **Quality Audit Checklist** before final code commits.
+
+---
 
 ### 1. Business Logic Extraction (React Component ➜ Utils)
 Ensure calculation logic is written as pure functions without React imports.

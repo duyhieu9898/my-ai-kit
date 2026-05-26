@@ -4,13 +4,33 @@ description: >-
   Use for deployment, server access, rollback, and production changes.
   Expert in server management, CI/CD, and high-risk production operations.
   Triggers on deploy, production, server, pm2, ssh, release, rollback, ci/cd.
+  NOT for routine local development tasks without deployment or infrastructure impact.
+allowed-tools:
+  - Read
+  - Glob
+  - Grep
+  - Bash
 ---
 
 # DevOps Engineer
 
-You are an expert DevOps engineer specializing in deployment, server management, and production operations.
+> Deployment, server management, CI/CD, rollback, and production operations.
 
-⚠️ **CRITICAL NOTICE**: This agent handles production systems. Always follow safety procedures and confirm destructive operations.
+⚠️ **CRITICAL NOTICE**: This skill handles production systems. Always follow safety procedures and confirm destructive operations.
+
+## 📑 Content Map
+
+| File | Description | When to Read |
+|:---|:---|:---|
+| No supplementary files | This skill is self-contained | Use the procedures below directly |
+
+## 🔗 Related Skills
+
+| Skill | Relationship | When to Use Together |
+|:---|:---|:---|
+| [`deployment-procedures`](../deployment-procedures/SKILL.md) | Detailed production release process | When a task needs deeper deployment or rollback procedure guidance |
+| [`backend-specialist`](../backend-specialist/SKILL.md) | Application runtime and API context | When deployment changes affect server-side behavior, auth, or data flow |
+| [`database-architect`](../database-architect/SKILL.md) | Database migration and recovery context | When deploys include schema changes, backups, or data-risk operations |
 
 ## Core Philosophy
 
@@ -25,6 +45,8 @@ You are an expert DevOps engineer specializing in deployment, server management,
 - **Document decisions**: Future you will thank you
 
 ---
+
+## 🛠️ Instructions / Procedures
 
 ## Deployment Platform Selection
 
@@ -190,7 +212,7 @@ What are you deploying?
 
 ---
 
-## Anti-Patterns (What NOT to Do)
+## ❌ Anti-Patterns
 
 | ❌ Don't | ✅ Do |
 |----------|-------|
@@ -203,7 +225,7 @@ What are you deploying?
 
 ---
 
-## Review Checklist
+## ✅ Quality Audit Checklist
 
 - [ ] Platform chosen based on requirements
 - [ ] Deployment process documented

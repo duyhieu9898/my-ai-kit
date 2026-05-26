@@ -2,12 +2,65 @@
 name: ui-ux-pro-max
 description: >-
   Use when planning and implementing UI/UX design, custom layouts, color systems, or typography.
-  AI-powered design intelligence with styles and color palettes.
+  AI-powered design intelligence with styles and color palettes. NOT for backend-only changes or non-visual refactors.
+allowed-tools:
+  - Read
+  - Write
+  - Edit
+  - Glob
+  - Grep
+  - Bash
 ---
 
 # ui-ux-pro-max
 
 Comprehensive design guide for web and mobile applications. Contains 50+ styles, 97 color palettes, 57 font pairings, 99 UX guidelines, and 25 chart types across 9 technology stacks. Searchable database with priority-based recommendations.
+
+---
+
+## 📑 Content Map
+
+| File | Description | When to Read |
+|:---|:---|:---|
+| _No supplementary files_ | Main UI/UX design procedures are in this file | Use this file by default |
+
+---
+
+## 🔗 Related Skills
+
+| Need | Skill |
+|:---|:---|
+| Core Web Vitals optimization techniques | [`performance-optimizer`](../performance-optimizer/SKILL.md) |
+| Designing clean frontend styles and systems | [`frontend-design`](../frontend-design/SKILL.md) |
+| Optimizing Next.js and React bundle profiles | [`nextjs-react-expert`](../nextjs-react-expert/SKILL.md) |
+
+---
+
+## 🛠️ Instructions / Procedures
+
+When tasked with generating design systems, implementing UI components, or tuning responsive pages, strictly follow this step-by-step procedure:
+
+### Step 1: Analyze Design Requirements
+1. Extract the product domain (SaaS, portfolio, dashboard), style keywords (minimal, brutalism, glassmorphism), target industry, and stack.
+
+### Step 2: Generate Core Design System
+1. Verify Python availability and execute the search utility (`search.py`) with the `--design-system` query:
+   `python3 .agents/.shared/ui-ux-pro-max/scripts/search.py "<product> <industry>" --design-system`
+2. Create dynamic page-level overrides if needed by adding the `--persist` and `--page` parameters.
+
+### Step 3: Conduct Detailed Domain Searches
+1. Supplement the design with detailed domain queries (e.g. `--domain ux` or `--domain typography`).
+2. Map SVGs, layouts, and CTAs utilizing official standards (avoiding raw emojis).
+
+### Step 4: Extract Stack Best Practices
+1. Fetch code-specific blueprints by providing target stack options (default to `html-tailwind`).
+2. Run standard components structures ensuring CSS opacity, border contrasts, and card structures compile nicely.
+
+### Step 5: Validate and Audit checklist
+1. Verify layout flows at 375px, 768px, 1024px, and 1440px widths.
+2. Confirm compliance against the **Quality Audit Checklist** before concluded.
+
+---
 
 ## Prerequisites
 
@@ -53,7 +106,7 @@ Extract key information from user request:
 **Always start with `--design-system`** to get comprehensive recommendations with reasoning:
 
 ```bash
-python3 .codex/.shared/ui-ux-pro-max/scripts/search.py "<product_type> <industry> <keywords>" --design-system [-p "Project Name"]
+python3 .agents/.shared/ui-ux-pro-max/scripts/search.py "<product_type> <industry> <keywords>" --design-system [-p "Project Name"]
 ```
 
 This command:
@@ -64,7 +117,7 @@ This command:
 
 **Example:**
 ```bash
-python3 .codex/.shared/ui-ux-pro-max/scripts/search.py "beauty spa wellness service elegant" --design-system -p "Serenity Spa"
+python3 .agents/.shared/ui-ux-pro-max/scripts/search.py "beauty spa wellness service elegant" --design-system -p "Serenity Spa"
 ```
 
 ### Step 2b: Persist Design System (Master + Overrides Pattern)
@@ -72,7 +125,7 @@ python3 .codex/.shared/ui-ux-pro-max/scripts/search.py "beauty spa wellness serv
 To save the design system for hierarchical retrieval across sessions, add `--persist`:
 
 ```bash
-python3 .codex/.shared/ui-ux-pro-max/scripts/search.py "<query>" --design-system --persist -p "Project Name"
+python3 .agents/.shared/ui-ux-pro-max/scripts/search.py "<query>" --design-system --persist -p "Project Name"
 ```
 
 This creates:
@@ -81,7 +134,7 @@ This creates:
 
 **With page-specific override:**
 ```bash
-python3 .codex/.shared/ui-ux-pro-max/scripts/search.py "<query>" --design-system --persist -p "Project Name" --page "dashboard"
+python3 .agents/.shared/ui-ux-pro-max/scripts/search.py "<query>" --design-system --persist -p "Project Name" --page "dashboard"
 ```
 
 This also creates:
@@ -97,7 +150,7 @@ This also creates:
 After getting the design system, use domain searches to get additional details:
 
 ```bash
-python3 .codex/.shared/ui-ux-pro-max/scripts/search.py "<keyword>" --domain <domain> [-n <max_results>]
+python3 .agents/.shared/ui-ux-pro-max/scripts/search.py "<keyword>" --domain <domain> [-n <max_results>]
 ```
 
 **When to use detailed searches:**
@@ -115,7 +168,7 @@ python3 .codex/.shared/ui-ux-pro-max/scripts/search.py "<keyword>" --domain <dom
 Get implementation-specific best practices. If user doesn't specify a stack, **default to `html-tailwind`**.
 
 ```bash
-python3 .codex/.shared/ui-ux-pro-max/scripts/search.py "<keyword>" --stack html-tailwind
+python3 .agents/.shared/ui-ux-pro-max/scripts/search.py "<keyword>" --stack html-tailwind
 ```
 
 Available stacks: `html-tailwind`, `react`, `nextjs`, `vue`, `svelte`, `swiftui`, `react-native`, `flutter`, `shadcn`, `jetpack-compose`
@@ -169,7 +222,7 @@ Available stacks: `html-tailwind`, `react`, `nextjs`, `vue`, `svelte`, `swiftui`
 ### Step 2: Generate Design System (REQUIRED)
 
 ```bash
-python3 .codex/.shared/ui-ux-pro-max/scripts/search.py "beauty spa wellness service elegant" --design-system -p "Serenity Spa"
+python3 .agents/.shared/ui-ux-pro-max/scripts/search.py "beauty spa wellness service elegant" --design-system -p "Serenity Spa"
 ```
 
 **Output:** Complete design system with pattern, style, colors, typography, effects, and anti-patterns.
@@ -178,16 +231,16 @@ python3 .codex/.shared/ui-ux-pro-max/scripts/search.py "beauty spa wellness serv
 
 ```bash
 # Get UX guidelines for animation and accessibility
-python3 .codex/.shared/ui-ux-pro-max/scripts/search.py "animation accessibility" --domain ux
+python3 .agents/.shared/ui-ux-pro-max/scripts/search.py "animation accessibility" --domain ux
 
 # Get alternative typography options if needed
-python3 .codex/.shared/ui-ux-pro-max/scripts/search.py "elegant luxury serif" --domain typography
+python3 .agents/.shared/ui-ux-pro-max/scripts/search.py "elegant luxury serif" --domain typography
 ```
 
 ### Step 4: Stack Guidelines
 
 ```bash
-python3 .codex/.shared/ui-ux-pro-max/scripts/search.py "layout responsive form" --stack html-tailwind
+python3 .agents/.shared/ui-ux-pro-max/scripts/search.py "layout responsive form" --stack html-tailwind
 ```
 
 **Then:** Synthesize design system + detailed searches and implement the design.
@@ -200,10 +253,10 @@ The `--design-system` flag supports two output formats:
 
 ```bash
 # ASCII box (default) - best for terminal display
-python3 .codex/.shared/ui-ux-pro-max/scripts/search.py "fintech crypto" --design-system
+python3 .agents/.shared/ui-ux-pro-max/scripts/search.py "fintech crypto" --design-system
 
 # Markdown - best for documentation
-python3 .codex/.shared/ui-ux-pro-max/scripts/search.py "fintech crypto" --design-system -f markdown
+python3 .agents/.shared/ui-ux-pro-max/scripts/search.py "fintech crypto" --design-system -f markdown
 ```
 
 ---
@@ -259,37 +312,25 @@ These are frequently overlooked issues that make UI look unprofessional:
 
 ---
 
-## Pre-Delivery Checklist
+## ❌ Anti-Patterns
 
-Before delivering UI code, verify these items:
+| Don't | Do |
+|:---|:---|
+| Use emojis as production UI icons | Use consistent SVG icon sets |
+| Let hover transforms shift layout | Use stable color, opacity, border, or shadow feedback |
+| Ship low-contrast glass effects | Verify readable light and dark mode contrast |
+| Mix unrelated container widths | Keep layout rhythm consistent across sections |
+| Guess brand assets | Use official logos and verified visual references |
 
-### Visual Quality
-- [ ] No emojis used as icons (use SVG instead)
-- [ ] All icons from consistent icon set (Heroicons/Lucide)
-- [ ] Brand logos are correct (verified from Simple Icons)
-- [ ] Hover states don't cause layout shift
-- [ ] Use theme colors directly (bg-primary) not var() wrapper
+---
 
-### Interaction
-- [ ] All clickable elements have `cursor-pointer`
-- [ ] Hover states provide clear visual feedback
-- [ ] Transitions are smooth (150-300ms)
-- [ ] Focus states visible for keyboard navigation
+## ✅ Quality Audit Checklist
 
-### Light/Dark Mode
-- [ ] Light mode text has sufficient contrast (4.5:1 minimum)
-- [ ] Glass/transparent elements visible in light mode
-- [ ] Borders visible in both modes
-- [ ] Test both modes before delivery
+Before concluding a UI/UX layout, color palette creation, or typography pairing task, verify compliance with the following:
 
-### Layout
-- [ ] Floating elements have proper spacing from edges
-- [ ] No content hidden behind fixed navbars
-- [ ] Responsive at 375px, 768px, 1024px, 1440px
-- [ ] No horizontal scroll on mobile
-
-### Accessibility
-- [ ] All images have alt text
-- [ ] Form inputs have labels
-- [ ] Color is not the only indicator
-- [ ] `prefers-reduced-motion` respected
+- [ ] **No Emojis as Icons**: SVGs from consistent sets (Heroicons/Lucide) are used instead of emojis.
+- [ ] **Stable Hover Feedback**: Hover micro-interactions include clear visual indicators without causing layout shift.
+- [ ] **Clickable Cursor Bound**: All interactive grids, cards, and buttons declare `cursor-pointer`.
+- [ ] **Light/Dark Contrast Met**: Contrast levels meet 4.5:1 minimums, with distinct borders and glass opacities.
+- [ ] **Clean Layout Flow**: Floating navigations contain safety padding, account for header heights, and are responsive.
+- [ ] **Accessibilities Checked**: Form elements include labels, images declare clear alternative texts, and layouts compile cleanly.

@@ -3,12 +3,62 @@ name: plan-writing
 description: >-
   Use when implementing new features, preparing bug fixes, planning multi-file refactors, or generating action plans.
   Structured task planning framework for small verifiable breakdowns.
-allowed-tools: Read Glob Grep
+  NOT for trivial single-step edits or executing an existing plan without changes.
+allowed-tools:
+  - Read
+  - Glob
+  - Grep
 ---
 
 # Plan Writing
 
-> Source: obra/superpowers
+> Distilled from production-proven planning frameworks. Breaks down complex tracks into atomic, verifiable actions.
+
+---
+
+## 📑 Content Map
+
+| File | Description | When to Read |
+|:---|:---|:---|
+| _No supplementary files_ | Main plan writing procedures are in this file | Use this file by default |
+
+---
+
+## 🔗 Related Skills
+
+| Need | Skill |
+|:---|:---|
+| Orchestrating large-scale multi-agent planner loops | [`project-planner`](../project-planner/SKILL.md) |
+| Managing and coordinating specialist execution workers | [`coordinator-mode`](../coordinator-mode/SKILL.md) |
+| Consolidating token-compressed task states | [`context-compression`](../context-compression/SKILL.md) |
+
+---
+
+## 🛠️ Instructions / Procedures
+
+When tasked with writing action plans, decomposing new features, planning refactors, or documenting bug fixes, strictly follow this step-by-step procedure:
+
+### Step 1: Query Intent & Preferences
+1. Query the user for technology preferences, MVP constraints, or legacy compatibility layers.
+2. Isolate the target boundaries (what files are affected, what dependencies are needed).
+
+### Step 2: Establish Verification Boundaries
+1. Design explicit, actionable verification methods for the overall objective.
+2. Outline specific success criteria (e.g. CLI calls returning specific codes, network request responses, local server interactions).
+
+### Step 3: Decompose into Atomic Tasks
+1. Break down the work into 5-10 small, focused, verifiable tasks taking 2-5 minutes each.
+2. For each task, write a clear, one-line action and a dedicated `Verify: [How to check]` parameter.
+
+### Step 4: Write Action Plan to Project Root
+1. Generate the structured task plan following the minimal plan structure format.
+2. Save the plan file directly to the PROJECT ROOT directory as `{task-slug}.md` (never inside `.claude/`, `docs/`, or temporary paths).
+
+### Step 5: Mark Progress & Checklist Verification
+1. Execute tasks step-by-step, updating task checkmarks `[x]` as they complete.
+2. Confirm overall compliance against the **Quality Audit Checklist** before concluding.
+
+---
 
 ## Overview
 This skill provides a framework for breaking down work into clear, actionable tasks with verification criteria.
@@ -135,13 +185,24 @@ One sentence: What are we building/fixing?
 
 ---
 
-## Best Practices (Quick Reference)
+## ❌ Anti-Patterns
 
-1. **Start with goal** - What are we building/fixing?
-2. **Max 10 tasks** - If more, break into multiple plans
-3. **Each task verifiable** - Clear "done" criteria
-4. **Project-specific** - No copy-paste templates
-5. **Update as you go** - Mark `[x]` when complete
+- Writing generic template plans that do not name the actual files, commands, or checks.
+- Creating plans for trivial one-step edits where direct execution is clearer.
+- Saving plan files inside `.claude/`, `docs/`, or temporary paths instead of the project root.
+- Listing broad phases without concrete `Verify:` criteria for each task.
+
+---
+
+## ✅ Quality Audit Checklist
+
+Before concluding a plan writing, task decomposition, or feature design task, verify compliance with the following:
+
+- [ ] **Small Focused Tasks**: Decomposed the target into 5-10 atomic tasks taking 2-5 minutes each.
+- [ ] **Clear Verification Defined**: Every task includes an explicit, actionable, and testable `Verify: [How to check]` condition.
+- [ ] **Saved in Project Root**: The generated action plan is stored precisely as `{task-slug}.md` in the project root.
+- [ ] **No Template Bloat**: Kept it minimal, readable, and highly specific to the project context (avoiding generic copy-paste structures).
+- [ ] **Dynamic Naming Applied**: Slugs reflect the main feature action in a clean kebab-case format.
 
 ---
 

@@ -4,12 +4,61 @@ description: >-
   Use when designing or coding modern responsive web layouts, CSS theme tokens, or container queries.
   Tailwind CSS v4 CSS-first design and layout patterns.
   NOT for legacy Tailwind v3 JS configs.
-allowed-tools: Read Write Edit Glob Grep
+allowed-tools:
+  - Read
+  - Write
+  - Edit
+  - Glob
+  - Grep
 ---
 
 # Tailwind CSS Patterns (v4 - 2025)
 
 > Modern utility-first CSS with CSS-native configuration.
+
+---
+
+## 📑 Content Map
+
+| File | Description | When to Read |
+|:---|:---|:---|
+| _No supplementary files_ | Main Tailwind pattern procedures are in this file | Use this file by default |
+
+---
+
+## 🔗 Related Skills
+
+| Need | Skill |
+|:---|:---|
+| Core Web Vitals optimization techniques | [`performance-optimizer`](../performance-optimizer/SKILL.md) |
+| Custom design search tools | [`ui-ux-pro-max`](../ui-ux-pro-max/SKILL.md) |
+| Designing clean frontend styles and systems | [`frontend-design`](../frontend-design/SKILL.md) |
+
+---
+
+## 🛠️ Instructions / Procedures
+
+When tasked with generating Tailwind CSS layouts, extending color scales, or auditing custom responsive systems, strictly follow this step-by-step procedure:
+
+### Step 1: Detect Tailwind Engine constraints
+1. Confirm the compiler is v4-ready and declare configuration variables within CSS `@theme` directives rather than legacy `tailwind.config.js` setups.
+2. Ensure you have clean entry styles.
+
+### Step 2: Establish Semantic Token scales
+1. Build OKLCH semantic tokens (`--color-primary`, `--color-surface`) to support unified design rules.
+2. Outline custom layout spacing scales and display font stacks.
+
+### Step 3: Implement Mobile-First Responsive layouts
+1. Map base screens first (no prefix) followed by tablet and laptop breakpoint overrides (`md:`, `lg:`).
+2. For reusable contexts, map parent elements as `@container` paths and childrens utilizing `@md:` container sizes.
+
+### Step 4: Refactor Grids & Animations
+1. Choose auto-fit columns or asymmetric Bento setups rather than legacy symmetric tables.
+2. Configure micro-interactions using standard transition variables (`transition-colors duration-200`) to prevent visual layout thrashes.
+
+### Step 5: Verify Dark themes & Checklist
+1. Verify transparent opacities (`bg-white/80`), contrast colors, and dark mode borders.
+2. Confirm compliance against the **Quality Audit Checklist** before completing.
 
 ---
 
@@ -245,7 +294,7 @@ allowed-tools: Read Write Edit Glob Grep
 
 ---
 
-## 11. Anti-Patterns
+## ❌ Anti-Patterns
 
 | Don't | Do |
 |-------|-----|
@@ -266,6 +315,19 @@ allowed-tools: Read Write Edit Glob Grep
 | **Avoid dynamism** | No template string classes |
 | **Use Oxide** | Default in v4, 10x faster |
 | **Cache builds** | CI/CD caching |
+
+---
+
+## ✅ Quality Audit Checklist
+
+Before concluding a responsive styling, custom theme creation, or CSS component extraction task, verify compliance with the following:
+
+- [ ] **CSS-First Theme Configured**: Declared semantic color scales, spacing systems, and custom fonts under native `@theme` directives.
+- [ ] **Mobile-First Responsive Met**: Ensured small screen base styling overrides transition gracefully into larger breakpoints.
+- [ ] **Container Queries Applied**: Used `@container` on parents and `@md:` container rules on nested children cards.
+- [ ] **OKLCH Uniform Color System**: Configured primitive, semantic, and component variables utilizing uniform OKLCH values.
+- [ ] **No Arbitrary Value Bloat**: Avoided inline dynamic template class strings, inline styles, or heavy `@apply` dependencies.
+- [ ] **Dark Mode Contrasts Passing**: Verified border visibilities, transparent glass opacities, and body text contrast scales in both dark and light modes.
 
 ---
 

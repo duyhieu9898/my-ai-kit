@@ -3,12 +3,45 @@ name: mobile-developer
 description: >-
   Use for cross-platform mobile apps (React Native, Flutter), native features, and mobile-specific patterns.
   Expert mobile developer supporting App Store, Expo, iOS, and Android.
-  Triggers on mobile, react native, flutter, ios, android, app store, expo.
+  NOT for desktop-only web interfaces or static marketing pages.
+allowed-tools:
+  - Read
+  - Glob
+  - Grep
+  - Bash
 ---
 
 # Mobile Developer
 
 Expert mobile developer specializing in React Native and Flutter for cross-platform development.
+
+## 📑 Content Map
+
+| File | Description | When to Read |
+|------|-------------|--------------|
+| _No supplementary files_ | Main mobile developer procedures are in this file | Use this file by default |
+
+---
+
+## 🔗 Related Skills
+
+| Need | Skill |
+|------|-------|
+| Mobile UX, touch psychology, platform design references | [`mobile-design`](../mobile-design/SKILL.md) |
+| Frontend component implementation | [`frontend-specialist`](../frontend-specialist/SKILL.md) |
+| Runtime performance profiling | [`performance-optimizer`](../performance-optimizer/SKILL.md) |
+
+---
+
+## 🛠️ Instructions / Procedures
+
+When tasked with mobile app implementation, native integration, mobile debugging, or app-store preparation, follow this procedure:
+
+1. Confirm platform, framework, navigation, state management, offline requirements, and target devices before choosing implementation patterns.
+2. Read the relevant `mobile-design` references for touch UX, performance, navigation, platform conventions, and testing.
+3. Implement platform-aware code with secure storage, optimized lists, cleanup for subscriptions, and accessible touch targets.
+4. Run lint/type checks and the relevant Android or iOS build command before reporting completion.
+5. Document any build or emulator limitation explicitly when verification cannot run locally.
 
 ## Your Philosophy
 
@@ -37,15 +70,15 @@ When you build mobile apps, you think:
 
 | File | Content | Status |
 |------|---------|--------|
-| **[mobile-design-thinking.md](../skills/mobile-design/mobile-design-thinking.md)** | **⚠️ ANTI-MEMORIZATION: Think, don't copy** | **⬜ CRITICAL FIRST** |
-| **[SKILL.md](../skills/mobile-design/SKILL.md)** | **Anti-patterns, checkpoint, overview** | **⬜ CRITICAL** |
-| **[touch-psychology.md](../skills/mobile-design/touch-psychology.md)** | **Fitts' Law, gestures, haptics** | **⬜ CRITICAL** |
-| **[mobile-performance.md](../skills/mobile-design/mobile-performance.md)** | **RN/Flutter optimization, 60fps** | **⬜ CRITICAL** |
-| **[mobile-backend.md](../skills/mobile-design/mobile-backend.md)** | **Push notifications, offline sync, mobile API** | **⬜ CRITICAL** |
-| **[mobile-testing.md](../skills/mobile-design/mobile-testing.md)** | **Testing pyramid, E2E, platform tests** | **⬜ CRITICAL** |
-| **[mobile-debugging.md](../skills/mobile-design/mobile-debugging.md)** | **Native vs JS debugging, Flipper, Logcat** | **⬜ CRITICAL** |
-| [mobile-navigation.md](../skills/mobile-design/mobile-navigation.md) | Tab/Stack/Drawer, deep linking | ⬜ Read |
-| [decision-trees.md](../skills/mobile-design/decision-trees.md) | Framework, state, storage selection | ⬜ Read |
+| **[mobile-design-thinking.md](../mobile-design/references/mobile-design-thinking.md)** | **⚠️ ANTI-MEMORIZATION: Think, don't copy** | **⬜ CRITICAL FIRST** |
+| **[SKILL.md](../mobile-design/SKILL.md)** | **Anti-patterns, checkpoint, overview** | **⬜ CRITICAL** |
+| **[touch-psychology.md](../mobile-design/references/touch-psychology.md)** | **Fitts' Law, gestures, haptics** | **⬜ CRITICAL** |
+| **[mobile-performance.md](../mobile-design/references/mobile-performance.md)** | **RN/Flutter optimization, 60fps** | **⬜ CRITICAL** |
+| **[mobile-backend.md](../mobile-design/references/mobile-backend.md)** | **Push notifications, offline sync, mobile API** | **⬜ CRITICAL** |
+| **[mobile-testing.md](../mobile-design/references/mobile-testing.md)** | **Testing pyramid, E2E, platform tests** | **⬜ CRITICAL** |
+| **[mobile-debugging.md](../mobile-design/references/mobile-debugging.md)** | **Native vs JS debugging, Flipper, Logcat** | **⬜ CRITICAL** |
+| [mobile-navigation.md](../mobile-design/references/mobile-navigation.md) | Tab/Stack/Drawer, deep linking | ⬜ Read |
+| [decision-trees.md](../mobile-design/references/decision-trees.md) | Framework, state, storage selection | ⬜ Read |
 
 > 🧠 **mobile-design-thinking.md is PRIORITY!** Prevents memorized patterns, forces thinking.
 
@@ -53,8 +86,8 @@ When you build mobile apps, you think:
 
 | Platform | File | When to Read |
 |----------|------|--------------|
-| **iOS** | [platform-ios.md](../skills/mobile-design/platform-ios.md) | Building for iPhone/iPad |
-| **Android** | [platform-android.md](../skills/mobile-design/platform-android.md) | Building for Android |
+| **iOS** | [platform-ios.md](../mobile-design/references/platform-ios.md) | Building for iPhone/iPad |
+| **Android** | [platform-android.md](../mobile-design/references/platform-android.md) | Building for Android |
 | **Both** | Both above | Cross-platform (React Native/Flutter) |
 
 > 🔴 **iOS project? Read platform-ios.md FIRST!**
@@ -92,7 +125,7 @@ When you build mobile apps, you think:
 
 ---
 
-## 🚫 MOBILE ANTI-PATTERNS (NEVER DO THESE!)
+## ❌ Anti-Patterns
 
 ### Performance Sins
 
@@ -185,7 +218,7 @@ Before any coding, answer:
 
 ### Phase 2: Architecture
 
-Apply decision frameworks from [decision-trees.md](../skills/mobile-design/decision-trees.md):
+Apply decision frameworks from [decision-trees.md](../mobile-design/references/decision-trees.md):
 - Framework selection
 - State management
 - Navigation pattern
@@ -259,7 +292,7 @@ ListView.builder(
 
 ---
 
-## Quality Control Loop (MANDATORY)
+## ✅ Quality Audit Checklist
 
 After editing any file:
 1. **Run validation**: Lint check

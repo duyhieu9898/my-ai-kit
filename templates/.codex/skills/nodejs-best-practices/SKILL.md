@@ -3,7 +3,13 @@ name: nodejs-best-practices
 description: >-
   Use when building Node.js backends, selecting frameworks, implementing async patterns, or validating APIs.
   Node.js development principles (Express, Fastify, NestJS, Hono), security, and architecture.
-allowed-tools: Read Write Edit Glob Grep
+  NOT for frontend-only UI components or non-JavaScript backend stacks.
+allowed-tools:
+  - Read
+  - Write
+  - Edit
+  - Glob
+  - Grep
 ---
 
 # Node.js Best Practices
@@ -13,13 +19,47 @@ allowed-tools: Read Write Edit Glob Grep
 
 ---
 
-## ⚠️ How to Use This Skill
+## 📑 Content Map
 
-This skill teaches **decision-making principles**, not fixed code to copy.
+| File | Description | When to Read |
+|:---|:---|:---|
+| _No supplementary files_ | Main Node.js backend procedures are in this file | Use this file by default |
 
-- ASK user for preferences when unclear
-- Choose framework/pattern based on CONTEXT
-- Don't default to same solution every time
+---
+
+## 🔗 Related Skills
+
+| Need | Skill |
+|:---|:---|
+| Designing clean API endpoints | [`api-patterns`](../api-patterns/SKILL.md) |
+| Optimizing Next.js and React UIs | [`nextjs-react-expert`](../nextjs-react-expert/SKILL.md) |
+| Writing high-performance unit/integration tests | [`test-engineer`](../test-engineer/SKILL.md) |
+
+---
+
+## 🛠️ Instructions / Procedures
+
+When tasked with building Node.js backends, configuring API routing services, or implementing async validation pipelines, strictly follow this step-by-step procedure:
+
+### Step 1: Select Backend Framework
+1. Query deployment target environments (serverless edge runtimes vs server/container environments).
+2. Choose matching frameworks based on context decision trees (Hono, Fastify, NestJS, Express).
+
+### Step 2: Define Runtime Modules & Configurations
+1. Configure execution runtime engines (Node, Bun, Deno).
+2. Prefer modern standard ESM module formats (`import/export`) and TypeScript-first stripping options (`--experimental-strip-types`).
+
+### Step 3: Establish Layered Code Architecture
+1. Layout repository paths dividing Controller, Service, and Repository layers.
+2. Verify that Controllers manage solely HTTP payloads/boundaries, Services execute framework-agnostic business rules, and Repositories run DB adapters.
+
+### Step 4: Implement Centralized Error & Boundary Schema Validations
+1. Create unified Custom error formats and catch exceptions using global controller/route middlewares.
+2. Bind validation schemas (Zod, Valibot) at network boundaries (body parser boundaries, env loader boundaries).
+
+### Step 5: Setup Tests & Confirm Compliance
+1. Implement test configurations utilizing built-in test runners (`node --test`) or specialized Vitest suites.
+2. Validate the codebase structure using the **Quality Audit Checklist** before completing.
 
 ---
 
@@ -298,9 +338,8 @@ node --test src/**/*.test.ts
 
 ---
 
-## 10. Anti-Patterns to Avoid
+## ❌ Anti-Patterns
 
-### ❌ DON'T:
 - Use Express for new edge projects (use Hono)
 - Use sync methods in production code
 - Put business logic in controllers
@@ -309,26 +348,18 @@ node --test src/**/*.test.ts
 - Trust external data without validation
 - Block event loop with CPU work
 
-### ✅ DO:
-- Choose framework based on context
-- Ask user for preferences when unclear
-- Use layered architecture for growing projects
-- Validate all inputs
-- Use environment variables for secrets
-- Profile before optimizing
-
 ---
 
-## 11. Decision Checklist
+## ✅ Quality Audit Checklist
 
-Before implementing:
+Before concluding a Node.js backend setup or API validation task, verify compliance with the following:
 
-- [ ] **Asked user about stack preference?**
-- [ ] **Chosen framework for THIS context?** (not just default)
-- [ ] **Considered deployment target?**
-- [ ] **Planned error handling strategy?**
-- [ ] **Identified validation points?**
-- [ ] **Considered security requirements?**
+- [ ] **Framework Context Checked**: Verified deployment runtime matches (Hono for Edge, Fastify/NestJS for server/containerized).
+- [ ] **ESM Modules Preferred**: Module configurations use standard modern import/export syntax.
+- [ ] **Layered Separation Complete**: Business logic lies solely within the Service layer, separate from Controllers and Repository adapters.
+- [ ] **Centralized Error Catch Active**: Centralized middleware intercepts errors without spilling internal stack traces to clients.
+- [ ] **Boundary Validation Bound**: Validation rules (Zod/Valibot) block invalid requests at controller boundaries.
+- [ ] **Secure Operations Configured**: Parameterized DB queries, Helmet.js headers, Argon2 hashing, and environment secrets are active.
 
 ---
 

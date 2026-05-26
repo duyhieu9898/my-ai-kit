@@ -4,11 +4,36 @@ description: >-
   Use for API development, server-side logic, database integration, security, and backend systems.
   Expert backend architect for Node.js, Python, and modern serverless/edge systems.
   Triggers on backend, server, api, endpoint, database, auth.
+  NOT for frontend-only implementation or visual design tasks.
+allowed-tools:
+  - Read
+  - Write
+  - Edit
+  - Glob
+  - Grep
+  - Bash
 ---
 
 # Backend Development Architect
 
+> Server-side architecture, API development, database integration, security, and backend verification.
+
 You are a Backend Development Architect who designs and builds server-side systems with security, scalability, and maintainability as top priorities.
+
+## 📑 Content Map
+
+| File | Description | When to Read |
+|:---|:---|:---|
+| No supplementary files | This skill is self-contained | Use the procedures below directly |
+
+## 🔗 Related Skills
+
+| Skill | Relationship | When to Use Together |
+|:---|:---|:---|
+| [`api-patterns`](../api-patterns/SKILL.md) | API style, responses, auth, and versioning | When designing REST, GraphQL, or tRPC contracts |
+| [`database-design`](../database-design/SKILL.md) | Schema, relationships, and data modeling | When backend changes require database structure decisions |
+| [`security-auditor`](../security-auditor/SKILL.md) | Security review and vulnerability checks | When implementing auth, authorization, or sensitive data flows |
+| [`devops-engineer`](../devops-engineer/SKILL.md) | Deployment and runtime operations | When backend changes affect deploy, environment, or production behavior |
 
 ## Your Philosophy
 
@@ -51,7 +76,9 @@ When you build backend systems, you think:
 
 ---
 
-## Development Decision Process
+## 🛠️ Instructions / Procedures
+
+### Development Decision Process
 
 When working on backend tasks, follow this mental process:
 
@@ -203,7 +230,7 @@ Before completing:
 
 ---
 
-## Common Anti-Patterns You Avoid
+## ❌ Anti-Patterns
 
 ❌ **SQL Injection** → Use parameterized queries, ORM
 ❌ **N+1 Queries** → Use JOINs, DataLoader, or includes
@@ -216,7 +243,7 @@ Before completing:
 
 ---
 
-## Review Checklist
+## ✅ Quality Audit Checklist
 
 When reviewing backend code, verify:
 

@@ -4,7 +4,13 @@ description: >-
   Use when working on macOS/Linux systems, writing bash scripts, or running terminal commands.
   Bash and Linux terminal patterns covering critical commands, piping, error handling, and scripting.
   NOT for Windows or PowerShell environments.
-allowed-tools: Read Write Edit Glob Grep Bash
+allowed-tools:
+  - Read
+  - Write
+  - Edit
+  - Glob
+  - Grep
+  - Bash
 ---
 
 # Bash Linux Patterns
@@ -12,6 +18,24 @@ allowed-tools: Read Write Edit Glob Grep Bash
 > Essential patterns for Bash on Linux/macOS.
 
 ---
+
+## 📑 Content Map
+
+| File | Description | When to Read |
+|:---|:---|:---|
+| No supplementary files | This skill is self-contained | Use the procedures below directly |
+
+## 🔗 Related Skills
+
+| Skill | Relationship | When to Use Together |
+|:---|:---|:---|
+| [`devops-engineer`](../devops-engineer/SKILL.md) | Production operations and server safety | When shell commands affect deployments, servers, or production systems |
+| [`batch-operations`](../batch-operations/SKILL.md) | Repeated file or command operations | When a task requires bulk changes or multi-file command orchestration |
+| [`lint-and-validate`](../lint-and-validate/SKILL.md) | Verification and validation commands | When terminal work should end with lint, type, or test checks |
+
+---
+
+## 🛠️ Instructions / Procedures
 
 ## 1. Operator Syntax
 
@@ -196,6 +220,27 @@ cleanup() {
 }
 trap cleanup EXIT
 ```
+
+---
+
+## ❌ Anti-Patterns
+
+- Run destructive commands without confirming the target path and scope.
+- Use unquoted variables in scripts when paths or values may contain spaces.
+- Parse complex structured data with fragile text pipelines when a structured tool is available.
+- Use `kill -9` before trying graceful termination unless the process is stuck.
+- Ignore non-zero command exits in automation scripts.
+
+---
+
+## ✅ Quality Audit Checklist
+
+- [ ] Commands match the user's operating system and shell.
+- [ ] Destructive commands have explicit target paths and confirmation when needed.
+- [ ] Scripts use `set -euo pipefail` where appropriate.
+- [ ] Variables are quoted unless word splitting is intentional.
+- [ ] Pipelines and command chains handle failures intentionally.
+- [ ] Long-running or background processes are identified and cleaned up.
 
 ---
 

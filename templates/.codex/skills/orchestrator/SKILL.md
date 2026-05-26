@@ -3,11 +3,40 @@ name: orchestrator
 description: >-
   Use when a task requires multiple perspectives, parallel analysis, or coordinated execution across different domains.
   Multi-agent coordinator and task orchestrator using coordinator mode.
+  NOT for simple single-file or single-domain tasks.
+allowed-tools:
+  - Read
+  - Write
+  - Edit
+  - Glob
+  - Grep
+  - Bash
 ---
 
 # Orchestrator - Native Multi-Agent Coordination
 
 You are the master orchestrator agent. You coordinate multiple specialized agents using Claude Code's native Agent Tool to solve complex tasks through parallel analysis and synthesis.
+
+---
+
+## 📑 Content Map
+
+| File | Description | When to Read |
+|:---|:---|:---|
+| _No supplementary files_ | Main orchestration procedures are in this file | Use this file by default |
+
+---
+
+## 🔗 Related Skills
+
+| Need | Skill |
+|:---|:---|
+| Orchestrated project plan creation | [`project-planner`](../project-planner/SKILL.md) |
+| Scaffolding and system build orchestration | [`app-builder`](../app-builder/SKILL.md) |
+| Frontend implementation patterns | [`frontend-specialist`](../frontend-specialist/SKILL.md) |
+| Backend implementation patterns | [`backend-specialist`](../backend-specialist/SKILL.md) |
+
+---
 
 ## 📑 Quick Navigation
 
@@ -215,79 +244,36 @@ Resume agent [agentId] and continue with the updated requirements.
 
 ---
 
-## Orchestration Workflow
+## 🛠️ Instructions / Procedures
 
-When given a complex task:
+When tasked with coordinating multiple perspectives, parallel worker analysis, or executing across different domains, strictly follow this step-by-step procedure:
 
-### 🔴 STEP 0: PRE-FLIGHT CHECKS (MANDATORY)
+### Step 1: Pre-flight Plan Verification
+1. Proactively check for the existence of `docs/PLAN-{task-slug}.md` using the pre-flight checks outlined in Step 0.
+2. If the plan file is missing, immediately stop specialist agent invocation and run the `project-planner` agent to build a task plan.
+3. Identify the Project Type (WEB, MOBILE, BACKEND) to ensure appropriate agent routing.
 
-**Before ANY agent invocation:**
+### Step 2: Task Decomposition & Agent Selection
+1. Map the task onto affected system domains (Security, Backend, Frontend, Database, Testing, DevOps, Mobile).
+2. Select 2-5 specialized agents. Ensure `test-engineer` is included for any code modifications, and `security-auditor` is included for authentication tasks.
+3. Enforce domain boundaries strictly (e.g., block `frontend-specialist` from writing backend tests or database configurations).
 
-```bash
-# 1. Check for task plan
-Read docs/PLAN-{task-slug}.md
+### Step 3: Sequential Worker Dispatch
+1. Dispatch workers in logical order:
+   - First, run `explorer-agent` to map codebase dependencies.
+   - Run domain-specific specialists (`backend-specialist`, `frontend-specialist`, `database-architect`, etc.) sequentially per file.
+   - Run `test-engineer` to verify code changes with comprehensive E2E or unit tests.
+   - Run `security-auditor` as a final safety check on modified security-sensitive files.
+2. Apply the Native Agent Invocation Protocol when spawning or forking sub-agents. Include highly detailed directives containing line ranges and file paths.
 
-# 2. If missing → Use project-planner agent first
-#    "No task plan found. Use project-planner to create plan."
+### Step 4: Monitor & Prevent peeking/racing
+1. Execute parallel research tasks utilizing standard fork semantics.
+2. Never peek at fork output mid-flight or fabricate worker results. Wait for completion notifications.
 
-# 3. Verify agent routing
-#    Mobile project → Only mobile-developer
-#    Web project → frontend-specialist + backend-specialist
-```
-
-> 🔴 **VIOLATION:** Skipping Step 0 = FAILED orchestration.
-
-### Step 1: Task Analysis
-```
-What domains does this task touch?
-- [ ] Security
-- [ ] Backend
-- [ ] Frontend
-- [ ] Database
-- [ ] Testing
-- [ ] DevOps
-- [ ] Mobile
-```
-
-### Step 2: Agent Selection
-Select 2-5 agents based on task requirements. Prioritize:
-1. **Always include** if modifying code: test-engineer
-2. **Always include** if touching auth: security-auditor
-3. **Include** based on affected layers
-
-### Step 3: Sequential Invocation
-Invoke agents in logical order:
-```
-1. explorer-agent → Map affected areas
-2. [domain-agents] → Analyze/implement
-3. test-engineer → Verify changes
-4. security-auditor → Final security check (if applicable)
-```
-
-### Step 4: Synthesis
-Combine findings into structured report:
-
-```markdown
-## Orchestration Report
-
-### Task: [Original Task]
-
-### Agents Invoked
-1. agent-name: [brief finding]
-2. agent-name: [brief finding]
-
-### Key Findings
-- Finding 1 (from agent X)
-- Finding 2 (from agent Y)
-
-### Recommendations
-1. Priority recommendation
-2. Secondary recommendation
-
-### Next Steps
-- [ ] Action item 1
-- [ ] Action item 2
-```
+### Step 5: Synthesis & Reporting
+1. Combine findings and results into a structured **Orchestration Report** template.
+2. Highlight key cross-domain issues, trade-offs, priority recommendations, and next steps.
+3. Execute final context compression and memory integration (`/remember` or updating `.agents/memory/MEMORY.md`).
 
 ---
 
@@ -302,18 +288,16 @@ Combine findings into structured report:
 
 ---
 
-## 🔴 Checkpoint Summary (CRITICAL)
+## ✅ Quality Audit Checklist
 
-**Before ANY agent invocation, verify:**
+Before concluding task orchestration or presenting findings to the user, verify compliance with the following:
 
-| Checkpoint | Verification | Failure Action |
-|------------|--------------|----------------|
-| **Task plan exists** | `Read docs/PLAN-{task-slug}.md` | Use project-planner first |
-| **Project type valid** | WEB/MOBILE/BACKEND identified | Ask user or analyze request |
-| **Agent routing correct** | Mobile → mobile-developer only | Reassign agents |
-| **Socratic Gate passed** | 3 questions asked & answered | Ask questions first |
-
-> 🔴 **Remember:** NO specialist agents without a verified task plan.
+- [ ] **Pre-Flight Checked**: Checked for the existence of `docs/PLAN-{task-slug}.md` and used `project-planner` first if missing.
+- [ ] **Routing Verified**: Project type (WEB vs. MOBILE vs. BACKEND) matches agent assignments.
+- [ ] **Domain Boundaries Enforced**: No agent modified files outside their designated domain (e.g. `frontend-specialist` didn't write test files or backend API routes).
+- [ ] **Directives Specific**: Worker prompts are detailed, explicit directives pointing to file paths and line ranges rather than generic "please fix the bug" messages.
+- [ ] **Synthesis Completed**: Avoided simple worker dumps; findings are compiled into a unified Socratic Orchestration Report containing key findings, recommendations, and next steps.
+- [ ] **Memory Integration**: Read `.agents/memory/MEMORY.md` at start, and saved critical decisions using `/remember` at end.
 
 ---
 
@@ -395,7 +379,7 @@ User Request → DECOMPOSE → CLASSIFY → DISPATCH → MONITOR → SYNTHESIZE 
 ### Memory Integration
 
 At orchestration start:
-1. Check `.codex/memory/MEMORY.md` for relevant past context
+1. Check `.agents/memory/MEMORY.md` for relevant past context
 2. Apply recalled preferences silently
 3. After orchestration, save key decisions with `/remember`
 
@@ -440,7 +424,9 @@ I'll coordinate multiple agents for a comprehensive review:
 
 ---
 
-### ❌ WRONG Example (Plan Missing)
+## ❌ Anti-Patterns
+
+### Wrong Example: Plan Missing
 
 **User**: "Build me an e-commerce site"
 

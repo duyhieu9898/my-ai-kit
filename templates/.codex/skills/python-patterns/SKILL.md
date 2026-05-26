@@ -3,13 +3,62 @@ name: python-patterns
 description: >-
   Use when writing Python code, selecting frameworks, implementing type hints, or structuring Python projects.
   Python development principles (FastAPI, Django, Flask), async vs sync, and Pydantic validation.
-allowed-tools: Read Write Edit Glob Grep
+  NOT for non-Python backend stacks or frontend-only implementation work.
+allowed-tools:
+  - Read
+  - Write
+  - Edit
+  - Glob
+  - Grep
 ---
 
 # Python Patterns
 
 > Python development principles and decision-making for 2025.
 > **Learn to THINK, not memorize patterns.**
+
+---
+
+## 📑 Content Map
+
+| File | Description | When to Read |
+|:---|:---|:---|
+| _No supplementary files_ | Main Python development procedures are in this file | Use this file by default |
+
+---
+
+## 🔗 Related Skills
+
+| Need | Skill |
+|:---|:---|
+| Node.js backend development paradigms | [`nodejs-best-practices`](../nodejs-best-practices/SKILL.md) |
+| CPU profiling and asynchronous performance tuning | [`performance-optimizer`](../performance-optimizer/SKILL.md) |
+
+---
+
+## 🛠️ Instructions / Procedures
+
+When tasked with designing Python backend services, building API routes, or debugging concurrency conflicts, strictly follow this step-by-step procedure:
+
+### Step 1: Select the Framework
+1. Match project goals with appropriate frameworks (FastAPI for APIs/AI models serving, Django for batteries-included full-stack admins, Flask for simple scripts).
+2. Ask about user preferences when ambiguous.
+
+### Step 2: Define Concurrency Models
+1. Decide sync vs async based on I/O bounds vs CPU workloads.
+2. Select appropriate non-blocking dependencies (httpx for HTTP requests, asyncpg for Postgres).
+
+### Step 3: Implement Schema Typing Hints
+1. Define type parameters for arguments and returns across public APIs.
+2. Build structured Pydantic v2 schemas for runtime data validation.
+
+### Step 4: Map Folder Directories
+1. Set up clean separation of concerns: routes/controllers -> business services -> DB models.
+2. Structure small scripts into standard modules.
+
+### Step 5: Establish Exception Handlers & Verify Checklist
+1. Build domain exception models to map custom HTTP errors cleanly without exposing internals.
+2. Run pytest suites and verify against the **Quality Audit Checklist** before completing.
 
 ---
 
@@ -407,36 +456,27 @@ Common fixtures:
 
 ---
 
-## 10. Decision Checklist
+## ✅ Quality Audit Checklist
 
-Before implementing:
+Before concluding a Python codebase design, database migration, or test suite execution task, verify compliance with the following:
 
-- [ ] **Asked user about framework preference?**
-- [ ] **Chosen framework for THIS context?** (not just default)
-- [ ] **Decided async vs sync?**
-- [ ] **Planned type hint strategy?**
-- [ ] **Defined project structure?**
-- [ ] **Planned error handling?**
-- [ ] **Considered background tasks?**
+- [ ] **Framework Validated**: Asked the user or analyzed context to confirm the best-fit framework (FastAPI, Django, Flask).
+- [ ] **Concurrency Mapped**: Decided async/sync correctly, ensuring no blocking calls execute inside async event loops.
+- [ ] **Type Hints Configured**: Documented comprehensive typing parameters for function arguments and return types.
+- [ ] **Data Validation Complete**: Integrated Pydantic models for incoming payload schemas and runtime configurations.
+- [ ] **Concerns Separated**: Confirmed business logic resides inside services layers instead of views or route entrypoints.
+- [ ] **Tests Asynchronous**: Executed pytest-asyncio workflows verifying concurrent I/O API responses.
 
 ---
 
-## 11. Anti-Patterns to Avoid
+## ❌ Anti-Patterns
 
-### ❌ DON'T:
 - Default to Django for simple APIs (FastAPI may be better)
 - Use sync libraries in async code
 - Skip type hints for public APIs
 - Put business logic in routes/views
 - Ignore N+1 queries
 - Mix async and sync carelessly
-
-### ✅ DO:
-- Choose framework based on context
-- Ask about async requirements
-- Use Pydantic for validation
-- Separate concerns (routes → services → repos)
-- Test critical paths
 
 ---
 

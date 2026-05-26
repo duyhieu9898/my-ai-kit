@@ -1,6 +1,6 @@
 # API Style Selection (2025)
 
-> REST vs GraphQL vs tRPC - Hangi durumda hangisi?
+> REST vs GraphQL vs tRPC - Which one to choose in which situation?
 
 ## Decision Tree
 

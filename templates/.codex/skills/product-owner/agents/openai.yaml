@@ -1,6 +1,6 @@
 interface:
   display_name: "Product Owner"
-  short_description: "Strategic facilitator bridging business needs and technical execution. Expert..."
+  short_description: "Requirements, roadmaps, backlog priorities, MVP scope, and PRDs."
   brand_color: "#D97706"
   default_prompt: "$product-owner"
 

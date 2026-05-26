@@ -4,16 +4,66 @@ description: >-
   Use when coordinating multiple specialist agents in parallel, or performing comprehensive security/quality reviews.
   Multi-agent orchestration patterns (sequential chaining, context passing, synthesis).
   NOT for single-agent tasks.
-allowed-tools: Read Glob Grep
+allowed-tools:
+  - Read
+  - Glob
+  - Grep
 ---
 
 # Native Parallel Agents
 
 > Orchestration through AG Kit's built-in Agent Tool
 
+---
+
+## 📑 Content Map
+
+| File | Description | When to Read |
+|:---|:---|:---|
+| _No supplementary files_ | Main parallel-agent procedures are in this file | Use this file by default |
+
+---
+
+## 🔗 Related Skills
+
+| Need | Skill |
+|:---|:---|
+| Running multi-agent parallel flows | [`coordinator-mode`](../coordinator-mode/SKILL.md) |
+| Writing atomic plans for parallel branches | [`plan-writing`](../plan-writing/SKILL.md) |
+
+---
+
+## 🛠️ Instructions / Procedures
+
+When tasked with coordinating multiple agents or synthesizing parallel domain reviews, strictly follow this step-by-step procedure:
+
+### Step 1: Validate Orchestration Needs
+1. Confirm the task spans multiple domains (security + quality + testing) rather than a simple single-domain task.
+2. Select target agent expertise.
+
+### Step 2: Establish Invocation Patterns
+1. Select appropriate coordination patterns (e.g. Explorer -> Domain -> Synthesis).
+2. Write explicit sequential triggers or parallel prompts.
+
+### Step 3: Trigger Multi-Agent Flows
+1. Invoke domain-specific agents, passing relevant contextual discoveries from preceding runs.
+2. Resume previous agent IDs if expanding existing branches.
+
+### Step 4: Synthesize Findings
+1. Execute the **Synthesis Protocol** to merge all findings into a unified Orchestration Synthesis report.
+2. Maintain single-session traceability.
+
+### Step 5: Audit Checklist Compliance
+1. Verify recommendations, severity mappings, and action items.
+2. Confirm compliance against the **Quality Audit Checklist** before completing.
+
+---
+
 ## Overview
 
 This skill enables coordinating multiple specialized agents through AG Kit's native agent system. Unlike external scripts, this approach keeps all orchestration within AG Kit's control.
+
+---
 
 ## When to Use Orchestration
 
@@ -166,6 +216,27 @@ After all agents complete, synthesize:
 3. **Share context** - Pass relevant findings to subsequent agents
 4. **Single synthesis** - One unified report, not separate outputs
 5. **Verify changes** - Always include test-engineer for code modifications
+
+---
+
+## ❌ Anti-Patterns
+
+- Using orchestration for simple single-domain tasks where one specialist is enough.
+- Dumping separate agent outputs without synthesizing findings into one report.
+- Passing vague context to follow-up agents instead of concrete findings and file paths.
+- Skipping test validation after coordinated code modifications.
+
+---
+
+## ✅ Quality Audit Checklist
+
+Before concluding a multi-agent orchestration or synthesis task, verify compliance with the following:
+
+- [ ] **Orchestration Need Validated**: Verified that tasks involve complex, multi-domain reviews rather than single-agent issues.
+- [ ] **Sequential context passed**: Ensured outputs and discoveries from explorer or domain agents are forwarded to synthesis.
+- [ ] **Synthesis Protocol Executed**: Consolidated all domain reports into a unified Orchestration Synthesis document.
+- [ ] **Action items mapped**: Extracted concrete, checkable action items from agent outputs.
+- [ ] **Test validation triggered**: Verified code modifications by calling `test-engineer` or running verification suites.
 
 ---
 

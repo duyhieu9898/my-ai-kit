@@ -5,14 +5,39 @@ description: >-
   adding imports or headers to many files, or performing bulk migrations.
   Applies operations across multiple files simultaneously using pattern-based bulk modifications and search-and-replace.
   NOT for single-file edits or unique changes per file.
-allowed-tools: Read Write Edit Grep Glob Bash
+allowed-tools:
+  - Read
+  - Write
+  - Edit
+  - Grep
+  - Glob
+  - Bash
 ---
 
 # Batch Operations — Multi-File Changes
 
 > Apply consistent changes across many files at once. One pattern, many targets.
 
-## When to Use
+## 📑 Content Map
+
+| File | Description | When to Read |
+|:---|:---|:---|
+| No supplementary files | This skill is self-contained | Use the procedures below directly |
+
+## 🔗 Related Skills
+
+| Skill | Relationship | When to Use Together |
+|:---|:---|:---|
+| [`bash-linux`](../bash-linux/SKILL.md) | Shell command patterns and safety | When batch work uses terminal pipelines or scripts |
+| [`clean-code`](../clean-code/SKILL.md) | Code quality guardrails | When bulk edits affect readability, naming, or structure |
+| [`lint-and-validate`](../lint-and-validate/SKILL.md) | Verification commands | When batch changes need lint, type, build, or test checks |
+| [`code-review-checklist`](../code-review-checklist/SKILL.md) | Review discipline | When multi-file changes need a focused review pass |
+
+---
+
+## 🛠️ Instructions / Procedures
+
+### When to Use
 
 ✅ **Good for:**
 - Renaming a function/component across all files that use it
@@ -105,3 +130,24 @@ npm run build
 3. **Exclude tests** — often tests need different treatment than source
 4. **Verify after** — run build + tests after every batch operation
 5. **Report changes** — list every file modified with change summary
+
+---
+
+## ❌ Anti-Patterns
+
+- Modify files in bulk before previewing every affected path.
+- Use broad globs without explicit exclusions for generated files, dependencies, or build output.
+- Mix unrelated migrations in one batch operation.
+- Assume tests should receive the same replacement as source files.
+- Stop after search-and-replace without running verification.
+
+---
+
+## ✅ Quality Audit Checklist
+
+- [ ] The target pattern, replacement, scope, and exclusions are explicit.
+- [ ] A preview command has listed affected files and match counts.
+- [ ] Generated, vendor, dependency, and build-output directories are excluded.
+- [ ] The batch was applied consistently and in a deterministic order.
+- [ ] Follow-up searches confirm no stale pattern remains unless intentionally preserved.
+- [ ] Relevant lint, type, build, or test checks were run after the change.

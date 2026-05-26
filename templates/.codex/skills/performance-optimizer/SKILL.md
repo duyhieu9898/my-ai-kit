@@ -3,12 +3,65 @@ name: performance-optimizer
 description: >-
   Use for improving speed, reducing bundle size, and optimizing runtime performance.
   Expert in performance optimization, profiling, Core Web Vitals, and bundle optimization.
-  Triggers on performance, optimize, speed, slow, memory, cpu, benchmark, lighthouse.
+  NOT for feature development unrelated to measurable performance bottlenecks.
+allowed-tools:
+  - Read
+  - Write
+  - Edit
+  - Glob
+  - Grep
+  - Bash
 ---
 
 # Performance Optimizer
 
 Expert in performance optimization, profiling, and web vitals improvement.
+
+---
+
+## 📑 Content Map
+
+| File | Description | When to Read |
+|:---|:---|:---|
+| _No supplementary files_ | Main performance optimization procedures are in this file | Use this file by default |
+
+---
+
+## 🔗 Related Skills
+
+| Need | Skill |
+|:---|:---|
+| Optimizing Next.js and React UIs | [`nextjs-react-expert`](../nextjs-react-expert/SKILL.md) |
+| Automating token-efficient codebase maps | [`code-review-graph`](../code-review-graph/SKILL.md) |
+| Establishing clean code formatting practices | [`clean-code`](../clean-code/SKILL.md) |
+
+---
+
+## 🛠️ Instructions / Procedures
+
+When tasked with improving speed, reducing bundle sizes, or profiling Core Web Vitals, strictly follow this step-by-step procedure:
+
+### Step 1: Measure baseline Metrics
+1. Profile the application under standard dev conditions.
+2. Measure Web Vitals (LCP, INP, CLS) or bundle footprint metrics using Chrome DevTools or Lighthouse.
+
+### Step 2: Isolate the Primary Bottleneck
+1. Query the **Optimization Decision Tree** to identify if the sluggishness is caused by load issues, interactions, layout thrashing, or memory leaks.
+2. Quantify the primary bottleneck (e.g. CPU blocking, network latency, oversized imports).
+
+### Step 3: Execute Optimization Strategies
+1. Apply targeted optimization models (code-splitting for bundles, virtualization for list loops, next/image for format lazy loads).
+2. Clean up unmount event listeners to prevent runtime growth leaks.
+
+### Step 4: Re-Measure & Validate
+1. Re-profile the optimized components.
+2. Compare metrics with original benchmarks to confirm user-perceived performance gains.
+
+### Step 5: Checklist Verification
+1. Run final validation checks.
+2. Confirm compliance against the **Quality Audit Checklist** before completing.
+
+---
 
 ## Core Philosophy
 
@@ -96,73 +149,20 @@ What's slow?
 | Layout thrashing | Batch DOM operations |
 | Blocking JS | Async, defer, workers |
 
----
+## ✅ Quality Audit Checklist
 
-## Profiling Approach
+Before concluding a performance optimization or web vitals improvement task, verify compliance with the following:
 
-### Step 1: Measure
-
-| Tool | What It Measures |
-|------|------------------|
-| Lighthouse | Core Web Vitals, opportunities |
-| Bundle analyzer | Bundle composition |
-| DevTools Performance | Runtime execution |
-| DevTools Memory | Heap, leaks |
-
-### Step 2: Identify
-
-- Find the biggest bottleneck
-- Quantify the impact
-- Prioritize by user impact
-
-### Step 3: Fix & Validate
-
-- Make targeted change
-- Re-measure
-- Confirm improvement
+- [ ] **LCP under target**: Largest Contentful Paint executes in <2.5 seconds.
+- [ ] **INP Responsive**: Interaction to Next Paint responsiveness completes in <200ms.
+- [ ] **Visual Layout Stable**: Cumulative Layout Shift scores strictly <0.1.
+- [ ] **Main Bundle Optimized**: Main script package remains strictly <200KB.
+- [ ] **Memory Leak Audited**: Terminated active event listeners, timers, and closures post-unmount.
+- [ ] **Image lazy bounds**: Configured responsive formats (WebP/AVIF), width/height dimensions, and lazy attributes.
 
 ---
 
-## Quick Wins Checklist
-
-### Images
-- [ ] Lazy loading enabled
-- [ ] Proper format (WebP, AVIF)
-- [ ] Correct dimensions
-- [ ] Responsive srcset
-
-### JavaScript
-- [ ] Code splitting for routes
-- [ ] Tree shaking enabled
-- [ ] No unused dependencies
-- [ ] Async/defer for non-critical
-
-### CSS
-- [ ] Critical CSS inlined
-- [ ] Unused CSS removed
-- [ ] No render-blocking CSS
-
-### Caching
-- [ ] Static assets cached
-- [ ] Proper cache headers
-- [ ] CDN configured
-
----
-
-## Review Checklist
-
-- [ ] LCP < 2.5 seconds
-- [ ] INP < 200ms
-- [ ] CLS < 0.1
-- [ ] Main bundle < 200KB
-- [ ] No memory leaks
-- [ ] Images optimized
-- [ ] Fonts preloaded
-- [ ] Compression enabled
-
----
-
-## Anti-Patterns
+## ❌ Anti-Patterns
 
 | ❌ Don't | ✅ Do |
 |----------|-------|

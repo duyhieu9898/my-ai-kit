@@ -4,12 +4,64 @@ description: >-
   Use when codebase suffers from over-abstraction, excessive nesting, or unnecessary cognitive load.
   Code complexity reduction patterns (early returns, flattening, abstraction pruning).
   NOT for new features.
-allowed-tools: Read Write Edit Grep Glob
+allowed-tools:
+  - Read
+  - Write
+  - Edit
+  - Grep
+  - Glob
 ---
 
 # Simplify Code — Reduce Unnecessary Complexity
 
 > The best code is the code you don't have to write. The second best is the code anyone can read.
+
+---
+
+## 📑 Content Map
+
+| File | Description | When to Read |
+|:---|:---|:---|
+| _No supplementary files_ | Main code simplification procedures are in this file | Use this file by default |
+
+---
+
+## 🔗 Related Skills
+
+| Need | Skill |
+|:---|:---|
+| Code refactoring design patterns | [`react-refactor-patterns`](../react-refactor-patterns/SKILL.md) |
+| Structuring high-speed frontend designs | [`frontend-design`](../frontend-design/SKILL.md) |
+| Clean code standards and styles | [`clean-code`](../clean-code/SKILL.md) |
+
+---
+
+## 🛠️ Instructions / Procedures
+
+When tasked with pruning over-abstractions, excessive nesting, or redundant parameters, strictly follow this step-by-step procedure:
+
+### Step 1: Identify Complexity Metrics
+1. Profile function complexity based on standard limits: Nesting target ≤3, Parameters target ≤4, Lines per function ≤30, Dead code target = 0.
+2. Note any wrapper delegations, single-implementation interfaces, or strategy smells.
+
+### Step 2: Verify Behavioral Intention
+1. Validate original design intention before refactoring.
+2. Verify that complete unit/integration tests cover the paths to avoid regression errors.
+
+### Step 3: Simplify Incrementally
+1. Remove dead variables, unreachable branches, and commented-out code first.
+2. Flatten nesting levels utilizing early returns.
+3. Inline trivial single-use wrappers, constructors, or config objects.
+
+### Step 4: Verify Behavior & Compile
+1. Run existing test runners (`npm run test` or similar) to ensure all tests pass.
+2. Run build step scripts (`npm run build` or similar) to confirm clean builds.
+
+### Step 5: Quality Audit Checklist
+1. Review overall changes.
+2. Confirm compliance against the **Quality Audit Checklist** before concluding.
+
+---
 
 ## Core Principle
 
@@ -86,40 +138,6 @@ function createUser(opts: CreateUserOpts) { }
 
 ---
 
-## Simplification Protocol
-
-### Step 1: Identify Complexity
-```
-- Count nesting levels (target: ≤3)
-- Count function parameters (target: ≤4)
-- Count lines per function (target: ≤30)
-- Count abstractions per feature (target: ≤2)
-- Check for dead code (target: 0)
-```
-
-### Step 2: Verify Understanding
-Before simplifying, ensure you understand:
-- What the code does (not what it looks like it does)
-- Why it was written this way (maybe there's a reason)
-- What tests cover it (simplification must not break tests)
-
-### Step 3: Simplify Incrementally
-```
-1. Remove dead code first (safest)
-2. Flatten nesting with early returns
-3. Inline trivial abstractions
-4. Merge related functions
-5. Simplify data structures
-```
-
-### Step 4: Verify Behavior Preserved
-```bash
-npm run test    # All existing tests still pass
-npm run build   # Still compiles
-```
-
----
-
 ## When NOT to Simplify
 
 | Situation | Why Keep Complexity |
@@ -130,3 +148,25 @@ npm run build   # Still compiles
 | Will need extension soon | Abstraction prepares for known growth |
 
 > **Ask first:** "This pattern seems over-engineered. Should I simplify it, or is there a reason for the abstraction?"
+
+---
+
+## ❌ Anti-Patterns
+
+- Removing abstractions that exist for a confirmed framework, performance, or extension requirement.
+- Simplifying behavior without first confirming test coverage or expected outcomes.
+- Replacing clear explicit code with clever one-liners that reduce readability.
+- Combining unrelated responsibilities just to reduce file count.
+
+---
+
+## ✅ Quality Audit Checklist
+
+Before concluding a code simplification, flattening, or abstraction pruning task, verify compliance with the following:
+
+- [ ] **Nesting Flattened**: High levels of nested conditional branches are refactored using early returns.
+- [ ] **Dead Code Pruned**: Zero unused imports, variables, commented-out scripts, or old TODO tags remain in the edited scope.
+- [ ] **Trivial Abstractions Inlined**: Single-use interfaces, strategy abstractions, or empty wrapper classes are pruned.
+- [ ] **Signature Parameters Compacted**: Multi-parameter functions are combined using clean object parameters.
+- [ ] **Unit Tests Passing**: Existing behavior is verified preserved by running the repository's test runner commands.
+- [ ] **Clean Compilation Audited**: Code compiles and builds without any errors or structural lint issues.

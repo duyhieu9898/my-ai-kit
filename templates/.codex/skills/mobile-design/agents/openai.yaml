@@ -1,6 +1,6 @@
 interface:
   display_name: "Mobile Design"
-  short_description: "Mobile-first touch UX, gesture psychology, app performance, and cross-platform divergence."
+  short_description: "Mobile touch UX, gestures, app performance, and platform divergence."
   brand_color: "#3B82F6"
   default_prompt: "$mobile-design"
 

@@ -8,12 +8,13 @@
 
 **Hieund AG & Codex Kit CLI** là công cụ dòng lệnh (CLI) tùy chỉnh giúp bạn dễ dàng khởi tạo môi trường mở rộng năng lực cho AI Agent trực tiếp trong dự án của mình. Bộ công cụ hỗ trợ hai kiến trúc tiên tiến nhất hiện nay:
 
-1. **✨ OpenAI Codex Standard (`.codex` - Mặc định/Khuyên dùng):** 
+1. **✨ OpenAI Codex Standard (`.agents` - Mặc định/Khuyên dùng):** 
    * Kiến trúc **Composable Skills** hợp nhất toàn bộ Agent Persona và Domain Knowledge thành 66 Kỹ năng độc lập.
    * Kích hoạt động (Implicit Invocation) giúp tiết kiệm đến 90% token.
-   * Sử dụng hệ thống Luật phân cấp kế thừa từ `AGENTS.md` ở thư mục gốc.
-2. **🚀 Legacy Antigravity Framework (`.agent` - Bản cũ):** 
+   * Cài `AGENTS.md` ở thư mục gốc và cài skills/scripts vào `.agents/`.
+2. **🚀 Antigravity Framework (`.agents` - qua `--legacy`):** 
    * Phù hợp với các dự án cũ sử dụng 20 Agent chuyên gia riêng biệt và 14 quy trình lệnh gạch chéo `/command` (Slash workflows).
+   * Source template nội bộ nằm ở `templates/.antigravity/`, khi cài ra repo vẫn dùng `.agents/`.
 
 ---
 
@@ -58,12 +59,12 @@ hieund-ag-kit init --legacy
 
 | Lệnh CLI | Tham số / Flags | Mô tả |
 | :--- | :--- | :--- |
-| `hieund-ag-kit init` | *Không có* | Cài đặt cấu hình Codex (`.codex`) vào dự án hiện tại. |
-| | `--legacy` (hoặc `-l`) | Cài đặt cấu hình Antigravity (`.agent`) vào dự án hiện tại. |
+| `hieund-ag-kit init` | *Không có* | Cài đặt cấu hình Codex vào `.agents/` và `AGENTS.md` ở root dự án. |
+| | `--legacy` (hoặc `-l`) | Cài đặt cấu hình Antigravity vào `.agents/` và `GEMINI.md` ở root dự án. |
 | | `--force` (hoặc `-f`) | Buộc ghi đè nếu thư mục đích đã tồn tại. |
 | | `--path <dir>` (hoặc `-p`)| Chỉ định đường dẫn thư mục dự án mục tiêu. |
-| `hieund-ag-kit update`| *Không có* | Cập nhật cấu hình `.codex` lên phiên bản mới nhất từ GitHub. |
-| | `--legacy` (hoặc `-l`) | Cập nhật cấu hình `.agent` cũ lên bản mới nhất. |
+| `hieund-ag-kit update`| *Không có* | Cập nhật cấu hình Codex trong `.agents/` lên phiên bản mới nhất từ GitHub. |
+| | `--legacy` (hoặc `-l`) | Cập nhật cấu hình Antigravity trong `.agents/` lên bản mới nhất. |
 | `hieund-ag-kit status`| *Không có* | Kiểm tra song song tình trạng cài đặt của cả bản Codex và Antigravity trong dự án. |
 
 ---
@@ -73,7 +74,7 @@ hieund-ag-kit init --legacy
 Để mở rộng hoặc chỉnh sửa năng lực của bộ kit:
 
 1. **Thêm/Sửa Skill cho Codex:** Chỉnh sửa hoặc thêm mới các thư mục kỹ năng trong `templates/.codex/skills/`.
-2. **Thêm/Sửa Skill cho Antigravity:** Chỉnh sửa trong `templates/.agent/skills/`.
+2. **Thêm/Sửa Skill cho Antigravity:** Chỉnh sửa trong `templates/.antigravity/skills/`.
 3. **Đẩy cấu hình mới lên GitHub:**
    ```bash
    git add .

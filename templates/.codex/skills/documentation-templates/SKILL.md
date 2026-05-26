@@ -4,12 +4,60 @@ description: >-
   Use when writing project READMEs, documenting API endpoints, structuring developer manuals, commenting code, or configuring llms.txt.
   Standard structures and templates for READMEs, APIs, JSDoc comments, Changelogs, and ADRs.
   NOT for general writing tasks unrelated to software development.
-allowed-tools: Read Glob Grep
+allowed-tools:
+  - Read
+  - Glob
+  - Grep
 ---
 
 # Documentation Templates
 
 > Templates and structure guidelines for common documentation types.
+
+---
+
+## 📑 Content Map
+
+| File | Description | When to Read |
+|:---|:---|:---|
+| No supplementary files | This skill is self-contained | Use the procedures below directly |
+
+---
+
+## 🔗 Related Skills
+
+| Need | Skill |
+|:---|:---|
+| Technical copywriting and writing style guides | [`documentation-writer`](../documentation-writer/SKILL.md) |
+| Standardizing step-by-step engineering plans | [`plan-writing`](../plan-writing/SKILL.md) |
+| Architecture Decision Records | [`architecture`](../architecture/SKILL.md) |
+| API documentation accuracy | [`api-patterns`](../api-patterns/SKILL.md) |
+
+---
+
+## 🛠️ Instructions / Procedures
+
+When tasked with generating technical manuals, API specs, or code commentary guides, strictly follow this step-by-step procedure:
+
+### Step 1: Query Document Objectives
+1. Define the required document profile (README, API endpoints spec, JSDoc/TSDoc blocks, Changelogs, ADRs, or `llms.txt`).
+2. Identify target readers.
+
+### Step 2: Load the Targeted Template
+1. Fetch the corresponding template structure from this standard.
+2. Maintain standard section hierarchies.
+
+### Step 3: Populate Real Parameters
+1. Replace all mock template values with active system properties (e.g. genuine port numbers, environment variables tables, tested quick start scripts).
+2. Avoid leaving any empty placeholders.
+
+### Step 4: Enhance with Visual Schemas
+1. Inject clean JSON/YAML data blocks representing request payloads.
+2. Build Mermaid flow diagrams to explain complex operational loops.
+
+### Step 5: Verify AI crawler readiness & checklist
+1. Structure directories to expose clean `llms.txt` entry points.
+2. Confirm compliance against the **Quality Audit Checklist** before completing.
 
 ---
 
@@ -180,6 +228,28 @@ For RAG indexing:
 - JSON/YAML examples for data structures
 - Mermaid diagrams for flows
 - Self-contained sections
+
+---
+
+## ❌ Anti-Patterns
+
+- Leave bracketed placeholders or fake example values in generated docs.
+- Document APIs or commands without verifying current names, paths, ports, or schemas.
+- Mix README, API reference, ADR, and changelog content without clear section boundaries.
+- Add obvious code comments that repeat implementation details instead of explaining intent.
+- Create `llms.txt` entries with stale or broken relative links.
+
+---
+
+## ✅ Quality Audit Checklist
+
+Before concluding a documentation writing, README generation, or JSDoc/TSDoc API comments task, verify compliance with the following:
+
+- [ ] **Templates Selected**: Leveraged standard structures (ADR/Changelog/README) aligning with the requested document type.
+- [ ] **No Placeholders Left**: Substituted all bracketed placeholders `[...]` with active project details.
+- [ ] **Executable Examples Provided**: Confirmed request/response schemas and code examples are syntactically valid and current.
+- [ ] **Scannability Rules Applied**: Checked for single H1 per page, clear H2/H3 levels, and markdown formatting wrappers.
+- [ ] **AI Crawler Indexable**: Confirmed `llms.txt` references contain correct relative links and brief description summaries.
 
 ---
 

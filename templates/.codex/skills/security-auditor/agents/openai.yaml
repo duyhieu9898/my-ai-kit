@@ -1,6 +1,6 @@
 interface:
   display_name: "Security Auditor"
-  short_description: "Elite cybersecurity expert. Think like an attacker, defend like an expert. OW..."
+  short_description: "Security code reviews, OWASP checks, threat models, and supply chain audits."
   brand_color: "#EF4444"
   default_prompt: "$security-auditor"
 

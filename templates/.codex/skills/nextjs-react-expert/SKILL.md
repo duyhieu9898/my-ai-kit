@@ -4,7 +4,13 @@ description: >-
   Use when building React components, optimizing Next.js routing/fetching, diagnosing UI lag, or configuring Next.js 16+ caching/PPR.
   Next.js and React performance optimization rules covering waterfalls, bundle size, and memoization.
   NOT for basic HTML templates.
-allowed-tools: Read Write Edit Glob Grep Bash
+allowed-tools:
+  - Read
+  - Write
+  - Edit
+  - Glob
+  - Grep
+  - Bash
 ---
 
 # Next.js & React Performance Expert
@@ -14,31 +20,65 @@ allowed-tools: Read Write Edit Glob Grep Bash
 
 ---
 
-## 🎯 Selective Reading Rule (MANDATORY)
-
-**Read ONLY sections relevant to your task!** Check the content map below and load what you need.
-
-> 🔴 **For performance reviews: Start with CRITICAL sections (1-2), then move to HIGH/MEDIUM.**
-
----
-
 ## 📑 Content Map
 
 | File | Impact | Rules | When to Read |
 |------|--------|-------|--------------|
-| `references/1-async-eliminating-waterfalls.md` | 🔴 **CRITICAL** | 5 rules | Slow page loads, sequential API calls, data fetching waterfalls |
-| `references/2-bundle-bundle-size-optimization.md` | 🔴 **CRITICAL** | 5 rules | Large bundle size, slow Time to Interactive, First Load issues |
-| `references/3-server-server-side-performance.md` | 🟠 **HIGH** | 7 rules | Slow SSR, API route optimization, server-side waterfalls |
-| `references/4-client-client-side-data-fetching.md` | 🟡 **MEDIUM-HIGH** | 4 rules | Client data management, SWR patterns, deduplication |
-| `references/5-rerender-re-render-optimization.md` | 🟡 **MEDIUM** | 12 rules | Excessive re-renders, React performance, memoization |
-| `references/6-rendering-rendering-performance.md` | 🟡 **MEDIUM** | 9 rules | Rendering bottlenecks, virtualization, image optimization |
-| `references/7-js-javascript-performance.md` | ⚪ **LOW-MEDIUM** | 12 rules | Micro-optimizations, caching, loop performance |
-| `references/8-advanced-advanced-patterns.md` | 🔵 **VARIABLE** | 3 rules | Advanced React patterns, useLatest, init-once |
-| `references/9-cache-components.md` | 🔴 **CRITICAL** | 4 sections | **Next.js 16+ Only**: `use cache`, `cacheLife`, PPR, `cacheTag` |
-
-**Total: 57 rules across 8 categories**
+| [references/1-async-eliminating-waterfalls.md](references/1-async-eliminating-waterfalls.md) | 🔴 **CRITICAL** | 5 rules | Slow page loads, sequential API calls, data fetching waterfalls |
+| [references/2-bundle-bundle-size-optimization.md](references/2-bundle-bundle-size-optimization.md) | 🔴 **CRITICAL** | 5 rules | Large bundle size, slow Time to Interactive, First Load issues |
+| [references/3-server-server-side-performance.md](references/3-server-server-side-performance.md) | 🟠 **HIGH** | 7 rules | Slow SSR, API route optimization, server-side waterfalls |
+| [references/4-client-client-side-data-fetching.md](references/4-client-client-side-data-fetching.md) | 🟡 **MEDIUM-HIGH** | 4 rules | Client data management, SWR patterns, deduplication |
+| [references/5-rerender-re-render-optimization.md](references/5-rerender-re-render-optimization.md) | 🟡 **MEDIUM** | 12 rules | Excessive re-renders, React performance, memoization |
+| [references/6-rendering-rendering-performance.md](references/6-rendering-rendering-performance.md) | 🟡 **MEDIUM** | 9 rules | Rendering bottlenecks, virtualization, image optimization |
+| [references/7-js-javascript-performance.md](references/7-js-javascript-performance.md) | ⚪ **LOW-MEDIUM** | 12 rules | Micro-optimizations, caching, loop performance |
+| [references/8-advanced-advanced-patterns.md](references/8-advanced-advanced-patterns.md) | 🔵 **VARIABLE** | 3 rules | Advanced React patterns, useLatest, init-once |
+| [references/9-cache-components.md](references/9-cache-components.md) | 🔴 **CRITICAL** | 4 sections | **Next.js 16+ Only**: `use cache`, `cacheLife`, PPR, `cacheTag` |
 
 ---
+
+## 🔗 Related Skills
+
+| Need | Skill |
+|------|-------|
+| API design patterns | [`api-patterns`](../api-patterns/SKILL.md) |
+| Database optimization | [`database-design`](../database-design/SKILL.md) |
+| Testing strategies | [`testing-patterns`](../testing-patterns/SKILL.md) |
+| UI/UX design principles | [`frontend-design`](../frontend-design/SKILL.md) |
+
+---
+
+## 🛠️ Instructions / Procedures
+
+When tasked with building React components, diagnosing UI lag, or optimizing caching structures, strictly follow this step-by-step procedure:
+
+### Step 1: Detect Performance Bottleneck
+1. Audit page performance using Chrome DevTools or React Profiler profiles.
+2. Locate issue category (e.g. dynamic rendering slow-downs, barrel exports, rendering waterfalls, memory leaks).
+
+### Step 2: Query the Decision Tree
+1. Query the **Quick Decision Tree** to map the issue to the appropriate optimization category.
+2. If slow load or waterfall latency is present, **you must prioritize Critical references** (Waterfalls and Bundle size) before optimizing minor details.
+
+### Step 3: Run Automated Performance Audits
+1. Run the performance checking utility (`react_performance_checker.py`) via terminal command:
+   `python scripts/react_performance_checker.py <project_path>`
+2. Parse output warnings regarding barrel exports, sequential await calls, or client-side fetch patterns.
+
+### Step 4: Refactor and Eliminate Bottlenecks
+1. Apply targeted optimization principles (Promise.all Parallel fetches, Suspense streaming boundaries, next/image wrappers).
+2. Remove nested un-memoized loops and configure caching strategies if Next.js 16+ is used (`use cache`).
+
+### Step 5: Validate Suite & Audit checklist
+1. Verify bundle sizes and run lint/testing actions.
+2. Confirm compliance against the **Quality Audit Checklist** before completing.
+
+---
+
+## 🎯 Selective Reading Rule (MANDATORY)
+
+**Read ONLY sections relevant to your task!** Check the content map above and load what you need.
+
+> 🔴 **For performance reviews: Start with CRITICAL sections (1-2), then move to HIGH/MEDIUM.**
 
 ## 🚀 Quick Decision Tree
 
@@ -108,53 +148,6 @@ allowed-tools: Read Write Edit Glob Grep Bash
 
 ---
 
-## 🔗 Related Skills
-
-| Need | Skill |
-|------|-------|
-| API design patterns | api-patterns |
-| Database optimization | database-design |
-| Testing strategies | testing-patterns |
-| UI/UX design principles | frontend-design |
-| TypeScript patterns | typescript-expert |
-| Deployment & DevOps | deployment-procedures |
-
----
-
-## ✅ Performance Review Checklist
-
-Before shipping to production:
-
-**Critical (Must Fix):**
-
-- [ ] No sequential data fetching (waterfalls eliminated)
-- [ ] Bundle size < 200KB for main bundle
-- [ ] No barrel imports in app code
-- [ ] Dynamic imports used for large components
-- [ ] Parallel data fetching where possible
-
-**High Priority:**
-
-- [ ] Server components used where appropriate
-- [ ] API routes optimized (no N+1 queries)
-- [ ] Suspense boundaries for data fetching
-- [ ] Static generation used where possible
-
-**Medium Priority:**
-
-- [ ] Expensive computations memoized
-- [ ] List rendering virtualized (if > 100 items)
-- [ ] Images optimized with next/image
-- [ ] No unnecessary re-renders
-
-**Low Priority (Polish):**
-
-- [ ] Hot path loops optimized
-- [ ] RegExp patterns hoisted
-- [ ] Property access cached in loops
-
----
-
 ## ❌ Anti-Patterns (Common Mistakes)
 
 **DON'T:**
@@ -179,30 +172,6 @@ Before shipping to production:
 
 ---
 
-## 🎯 How to Use This Skill
-
-### For New Features:
-
-1. Check **Section 1 & 2** while building (prevent waterfalls, keep bundle small)
-2. Use server components by default (Section 3)
-3. Apply memoization for expensive operations (Section 5)
-
-### For Performance Reviews:
-
-1. Start with **Section 1** (waterfalls = biggest impact)
-2. Then **Section 2** (bundle size)
-3. Then **Section 3** (server-side)
-4. Finally other sections as needed
-
-### For Debugging Slow Performance:
-
-1. Identify the symptom (slow load, lag, etc.)
-2. Use Quick Decision Tree above
-3. Read relevant section
-4. Apply fixes in priority order
-
----
-
 ## 📚 Learning Path
 
 **Beginner (Focus on Critical):**
@@ -213,7 +182,7 @@ Before shipping to production:
 → Section 3: Server-Side Performance
 → Section 5: Re-render Optimization
 
-**Advanced (Full Optimization):**
+**Advanced (Focus on Full Optimization):**
 → All sections + Section 8: Advanced Patterns
 
 ---
@@ -222,7 +191,21 @@ Before shipping to production:
 
 | Script | Purpose | Command |
 |--------|---------|---------|
-| `scripts/react_performance_checker.py` | Automated performance audit | `python scripts/react_performance_checker.py <project_path>` |
+| [scripts/react_performance_checker.py](scripts/react_performance_checker.py) | Automated performance audit | `python scripts/react_performance_checker.py <project_path>` |
+
+---
+
+## ✅ Quality Audit Checklist
+
+Before concluding Next.js or React UI optimization tasks, verify compliance with the following:
+
+- [ ] **Sequential Calls Eliminated**: Independent queries are executed in parallel (`Promise.all()`) to prevent rendering waterfalls.
+- [ ] **Bundle Constraint Met**: Main bundle footprint remains strictly <200KB.
+- [ ] **Direct Imports Configured**: Zero barrel re-exports (`index.ts`) are used in critical app module paths.
+- [ ] **Dynamic Load Bound**: Heavy subcomponents and dynamic libraries load via `dynamic()` or React lazy bounds.
+- [ ] **Server Optimization Priority**: React Server Components execute static data fetches by default.
+- [ ] **Memoization Active**: Heavy loop operations or complex mappings are memoized via `useMemo` or `useCallback`.
+- [ ] **Modern Caching Leveraged**: Caching APIs (`use cache` or Suspense streaming boundaries) are utilized if Next.js 16+ is detected.
 
 ---
 

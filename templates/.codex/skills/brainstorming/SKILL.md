@@ -5,7 +5,10 @@ description: >-
   defining must-have vs nice-to-have options, or handling exceptions.
   Socratic questioning protocol and developer-user communication guidelines covering trade-offs, status reporting, and completion summaries.
   NOT for standard task automation or standalone code modifications.
-allowed-tools: Read Glob Grep
+allowed-tools:
+  - Read
+  - Glob
+  - Grep
 ---
 
 # Brainstorming & Communication Protocol
@@ -15,10 +18,23 @@ allowed-tools: Read Glob Grep
 ## 📑 Content Map
 
 | File | Description | When to Read |
-|------|-------------|--------------|
-| `references/dynamic-questioning.md` | In-depth domain-specific Socratic questioning libraries and algorithms | Designing dynamic questions and mapping trade-offs |
+|:---|:---|:---|
+| [references/dynamic-questioning.md](references/dynamic-questioning.md) | In-depth domain-specific Socratic questioning libraries and algorithms | Designing dynamic questions and mapping trade-offs |
 
 ---
+
+## 🔗 Related Skills
+
+| Skill | Relationship | When to Use Together |
+|:---|:---|:---|
+| [`behavioral-modes`](../behavioral-modes/SKILL.md) | Operating mode selection | When switching between brainstorm, implement, debug, review, teach, and ship modes |
+| [`architecture`](../architecture/SKILL.md) | Technical trade-off analysis | When brainstorming impacts system architecture or ADR decisions |
+| [`project-planner`](../project-planner/SKILL.md) | Task breakdown and planning | When clarified ideas need an executable implementation plan |
+| [`memory-system`](../memory-system/SKILL.md) | Decision persistence | When brainstorming decisions should be saved for future sessions |
+
+---
+
+## 🛠️ Instructions / Procedures
 
 ## 🛑 Socratic Gate (Enforcement)
 
@@ -36,7 +52,7 @@ allowed-tools: Read Glob Grep
 > Before asking questions, check if past context exists:
 
 ```
-0. CHECK MEMORY — Does .agent/memory/MEMORY.md exist?
+0. CHECK MEMORY — Does .agents/memory/MEMORY.md exist?
    → YES: Read index. Apply relevant past decisions silently.
           Skip questions already answered in memory.
    → NO: Proceed with standard Socratic Gate.
@@ -45,7 +61,7 @@ allowed-tools: Read Glob Grep
 ### 🚫 MANDATORY: 3 Questions Before Implementation
 
 1. **STOP** - Do NOT start coding
-2. **CHECK** - Read `.agent/memory/` for past context on this topic
+2. **CHECK** - Read `.agents/memory/` for past context on this topic
 3. **ASK** - Minimum 3 questions (skip any already answered via memory):
    - 🎯 Purpose: What problem are you solving?
    - 👥 Users: Who will use this?
@@ -173,7 +189,7 @@ allowed-tools: Read Glob Grep
 
 ---
 
-## Anti-Patterns (AVOID)
+## ❌ Anti-Patterns
 
 | Anti-Pattern | Why |
 |--------------|-----|
@@ -182,3 +198,14 @@ allowed-tools: Read Glob Grep
 | Over-engineering first version | Delays value delivery |
 | Ignoring constraints | Creates unusable solutions |
 | "I think" phrases | Uncertainty → Ask instead |
+
+---
+
+## ✅ Quality Audit Checklist
+
+- [ ] The request is actually ambiguous, greenfield, strategic, or exception-heavy enough to require brainstorming.
+- [ ] Existing memory/context was checked before asking duplicate questions.
+- [ ] Questions are dynamic and tied to concrete trade-offs, not copied from a static template.
+- [ ] Blocking decisions are separated from nice-to-have preferences.
+- [ ] Defaults are stated with rationale when the user does not specify an option.
+- [ ] Final decisions and scope are summarized before implementation or handoff.

@@ -3,11 +3,67 @@ name: game-developer
 description: >-
   Use when building games with Unity, Godot, Unreal, Phaser, Three.js, or any game engine across PC, Web, Mobile, or VR/AR.
   Game development principles covering mechanics, multiplayer, optimization, and 2D/3D graphics.
+  NOT for non-interactive websites or standard business application UI.
+allowed-tools:
+  - Read
+  - Write
+  - Edit
+  - Glob
+  - Grep
+  - Bash
 ---
 
 # Game Developer Agent
 
 Expert game developer specializing in multi-platform game development with 2025 best practices.
+
+---
+
+## 📑 Content Map
+
+| File | Description | When to Read |
+|:---|:---|:---|
+| No supplementary files | This skill is self-contained | Use the procedures below directly |
+
+---
+
+## 🔗 Related Skills
+
+| Need | Skill |
+|:---|:---|
+| Core game orchestrator and platform references | [`game-development`](../game-development/SKILL.md) |
+| Memory caching and framerate tuning | [`performance-optimizer`](../performance-optimizer/SKILL.md) |
+| Web game UI and canvas implementation | [`frontend-specialist`](../frontend-specialist/SKILL.md) |
+| Mobile game platform constraints | [`mobile-developer`](../mobile-developer/SKILL.md) |
+| Browser gameplay testing | [`webapp-testing`](../webapp-testing/SKILL.md) |
+
+---
+
+## 🛠️ Instructions / Procedures
+
+When tasked with designing game architectures, optimizing game loops, or planning asset pipelines, strictly follow this step-by-step procedure:
+
+### Step 1: Plan Platform Adaptation
+1. Query client targets and read the platform sub-skill (`references/web-games.md`, `references/mobile-games.md`, `references/pc-games.md`).
+2. Identify safe UI areas and viewport ratios.
+
+### Step 2: Establish Spatial Dimensions
+1. Select 2D sprite hierarchies (`references/2d-games.md`) or 3D mesh rendering pipelines (`references/3d-games.md`).
+2. Choose matching coordinate spaces.
+
+### Step 3: Implement Game Loop fixed ticks
+1. Code game loops to run core logic/physics updates on a fixed timestep.
+2. Allow rendering frame execution at variable speeds using visual interpolations.
+
+### Step 4: Abstract Key Bindings
+1. Map physical keys or taps onto abstract action objects (e.g. Action: "jump").
+2. Build support for gamepad or mobile touch buttons overlays.
+
+### Step 5: Budget Frame Budgets & Verify Checklist
+1. Optimize graphics render layers using batched draw calls and object pooling.
+2. Confirm compliance against the **Quality Audit Checklist** before completing.
+
+---
 
 ## Core Philosophy
 
@@ -124,7 +180,7 @@ Every game has this cycle:
 
 ---
 
-## Anti-Patterns
+## ❌ Anti-Patterns
 
 | ❌ Don't | ✅ Do |
 |----------|-------|
@@ -136,25 +192,16 @@ Every game has this cycle:
 
 ---
 
-## Review Checklist
+## ✅ Quality Audit Checklist
 
-- [ ] Core gameplay loop defined?
-- [ ] Engine chosen for right reasons?
-- [ ] Performance targets set?
-- [ ] Input abstraction in place?
-- [ ] Save system planned?
-- [ ] Audio system considered?
+Before concluding a game prototype, asset engine integration, or graphics pipeline task, verify compliance with the following:
 
----
-
-## When You Should Be Used
-
-- Building games on any platform
-- Choosing game engine
-- Implementing game mechanics
-- Optimizing game performance
-- Designing multiplayer systems
-- Creating VR/AR experiences
+- [ ] **Timestep Logic Decoupled**: Confirmed physics updates run on a fixed timer while rendering frame updates run variable.
+- [ ] **GC Spikes Avoided**: Ensured no object instantiations occur within fast loop updates (implemented object pooling for active entities).
+- [ ] **Input Actions Abstracted**: Mapped raw touch or key inputs onto high-level logical Actions (jump, slide) for easy rebinds.
+- [ ] **Render draw calls Batched**: Optimized canvas render calls using sprite sheets or texture atlases to reduce pipeline lag.
+- [ ] **Frame Budget Kept (<16ms)**: Audited execution metrics to guarantee active frames process under target latency limits.
+- [ ] **Profile-driven Tuning Done**: Profiled performance CPU bottlenecks before choosing algorithm changes or ECS rewrites.
 
 ---
 

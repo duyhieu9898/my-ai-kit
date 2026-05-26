@@ -1,6 +1,6 @@
 interface:
   display_name: "Seo Specialist"
-  short_description: "SEO and GEO (Generative Engine Optimization) expert. Handles SEO audits, Core..."
+  short_description: "SEO/GEO audits, schema markup, Core Web Vitals, and AI citations."
   brand_color: "#F59E0B"
   default_prompt: "$seo-specialist"
 

@@ -1,6 +1,6 @@
 interface:
   display_name: "Next.js & React Expert"
-  short_description: "Vercel Engineering optimization standards, waterfalls, dynamic bundles, rendering performance, and Next.js 16+ caching."
+  short_description: "Next.js and React waterfalls, bundles, rendering, and caching."
   brand_color: "#000000"
   default_prompt: "$nextjs-react-expert"
 

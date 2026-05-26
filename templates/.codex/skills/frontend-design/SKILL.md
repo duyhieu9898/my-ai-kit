@@ -4,7 +4,13 @@ description: >-
   Use when designing component layouts, establishing color palettes, font systems, or writing modern responsive interfaces.
   Design thinking and UX guidelines covering proportional grids, typography, shadow effects, and Next.js Form patterns.
   NOT for native mobile apps.
-allowed-tools: Read Write Edit Glob Grep Bash
+allowed-tools:
+  - Read
+  - Write
+  - Edit
+  - Glob
+  - Grep
+  - Bash
 ---
 
 # Frontend Design System
@@ -14,21 +20,62 @@ allowed-tools: Read Write Edit Glob Grep Bash
 
 ---
 
-## 🎯 Selective Reading Rule (MANDATORY)
+## 📑 Content Map
 
-**Read REQUIRED files always, OPTIONAL only when needed:**
+| File | Description | When to Read |
+|:---|:---|:---|
+| [references/ux-psychology.md](references/ux-psychology.md) | UX Laws, trust indicators, emotional design (**REQUIRED**) | Always read first! |
+| [references/color-system.md](references/color-system.md) | Curated palettes, HSL tailoring, primary/accent rules | Determining color systems |
+| [references/typography-system.md](references/typography-system.md) | Font selection, pairing, size scales, line readability | Selecting typography |
+| [references/visual-effects.md](references/visual-effects.md) | Glassmorphism, shadow elevations, gradient rules | Selecting shadows, borders, backgrounds |
+| [references/animation-guide.md](references/animation-guide.md) | Duration curves, easing functions, custom motion guidelines | Implementing animations |
+| [references/motion-graphics.md](references/motion-graphics.md) | Advanced animations, SVG paths, 3D particles, Lottie rules | Designing advanced motion graphics |
+| [references/decision-trees.md](references/decision-trees.md) | Context-specific structural/aesthetic decision trees | Planning page-level design directions |
+| [scripts/ux_audit.py](scripts/ux_audit.py) | UX psychology and accessibility audit script | Auditing implemented web UI |
+| [scripts/accessibility_checker.py](scripts/accessibility_checker.py) | Accessibility-focused static checker | Checking contrast, labels, and semantic issues |
 
-| File | Status | When to Read |
-|------|--------|--------------|
-| `references/ux-psychology.md` | 🔴 **REQUIRED** | Always read first! |
-| `references/color-system.md` | ⚪ Optional | Color/palette decisions |
-| `references/typography-system.md` | ⚪ Optional | Font selection/pairing |
-| `references/visual-effects.md` | ⚪ Optional | Glassmorphism, shadows, gradients |
-| `references/animation-guide.md` | ⚪ Optional | Animation needed |
-| `references/motion-graphics.md` | ⚪ Optional | Lottie, GSAP, 3D |
-| `references/decision-trees.md` | ⚪ Optional | Context templates |
+---
 
-> 🔴 **references/ux-psychology.md = ALWAYS READ. Others = only if relevant.**
+## 🔗 Related Skills
+
+| Need | Skill |
+|:---|:---|
+| Implementing web UI from design guidance | [`frontend-specialist`](../frontend-specialist/SKILL.md) |
+| Next.js and React implementation details | [`nextjs-react-expert`](../nextjs-react-expert/SKILL.md) |
+| Post-coding layout audit, accessibility, perf | [`web-design-guidelines`](../web-design-guidelines/SKILL.md) |
+| Native mobile interface guidance | [`mobile-design`](../mobile-design/SKILL.md) |
+
+---
+
+## 🛠️ Instructions / Procedures
+
+For EVERY design, layout, or visual implementation task, follow this step-by-step procedure:
+
+### Step 1: Execute Constraint Analysis
+1. Proactively identify constraints listed in Section 1 (Timeline, Content status, Brand guidelines, Tech stack, and Target Audience).
+2. **STOP & ASK**: If colors, style, or layout are vague or unspecified, immediately ask the user the clarification questions listed in the **"ASK BEFORE ASSUMING"** section.
+
+### Step 2: Apply UX Psychology Principles
+1. Always read **[references/ux-psychology.md](references/ux-psychology.md)** first.
+2. Ensure the UI conforms to Fitts' Law (CTA sizes), Hick's Law (progressive disclosure), and Miller's Law (content chunking).
+3. Establish trust indicators (security, social proof) and select emotional design triggers appropriate to the target audience.
+
+### Step 3: Architect Layout & Proportions
+1. Apply the Golden Ratio (spacing and headings) and the 8-Point Grid system (spacing and container dimensions) as outlined in Section 3.
+2. Set button heights, touch targets, input alignments, and reading widths (45-75 characters) to maximize usability.
+
+### Step 4: Configure Visual Aesthetic (Colors, Typography, Effects)
+1. Design a tailored color scheme applying the 60-30-10 rule. If colors are chosen, consult **[references/color-system.md](references/color-system.md)** for HSL parameters.
+2. Set font pairings and hierarchy scales using rules in **[references/typography-system.md](references/typography-system.md)**.
+3. Plan realistic depth using shadow elevations and safe gradient transitions using **[references/visual-effects.md](references/visual-effects.md)**.
+
+### Step 5: Incorporate Purposeful Motion
+1. Determine animation curves, easing types (Ease-in, Ease-out, Bounce), and speed settings based on guides in **[references/animation-guide.md](references/animation-guide.md)**.
+2. For advanced SVG, Lottie, or 3D animations, use **[references/motion-graphics.md](references/motion-graphics.md)**.
+
+### Step 6: Review & Audit
+1. Execute `python scripts/ux_audit.py <project_path>` to detect accessibility and cognitive load issues.
+2. Run the **Quality Audit Checklist** to ensure compliance with modern guidelines before final delivery.
 
 ---
 
@@ -37,8 +84,9 @@ allowed-tools: Read Write Edit Glob Grep Bash
 **Execute these for audits (don't read, just run):**
 
 | Script | Purpose | Usage |
-|--------|---------|-------|
-| `scripts/ux_audit.py` | UX Psychology & Accessibility Audit | `python scripts/ux_audit.py <project_path>` |
+|:---|:---|:---|
+| [scripts/ux_audit.py](scripts/ux_audit.py) | UX Psychology & Accessibility Audit | `python scripts/ux_audit.py <project_path>` |
+| [scripts/accessibility_checker.py](scripts/accessibility_checker.py) | Accessibility static checks | `python scripts/accessibility_checker.py <project_path>` |
 
 ---
 
@@ -60,26 +108,26 @@ allowed-tools: Read Write Edit Glob Grep Bash
 ### ⛔ DEFAULT TENDENCIES TO AVOID (ANTI-SAFE HARBOR):
 
 | AI Default Tendency | Why It's Bad | Think Instead |
-|---------------------|--------------|---------------|
+|:---|:---|:---|
 | **Bento Grids (Modern Cliché)** | Used in every AI design | Why does this content NEED a grid? |
 | **Hero Split (Left/Right)** | Predictable & Boring | How about Massive Typography or Vertical Narrative? |
 | **Mesh/Aurora Gradients** | The "new" lazy background | What's a radical color pairing? |
 | **Glassmorphism** | AI's idea of "premium" | How about solid, high-contrast flat? |
 | **Deep Cyan / Fintech Blue** | Safe harbor from purple ban | Why not Red, Black, or Neon Green? |
 | **"Orchestrate / Empower"** | AI-generated copywriting | How would a human say this? |
-| Dark background + neon glow | Overused, "AI look" | What does the BRAND actually need? |
+| **Dark background + neon glow** | Overused, "AI look" | What does the BRAND actually need? |
 | **Rounded everything** | Generic/Safe | Where can I use sharp, brutalist edges? |
 
 > 🔴 **"Every 'safe' structure you choose brings you one step closer to a generic template. TAKE RISKS."**
 
 ---
 
-## 1. Constraint Analysis (ALWAYS FIRST)
+## 1. Constraint Analysis
 
 Before any design work, ANSWER THESE or ASK USER:
 
 | Constraint | Question | Why It Matters |
-|------------|----------|----------------|
+|:---|:---|:---|
 | **Timeline** | How much time? | Determines complexity |
 | **Content** | Ready or placeholder? | Affects layout flexibility |
 | **Brand** | Existing guidelines? | May dictate colors/fonts |
@@ -89,7 +137,7 @@ Before any design work, ANSWER THESE or ASK USER:
 ### Audience → Design Approach
 
 | Audience | Think About |
-|----------|-------------|
+|:---|:---|
 | **Gen Z** | Bold, fast, mobile-first, authentic |
 | **Millennials** | Clean, minimal, value-driven |
 | **Gen X** | Familiar, trustworthy, clear |
@@ -104,7 +152,7 @@ Before any design work, ANSWER THESE or ASK USER:
 ### Core Laws (Internalize These)
 
 | Law | Principle | Application |
-|-----|-----------|-------------|
+|:---|:---|:---|
 | **Hick's Law** | More choices = slower decisions | Limit options, use progressive disclosure |
 | **Fitts' Law** | Bigger + closer = easier to click | Size CTAs appropriately |
 | **Miller's Law** | ~7 items in working memory | Chunk content into groups |
@@ -137,7 +185,7 @@ REFLECTIVE (memory) → After: "I like what this says about me"
 Use for proportional harmony:
 ├── Content : Sidebar = roughly 62% : 38%
 ├── Each heading size = previous × 1.618 (for dramatic scale)
-├── Spacing can follow: sm → md → lg (each × 1.618)
+└── Spacing can follow: sm → md → lg (each × 1.618)
 ```
 
 ### 8-Point Grid Concept
@@ -155,7 +203,7 @@ All spacing and sizing in multiples of 8:
 ### Key Sizing Principles
 
 | Element | Consideration |
-|---------|---------------|
+|:---|:---|
 | **Touch targets** | Minimum comfortable tap size |
 | **Buttons** | Height based on importance hierarchy |
 | **Inputs** | Match button height for alignment |
@@ -177,7 +225,7 @@ All spacing and sizing in multiples of 8:
 ### Color Psychology (For Decision Making)
 
 | If You Need... | Consider Hues | Avoid |
-|----------------|---------------|-------|
+|:---|:---|:---|
 | Trust, calm | Blue family | Aggressive reds |
 | Growth, nature | Green family | Industrial grays |
 | Energy, urgency | Orange, red | Passive blues |
@@ -200,7 +248,7 @@ For detailed color theory: see `references/color-system.md`
 ### Scale Selection
 
 | Content Type | Scale Ratio | Feel |
-|--------------|-------------|------|
+|:---|:---|:---|
 | Dense UI | 1.125-1.2 | Compact, efficient |
 | General web | 1.25 | Balanced (most common) |
 | Editorial | 1.333 | Readable, spacious |
@@ -278,7 +326,7 @@ Duration based on:
 ### Easing Selection
 
 | Action | Easing | Why |
-|--------|--------|-----|
+|:---|:---|:---|
 | Entering | Ease-out | Decelerate, settle in |
 | Leaving | Ease-in | Accelerate, exit |
 | Emphasis | Ease-in-out | Smooth, deliberate |
@@ -294,135 +342,7 @@ For animation patterns: see `references/animation-guide.md`, for advanced: `refe
 
 ---
 
-## 8. "Wow Factor" Checklist
-
-### Premium Indicators
-
-- [ ] Generous whitespace (luxury = breathing room)
-- [ ] Subtle depth and dimension
-- [ ] Smooth, purposeful animations
-- [ ] Attention to detail (alignment, consistency)
-- [ ] Cohesive visual rhythm
-- [ ] Custom elements (not all defaults)
-
-### Trust Builders
-
-- [ ] Security cues where appropriate
-- [ ] Social proof / testimonials
-- [ ] Clear value proposition
-- [ ] Professional imagery
-- [ ] Consistent design language
-
-### Emotional Triggers
-
-- [ ] Hero that evokes intended emotion
-- [ ] Human elements (faces, stories)
-- [ ] Progress/achievement indicators
-- [ ] Moments of delight
-
----
-
-## 9. Anti-Patterns (What NOT to Do)
-
-### ❌ Lazy Design Indicators
-
-- Default system fonts without consideration
-- Stock imagery that doesn't match
-- Inconsistent spacing
-- Too many competing colors
-- Walls of text without hierarchy
-- Inaccessible contrast
-
-### ❌ AI Tendency Patterns (AVOID!)
-
-- **Same colors every project**
-- **Dark + neon as default**
-- **Purple/violet everything (PURPLE BAN ✅)**
-- **Bento grids for simple landing pages**
-- **Mesh Gradients & Glow Effects**
-- **Same layout structure / Vercel clone**
-- **Not asking user preferences**
-
-### ❌ Dark Patterns (Unethical)
-
-- Hidden costs
-- Fake urgency
-- Forced actions
-- Deceptive UI
-- Confirmshaming
-
----
-
-## 10. Decision Process Summary
-
-```
-For EVERY design task:
-
-1. CONSTRAINTS
-   └── What's the timeline, brand, tech, audience?
-   └── If unclear → ASK
-
-2. CONTENT
-   └── What content exists?
-   └── What's the hierarchy?
-
-3. STYLE DIRECTION
-   └── What's appropriate for context?
-   └── If unclear → ASK (don't default!)
-
-4. EXECUTION
-   └── Apply principles above
-   └── Check against anti-patterns
-
-5. REVIEW
-   └── "Does this serve the user?"
-   └── "Is this different from my defaults?"
-   └── "Would I be proud of this?"
-```
-
----
-
-## Reference Files
-
-For deeper guidance on specific areas:
-
-- `references/color-system.md` - Color theory and selection process
-- `references/typography-system.md` - Font pairing and scale decisions
-- `references/visual-effects.md` - Effects principles and techniques
-- `references/animation-guide.md` - Motion design principles
-- `references/motion-graphics.md` - Advanced: Lottie, GSAP, SVG, 3D, Particles
-- `references/decision-trees.md` - Context-specific templates
-- `references/ux-psychology.md` - User psychology deep dive
-
----
-
-## Related Skills
-
-| Skill | When to Use |
-|-------|-------------|
-| **frontend-design** (this) | Before coding - Learn design principles (color, typography, UX psychology) |
-| `web-design-guidelines` | After coding - Audit for accessibility, performance, and best practices |
-
-## Post-Design Workflow
-
-After implementing your design, run the audit:
-
-```
-1. DESIGN   → Read frontend-design principles ← YOU ARE HERE
-2. CODE     → Implement the design
-3. AUDIT    → Run web-design-guidelines review
-4. FIX      → Address findings from audit
-```
-
-> **Next Step:** After coding, use `web-design-guidelines` skill to audit your implementation for accessibility, focus states, animations, and performance issues.
-
----
-
-> **Remember:** Design is THINKING, not copying. Every project deserves fresh consideration based on its unique context and users. **Avoid the Modern SaaS Safe Harbor!**
-
----
-
-## 5. Next.js 16+ Modern Form Patterns
+## 8. Next.js 16+ Modern Form Patterns
 
 > [!IMPORTANT]
 > For Next.js 16+ projects, use the native `next/form` component instead of standard HTML `<form>` for all GET-based search/filter operations.
@@ -453,3 +373,62 @@ export default function SearchBar() {
 ### When to use `<Form>` vs. standard `<form>`:
 - **Use `next/form`** for: Search, Filtering, Sorting, Pagination (GET requests).
 - **Use standard `<form>`** for: Mutations, Login, Data Entry (POST requests via Server Actions).
+
+---
+
+## ❌ Anti-Patterns
+
+### ❌ Lazy Design Indicators
+- Default system fonts without consideration.
+- Stock imagery that doesn't match the brand's aesthetic.
+- Inconsistent grid and margin spacing.
+- Too many competing colors breaking the 60-30-10 rule.
+- Walls of text without hierarchical weight.
+- Inaccessible visual contrasts.
+
+### ❌ AI Tendency Patterns (AVOID!)
+- **Same colors every project**
+- **Dark + neon as default**
+- **Purple/violet everything (PURPLE BAN ✅)**
+- **Bento grids for simple landing pages**
+- **Mesh Gradients & Glow Effects**
+- **Same layout structure / Vercel clone**
+- **Not asking user preferences**
+
+### ❌ Dark Patterns (Unethical)
+- Hidden transactional costs at checkout.
+- Deceptive visual cues and fake urgency clocks.
+- Forced actions or hidden opt-outs.
+- Confirmshaming copywriting.
+
+---
+
+## ✅ Quality Audit Checklist
+
+Before delivering any user interface or layout designs, verify compliance with the following:
+
+- [ ] **No Unvetted Defaults**: Avoided generic bento grids, boring left/right splits, mesh gradients, fintech blue, and standard white glassmorphism unless strictly proven to be the absolute best choice for the brand.
+- [ ] **Proportional Rhythm**: Checked spacing and sizes against the 8-point grid, and heading scales against Golden Ratio proportions.
+- [ ] **Linguistic Cleanliness**: Ensure copywriting is authentic and free of AI filler terms (e.g. "orchestrate", "empower").
+- [ ] **Contrast & Accessibility**: Text contrast passes WCAG AA requirements, font size for body is 16px+, and target touch sizes are comfortable.
+- [ ] **Motion Performance**: Animations are smooth, responsive to reduced-motion preferences, and use only transform and opacity changes.
+- [ ] **Next.js Form Alignment**: GET-based search/filtering forms are implemented using the native Next.js `<Form>` component.
+
+---
+
+## 🔄 Post-Design Workflow
+
+After implementing your design, run the audit:
+
+```
+1. DESIGN   → Read frontend-design principles ← YOU ARE HERE
+2. CODE     → Implement the design
+3. AUDIT    → Run web-design-guidelines review
+4. FIX      → Address findings from audit
+```
+
+> **Next Step:** After coding, use `web-design-guidelines` skill to audit your implementation for accessibility, focus states, animations, and performance issues.
+
+---
+
+> **Remember:** Design is THINKING, not copying. Every project deserves fresh consideration based on its unique context and users. **Avoid the Modern SaaS Safe Harbor!**

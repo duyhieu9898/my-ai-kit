@@ -4,12 +4,62 @@ description: >-
   Use when the user requests 'make this a skill' or when a repetitive pattern warrants extraction.
   Auto-creates new skills from repetitive workflows.
   NOT for one-off tasks.
-allowed-tools: Read Write Glob Grep
+allowed-tools:
+  - Read
+  - Write
+  - Glob
+  - Grep
 ---
 
 # Skillify — Auto-Create Skills from Workflows
 
 > Turn repetitive patterns into reusable skills. If you've done it three times, it should be a skill.
+
+---
+
+## 📑 Content Map
+
+| File | Description | When to Read |
+|:---|:---|:---|
+| _No supplementary files_ | Main skill extraction procedures are in this file | Use this file by default |
+
+---
+
+## 🔗 Related Skills
+
+| Need | Skill |
+|:---|:---|
+| Orchestrating multi-agent plans | [`project-planner`](../project-planner/SKILL.md) |
+| Writing atomic verifiable plans | [`plan-writing`](../plan-writing/SKILL.md) |
+| Compressing context states | [`context-compression`](../context-compression/SKILL.md) |
+
+---
+
+## 🛠️ Instructions / Procedures
+
+When tasked with extracting repetitive developer workflows into reusable skills, strictly follow this step-by-step procedure:
+
+### Step 1: Detect Workflow Patterns
+1. Audit conversation logs or task histories to detect repetitive developer actions (requested 3+ times, involving 5+ steps).
+2. Confirm the extraction is a good candidate (reusable across multiple projects, not covered by existing templates).
+
+### Step 2: Establish the Skill Directory & Description
+1. Determine a clear, action-based, tool-based, or domain-based name (2-3 words, kebab-case).
+2. Formulate the `Use when...` trigger description starting within the first 100 characters.
+
+### Step 3: Write the SKILL.md Template
+1. Create the `SKILL.md` inside `.agents/skills/[skill-name]/` using the standard format.
+2. Ensure you list: Frontmatter with YAML array `allowed-tools`, Content Map, Related Skills table, 5-step actionable Procedures, and a dedicated **Quality Audit Checklist** verifying task outcomes.
+
+### Step 4: Add OpenAI config Sidecar
+1. Configure `agents/openai.yaml` inside the skill directory.
+2. Map the display parameters, description, brand color, and implicit policy triggers.
+
+### Step 5: Verify and Register Compliance
+1. Run lint checks and verify Markdown relative hyperlinking.
+2. Confirm overall compliance against the **Quality Audit Checklist** before completing.
+
+---
 
 ## When to Use
 
@@ -23,84 +73,6 @@ allowed-tools: Read Write Glob Grep
 - One-off tasks (just do them)
 - Project-specific hacks (use memory instead)
 - Already covered by existing skills (check first)
-
----
-
-## Skill Creation Protocol
-
-### Step 1: Identify the Pattern
-```
-What triggers this workflow? (user says X, file type Y, domain Z)
-What steps are always the same?
-What parts vary between uses?
-What's the expected output?
-```
-
-### Step 2: Generate SKILL.md and openai.yaml
-
-Use this template for `SKILL.md`:
-
-```markdown
----
-name: [kebab-case-name]
-description: >-
-  [Imperative "Use when..." description merging triggering intent and scope limits,
-  under 1024 characters.]
-allowed-tools: [Read Write Edit Grep Glob - space-separated]
----
-
-# [Skill Name] — [Short Subtitle]
-
-> [One-line philosophy or principle]
-
-## 📑 Content Map
-
-| File | Description | When to Read |
-|------|-------------|--------------|
-| `references/[name].md` | [Reference description] | [Trigger for reading] |
-
-## Overview
-[2-3 sentences explaining what this skill enables]
-
-## Protocol
-### Step 1: [First Action]
-[Instructions]
-
-### Step 2: [Second Action]
-[Instructions]
-
-### Step N: [Verification]
-[How to verify the skill worked correctly]
-
-## Best Practices
-[3-5 key rules]
-```
-
-And use this template for `agents/openai.yaml`:
-
-```yaml
-interface:
-  display_name: "[Display Name]"
-  short_description: "[Brief UI description]"
-  brand_color: "[Accent hex/HSL color]"
-  default_prompt: "$[kebab-case-name]"
-
-policy:
-  allow_implicit_invocation: [true | false]
-```
-
-### Step 3: Place the Skill
-```
-.codex/skills/[skill-name]/SKILL.md
-.codex/skills/[skill-name]/agents/openai.yaml
-```
-
-### Step 4: Verify
-- [ ] Frontmatter has all required fields (name, description, allowed-tools)
-- [ ] `description` clearly defines triggers AND exclusions
-- [ ] `openai.yaml` exists with interface and policy parameters
-- [ ] Steps are actionable, not vague
-- [ ] Skill doesn't duplicate an existing one
 
 ---
 
@@ -120,14 +92,22 @@ policy:
 
 ---
 
-## Quality Checklist
+## ❌ Anti-Patterns
 
-Before finalizing a new skill:
+- Creating a skill for a one-off task that should be handled directly.
+- Duplicating an existing skill instead of linking or extending it.
+- Writing vague descriptions that do not start with a concrete `Use when` trigger.
+- Omitting sidecar metadata or required body sections from the generated skill.
 
-| Check | Criteria |
-|---|---|
-| **Uniqueness** | No existing skill covers this (grep `.codex/skills/`) |
-| **Reusability** | Useful across multiple projects, not just one |
-| **Completeness** | Has overview, when to use, protocol, verification |
-| **Frontmatter** | All required fields present and accurate |
-| **Clarity** | A new agent could follow these instructions cold |
+---
+
+## ✅ Quality Audit Checklist
+
+Before concluding a skill extraction or auto-creation task, verify compliance with the following:
+
+- [ ] **Folder Match name**: Directory name exactly matches frontmatter `name` value in kebab-case.
+- [ ] **First-line Trigger Bind**: The description field starts with a clean "Use when..." condition under 100 characters.
+- [ ] **Unified Content Map**: The generated skill file includes a relative Markdown links content table.
+- [ ] **Actionable Procedures Built**: Unified static directives into a sequential 5-step procedures pipeline.
+- [ ] **Checklist Incorporated**: Appended a dedicated `Quality Audit Checklist` validating the new skill behaviors.
+- [ ] **OpenAI Config Verified**: Created a matching `agents/openai.yaml` with implicit options configured.

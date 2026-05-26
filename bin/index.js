@@ -24,7 +24,12 @@ const getFolderConfig = (isLegacy) => {
     if (isLegacy) {
         return {
             name: 'Antigravity Kit',
-            folder: '.agent',
+            sourceFolder: '.antigravity',
+            installFolder: '.agents',
+            rootInstruction: {
+                source: 'rules/GEMINI.md',
+                target: 'GEMINI.md',
+            },
             bannerColor: chalk.blueBright,
             tag: '🚀 Legacy Framework',
             desc: 'Multi-agent routing & slash workflows'
@@ -32,7 +37,12 @@ const getFolderConfig = (isLegacy) => {
     } else {
         return {
             name: 'OpenAI Codex Kit',
-            folder: '.codex',
+            sourceFolder: '.codex',
+            installFolder: '.agents',
+            rootInstruction: {
+                source: 'AGENTS.md',
+                target: 'AGENTS.md',
+            },
             bannerColor: chalk.magentaBright,
             tag: '✨ Codex Standard (Recommended)',
             desc: 'Unified composable skills & cascading rules'
@@ -95,16 +105,50 @@ const cleanup = (tempDir) => {
  * Copy dynamic folder from temp to destination
  * @param {string} tempDir - Temp directory
  * @param {string} destDir - Destination directory
- * @param {string} folderName - Subfolder to copy (e.g. .codex or .agent)
+ * @param {object} config - Active folder configuration
  */
-const copyTemplateFolder = (tempDir, destDir, folderName) => {
-    const sourcePath = path.join(tempDir, TEMPLATES_FOLDER, folderName);
+const copyTemplateFolder = (tempDir, destDir, config) => {
+    const sourcePath = path.join(tempDir, TEMPLATES_FOLDER, config.sourceFolder);
 
     if (!fs.existsSync(sourcePath)) {
-        throw new Error(`Could not find templates/${folderName} folder in source repository!`);
+        throw new Error(`Could not find templates/${config.sourceFolder} folder in source repository!`);
+    }
+
+    if (fs.existsSync(destDir)) {
+        fs.rmSync(destDir, { recursive: true, force: true });
     }
 
     fs.cpSync(sourcePath, destDir, { recursive: true });
+};
+
+/**
+ * Copy the root instruction file used by the target agent runtime.
+ * @param {string} tempDir - Temp directory
+ * @param {string} targetDir - Target project directory
+ * @param {object} config - Active folder configuration
+ * @param {boolean} force - Whether to overwrite an existing root instruction
+ * @returns {"copied"|"overwritten"|"skipped"|"none"}
+ */
+const copyRootInstruction = (tempDir, targetDir, config, force) => {
+    if (!config.rootInstruction) {
+        return 'none';
+    }
+
+    const sourcePath = path.join(tempDir, TEMPLATES_FOLDER, config.sourceFolder, config.rootInstruction.source);
+    const destPath = path.join(targetDir, config.rootInstruction.target);
+
+    if (!fs.existsSync(sourcePath)) {
+        return 'none';
+    }
+
+    const existedBefore = fs.existsSync(destPath);
+
+    if (existedBefore && !force) {
+        return 'skipped';
+    }
+
+    fs.copyFileSync(sourcePath, destPath);
+    return existedBefore ? 'overwritten' : 'copied';
 };
 
 /**
@@ -160,12 +204,12 @@ const initCommand = async (options) => {
 
     const targetDir = path.resolve(options.path || process.cwd());
     const tempDir = path.join(targetDir, TEMP_FOLDER);
-    const destDir = path.join(targetDir, config.folder);
+    const destDir = path.join(targetDir, config.installFolder);
 
     // Check if folder already exists
     if (fs.existsSync(destDir)) {
         if (!options.force) {
-            console.log(chalk.yellow(`⚠️  Folder ${chalk.cyan(config.folder)} already exists at: ${destDir}`));
+            console.log(chalk.yellow(`⚠️  Folder ${chalk.cyan(config.installFolder)} already exists at: ${destDir}`));
             const shouldOverwrite = await confirm('Do you want to overwrite it?');
 
             if (!shouldOverwrite) {
@@ -173,7 +217,7 @@ const initCommand = async (options) => {
                 process.exit(0);
             }
         }
-        console.log(chalk.gray(`Overwriting ${chalk.cyan(config.folder)} folder...`));
+        console.log(chalk.gray(`Overwriting ${chalk.cyan(config.installFolder)} folder...`));
     }
 
     const spinner = ora({
@@ -191,11 +235,12 @@ const initCommand = async (options) => {
 
         spinner.text = 'Installing kit template...';
 
-        // Copy selected folder (.codex or .agent)
-        copyTemplateFolder(tempDir, destDir, config.folder);
+        // Copy selected template source into the runtime .agents folder.
+        copyTemplateFolder(tempDir, destDir, config);
+        const rootInstructionStatus = copyRootInstruction(tempDir, targetDir, config, !!options.force);
 
         // Update .gitignore
-        const gitignoreUpdated = updateGitignore(targetDir, config.folder);
+        const gitignoreUpdated = updateGitignore(targetDir, config.installFolder);
 
         // Cleanup
         cleanup(tempDir);
@@ -205,20 +250,25 @@ const initCommand = async (options) => {
         // Success message
         console.log(chalk.gray('\n──────────────────────────────────────────────────────'));
         console.log(chalk.white('📁 Installed Location:'));
-        console.log(`   ${chalk.cyan(config.folder)} → ${chalk.gray(destDir)}`);
+        console.log(`   ${chalk.cyan(config.installFolder)} → ${chalk.gray(destDir)}`);
+        if (rootInstructionStatus === 'copied' || rootInstructionStatus === 'overwritten') {
+            console.log(`   ${chalk.cyan(config.rootInstruction.target)} → ${chalk.gray(path.join(targetDir, config.rootInstruction.target))}`);
+        } else if (rootInstructionStatus === 'skipped') {
+            console.log(`   ${chalk.yellow(config.rootInstruction.target)} → Existing file kept (use --force to overwrite)`);
+        }
         if (gitignoreUpdated) {
-            console.log(`   ${chalk.cyan('.gitignore')} → Added ignore entry: ${chalk.yellow(config.folder)}`);
+            console.log(`   ${chalk.cyan('.gitignore')} → Added ignore entry: ${chalk.yellow(config.installFolder)}`);
         }
         console.log(chalk.gray('──────────────────────────────────────────────────────'));
         
         if (!options.legacy) {
             console.log(chalk.magentaBright(`\n✨ OpenAI Codex mode enabled.`));
             console.log(chalk.gray(`💡 Tip: Natural language commands will automatically load skills!`));
-            console.log(chalk.gray(`   Run tests via: ${chalk.cyan('python .codex/scripts/verify_all.py .')}\n`));
+            console.log(chalk.gray(`   Run tests via: ${chalk.cyan('python .agents/scripts/verify_all.py .')}\n`));
         } else {
             console.log(chalk.blueBright(`\n🚀 Legacy Antigravity mode enabled.`));
             console.log(chalk.gray(`💡 Tip: Run slash commands like /plan or /brainstorm in chat.`));
-            console.log(chalk.gray(`   Run tests via: ${chalk.cyan('python .agent/scripts/verify_all.py .')}\n`));
+            console.log(chalk.gray(`   Run tests via: ${chalk.cyan('python .agents/scripts/verify_all.py .')}\n`));
         }
         
     } catch (error) {
@@ -236,17 +286,17 @@ const updateCommand = async (options) => {
     showBanner(config);
 
     const targetDir = path.resolve(options.path || process.cwd());
-    const destDir = path.join(targetDir, config.folder);
+    const destDir = path.join(targetDir, config.installFolder);
 
     // Check if folder exists
     if (!fs.existsSync(destDir)) {
-        console.log(chalk.red(`❌ Could not find active ${chalk.cyan(config.folder)} folder at: ${targetDir}`));
+        console.log(chalk.red(`❌ Could not find active ${chalk.cyan(config.installFolder)} folder at: ${targetDir}`));
         console.log(chalk.yellow(`💡 Tip: Run ${chalk.cyan('hieund-ag-kit init' + (options.legacy ? ' --legacy' : ''))} to install first.`));
         process.exit(1);
     }
 
     if (!options.force) {
-        console.log(chalk.yellow(`⚠️  Update will overwrite the entire ${chalk.cyan(config.folder)} folder.`));
+        console.log(chalk.yellow(`⚠️  Update will overwrite the entire ${chalk.cyan(config.installFolder)} folder.`));
         const shouldUpdate = await confirm('Are you sure you want to continue?');
 
         if (!shouldUpdate) {
@@ -265,45 +315,48 @@ const updateCommand = async (options) => {
 const statusCommand = (options) => {
     const targetDir = path.resolve(options.path || process.cwd());
     
-    const codexDir = path.join(targetDir, '.codex');
-    const agentDir = path.join(targetDir, '.agent');
+    const agentsDir = path.join(targetDir, '.agents');
+    const legacyCodexDir = path.join(targetDir, '.codex');
+    const legacyAgentDir = path.join(targetDir, '.agent');
 
     console.log(chalk.blueBright('\n📊 Kit Installation Status\n'));
 
     let found = false;
 
-    // Check OpenAI Codex (.codex)
-    if (fs.existsSync(codexDir)) {
+    // Check current runtime folder (.agents)
+    if (fs.existsSync(agentsDir)) {
         found = true;
-        const stats = fs.statSync(codexDir);
-        const files = fs.readdirSync(codexDir, { recursive: true });
+        const stats = fs.statSync(agentsDir);
+        const files = fs.readdirSync(agentsDir, { recursive: true });
+        const isAntigravity = fs.existsSync(path.join(agentsDir, 'agents')) || fs.existsSync(path.join(agentsDir, 'workflows'));
+        const label = isAntigravity ? 'Antigravity Kit' : 'OpenAI Codex Kit';
+        const itemLabel = isAntigravity ? 'agents, workflows & skills' : 'composable skills';
         
-        console.log(chalk.magentaBright('✨ OpenAI Codex Standard Kit: INSTALLED'));
+        console.log(chalk.magentaBright(`${label}: INSTALLED`));
         console.log(chalk.gray('──────────────────────────────────────────────────────'));
-        console.log(`📁 Path:     ${chalk.cyan(codexDir)}`);
+        console.log(`📁 Path:     ${chalk.cyan(agentsDir)}`);
         console.log(`📅 Modified: ${chalk.gray(stats.mtime.toLocaleString('en-US'))}`);
-        console.log(`📄 Items:    ${chalk.yellow(files.length)} items (unified skills)`);
+        console.log(`📄 Items:    ${chalk.yellow(files.length)} items (${itemLabel})`);
         console.log(chalk.gray('──────────────────────────────────────────────────────\n'));
     }
 
-    // Check Antigravity (.agent)
-    if (fs.existsSync(agentDir)) {
+    // Check obsolete folders from older kit versions.
+    if (fs.existsSync(legacyCodexDir) || fs.existsSync(legacyAgentDir)) {
         found = true;
-        const stats = fs.statSync(agentDir);
-        const files = fs.readdirSync(agentDir, { recursive: true });
-
-        console.log(chalk.blueBright('🚀 Legacy Antigravity Kit: INSTALLED'));
-        console.log(chalk.gray('──────────────────────────────────────────────────────'));
-        console.log(`📁 Path:     ${chalk.cyan(agentDir)}`);
-        console.log(`📅 Modified: ${chalk.gray(stats.mtime.toLocaleString('en-US'))}`);
-        console.log(`📄 Items:    ${chalk.yellow(files.length)} items (workflows & agents)`);
-        console.log(chalk.gray('──────────────────────────────────────────────────────\n'));
+        console.log(chalk.yellow('Legacy kit folders detected:'));
+        if (fs.existsSync(legacyCodexDir)) {
+            console.log(`   ${chalk.cyan(legacyCodexDir)} (old Codex install path)`);
+        }
+        if (fs.existsSync(legacyAgentDir)) {
+            console.log(`   ${chalk.cyan(legacyAgentDir)} (old Antigravity install path)`);
+        }
+        console.log(chalk.gray(`   Current installs use ${chalk.cyan('.agents')}.\n`));
     }
 
     if (!found) {
         console.log(chalk.red('❌ No active kits installed in this directory.'));
-        console.log(chalk.yellow(`💡 Run ${chalk.cyan('hieund-ag-kit init')} to install Codex (Recommended).`));
-        console.log(chalk.yellow(`💡 Run ${chalk.cyan('hieund-ag-kit init --legacy')} to install legacy Antigravity.\n`));
+        console.log(chalk.yellow(`💡 Run ${chalk.cyan('hieund-ag-kit init')} to install Codex into .agents.`));
+        console.log(chalk.yellow(`💡 Run ${chalk.cyan('hieund-ag-kit init --legacy')} to install Antigravity into .agents.\n`));
     }
 };
 
@@ -321,11 +374,11 @@ program
 // Command: init
 program
     .command('init')
-    .description('Install .codex or .agent folder into your project')
+    .description('Install Codex or Antigravity kit into .agents')
     .option('-f, --force', 'Overwrite if folder already exists', false)
     .option('-p, --path <dir>', 'Path to the project directory', process.cwd())
     .option('-b, --branch <name>', 'Select repository branch')
-    .option('-l, --legacy', 'Install legacy Antigravity (.agent) format instead of Codex', false)
+    .option('-l, --legacy', 'Install Antigravity format instead of Codex', false)
     .action(initCommand);
 
 // Command: update
@@ -335,7 +388,7 @@ program
     .option('-f, --force', 'Skip confirmation prompt', false)
     .option('-p, --path <dir>', 'Path to the project directory', process.cwd())
     .option('-b, --branch <name>', 'Select repository branch')
-    .option('-l, --legacy', 'Update legacy Antigravity (.agent) folder', false)
+    .option('-l, --legacy', 'Update Antigravity format in .agents', false)
     .action(updateCommand);
 
 // Command: status

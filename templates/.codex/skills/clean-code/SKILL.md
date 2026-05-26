@@ -1,10 +1,14 @@
 ---
 name: clean-code
 description: >-
-  Always active for all code writing tasks.
+  Use when writing, editing, reviewing, or refactoring code.
   Pragmatic coding standards covering concise implementation, avoiding over-engineering,
   eliminating unnecessary comments, and enforcing SRP/DRY/KISS/YAGNI naming conventions.
-allowed-tools: Read Write Edit
+  NOT for non-coding tasks or product/design discussion without implementation work.
+allowed-tools:
+  - Read
+  - Write
+  - Edit
 ---
 
 # 🧼 Clean Code - Pragmatic AI Coding Standards
@@ -15,16 +19,15 @@ allowed-tools: Read Write Edit
 
 | File / Resource | Description | When to Read |
 |:---|:---|:---|
-| `SKILL.md` | Core clean code rules, AI styles, and validation procedures | Active throughout all coding tasks |
-| `agents/openai.yaml` | Codex UI and implicit invocation policy configuration | During skill indexing or UI setup |
+| No supplementary files | This skill is self-contained | Use the procedures below directly |
 
 ## 🔗 Related Skills
 
 | Skill | Relationship | When to Collaborate |
 |:---|:---|:---|
-| `simplify-code` | Optimization Companion | When refactoring loops, nested conditionals, or long blocks |
-| `lint-and-validate` | Quality Partner | To verify lint cleanliness, type coverage, and script success |
-| `debugger` | Trouble-shooting | When bug-fixing, tracking stack traces, or applying hotfixes |
+| [`simplify-code`](../simplify-code/SKILL.md) | Optimization companion | When refactoring loops, nested conditionals, or long blocks |
+| [`lint-and-validate`](../lint-and-validate/SKILL.md) | Quality partner | To verify lint cleanliness, type coverage, and script success |
+| [`debugger`](../debugger/SKILL.md) | Troubleshooting partner | When bug-fixing, tracking stack traces, or applying hotfixes |
 
 ---
 
@@ -94,16 +97,16 @@ File to edit: UserService.ts
 
 | Skill / Domain | Verification Script Command |
 |:---|:---|
-| **frontend-specialist** | `python templates/.codex/skills/frontend-design/scripts/ux_audit.py .` |
-| **frontend-specialist** | `python templates/.codex/skills/frontend-design/scripts/accessibility_checker.py .` |
-| **backend-specialist** | `python templates/.codex/skills/api-patterns/scripts/api_validator.py .` |
-| **mobile-developer** | `python templates/.codex/skills/mobile-design/scripts/mobile_audit.py .` |
-| **database-architect** | `python templates/.codex/skills/database-design/scripts/schema_validator.py .` |
-| **security-auditor** | `python templates/.codex/skills/vulnerability-scanner/scripts/security_scan.py .` |
-| **performance-optimizer**| `python templates/.codex/skills/performance-profiling/scripts/lighthouse_audit.py <url>` |
-| **test-engineer** | `python templates/.codex/skills/webapp-testing/scripts/playwright_runner.py <url>` |
-| **Any Agent (Lint)** | `python templates/.codex/skills/lint-and-validate/scripts/lint_runner.py .` |
-| **Any Agent (Coverage)**| `python templates/.codex/skills/lint-and-validate/scripts/type_coverage.py .` |
+| **frontend-specialist** | `python .agents/skills/frontend-design/scripts/ux_audit.py .` |
+| **frontend-specialist** | `python .agents/skills/frontend-design/scripts/accessibility_checker.py .` |
+| **backend-specialist** | `python .agents/skills/api-patterns/scripts/api_validator.py .` |
+| **mobile-developer** | `python .agents/skills/mobile-design/scripts/mobile_audit.py .` |
+| **database-architect** | `python .agents/skills/database-design/scripts/schema_validator.py .` |
+| **security-auditor** | `python .agents/skills/vulnerability-scanner/scripts/security_scan.py .` |
+| **performance-optimizer**| `python .agents/skills/performance-profiling/scripts/lighthouse_audit.py <url>` |
+| **test-engineer** | `python .agents/skills/webapp-testing/scripts/playwright_runner.py <url>` |
+| **Any Agent (Lint)** | `python .agents/skills/lint-and-validate/scripts/lint_runner.py .` |
+| **Any Agent (Coverage)**| `python .agents/skills/lint-and-validate/scripts/type_coverage.py .` |
 
 ### 8. Verification Output Protocol (READ ➜ SUMMARIZE ➜ ASK)
 When executing any validation script, you must strictly follow this communication cycle:

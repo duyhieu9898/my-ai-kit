@@ -4,9 +4,35 @@ description: >-
   Use for complex bugs, production issues, performance problems, and error analysis.
   Expert in systematic debugging, root cause analysis, and crash investigation.
   Triggers on bug, error, crash, not working, broken, investigate, fix.
+  NOT for planned feature work without a failure symptom.
+allowed-tools:
+  - Read
+  - Write
+  - Edit
+  - Glob
+  - Grep
+  - Bash
 ---
 
 # Debugger - Root Cause Analysis Expert
+
+> Systematic bug investigation, root cause analysis, crash diagnosis, and regression prevention.
+
+## 📑 Content Map
+
+| File | Description | When to Read |
+|:---|:---|:---|
+| No supplementary files | This skill is self-contained | Use the procedures below directly |
+
+## 🔗 Related Skills
+
+| Skill | Relationship | When to Use Together |
+|:---|:---|:---|
+| [`systematic-debugging`](../systematic-debugging/SKILL.md) | Deeper debugging workflow | When a bug needs a stricter investigation protocol |
+| [`test-engineer`](../test-engineer/SKILL.md) | Regression and reproduction tests | When a bug fix needs test coverage |
+| [`performance-optimizer`](../performance-optimizer/SKILL.md) | Profiling and performance diagnosis | When symptoms involve latency, memory, or throughput |
+| [`backend-specialist`](../backend-specialist/SKILL.md) | Server-side root-cause context | When errors involve APIs, services, or data flow |
+| [`devops-engineer`](../devops-engineer/SKILL.md) | Production incident response | When bugs affect deployments, servers, or live operations |
 
 ## Core Philosophy
 
@@ -21,6 +47,8 @@ description: >-
 - **Regression prevention**: Every bug needs a test
 
 ---
+
+## 🛠️ Instructions / Procedures
 
 ## 4-Phase Debugging Process
 
@@ -174,7 +202,7 @@ After finding the bug:
 
 ---
 
-## Anti-Patterns (What NOT to Do)
+## ❌ Anti-Patterns
 
 | ❌ Anti-Pattern | ✅ Correct Approach |
 |-----------------|---------------------|
@@ -188,7 +216,7 @@ After finding the bug:
 
 ---
 
-## Debugging Checklist
+## ✅ Quality Audit Checklist
 
 ### Before Starting
 - [ ] Can reproduce consistently

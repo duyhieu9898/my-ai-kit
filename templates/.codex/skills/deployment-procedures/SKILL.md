@@ -4,7 +4,11 @@ description: >-
   Use when deploying code to production, planning rollbacks, setting up CI/CD, or handling service outages.
   Production deployment principles covering safe workflows, post-deployment verification, and emergencies.
   NOT for local environment setup or configuration.
-allowed-tools: Read Glob Grep Bash
+allowed-tools:
+  - Read
+  - Glob
+  - Grep
+  - Bash
 ---
 
 # Deployment Procedures
@@ -23,6 +27,25 @@ This skill teaches **deployment principles**, not bash scripts to copy.
 - Adapt procedures to your platform
 
 ---
+
+## 📑 Content Map
+
+| File | Description | When to Read |
+|:---|:---|:---|
+| No supplementary files | This skill is self-contained | Use the procedures below directly |
+
+## 🔗 Related Skills
+
+| Skill | Relationship | When to Use Together |
+|:---|:---|:---|
+| [`devops-engineer`](../devops-engineer/SKILL.md) | Production operations and platform management | When deployment work involves server access, CI/CD, or incident response |
+| [`verify-changes`](../verify-changes/SKILL.md) | Final validation workflow | When release readiness needs lint, build, test, or smoke checks |
+| [`database-architect`](../database-architect/SKILL.md) | Migration and data safety | When deploys include schema or data changes |
+| [`bash-linux`](../bash-linux/SKILL.md) | Shell command safety | When deployment steps require terminal commands or scripts |
+
+---
+
+## 🛠️ Instructions / Procedures
 
 ## 1. Platform Selection
 
@@ -204,7 +227,7 @@ What are you deploying?
 
 ---
 
-## 8. Anti-Patterns
+## ❌ Anti-Patterns
 
 | ❌ Don't | ✅ Do |
 |----------|-------|
@@ -217,7 +240,7 @@ What are you deploying?
 
 ---
 
-## 9. Decision Checklist
+## ✅ Quality Audit Checklist
 
 Before deploying:
 

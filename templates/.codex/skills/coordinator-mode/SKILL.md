@@ -4,12 +4,66 @@ description: >-
   Use when coordinating multiple specialist agents, designing parallel developer pipelines, synthesizing research across multiple domains, or managing complex tasks.
   Advanced multi-agent orchestration covering concurrency rules, worker prompt writing guidelines, fork/spawn semantics, and synthesis protocols.
   NOT for simple, single-domain code edits or direct implementation tasks.
-allowed-tools: Read Grep Glob Bash Write Edit Agent
+allowed-tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash
+  - Write
+  - Edit
+  - Agent
 ---
 
 # Coordinator Mode — Multi-Agent Orchestration
 
 > Distilled from production-proven coordinator patterns. Transforms sequential agent chains into intelligent parallel orchestration.
+
+---
+
+## 📑 Content Map
+
+| File | Description | When to Read |
+|:---|:---|:---|
+| No supplementary files | This skill is self-contained | Use the procedures below directly |
+
+---
+
+## 🔗 Related Skills
+
+| Need | Skill |
+|:---|:---|
+| Orchestrating and planning large project tracks | [`project-planner`](../project-planner/SKILL.md) |
+| Managing active token context compression | [`context-compression`](../context-compression/SKILL.md) |
+| Optimizing large-repository token usage | [`code-review-graph`](../code-review-graph/SKILL.md) |
+| Parallel worker execution patterns | [`parallel-agents`](../parallel-agents/SKILL.md) |
+
+---
+
+## 🛠️ Instructions / Procedures
+
+When tasked with coordinating multiple specialist agents, designing parallel pipeline workflows, or managing complex task synthesis, strictly follow this step-by-step procedure:
+
+### Step 1: Decompose Task & Map Pipeline
+1. Break down the user's complex requirements into independent, atomic worker subtasks (Decompose).
+2. Classify tasks into Phase Categories: Research (Read-only), Synthesis, Implementation (Sequential writes), and Verification (Parallel tests).
+
+### Step 2: Establish Concurrency Models
+1. Group tasks that are Safe to Parallelize (reading distinct files, running tests, lint checks).
+2. Establish strict sequential boundaries for write-heavy tasks (multi-agent concurrent file edits are forbidden).
+
+### Step 3: Formulate Worker Prompts (The Conductor Role)
+1. Write specific, structured prompts for each worker according to the Worker Prompt Writing Guide.
+2. Include explicit file paths, line ranges, changed logic mappings, and output format goals. **Never delegate understanding** to the worker.
+
+### Step 4: Dispatch & Monitor Concurrency
+1. Launch parallel/sequential tasks using the `Agent` tool (fork/spawn semantics).
+2. Do not peek at transcripts mid-flight. Wait for actual completion alerts.
+
+### Step 5: Synthesize Findings & Audit
+1. Consolidate worker outputs into a single, unified architectural synthesis using the Synthesis Protocol.
+2. Confirm compliance against the **Quality Audit Checklist** before completing.
+
+---
 
 ## Overview
 
@@ -145,7 +199,7 @@ Report: Pass/fail with details on any failures.
 
 ---
 
-## Anti-Patterns
+## ❌ Anti-Patterns
 
 | Anti-Pattern | Why It's Bad | Fix |
 |---|---|---|
@@ -201,9 +255,21 @@ After all workers complete:
 
 ## Best Practices
 
-1. **Start with 2-3 workers** — add more after synthesis if needed
-2. **Research before implementation** — always, even for "simple" tasks
-3. **Synthesize, don't copy** — your summary should add insight, not repeat
-4. **Verify independently** — verification workers shouldn't trust implementation workers
-5. **Track state** — note which workers are pending/completed/failed
-6. **Share scratchpad** — use a known directory for cross-worker artifacts
+1. **Start with 2-3 workers** — add more after synthesis if needed.
+2. **Research before implementation** — always, even for "simple" tasks.
+3. **Synthesize, don't copy** — your summary should add insight, not repeat.
+4. **Verify independently** — verification workers shouldn't trust implementation workers.
+5. **Track state** — note which workers are pending/completed/failed.
+6. **Share scratchpad** — use a known directory for cross-worker artifacts.
+
+---
+
+## ✅ Quality Audit Checklist
+
+Before concluding a Coordinator delegation or Synthesis task, verify compliance with the following:
+
+- [ ] **No Direct Code Written**: Acted strictly as a Conductor/Orchestrator without modifying implementation code directly.
+- [ ] **Research Conducted First**: Dispatched exploratory read workers prior to drafting implementation guides.
+- [ ] **No Race Conditions**: Waited for actual worker execution completion instead of guessing or fabricating outputs.
+- [ ] **No Delegation of Understanding**: Worker instructions specify exact files, lines, inputs, and constraints.
+- [ ] **Structured Synthesis Formulated**: Consolidated findings using the strict Synthesis Protocol template.

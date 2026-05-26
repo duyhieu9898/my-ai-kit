@@ -4,12 +4,60 @@ description: >-
   Use when building or modifying custom MCP servers, designing JSON schemas for tools, or configuring Claude Desktop.
   Model Context Protocol (MCP) server building principles covering stdio, tools, and error handling.
   NOT for frontend layouts.
-allowed-tools: Read Write Edit Glob Grep
+allowed-tools:
+  - Read
+  - Write
+  - Edit
+  - Glob
+  - Grep
 ---
 
 # MCP Builder
 
 > Principles for building MCP servers.
+
+---
+
+## 📑 Content Map
+
+| File | Description | When to Read |
+|:---|:---|:---|
+| _No supplementary files_ | Main MCP builder procedures are in this file | Use this file by default |
+
+---
+
+## 🔗 Related Skills
+
+| Need | Skill |
+|:---|:---|
+| Node.js coding conventions and package structures | [`nodejs-best-practices`](../nodejs-best-practices/SKILL.md) |
+| Transport profiling and latency optimization | [`performance-optimizer`](../performance-optimizer/SKILL.md) |
+
+---
+
+## 🛠️ Instructions / Procedures
+
+When tasked with constructing custom MCP servers, configuring Claude Desktop setups, or defining tool parameters schemas, strictly follow this step-by-step procedure:
+
+### Step 1: Establish Server Architecture
+1. Set up standard node/typescript packages using Stdio for local CLIs or SSE for web endpoints.
+2. Direct all developer console logging exclusively to `stderr` so as not to pollute stdio transport channels.
+
+### Step 2: Design Tool JSON Schemas
+1. Create descriptive, action-oriented tool names (e.g. `get_weather`, `run_query`).
+2. Map strict type parameters and descriptions for all schema fields.
+
+### Step 3: Implement Resource URI Patterns
+1. Code dynamic/parameterized patterns (e.g. `users://{userId}`) or static documentation collections.
+2. Enforce limits on directory scope walks.
+
+### Step 4: Configure Error Handlers
+1. Capture validation failures or resource gaps and return structured error JSON response models.
+2. Assure stack traces are never exposed in user-facing payloads.
+
+### Step 5: Test and Configure Client & Verify Checklist
+1. Write custom Claude Desktop setup profiles and execute unit/integration testing mocks.
+2. Confirm compliance against the **Quality Audit Checklist** before completing.
 
 ---
 
@@ -164,15 +212,25 @@ my-mcp-server/
 
 ---
 
-## 10. Best Practices Checklist
+## ❌ Anti-Patterns
 
-- [ ] Clear, action-oriented tool names
-- [ ] Complete input schemas with descriptions
-- [ ] Structured JSON output
-- [ ] Error handling for all cases
-- [ ] Input validation
-- [ ] Environment-based configuration
-- [ ] Logging for debugging
+- Writing MCP server diagnostics to `stdout` when using stdio transport.
+- Defining vague tool names or schemas without field descriptions.
+- Returning raw stack traces, absolute paths, or secret values in user-facing errors.
+- Exposing broad filesystem or network access without explicit scope limits.
+
+---
+
+## ✅ Quality Audit Checklist
+
+Before concluding an MCP server initialization, tool schema design, or configuration integration task, verify compliance with the following:
+
+- [ ] **Tool Names Action-Oriented**: Confirmed tool names describe operations clearly (e.g. `get_weather`, `create_user`).
+- [ ] **Input Schemas Complete**: Defined parameter properties with human-readable type parameters and descriptions.
+- [ ] **JSON Outputs Structured**: Ensured all tools return consistent JSON formats without raw text blocks.
+- [ ] **Stdio Streams Cleaned**: Verified that no server logging outputs leak to `stdout` (redirected to `stderr` exclusively).
+- [ ] **Secrets Loaded from Env**: Permitted API key access only via environment configurations (never hardcoded).
+- [ ] **Error Details Sanitized**: Sanitized response messages to avoid leaking absolute server directory paths or raw stack traces.
 
 ---
 

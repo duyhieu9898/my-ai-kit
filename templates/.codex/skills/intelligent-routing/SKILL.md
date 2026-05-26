@@ -4,12 +4,60 @@ description: >-
   Use when defining rules for automated routing of developer requests, structuring a multi-agent workspace, or configuring router middleware.
   Automatic agent selection and intelligent routing covering selection matrices, domain detection, and overrides.
   NOT for single-agent tasks.
-allowed-tools: Read Glob Grep
+allowed-tools:
+  - Read
+  - Glob
+  - Grep
 ---
 
 # Intelligent Agent Routing
 
 **Purpose**: Automatically analyze user requests and route them to the most appropriate specialist agent(s) without requiring explicit user mentions.
+
+---
+
+## 📑 Content Map
+
+| File | Description | When to Read |
+|:---|:---|:---|
+| _No supplementary files_ | Main routing procedures are in this file | Use this file by default |
+
+---
+
+## 🔗 Related Skills
+
+| Need | Skill |
+|:---|:---|
+| Managing multi-agent parallel operations | [`parallel-agents`](../parallel-agents/SKILL.md) |
+| Dynamic agent coordination and Socratic gates | [`orchestrator`](../orchestrator/SKILL.md) |
+
+---
+
+## 🛠️ Instructions / Procedures
+
+When tasked with analyzing user intent, routing complex tasks, or coordinating specialist agent activations, strictly follow this step-by-step procedure:
+
+### Step 1: Perform Silent Analysis
+1. Parse the incoming request keywords and categorize the target domains silently.
+2. Determine complexity bounds.
+
+### Step 2: Query the Agent Matrix
+1. Match the request domains against the Agent Selection Matrix.
+2. Check for explicit agent overrides (e.g. "@test-engineer").
+
+### Step 3: Grade Task Complexity
+1. Grade the request complexity (Simple vs Moderate vs Complex).
+2. Direct simple items to single specialists, and route multi-domain items to the Orchestrator.
+
+### Step 4: Declare routing transparency
+1. Prefix output messages using standard declaration tokens: "🤖 **Applying knowledge of `@agent-name`...**".
+2. Present first-time tip instructions when booting new workspaces.
+
+### Step 5: Address Ambiguous Requests & Verify Checklist
+1. Solve edge cases (such as generic queries or vague inputs) using Socratic gate clarifications before routing.
+2. Confirm compliance against the **Quality Audit Checklist** before completing.
+
+---
 
 ## Core Principle
 
@@ -339,6 +387,27 @@ Show selection reasoning:
 - Selected agent: [name]
 - Reasoning: [why]
 ```
+
+---
+
+## ❌ Anti-Patterns
+
+- Announcing internal routing analysis before selecting a specialist.
+- Ignoring explicit `@agent-name` user overrides.
+- Routing vague, contradictory, or multi-domain work directly to a single specialist without clarification or orchestration.
+- Treating routing as a substitute for the specialist skill's own procedures.
+
+---
+
+## ✅ Quality Audit Checklist
+
+Before concluding a request routing operation, agent invocation dispatch, or multi-agent session kickoff, verify compliance with the following:
+
+- [ ] **Silent Parsing Enforced**: Evaluated keyword classifiers silently without outputting meta-commentary explanations.
+- [ ] **Ecosystem Matches Matrix**: Selected target specialist agents accurately aligning with the main domain categories.
+- [ ] **Complexity Assessed**: Escalated multi-domain tasks to the `orchestrator` directly rather than invoking incorrect specialists.
+- [ ] **Explicit Mention Honored**: Prioritized explicitly called `@agent-name` overrides over automated matchers.
+- [ ] **Transparency Declared**: Prefixed the response output with the standardized agent application statement.
 
 ---
 

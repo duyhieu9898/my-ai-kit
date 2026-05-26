@@ -4,12 +4,58 @@ description: >-
   Use when internationalizing an application, structuring locale JSON directories, formatting locale-sensitive dates/numbers, or implementing RTL.
   Internationalization (i18n) and localization covering hardcoded strings, Next.js, and ICU formatting.
   NOT for single-language UI.
-allowed-tools: Read Glob Grep
+allowed-tools:
+  - Read
+  - Glob
+  - Grep
 ---
 
 # i18n & Localization
 
 > Internationalization (i18n) and Localization (L10n) best practices.
+
+---
+
+## 📑 Content Map
+
+| File | Description | When to Read |
+|:---|:---|:---|
+| [scripts/i18n_checker.py](scripts/i18n_checker.py) | Hardcoded string and missing translation checker | Running local i18n validation |
+
+---
+
+## 🔗 Related Skills
+
+| Need | Skill |
+|:---|:---|
+| Designing internationalized UX components | [`frontend-design`](../frontend-design/SKILL.md) |
+| Server-side i18n middleware setups | [`nodejs-best-practices`](../nodejs-best-practices/SKILL.md) |
+
+---
+
+## 🛠️ Instructions / Procedures
+
+When tasked with internationalizing an application, structuring locale JSONs, or adapting layouts for RTL directional flows, strictly follow this step-by-step procedure:
+
+### Step 1: Outline Language Locales
+1. Define the target language support matrix (e.g. en-US, tr-TR) and note if any require RTL support (e.g. Arabic, Hebrew).
+2. Configure dynamic default fallbacks.
+
+### Step 2: Build JSON Directories
+1. Set up logical namespaced directories mapping resource files by module context (`locales/en/common.json`, `locales/en/errors.json`).
+2. Populate keys uniformly across all targets.
+
+### Step 3: Implement Translation Hooks
+1. Code localized UI templates utilizing framework tools (hooks like `useTranslation` for react-i18next or `useTranslations` for next-intl).
+2. Avoid string concatenation; use variables interpolation instead.
+
+### Step 4: Structure RTL CSS Layouts
+1. Swap standard hardcoded values (margin-left, padding-right) for logical CSS properties (`margin-inline-start`, `padding-inline-end`).
+2. Integrate dynamic directional styling rules.
+
+### Step 5: Analyze Hardcoded Mismatches & Verify Checklist
+1. Trigger static detection check scripts (`python scripts/i18n_checker.py <project_path>`).
+2. Confirm compliance against the **Quality Audit Checklist** before completing.
 
 ---
 
@@ -99,7 +145,7 @@ locales/
 - Plan for RTL from the start
 - Use ICU message format for complex strings
 
-### DON'T ❌
+## ❌ Anti-Patterns
 
 - Hardcode strings in components
 - Concatenate translated strings
@@ -137,16 +183,16 @@ locales/
 
 ---
 
-## 8. Checklist
+## ✅ Quality Audit Checklist
 
-Before shipping:
+Before concluding an internationalization setup, locale translation import, or RTL styling patch, verify compliance with the following:
 
-- [ ] All user-facing strings use translation keys
-- [ ] Locale files exist for all supported languages
-- [ ] Date/number formatting uses Intl API
-- [ ] RTL layout tested (if applicable)
-- [ ] Fallback language configured
-- [ ] No hardcoded strings in components
+- [ ] **No Hardcoded Strings**: Scanned codebase to ensure all user-facing copy uses namespaced translation keys.
+- [ ] **Ecosystem Mocks Verified**: Confirmed translation providers properly fallback to default locales on missing keys.
+- [ ] **Intl APIs Applied**: Handled all dynamic dates, times, and currency amounts using the standard global `Intl` interfaces.
+- [ ] **RTL Styling Responsive**: Leveraged CSS logical properties (`*-inline-start/end`) instead of strict directional overrides.
+- [ ] **ICU Formatting Used**: Managed pluralized strings or complex variables using official ICU brackets layouts.
+- [ ] **Checker Run Clean**: Triggered the local validator (`python scripts/i18n_checker.py <project_path>`) and resolved all mismatch exceptions.
 
 ---
 
@@ -154,4 +200,4 @@ Before shipping:
 
 | Script | Purpose | Command |
 |--------|---------|---------|
-| `scripts/i18n_checker.py` | Detect hardcoded strings & missing translations | `python scripts/i18n_checker.py <project_path>` |
+| [scripts/i18n_checker.py](scripts/i18n_checker.py) | Detect hardcoded strings & missing translations | `python scripts/i18n_checker.py <project_path>` |

@@ -4,7 +4,11 @@ description: >-
   Use when designing mobile app interfaces (React Native, Flutter, native), optimizing touch target sizes, or defining mobile navigation.
   Mobile-first design principles covering touch UX, gesture psychology, and HIG/Material 3 conventions.
   NOT for desktop.
-allowed-tools: Read Glob Grep Bash
+allowed-tools:
+  - Read
+  - Glob
+  - Grep
+  - Bash
 ---
 
 # Mobile Design System
@@ -16,18 +20,40 @@ allowed-tools: Read Glob Grep Bash
 
 | File | Description | When to Read |
 |------|-------------|--------------|
-| `references/mobile-design-thinking.md` | Anti-memorization principles to force context-based thinking | Before beginning any mobile design or development work |
-| `references/touch-psychology.md` | Fitts' Law, gestures, haptics, thumb zone, and visual touch zones | Designing touch layouts, spacing buttons, or gesture UI |
-| `references/mobile-performance.md` | RN/Flutter performance, 60fps, memoization, lists, and memory management | Optimizing rendering, animations, or list scrolling |
-| `references/mobile-backend.md` | Push notifications, offline sync, secure API architecture | Setting up storage, network sync, or notifications |
-| `references/mobile-testing.md` | Testing pyramid, E2E, mock strategies, and platform-specific tests | Planning mobile test suites and automated execution |
-| `references/mobile-debugging.md` | Native vs JS debugging, Flipper, Logcat, and Chrome DevTools | Troubleshooting runtime crashes or memory leaks |
-| `references/mobile-navigation.md` | Tab/Stack/Drawer navigators, deep linking, back navigation | Designing route architecture and entry paths |
-| `references/mobile-typography.md` | System fonts, Dynamic Type, sizing scale, and accessibility | Implementing typography stylesheets or font-scales |
-| `references/mobile-color-system.md` | OLED optimizations, dark mode, contrast, and battery-aware colors | Defining colors, custom themes, or dynamic styles |
-| `references/decision-trees.md` | Framework, state management, and storage selection matrices | Making architectural stack choices |
-| `references/platform-ios.md` | Apple Human Interface Guidelines (HIG), SF Symbols, SwiftUI patterns | Customizing iOS layouts, navigation, and icons |
-| `references/platform-android.md` | Material Design 3, Roboto fonts, Compose patterns, back handler | Customizing Android layouts, dialogs, and navigation |
+| [references/mobile-design-thinking.md](references/mobile-design-thinking.md) | Anti-memorization principles to force context-based thinking | Before beginning any mobile design or development work |
+| [references/touch-psychology.md](references/touch-psychology.md) | Fitts' Law, gestures, haptics, thumb zone, and visual touch zones | Designing touch layouts, spacing buttons, or gesture UI |
+| [references/mobile-performance.md](references/mobile-performance.md) | RN/Flutter performance, 60fps, memoization, lists, and memory management | Optimizing rendering, animations, or list scrolling |
+| [references/mobile-backend.md](references/mobile-backend.md) | Push notifications, offline sync, secure API architecture | Setting up storage, network sync, or notifications |
+| [references/mobile-testing.md](references/mobile-testing.md) | Testing pyramid, E2E, mock strategies, and platform-specific tests | Planning mobile test suites and automated execution |
+| [references/mobile-debugging.md](references/mobile-debugging.md) | Native vs JS debugging, Flipper, Logcat, and Chrome DevTools | Troubleshooting runtime crashes or memory leaks |
+| [references/mobile-navigation.md](references/mobile-navigation.md) | Tab/Stack/Drawer navigators, deep linking, back navigation | Designing route architecture and entry paths |
+| [references/mobile-typography.md](references/mobile-typography.md) | System fonts, Dynamic Type, sizing scale, and accessibility | Implementing typography stylesheets or font-scales |
+| [references/mobile-color-system.md](references/mobile-color-system.md) | OLED optimizations, dark mode, contrast, and battery-aware colors | Defining colors, custom themes, or dynamic styles |
+| [references/decision-trees.md](references/decision-trees.md) | Framework, state management, and storage selection matrices | Making architectural stack choices |
+| [references/platform-ios.md](references/platform-ios.md) | Apple Human Interface Guidelines (HIG), SF Symbols, SwiftUI patterns | Customizing iOS layouts, navigation, and icons |
+| [references/platform-android.md](references/platform-android.md) | Material Design 3, Roboto fonts, Compose patterns, back handler | Customizing Android layouts, dialogs, and navigation |
+
+---
+
+## 🔗 Related Skills
+
+| Need | Skill |
+|------|-------|
+| Implementing mobile app features | [`mobile-developer`](../mobile-developer/SKILL.md) |
+| Designing responsive web interfaces | [`frontend-design`](../frontend-design/SKILL.md) |
+| Optimizing runtime performance | [`performance-optimizer`](../performance-optimizer/SKILL.md) |
+
+---
+
+## 🛠️ Instructions / Procedures
+
+When tasked with mobile interface design, navigation structure, touch interaction, or cross-platform app UX, follow this procedure:
+
+1. Confirm platform, framework, navigation pattern, offline needs, and target device class before choosing patterns.
+2. Read only the relevant references from the Content Map for the requested platform or concern.
+3. Apply platform-native conventions for navigation, typography, controls, gestures, and system feedback.
+4. Validate touch targets, thumb-zone placement, loading/error/offline states, and accessibility labels before completing.
+5. Run `python scripts/mobile_audit.py <project_path>` when a project path is available.
 
 ---
 
@@ -37,7 +63,7 @@ allowed-tools: Read Glob Grep Bash
 
 | Script | Purpose | Command |
 |--------|---------|---------|
-| `scripts/mobile_audit.py` | Mobile UX & Touch Audit | `python scripts/mobile_audit.py <project_path>` |
+| [scripts/mobile_audit.py](scripts/mobile_audit.py) | Mobile UX & Touch Audit | `python scripts/mobile_audit.py <project_path>` |
 
 ---
 
@@ -56,7 +82,7 @@ allowed-tools: Read Glob Grep Bash
 | **Offline** | "Does this need to work offline?" | Affects data strategy |
 | **Target devices** | "Phone only, or tablet support?" | Layout complexity |
 
-### ⛔ AI MOBILE ANTI-PATTERNS (YASAK LİSTESİ)
+## ❌ Anti-Patterns
 
 > 🚫 **These are AI default tendencies that MUST be avoided!**
 
@@ -298,7 +324,7 @@ WHAT ARE YOU BUILDING?
 
 ---
 
-## 📋 Pre-Development Checklist
+## ✅ Quality Audit Checklist
 
 ### Before Starting ANY Mobile Project
 

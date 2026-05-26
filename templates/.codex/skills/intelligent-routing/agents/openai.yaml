@@ -1,6 +1,6 @@
 interface:
   display_name: "Intelligent Routing"
-  short_description: "Automatic agent selection, request analysis, domain detection, and override rules."
+  short_description: "Agent selection, request analysis, domain detection, and overrides."
   brand_color: "#1E3A8A"
   default_prompt: "$intelligent-routing"
 

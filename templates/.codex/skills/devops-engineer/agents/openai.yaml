@@ -1,6 +1,6 @@
 interface:
-  display_name: "Devops Engineer"
-  short_description: "Expert in deployment, server management, CI/CD, and production operations. CR..."
+  display_name: "DevOps Engineer"
+  short_description: "Deployment, CI/CD, rollback, servers, and production safety."
   brand_color: "#0D9488"
   default_prompt: "$devops-engineer"
 
