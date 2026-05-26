@@ -18,12 +18,12 @@ const TEMP_FOLDER = '.temp_ag_kit';
 
 /**
  * Get active folder configuration
- * @param {boolean} isLegacy - True if requesting old Antigravity format
+ * @param {boolean} isGemini - True if requesting Gemini/Antigravity format
  */
-const getFolderConfig = (isLegacy) => {
-    if (isLegacy) {
+const getFolderConfig = (isGemini) => {
+    if (isGemini) {
         return {
-            name: 'Antigravity Kit',
+            name: 'Gemini Antigravity Kit',
             sourceFolder: '.antigravity',
             installFolder: '.agents',
             rootInstruction: {
@@ -31,7 +31,7 @@ const getFolderConfig = (isLegacy) => {
                 target: 'GEMINI.md',
             },
             bannerColor: chalk.blueBright,
-            tag: '🚀 Legacy Framework',
+            tag: '🚀 Gemini Framework',
             desc: 'Multi-agent routing & slash workflows'
         };
     } else {
@@ -199,7 +199,8 @@ const updateGitignore = (targetDir, folderName) => {
  * Initialize selected kit folder in project
  */
 const initCommand = async (options) => {
-    const config = getFolderConfig(!!options.legacy);
+    const isGemini = !!options.gemini;
+    const config = getFolderConfig(isGemini);
     showBanner(config);
 
     const targetDir = path.resolve(options.path || process.cwd());
@@ -261,12 +262,12 @@ const initCommand = async (options) => {
         }
         console.log(chalk.gray('──────────────────────────────────────────────────────'));
         
-        if (!options.legacy) {
+        if (!isGemini) {
             console.log(chalk.magentaBright(`\n✨ OpenAI Codex mode enabled.`));
             console.log(chalk.gray(`💡 Tip: Natural language commands will automatically load skills!`));
             console.log(chalk.gray(`   Run tests via: ${chalk.cyan('python .agents/scripts/verify_all.py .')}\n`));
         } else {
-            console.log(chalk.blueBright(`\n🚀 Legacy Antigravity mode enabled.`));
+            console.log(chalk.blueBright(`\n🚀 Gemini Antigravity mode enabled.`));
             console.log(chalk.gray(`💡 Tip: Run slash commands like /plan or /brainstorm in chat.`));
             console.log(chalk.gray(`   Run tests via: ${chalk.cyan('python .agents/scripts/verify_all.py .')}\n`));
         }
@@ -282,7 +283,8 @@ const initCommand = async (options) => {
  * Update existing kit folder
  */
 const updateCommand = async (options) => {
-    const config = getFolderConfig(!!options.legacy);
+    const isGemini = !!options.gemini;
+    const config = getFolderConfig(isGemini);
     showBanner(config);
 
     const targetDir = path.resolve(options.path || process.cwd());
@@ -291,7 +293,7 @@ const updateCommand = async (options) => {
     // Check if folder exists
     if (!fs.existsSync(destDir)) {
         console.log(chalk.red(`❌ Could not find active ${chalk.cyan(config.installFolder)} folder at: ${targetDir}`));
-        console.log(chalk.yellow(`💡 Tip: Run ${chalk.cyan('hieund-ai-kit init' + (options.legacy ? ' --legacy' : ''))} to install first.`));
+        console.log(chalk.yellow(`💡 Tip: Run ${chalk.cyan('hieund-ai-kit init' + (isGemini ? ' --gemini' : ''))} to install first.`));
         process.exit(1);
     }
 
@@ -316,8 +318,8 @@ const statusCommand = (options) => {
     const targetDir = path.resolve(options.path || process.cwd());
     
     const agentsDir = path.join(targetDir, '.agents');
-    const legacyCodexDir = path.join(targetDir, '.codex');
-    const legacyAgentDir = path.join(targetDir, '.agent');
+    const oldCodexDir = path.join(targetDir, '.codex');
+    const oldAgentDir = path.join(targetDir, '.agent');
 
     console.log(chalk.blueBright('\n📊 Kit Installation Status\n'));
 
@@ -329,7 +331,7 @@ const statusCommand = (options) => {
         const stats = fs.statSync(agentsDir);
         const files = fs.readdirSync(agentsDir, { recursive: true });
         const isAntigravity = fs.existsSync(path.join(agentsDir, 'agents')) || fs.existsSync(path.join(agentsDir, 'workflows'));
-        const label = isAntigravity ? 'Antigravity Kit' : 'OpenAI Codex Kit';
+        const label = isAntigravity ? 'Gemini Antigravity Kit' : 'OpenAI Codex Kit';
         const itemLabel = isAntigravity ? 'agents, workflows & skills' : 'composable skills';
         
         console.log(chalk.magentaBright(`${label}: INSTALLED`));
@@ -341,14 +343,14 @@ const statusCommand = (options) => {
     }
 
     // Check obsolete folders from older kit versions.
-    if (fs.existsSync(legacyCodexDir) || fs.existsSync(legacyAgentDir)) {
+    if (fs.existsSync(oldCodexDir) || fs.existsSync(oldAgentDir)) {
         found = true;
-        console.log(chalk.yellow('Legacy kit folders detected:'));
-        if (fs.existsSync(legacyCodexDir)) {
-            console.log(`   ${chalk.cyan(legacyCodexDir)} (old Codex install path)`);
+        console.log(chalk.yellow('Old kit folders detected:'));
+        if (fs.existsSync(oldCodexDir)) {
+            console.log(`   ${chalk.cyan(oldCodexDir)} (old Codex install path)`);
         }
-        if (fs.existsSync(legacyAgentDir)) {
-            console.log(`   ${chalk.cyan(legacyAgentDir)} (old Antigravity install path)`);
+        if (fs.existsSync(oldAgentDir)) {
+            console.log(`   ${chalk.cyan(oldAgentDir)} (old Gemini/Antigravity install path)`);
         }
         console.log(chalk.gray(`   Current installs use ${chalk.cyan('.agents')}.\n`));
     }
@@ -356,7 +358,7 @@ const statusCommand = (options) => {
     if (!found) {
         console.log(chalk.red('❌ No active kits installed in this directory.'));
         console.log(chalk.yellow(`💡 Run ${chalk.cyan('hieund-ai-kit init')} to install Codex into .agents.`));
-        console.log(chalk.yellow(`💡 Run ${chalk.cyan('hieund-ai-kit init --legacy')} to install Antigravity into .agents.\n`));
+        console.log(chalk.yellow(`💡 Run ${chalk.cyan('hieund-ai-kit init --gemini')} to install Gemini Antigravity into .agents.\n`));
     }
 };
 
@@ -374,11 +376,11 @@ program
 // Command: init
 program
     .command('init')
-    .description('Install Codex or Antigravity kit into .agents')
+    .description('Install Codex or Gemini Antigravity kit into .agents')
     .option('-f, --force', 'Overwrite if folder already exists', false)
     .option('-p, --path <dir>', 'Path to the project directory', process.cwd())
     .option('-b, --branch <name>', 'Select repository branch')
-    .option('-l, --legacy', 'Install Antigravity format instead of Codex', false)
+    .option('-g, --gemini', 'Install Gemini Antigravity format instead of Codex', false)
     .action(initCommand);
 
 // Command: update
@@ -388,7 +390,7 @@ program
     .option('-f, --force', 'Skip confirmation prompt', false)
     .option('-p, --path <dir>', 'Path to the project directory', process.cwd())
     .option('-b, --branch <name>', 'Select repository branch')
-    .option('-l, --legacy', 'Update Antigravity format in .agents', false)
+    .option('-g, --gemini', 'Update Gemini Antigravity format in .agents', false)
     .action(updateCommand);
 
 // Command: status

@@ -18,7 +18,7 @@ Both standards rely on **Progressive Disclosure** (loading only metadata initial
 
 | Feature | Google Antigravity | OpenAI Codex |
 | :--- | :--- | :--- |
-| **Workspace Dir** | `.agents/skills/` (fallback to `.agent/skills/`) | `.agents/skills/` (scanned recursively from CWD to root) |
+| **Workspace Dir** | `.agents/skills/` | `.agents/skills/` (scanned recursively from CWD to root) |
 | **Global Dir** | `~/.gemini/antigravity/skills/` | `$HOME/.agents/skills/` |
 | **Frontmatter `name`**| **Optional** (defaults to folder name if omitted) | **Required** (must match folder name exactly) |
 | **Frontmatter `description`**| Written in the **third person**, no strict length limits, focuses on key search terms. | **Unified & Truncation-Optimized** (≤ 1024 chars), strict **100-character front-loading rule**. |

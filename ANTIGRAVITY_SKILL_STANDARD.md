@@ -32,7 +32,7 @@ Antigravity supports two scopes of skills: workspace-specific (team/project scop
 | **Global (All Workspaces)** | `~/.gemini/antigravity/skills/[skill-folder]/` | Personal utility scripts, general-purpose programming guidelines, or global productivity tools. |
 
 > [!NOTE]
-> Antigravity now defaults to scanning `.agents/skills/`, but it maintains full **backward compatibility** with the legacy `.agent/skills/` directory.
+> This kit uses `.agents/skills/` for workspace skills. Do not create new `.agent/skills/` installs.
 
 ---
 
@@ -141,8 +141,8 @@ Use this checklist to verify an Antigravity Skill's quality before finalizing or
 
 * [ ] **Folder Naming:** Matches the frontmatter `name` (or provides a clean, lowercase hyphenated name if the field is omitted).
 * [ ] **Required Frontmatter:** The `description` is present, written in the third person, and contains strong trigger keywords.
-* [ ] **Correct Paths:** The skill is placed in either `.agents/skills/` (recommended) or global `~/.gemini/antigravity/skills/`.
-* [ ] **Backward Compatibility:** Checked that legacy `.agent/skills/` directories are supported or gracefully migrated.
+* [ ] **Correct Paths:** The skill is placed in either `.agents/skills/` or global `~/.gemini/antigravity/skills/`.
+* [ ] **Old Path Cleanup:** Checked that no new `.agent/skills/` directory is introduced.
 * [ ] **Well-Defined Boundaries:** Under `When to use this skill`, both positive usage cases and out-of-scope boundaries are defined.
 * [ ] **Executable Safety:** All scripts in `scripts/` have executable permissions and are documented to run with `--help` first.
 * [ ] **Clean Markdown:** Contains no broken links, and uses clear bolding, headers, and bulleted lists for maximum readability.

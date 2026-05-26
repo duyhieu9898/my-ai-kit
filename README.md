@@ -1,96 +1,140 @@
-# ⚡ Hieund AI & Codex Kit CLI
+# Hieund AI Kit CLI
 
-> **Bộ công cụ tối ưu hóa năng lực tối tân dành cho AI Agent & OpenAI Codex** - Tự động hóa việc cài đặt các skill, quy tắc (rules) và bộ nhớ ngữ cảnh để AI của bạn đạt hiệu suất vượt trội.
+CLI cài đặt bộ skill và rule cho AI coding agents vào repository hiện tại.
 
----
+Mặc định CLI cài bộ OpenAI Codex. Có thể cài bộ Gemini Antigravity bằng `--gemini`.
 
-## 📋 Giới thiệu
+## Cài Đặt Nhanh
 
-**Hieund AI & Codex Kit CLI** là công cụ dòng lệnh (CLI) tùy chỉnh giúp bạn dễ dàng khởi tạo môi trường mở rộng năng lực cho AI Agent trực tiếp trong dự án của mình. Bộ công cụ hỗ trợ hai kiến trúc tiên tiến nhất hiện nay:
+Codex mặc định:
 
-1. **✨ OpenAI Codex Standard (`.agents` - Mặc định/Khuyên dùng):** 
-   * Kiến trúc **Composable Skills** hợp nhất toàn bộ Agent Persona và Domain Knowledge thành 66 Kỹ năng độc lập.
-   * Kích hoạt động (Implicit Invocation) giúp tiết kiệm đến 90% token.
-   * Cài `AGENTS.md` ở thư mục gốc và cài skills/scripts vào `.agents/`.
-2. **🚀 Antigravity Framework (`.agents` - qua `--legacy`):** 
-   * Phù hợp với các dự án cũ sử dụng 20 Agent chuyên gia riêng biệt và 14 quy trình lệnh gạch chéo `/command` (Slash workflows).
-   * Source template nội bộ nằm ở `templates/.antigravity/`, khi cài ra repo vẫn dùng `.agents/`.
-
----
-
-## 📦 Cài đặt nhanh qua `npx` (Không cần cài đặt trước)
-
-Bạn có thể chạy trực tiếp bộ cài đặt của mình từ GitHub vào bất kỳ dự án mới nào mà không cần cài đặt CLI toàn cục vào máy tính:
-
-### 1. Cài đặt OpenAI Codex thế hệ mới (Mặc định)
 ```bash
 npx -y github:duyhieu9898/my-ai-kit init
 ```
 
-### 2. Cài đặt Antigravity cũ (Legacy)
+Gemini Antigravity:
+
 ```bash
-npx -y github:duyhieu9898/my-ai-kit init --legacy
+npx -y github:duyhieu9898/my-ai-kit init --gemini
 ```
 
----
+Kết quả cài đặt:
 
-## 💻 Cài đặt cục bộ (Dành cho nhà phát triển Kit)
+| Mode | Runtime Folder | Root Instruction |
+|:---|:---|:---|
+| Codex | `.agents/` | `AGENTS.md` |
+| Gemini Antigravity | `.agents/` | `GEMINI.md` |
 
-Nếu bạn muốn chỉnh sửa mã nguồn CLI hoặc chạy kiểm thử trực tiếp từ thư mục phát triển hiện tại:
+`.agents/` chứa `skills/`, `scripts/`, và các tài nguyên runtime cần thiết. Folder này được thêm vào `.gitignore`.
 
-### Bước 1: Liên kết CLI với máy tính
+## Lệnh CLI
+
+| Lệnh | Mô tả |
+|:---|:---|
+| `hieund-ai-kit init` | Cài Codex kit vào repo hiện tại |
+| `hieund-ai-kit init --gemini` | Cài Gemini Antigravity kit vào repo hiện tại |
+| `hieund-ai-kit init --force` | Ghi đè `.agents/` và root instruction nếu đã tồn tại |
+| `hieund-ai-kit init --path <dir>` | Cài vào thư mục chỉ định |
+| `hieund-ai-kit update` | Cập nhật Codex kit trong `.agents/` |
+| `hieund-ai-kit update --gemini` | Cập nhật Gemini Antigravity kit trong `.agents/` |
+| `hieund-ai-kit status` | Kiểm tra trạng thái cài đặt |
+
+## Cài Đặt Local Để Phát Triển
+
 ```bash
 cd /home/hieund/Documents/hieund-ai-kit-cli
+npm install
 npm link
 ```
 
-### Bước 2: Chạy trực tiếp từ bất kỳ thư mục dự án nào
-```bash
-# Khởi tạo Codex mới
-hieund-ai-kit init
+Sau đó có thể chạy:
 
-# Khởi tạo Antigravity cũ
-hieund-ai-kit init --legacy
+```bash
+hieund-ai-kit init --path /path/to/project
+hieund-ai-kit status --path /path/to/project
 ```
 
----
+## Cấu Trúc Template
 
-## 🛠️ Danh sách các câu lệnh CLI
+```text
+templates/
+├── .codex/          # Source template cho Codex
+└── .antigravity/    # Source template cho Gemini Antigravity
+```
 
-| Lệnh CLI | Tham số / Flags | Mô tả |
-| :--- | :--- | :--- |
-| `hieund-ai-kit init` | *Không có* | Cài đặt cấu hình Codex vào `.agents/` và `AGENTS.md` ở root dự án. |
-| | `--legacy` (hoặc `-l`) | Cài đặt cấu hình Antigravity vào `.agents/` và `GEMINI.md` ở root dự án. |
-| | `--force` (hoặc `-f`) | Buộc ghi đè nếu thư mục đích đã tồn tại. |
-| | `--path <dir>` (hoặc `-p`)| Chỉ định đường dẫn thư mục dự án mục tiêu. |
-| `hieund-ai-kit update`| *Không có* | Cập nhật cấu hình Codex trong `.agents/` lên phiên bản mới nhất từ GitHub. |
-| | `--legacy` (hoặc `-l`) | Cập nhật cấu hình Antigravity trong `.agents/` lên bản mới nhất. |
-| `hieund-ai-kit status`| *Không có* | Kiểm tra song song tình trạng cài đặt của cả bản Codex và Antigravity trong dự án. |
+Khi cài vào project, cả hai source template đều được copy ra `.agents/`.
 
----
+Codex template:
 
-## 🤝 Tùy chỉnh & Nâng cấp Kỹ năng (Personalization)
+```text
+.agents/
+├── skills/
+├── scripts/
+├── .shared/
+└── ARCHITECTURE.md
+AGENTS.md
+```
 
-Để mở rộng hoặc chỉnh sửa năng lực của bộ kit:
+Gemini Antigravity template:
 
-1. **Thêm/Sửa Skill cho Codex:** Chỉnh sửa hoặc thêm mới các thư mục kỹ năng trong `templates/.codex/skills/`.
-2. **Thêm/Sửa Skill cho Antigravity:** Chỉnh sửa trong `templates/.antigravity/skills/`.
-3. **Đẩy cấu hình mới lên GitHub:**
-   ```bash
-   git add .
-   git commit -m "feat: add advanced nextjs performance patterns to codex"
-   git push origin main
-   ```
-4. **Cập nhật ở các dự án:** Di chuyển đến thư mục dự án của bạn và chạy `hieund-ai-kit update` để đồng bộ các cập nhật mới nhất!
+```text
+.agents/
+├── agents/
+├── skills/
+├── workflows/
+├── scripts/
+├── rules/
+└── ARCHITECTURE.md
+GEMINI.md
+```
 
----
+## Phát Triển Skill
 
-## 📄 License
+Codex skills:
 
-MIT License
+```text
+templates/.codex/skills/<skill-name>/SKILL.md
+templates/.codex/skills/<skill-name>/agents/openai.yaml
+templates/.codex/skills/<skill-name>/references/
+templates/.codex/skills/<skill-name>/scripts/
+```
 
----
+Gemini Antigravity skills:
 
-<p align="center">
-  Made with ❤️ by <b>Hieu Nguyen Duy</b>
-</p>
+```text
+templates/.antigravity/skills/<skill-name>/SKILL.md
+```
+
+Sau khi sửa template, push lên `main`; các project khác có thể cập nhật bằng:
+
+```bash
+hieund-ai-kit update
+```
+
+## Kiểm Tra
+
+Kiểm tra CLI:
+
+```bash
+node --check bin/index.js
+node bin/index.js --help
+```
+
+Kiểm tra kit đã cài trong project:
+
+```bash
+hieund-ai-kit status
+```
+
+Chạy kiểm tra runtime sau khi cài:
+
+```bash
+python .agents/scripts/checklist.py .
+python .agents/scripts/verify_all.py . --url http://localhost:3000
+```
+
+## Ghi Chú
+
+Repository: `https://github.com/duyhieu9898/my-ai-kit`
+
+License: MIT
