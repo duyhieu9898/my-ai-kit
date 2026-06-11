@@ -13,7 +13,7 @@ $ARGUMENTS
 1. **Load verify-changes skill** — Read `.agents/skills/verify-changes/SKILL.md` first
 2. **Execute, don't inspect** — Run the code, don't just read it
 3. **Report evidence** — Show actual output, not assumptions
-4. **Cover edge cases** — Test error paths, not just happy path
+4. **Match the risk** — Cover edge cases when the changed behavior or proof requirements warrant them
 
 ---
 
@@ -29,14 +29,14 @@ CONTEXT:
 WORKFLOW:
 1. IDENTIFY what changed (files, functions, behavior)
 2. DETERMINE verification method (build, test, run, curl)
-3. EXECUTE verification commands
+3. EXECUTE the narrowest sufficient verification commands
 4. REPORT evidence of success or failure
 5. FLAG anything that couldn't be verified automatically
 
 RULES:
 1. Follow verify-changes/SKILL.md protocol
 2. "It should work" is NOT verification — run it
-3. Test error paths, not just success paths
+3. Test error paths when risk, acceptance criteria, or changed behavior requires them
 4. Report with actual command output as evidence
 ```
 

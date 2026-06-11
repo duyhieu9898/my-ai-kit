@@ -1,9 +1,10 @@
 ---
 name: verify-changes
 description: >-
-  Use when code was written, a feature completed, a bug fixed, or the user asks to test, verify, or prove.
-  Runtime execution, testing, and evidence collection protocol.
-  NOT for writing code.
+  Use after code changes or when the user asks to test, verify, or prove behavior.
+  Selects proportional, executable evidence from project-native checks, Harness
+  risk lanes, story acceptance criteria, and the proof matrix. NOT for writing
+  unrelated implementation or automatically running every available check.
 allowed-tools:
   - Read
   - Bash
@@ -11,159 +12,97 @@ allowed-tools:
   - Glob
 ---
 
-# Verify Changes — Prove Code Works
+# Verify Changes
 
-> "Code that exists" ≠ "Code that works." This skill ensures changes are verified through execution.
+Prove the changed behavior with the smallest sufficient executable evidence.
 
----
+## Authority
 
-## 📑 Content Map
+Apply verification requirements in this order:
 
-| File | Description | When to Read |
-|:---|:---|:---|
-| _No supplementary files_ | Main verification procedures are in this file | Use this file by default |
+1. Repository instructions and explicit user requirements.
+2. Harness lane, story acceptance criteria, configured verification command,
+   and proof matrix.
+3. Project-native test, build, lint, typecheck, and smoke commands.
+4. This skill's defaults when the project provides no stronger direction.
 
----
+Do not weaken required proof. Do not expand a narrow task into a release audit
+unless the affected contract, risk lane, or user request requires it.
 
-## 🔗 Related Skills
+## Workflow
 
-| Need | Skill |
-|:---|:---|
-| Core Web Vitals optimization techniques | [`performance-optimizer`](../performance-optimizer/SKILL.md) |
-| Writing atomic verifiable plans | [`plan-writing`](../plan-writing/SKILL.md) |
-| Automating testing strategies | [`webapp-testing`](../webapp-testing/SKILL.md) |
+### 1. Map The Change
 
----
+- Identify changed files, behavior, callers, and contracts.
+- Inspect nearby tests and project command definitions such as `package.json`,
+  `pyproject.toml`, task runners, CI files, or story verification commands.
+- Distinguish executable behavior from docs-only or metadata-only changes.
 
-## 🛠️ Instructions / Procedures
+### 2. Select Proportional Proof
 
-When tasked with verifying changes, proving bug fixes, or running backend/frontend tests, strictly follow this step-by-step procedure:
-
-### Step 1: Map Modified Files & Intent
-1. Identify all altered files, code signatures, and behavioral changes.
-2. Note the original requirement or target issue.
-
-### Step 2: Determine Verification Methods
-1. Select validation pathways per change class:
-   - Bug fix -> reproduces bug scenario, checks resolution.
-   - Refactor -> runs complete test suites.
-   - API endpoints -> curls paths, checks response shapes.
-
-### Step 3: Run Verification Triggers
-1. Trigger appropriate compilers (`npm run build`), test suites (`npm run test`), or endpoint targets.
-2. Test both happy paths and edge boundaries.
-
-### Step 4: Write Verification Report
-1. Create a detailed report summarizing files modified, precise commands run, and execution evidence.
-2. Ensure you document any edge scenarios.
-
-### Step 5: Validate checklist compliance
-1. Audit overall outcomes.
-2. Confirm compliance against the **Quality Audit Checklist** before concluded.
-
----
-
-## Core Principle
-
-```
-- Verification by inspection:  "I can see the function exists, it should work"
-- Verification by assumption:  "The types check out, so it's correct"
-- Verification by execution:   "I ran it, here's the output, it works because [evidence]"
-```
-
----
-
-## Verification Protocol
-
-### Step 1: Identify What Changed
-```
-- Which files were modified?
-- What behavior should be different now?
-- What was the original bug/requirement?
-```
-
-### Step 2: Determine Verification Method
-
-| Change Type | Verification Method |
+| Scope | Default evidence |
 |---|---|
-| **Bug fix** | Reproduce the original bug scenario → confirm it no longer occurs |
-| **New feature** | Run the feature → confirm expected output |
-| **Refactor** | Run existing tests → confirm nothing broke |
-| **API change** | Call the endpoint → confirm response shape |
-| **UI change** | Render the component → confirm visual output |
-| **Config change** | Load the config → confirm values applied |
-| **Build/infra** | Run build command → confirm success |
+| Tiny docs/copy/metadata | Structural check, parser, link check, or diff check when applicable |
+| Tiny code change | Syntax/type check plus one targeted test or focused executable probe |
+| Normal change | Targeted tests for changed behavior, then affected integration/build checks |
+| High-risk or shared contract | Required story proof, negative paths, integration checks, and broader regression coverage |
+| Release or explicit full verification | Project release suite, configured story verification, or full checklist |
 
-### Step 3: Execute Verification
+Compilation alone is sufficient only when the changed contract is compilation
+or syntax. API calls, browser checks, database operations, and server startup
+are conditional on touching those surfaces.
 
-```bash
-# For Node.js projects
-npm run build          # Does it compile?
-npm run test           # Do tests pass?
-npm run dev            # Does it start?
+### 3. Execute Narrow First
 
-# For specific files
-node -e "require('./path/to/module'); console.log('✅ Loads correctly')"
+1. Run the closest existing test or reproduction for the changed behavior.
+2. Run affected static or integration checks.
+3. Expand to broader suites when:
+   - required by Harness or acceptance criteria;
+   - shared behavior has a wider blast radius;
+   - targeted evidence exposes a regression;
+   - the user requests release-level confidence.
 
-# For API endpoints
-curl http://localhost:3000/api/endpoint
+Do not run every validator merely because it exists. Avoid unrelated network,
+browser, database, or deployment checks.
 
-# For scripts
-python3 script.py --test
-```
+### 4. Handle Missing Proof
 
-### Step 4: Report Evidence
+If no suitable test exists:
 
-```markdown
-## Verification Report
+- run a focused executable smoke or reproduction command;
+- add a regression test when the behavior is important and test creation is in scope;
+- otherwise report the proof gap and what remains unverified.
 
-### What was changed
-- [File list and summary]
+Never replace unavailable runtime evidence with an unsupported claim.
 
-### How it was verified
-- [Exact commands run]
+### 5. Report Evidence
 
-### Evidence
-- Build: ✅ Compiled without errors
-- Tests: ✅ 42/42 passing
-- Runtime: ✅ Server starts, endpoint returns expected JSON
-- Edge case: ✅ Empty input handled correctly
+Keep the report proportional to the task. Include:
 
-### Not yet verified
-- [Anything that couldn't be tested automatically]
-```
+- commands executed;
+- observed pass/fail result and relevant counts;
+- behavior directly proven;
+- skipped or unavailable checks with the reason.
 
----
+Do not paste full logs unless requested. Do not claim that unexecuted checks
+passed.
 
-## ✅ Quality Audit Checklist
+## Verification Checklist
 
-Before concluding a feature execution, code verification, or test reporting task, verify compliance with the following:
+- [ ] Required Harness/story proof was identified and respected.
+- [ ] Commands came from project-native configuration where available.
+- [ ] Evidence directly covers the changed behavior.
+- [ ] Negative or boundary cases were checked when risk or behavior warrants them.
+- [ ] Broader suites were run only when justified.
+- [ ] Remaining gaps and skipped checks are explicit.
 
-- [ ] **Execution Verified**: Verified all behavior through actual execution, not just code inspection or compile validation.
-- [ ] **Build compiles successfully**: Checked compilation status utilizing standard bundle scripts (`npm run build` or similar).
-- [ ] **API Endpoint Curl checks**: Triggered curl requests or test runners on modified endpoints and verified response structures.
-- [ ] **Errors and Edge cases handled**: Audited edge inputs, boundary parameters, and error status code handling.
-- [ ] **No Console warnings in runtime**: Audited console logs for error stack traces or layout warnings.
-- [ ] **Verification report appended**: Documented changes, exact execution triggers, and passing evidence.
+## Anti-Patterns
 
----
-
-## ❌ Anti-Patterns
-
-| Anti-Pattern | Why It's Bad | Fix |
-|---|---|---|
-| "It should work" | No evidence | Run it and show output |
-| Only checking happy path | Bugs hide in edge cases | Test error paths too |
-| Verifying only compilation | Compiles ≠ correct | Test runtime behavior |
-| Skipping verification for "trivial" changes | Trivial changes cause real bugs | Verify everything |
-
----
-
-## Integration with Other Skills
-
-| After Using | Verify With |
+| Anti-pattern | Correction |
 |---|---|
-| `frontend-design` → UI changes | Render in browser, check console |
-| `backend-specialist` → API changes | curl endpoints, check responses |
-| `database-design` → Schema changes | Run migrations, query data |
-| `testing-patterns` → New tests | Run test suite, check coverage |
+| Always run build, lint, tests, curl, and browser checks | Select checks for the changed surface and required proof |
+| Run the full suite for a one-line local change | Start with the closest targeted check |
+| Treat compilation as proof of runtime behavior | Execute the behavior or its test |
+| Invent commands without inspecting project configuration | Prefer existing scripts, tests, and story commands |
+| Skip all verification because a change is small | Run the smallest meaningful check |
+| Stop after a failing check without diagnosis | Report the failure and investigate when fixing is in scope |

@@ -103,14 +103,14 @@ When user's prompt is NOT in English:
 2. **Respond in user's language** - match their communication
 3. **Code comments/variables** remain in English
 
-### 🧹 Clean Code (Global Mandatory)
+### 🧹 Clean Code
 
-**ALL code MUST follow `@[skills/clean-code]` rules. No exceptions.**
+When writing or refactoring code, apply `@[skills/clean-code]` with repository
+conventions and scope rules taking precedence.
 
-- **Code**: Concise, direct, no over-engineering. Self-documenting.
-- **Testing**: Mandatory. Pyramid (Unit > Int > E2E) + AAA Pattern.
-- **Performance**: Measure first. Adhere to 2025 standards (Core Web Vitals).
-- **Infra/Safety**: 5-Phase Deployment. Verify secrets security.
+- Keep changes focused and avoid speculative abstractions.
+- Treat size and complexity metrics as review signals, not universal quotas.
+- Use `verify-changes` and project instructions to select validation evidence.
 
 ### 📁 File Dependency Awareness
 

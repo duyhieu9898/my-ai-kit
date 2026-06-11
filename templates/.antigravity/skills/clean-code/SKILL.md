@@ -1,202 +1,87 @@
 ---
 name: clean-code
-description: Pragmatic coding standards - concise, direct, no over-engineering, no unnecessary comments
-when_to_use: "Always active for ALL code writing. Enforces concise, direct coding standards, testing pyramid, and performance best practices."
-allowed-tools: Read, Write, Edit
-version: 2.0
-priority: CRITICAL
+description: >-
+  Use when writing, editing, or refactoring code. Provides pragmatic quality
+  heuristics for scoped changes, readable naming, simple control flow, useful
+  abstractions, comments, and dependency impact. Follow repository conventions
+  over generic style preferences. NOT for planning, documentation-only work, or
+  selecting validation commands.
+allowed-tools:
+  - Read
+  - Write
+  - Edit
 ---
 
-# Clean Code - Pragmatic AI Coding Standards
+# Clean Code
 
-> **CRITICAL SKILL** - Be **concise, direct, and solution-focused**.
+Improve readability and maintainability without expanding the requested scope.
 
----
+## Authority
 
-## Core Principles
+Apply guidance in this order:
 
-| Principle | Rule |
-|-----------|------|
-| **SRP** | Single Responsibility - each function/class does ONE thing |
-| **DRY** | Don't Repeat Yourself - extract duplicates, reuse |
-| **KISS** | Keep It Simple - simplest solution that works |
-| **YAGNI** | You Aren't Gonna Need It - don't build unused features |
-| **Boy Scout** | Leave code cleaner than you found it |
+1. Repository instructions and established local conventions.
+2. Existing module boundaries, public contracts, and neighboring patterns.
+3. This skill's heuristics.
 
----
+Do not perform unrelated cleanup. A better design that changes extra behavior,
+files, or contracts is not a scoped implementation.
 
-## Naming Rules
+## Workflow
 
-| Element | Convention |
-|---------|------------|
-| **Variables** | Reveal intent: `userCount` not `n` |
-| **Functions** | Verb + noun: `getUserById()` not `user()` |
-| **Booleans** | Question form: `isActive`, `hasPermission`, `canEdit` |
-| **Constants** | SCREAMING_SNAKE: `MAX_RETRY_COUNT` |
+### 1. Understand The Change
 
-> **Rule:** If you need a comment to explain a name, rename it.
+- Identify the requested behavior and the smallest affected surface.
+- Inspect callers, imports, tests, interfaces, and nearby implementations.
+- Preserve unrelated user changes and existing compatible patterns.
 
----
+### 2. Implement Simply
 
-## Function Rules
+- Prefer direct code over speculative layers or configuration.
+- Add an abstraction when it removes meaningful duplication, isolates a real
+  concept, or matches an established repository pattern.
+- Keep related behavior together. Split code when responsibilities or change
+  reasons are genuinely independent.
+- Use guard clauses when they clarify control flow, not as a mechanical rule.
+- Avoid hidden global mutation and surprising input mutation.
 
-| Rule | Description |
-|------|-------------|
-| **Small** | Max 20 lines, ideally 5-10 |
-| **One Thing** | Does one thing, does it well |
-| **One Level** | One level of abstraction per function |
-| **Few Args** | Max 3 arguments, prefer 0-2 |
-| **No Side Effects** | Don't mutate inputs unexpectedly |
+### 3. Name And Explain
 
----
+- Choose names that communicate domain intent at the point of use.
+- Follow the language and repository naming conventions.
+- Use comments for non-obvious constraints, tradeoffs, or external behavior.
+- Do not narrate syntax or duplicate what the code already states.
+- Replace unexplained literals with named values when the name adds meaning.
 
-## Code Structure
+### 4. Control Scope
 
-| Pattern | Apply |
-|---------|-------|
-| **Guard Clauses** | Early returns for edge cases |
-| **Flat > Nested** | Avoid deep nesting (max 2 levels) |
-| **Composition** | Small functions composed together |
-| **Colocation** | Keep related code close |
+- Update dependent files required by a changed signature or contract.
+- Do not rename, reformat, or reorganize unrelated code.
+- Do not introduce utilities, factories, wrappers, or base classes for a
+  single hypothetical reuse case.
+- Leave existing complexity alone when changing it is unnecessary or risky.
 
----
+### 5. Hand Off Verification
 
-## AI Coding Style
+`clean-code` governs implementation quality, not test selection or result
+reporting. Use repository instructions, Harness proof requirements, and
+`verify-changes` to choose proportional executable evidence.
 
-| Situation | Action |
-|-----------|--------|
-| User asks for feature | Write it directly |
-| User reports bug | Fix it, don't explain |
-| No clear requirement | Ask, don't assume |
+## Heuristics, Not Quotas
 
----
+Function length, parameter count, nesting depth, and file size are review
+signals. They are not universal pass/fail limits.
 
-## Anti-Patterns (DON'T)
+Refactor when structure obscures intent, mixes responsibilities, duplicates
+meaningful logic, or makes changes unsafe. Keep cohesive code together when
+splitting it would add indirection without improving understanding.
 
-| ❌ Pattern | ✅ Fix |
-|-----------|-------|
-| Comment every line | Delete obvious comments |
-| Helper for one-liner | Inline the code |
-| Factory for 2 objects | Direct instantiation |
-| utils.ts with 1 function | Put code where used |
-| "First we import..." | Just write code |
-| Deep nesting | Guard clauses |
-| Magic numbers | Named constants |
-| God functions | Split by responsibility |
+## Checklist
 
----
-
-## 🔴 Before Editing ANY File (THINK FIRST!)
-
-**Before changing a file, ask yourself:**
-
-| Question | Why |
-|----------|-----|
-| **What imports this file?** | They might break |
-| **What does this file import?** | Interface changes |
-| **What tests cover this?** | Tests might fail |
-| **Is this a shared component?** | Multiple places affected |
-
-**Quick Check:**
-```
-File to edit: UserService.ts
-└── Who imports this? → UserController.ts, AuthController.ts
-└── Do they need changes too? → Check function signatures
-```
-
-> 🔴 **Rule:** Edit the file + all dependent files in the SAME task.
-> 🔴 **Never leave broken imports or missing updates.**
-
----
-
-## Summary
-
-| Do | Don't |
-|----|-------|
-| Write code directly | Write tutorials |
-| Let code self-document | Add obvious comments |
-| Fix bugs immediately | Explain the fix first |
-| Inline small things | Create unnecessary files |
-| Name things clearly | Use abbreviations |
-| Keep functions small | Write 100+ line functions |
-
-> **Remember: The user wants working code, not a programming lesson.**
-
----
-
-## 🔴 Self-Check Before Completing (MANDATORY)
-
-**Before saying "task complete", verify:**
-
-| Check | Question |
-|-------|----------|
-| ✅ **Goal met?** | Did I do exactly what user asked? |
-| ✅ **Files edited?** | Did I modify all necessary files? |
-| ✅ **Code works?** | Did I test/verify the change? |
-| ✅ **No errors?** | Lint and TypeScript pass? |
-| ✅ **Nothing forgotten?** | Any edge cases missed? |
-
-> 🔴 **Rule:** If ANY check fails, fix it before completing.
-
----
-
-## Verification Scripts (MANDATORY)
-
-> 🔴 **CRITICAL:** Each agent runs ONLY their own skill's scripts after completing work.
-
-### Agent → Script Mapping
-
-| Agent | Script | Command |
-|-------|--------|---------|
-| **frontend-specialist** | UX Audit | `python3 .agents/skills/frontend-design/scripts/ux_audit.py .` |
-| **frontend-specialist** | A11y Check | `python3 .agents/skills/frontend-design/scripts/accessibility_checker.py .` |
-| **backend-specialist** | API Validator | `python3 .agents/skills/api-patterns/scripts/api_validator.py .` |
-| **mobile-developer** | Mobile Audit | `python3 .agents/skills/mobile-design/scripts/mobile_audit.py .` |
-| **database-architect** | Schema Validate | `python3 .agents/skills/database-design/scripts/schema_validator.py .` |
-| **security-auditor** | Security Scan | `python3 .agents/skills/vulnerability-scanner/scripts/security_scan.py .` |
-| **seo-specialist** | SEO Check | `python3 .agents/skills/seo-fundamentals/scripts/seo_checker.py .` |
-| **seo-specialist** | GEO Check | `python3 .agents/skills/geo-fundamentals/scripts/geo_checker.py .` |
-| **performance-optimizer** | Lighthouse | `python3 .agents/skills/performance-profiling/scripts/lighthouse_audit.py <url>` |
-| **test-engineer** | Test Runner | `python3 .agents/skills/testing-patterns/scripts/test_runner.py .` |
-| **test-engineer** | Playwright | `python3 .agents/skills/webapp-testing/scripts/playwright_runner.py <url>` |
-| **Any agent** | Lint Check | `python3 .agents/skills/lint-and-validate/scripts/lint_runner.py .` |
-| **Any agent** | Type Coverage | `python3 .agents/skills/lint-and-validate/scripts/type_coverage.py .` |
-| **Any agent** | i18n Check | `python3 .agents/skills/i18n-localization/scripts/i18n_checker.py .` |
-
-> ❌ **WRONG:** `test-engineer` running `ux_audit.py`
-> ✅ **CORRECT:** `frontend-specialist` running `ux_audit.py`
-
----
-
-### 🔴 Script Output Handling (READ → SUMMARIZE → ASK)
-
-**When running a validation script, you MUST:**
-
-1. **Run the script** and capture ALL output
-2. **Parse the output** - identify errors, warnings, and passes
-3. **Summarize to user** in this format:
-
-```markdown
-## Script Results: [script_name.py]
-
-### ❌ Errors Found (X items)
-- [File:Line] Error description 1
-- [File:Line] Error description 2
-
-### ⚠️ Warnings (Y items)
-- [File:Line] Warning description
-
-### ✅ Passed (Z items)
-- Check 1 passed
-- Check 2 passed
-
-**Should I fix the X errors?**
-```
-
-4. **Wait for user confirmation** before fixing
-5. **After fixing** → Re-run script to confirm
-
-> 🔴 **VIOLATION:** Running script and ignoring output = FAILED task.
-> 🔴 **VIOLATION:** Auto-fixing without asking = Not allowed.
-> 🔴 **Rule:** Always READ output → SUMMARIZE → ASK → then fix.
-
+- [ ] The change implements only the requested behavior.
+- [ ] Local conventions and ownership boundaries are preserved.
+- [ ] Callers, imports, tests, and contracts were considered.
+- [ ] Names and control flow make the intent clear.
+- [ ] Abstractions solve current complexity rather than hypothetical reuse.
+- [ ] Comments explain only information the code cannot express clearly.
+- [ ] Required dependent changes are included; unrelated cleanup is excluded.

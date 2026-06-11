@@ -7,6 +7,8 @@ Project-specific accepted decisions:
 
 - `0008-dual-toolkit-runtime.md`
 - `0009-separate-root-and-toolkit-instructions.md`
+- `0010-proportional-change-verification.md`
+- `0011-scoped-clean-code-guidance.md`
 
 The earlier `0001` through `0007` records describe the installed Harness
 framework itself.

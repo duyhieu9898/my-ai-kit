@@ -25,6 +25,8 @@ of truth and add rows only when a story has executable evidence.
 | KIT-003 | Preserve instruction scopes | yes | yes | no | yes | implemented | source assertions and package manifest |
 | KIT-004 | Report installation status | no | yes | no | yes | implemented | status help and source contract |
 | KIT-005 | Ship validated Backlog skill | yes | yes | no | yes | implemented | 75 offline tests |
+| KIT-006 | Select proportional change verification | yes | yes | no | yes | implemented | skill validation and cross-template assertions |
+| KIT-007 | Keep clean-code scoped to implementation quality | yes | yes | no | yes | implemented | skill validation, routing assertions, and package manifest |
 
 ## Evidence Rules
 

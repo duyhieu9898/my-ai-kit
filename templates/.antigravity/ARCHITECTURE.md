@@ -173,7 +173,7 @@ Modular knowledge domains that agents can load on-demand based on task context. 
 
 | Skill                     | Description               |
 | ------------------------- | ------------------------- |
-| `clean-code`              | Coding standards (Global) |
+| `clean-code`              | Scoped implementation quality heuristics |
 | `behavioral-modes`        | Agent personas            |
 | `parallel-agents`         | Multi-agent patterns      |
 | `mcp-builder`             | Model Context Protocol    |
