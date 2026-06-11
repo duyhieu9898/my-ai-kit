@@ -27,7 +27,7 @@ const getFolderConfig = (isGemini) => {
             sourceFolder: '.antigravity',
             installFolder: '.agents',
             rootInstruction: {
-                source: 'rules/GEMINI.md',
+                source: '.antigravity/rules/GEMINI.md',
                 target: 'GEMINI.md',
             },
             bannerColor: chalk.blueBright,
@@ -40,7 +40,7 @@ const getFolderConfig = (isGemini) => {
             sourceFolder: '.codex',
             installFolder: '.agents',
             rootInstruction: {
-                source: 'AGENTS.md',
+                source: 'root/AGENTS.md',
                 target: 'AGENTS.md',
             },
             bannerColor: chalk.magentaBright,
@@ -134,7 +134,7 @@ const copyRootInstruction = (tempDir, targetDir, config, force) => {
         return 'none';
     }
 
-    const sourcePath = path.join(tempDir, TEMPLATES_FOLDER, config.sourceFolder, config.rootInstruction.source);
+    const sourcePath = path.join(tempDir, TEMPLATES_FOLDER, config.rootInstruction.source);
     const destPath = path.join(targetDir, config.rootInstruction.target);
 
     if (!fs.existsSync(sourcePath)) {
@@ -238,7 +238,8 @@ const initCommand = async (options) => {
 
         // Copy selected template source into the runtime .agents folder.
         copyTemplateFolder(tempDir, destDir, config);
-        const rootInstructionStatus = copyRootInstruction(tempDir, targetDir, config, !!options.force);
+        const shouldOverwriteRoot = options.overwriteRootInstruction ?? !!options.force;
+        const rootInstructionStatus = copyRootInstruction(tempDir, targetDir, config, shouldOverwriteRoot);
 
         // Update .gitignore
         const gitignoreUpdated = updateGitignore(targetDir, config.installFolder);
@@ -307,8 +308,8 @@ const updateCommand = async (options) => {
         }
     }
 
-    // Call init with force option
-    await initCommand({ ...options, force: true });
+    // Refresh the toolkit without overwriting repository-specific root instructions.
+    await initCommand({ ...options, force: true, overwriteRootInstruction: false });
 };
 
 /**

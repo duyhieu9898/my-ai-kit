@@ -48,8 +48,8 @@ Thay `hieund-ai-kit` bằng `npx -y hieund-ai-kit` nếu chưa cài global.
 | `init --gemini` | Cài Gemini Antigravity kit vào repo hiện tại |
 | `init --force` | Ghi đè `.agents/` và root instruction nếu đã tồn tại |
 | `init --path <dir>` | Cài vào thư mục chỉ định |
-| `update` | Cập nhật Codex kit trong `.agents/` |
-| `update --gemini` | Cập nhật Gemini Antigravity kit trong `.agents/` |
+| `update` | Cập nhật Codex kit trong `.agents/`, giữ nguyên root instruction |
+| `update --gemini` | Cập nhật Gemini Antigravity kit trong `.agents/`, giữ nguyên root instruction |
 | `status` | Kiểm tra trạng thái cài đặt |
 
 Ví dụ trong thư mục project:
@@ -90,20 +90,23 @@ hieund-ai-kit status
 ```text
 templates/
 ├── .codex/          # Source template cho Codex
-└── .antigravity/    # Source template cho Gemini Antigravity
+├── .antigravity/    # Source template cho Gemini Antigravity
+└── root/            # Root instruction cho Codex
 ```
 
-Khi cài vào project, cả hai source template đều được copy ra `.agents/`.
+Khi cài, source template của mode được copy vào `.agents/`; root instruction
+được copy riêng ra thư mục project.
 
 Codex template:
 
 ```text
 .agents/
+├── AGENTS.md        # Rules scoped to shared toolkit maintenance
 ├── skills/
 ├── scripts/
 ├── .shared/
 └── ARCHITECTURE.md
-AGENTS.md
+AGENTS.md             # Repository-wide workflow and skill rules
 ```
 
 Gemini Antigravity template:
