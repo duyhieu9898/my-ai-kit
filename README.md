@@ -6,17 +6,28 @@ Mặc định CLI cài bộ OpenAI Codex. Có thể cài bộ Gemini Antigravity
 
 ## Cài Đặt Nhanh
 
+Không cần cài global — dùng `npx` (khuyến nghị):
+
 Codex mặc định:
 
 ```bash
-npx -y github:duyhieu9898/my-ai-kit init
+npx -y hieund-ai-kit init
 ```
 
 Gemini Antigravity:
 
 ```bash
+npx -y hieund-ai-kit init --gemini
+```
+
+Hoặc trỏ thẳng repo GitHub:
+
+```bash
+npx -y github:duyhieu9898/my-ai-kit init
 npx -y github:duyhieu9898/my-ai-kit init --gemini
 ```
+
+> **Lưu ý:** Lệnh `hieund-ai-kit init` (không có `npx`) chỉ chạy được sau khi bạn `npm link` hoặc `npm install -g` trong repo CLI. Nếu terminal báo `command not found`, dùng các lệnh `npx` ở trên.
 
 Kết quả cài đặt:
 
@@ -29,29 +40,49 @@ Kết quả cài đặt:
 
 ## Lệnh CLI
 
+Thay `hieund-ai-kit` bằng `npx -y hieund-ai-kit` nếu chưa cài global.
+
 | Lệnh | Mô tả |
 |:---|:---|
-| `hieund-ai-kit init` | Cài Codex kit vào repo hiện tại |
-| `hieund-ai-kit init --gemini` | Cài Gemini Antigravity kit vào repo hiện tại |
-| `hieund-ai-kit init --force` | Ghi đè `.agents/` và root instruction nếu đã tồn tại |
-| `hieund-ai-kit init --path <dir>` | Cài vào thư mục chỉ định |
-| `hieund-ai-kit update` | Cập nhật Codex kit trong `.agents/` |
-| `hieund-ai-kit update --gemini` | Cập nhật Gemini Antigravity kit trong `.agents/` |
-| `hieund-ai-kit status` | Kiểm tra trạng thái cài đặt |
+| `init` | Cài Codex kit vào repo hiện tại |
+| `init --gemini` | Cài Gemini Antigravity kit vào repo hiện tại |
+| `init --force` | Ghi đè `.agents/` và root instruction nếu đã tồn tại |
+| `init --path <dir>` | Cài vào thư mục chỉ định |
+| `update` | Cập nhật Codex kit trong `.agents/` |
+| `update --gemini` | Cập nhật Gemini Antigravity kit trong `.agents/` |
+| `status` | Kiểm tra trạng thái cài đặt |
+
+Ví dụ trong thư mục project:
+
+```bash
+npx -y hieund-ai-kit init
+npx -y hieund-ai-kit status
+```
 
 ## Cài Đặt Local Để Phát Triển
 
+Clone repo CLI, link binary vào PATH:
+
 ```bash
-cd /home/hieund/Documents/hieund-ai-kit-cli
+git clone https://github.com/duyhieu9898/my-ai-kit.git
+cd my-ai-kit   # hoặc thư mục clone của bạn
 npm install
 npm link
 ```
 
-Sau đó có thể chạy:
+Kiểm tra:
 
 ```bash
-hieund-ai-kit init --path /path/to/project
-hieund-ai-kit status --path /path/to/project
+hieund-ai-kit --help
+```
+
+Sau `npm link`, chạy trực tiếp (không cần `npx`):
+
+```bash
+cd /path/to/your-project
+hieund-ai-kit init
+hieund-ai-kit init --path /path/to/other-project
+hieund-ai-kit status
 ```
 
 ## Cấu Trúc Template
@@ -108,12 +139,12 @@ templates/.antigravity/skills/<skill-name>/SKILL.md
 Sau khi sửa template, push lên `main`; các project khác có thể cập nhật bằng:
 
 ```bash
-hieund-ai-kit update
+npx -y hieund-ai-kit update
 ```
 
 ## Kiểm Tra
 
-Kiểm tra CLI:
+Kiểm tra CLI (trong repo `my-ai-kit`):
 
 ```bash
 node --check bin/index.js
@@ -123,7 +154,7 @@ node bin/index.js --help
 Kiểm tra kit đã cài trong project:
 
 ```bash
-hieund-ai-kit status
+npx -y hieund-ai-kit status
 ```
 
 Chạy kiểm tra runtime sau khi cài:
