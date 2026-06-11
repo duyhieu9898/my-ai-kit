@@ -260,10 +260,10 @@ Master validation scripts that orchestrate skill-level scripts.
 
 ```bash
 # Quick validation during development
-python .agents/scripts/checklist.py .
+python3 .agents/scripts/checklist.py .
 
 # Full verification before deployment
-python .agents/scripts/verify_all.py . --url http://localhost:3000
+python3 .agents/scripts/verify_all.py . --url http://localhost:3000
 ```
 
 ### What They Check

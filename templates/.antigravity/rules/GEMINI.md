@@ -186,8 +186,8 @@ When user's prompt is NOT in English:
 
 | Task Stage       | Command                                            | Purpose                        |
 | ---------------- | -------------------------------------------------- | ------------------------------ |
-| **Manual Audit** | `python .agents/scripts/checklist.py .`             | Priority-based project audit   |
-| **Pre-Deploy**   | `python .agents/scripts/checklist.py . --url <URL>` | Full Suite + Performance + E2E |
+| **Manual Audit** | `python3 .agents/scripts/checklist.py .`             | Priority-based project audit   |
+| **Pre-Deploy**   | `python3 .agents/scripts/checklist.py . --url <URL>` | Full Suite + Performance + E2E |
 
 **Priority Execution Order:**
 
@@ -215,7 +215,7 @@ When user's prompt is NOT in English:
 | `lighthouse_audit.py`      | performance-profiling | Before deploy       |
 | `playwright_runner.py`     | webapp-testing        | Before deploy       |
 
-> 🔴 **Agents & Skills can invoke ANY script** via `python .agents/skills/<skill>/scripts/<script>.py`
+> 🔴 **Agents & Skills can invoke ANY script** via `python3 .agents/skills/<skill>/scripts/<script>.py`
 
 ### 🎭 Gemini Mode Mapping
 

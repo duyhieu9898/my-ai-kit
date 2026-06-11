@@ -74,7 +74,7 @@ For EVERY design, layout, or visual implementation task, follow this step-by-ste
 2. For advanced SVG, Lottie, or 3D animations, use **[references/motion-graphics.md](references/motion-graphics.md)**.
 
 ### Step 6: Review & Audit
-1. Execute `python scripts/ux_audit.py <project_path>` to detect accessibility and cognitive load issues.
+1. Execute `python3 scripts/ux_audit.py <project_path>` to detect accessibility and cognitive load issues.
 2. Run the **Quality Audit Checklist** to ensure compliance with modern guidelines before final delivery.
 
 ---
@@ -85,8 +85,8 @@ For EVERY design, layout, or visual implementation task, follow this step-by-ste
 
 | Script | Purpose | Usage |
 |:---|:---|:---|
-| [scripts/ux_audit.py](scripts/ux_audit.py) | UX Psychology & Accessibility Audit | `python scripts/ux_audit.py <project_path>` |
-| [scripts/accessibility_checker.py](scripts/accessibility_checker.py) | Accessibility static checks | `python scripts/accessibility_checker.py <project_path>` |
+| [scripts/ux_audit.py](scripts/ux_audit.py) | UX Psychology & Accessibility Audit | `python3 scripts/ux_audit.py <project_path>` |
+| [scripts/accessibility_checker.py](scripts/accessibility_checker.py) | Accessibility static checks | `python3 scripts/accessibility_checker.py <project_path>` |
 
 ---
 

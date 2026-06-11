@@ -55,7 +55,7 @@ When tasked with security code reviews, vulnerability assessments, or threat mod
 2. Classify bugs based on clear business outcomes and security damage bounds.
 
 ### Step 5: Validate and Audit checklist
-1. Trigger validation scripts (`python scripts/security_scan.py`) against the codebase path.
+1. Trigger validation scripts (`python3 scripts/security_scan.py`) against the codebase path.
 2. Confirm compliance against the **Quality Audit Checklist** before completing.
 
 ---
@@ -200,7 +200,7 @@ Before concluding a security audit, threat model review, or OWASP compliance che
 - [ ] **Secrets & Keys Inspected**: Searched codebase for hardcoded credentials, JWT variables, or private keys.
 - [ ] **Lock Files Validated**: Verified that package manager lock files exist and hold correct integrity hash signatures.
 - [ ] **Vulnerabilities Prioritized**: Classified findings strictly using CVSS and EPSS decision frameworks.
-- [ ] **Scan Script Executed**: Triggered security scan validation utilities (`python scripts/security_scan.py <project_path> --output summary`) and recorded results.
+- [ ] **Scan Script Executed**: Triggered security scan validation utilities (`python3 scripts/security_scan.py <project_path> --output summary`) and recorded results.
 
 ---
 

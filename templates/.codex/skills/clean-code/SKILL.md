@@ -97,16 +97,16 @@ File to edit: UserService.ts
 
 | Skill / Domain | Verification Script Command |
 |:---|:---|
-| **frontend-specialist** | `python .agents/skills/frontend-design/scripts/ux_audit.py .` |
-| **frontend-specialist** | `python .agents/skills/frontend-design/scripts/accessibility_checker.py .` |
-| **backend-specialist** | `python .agents/skills/api-patterns/scripts/api_validator.py .` |
-| **mobile-developer** | `python .agents/skills/mobile-design/scripts/mobile_audit.py .` |
-| **database-architect** | `python .agents/skills/database-design/scripts/schema_validator.py .` |
-| **security-auditor** | `python .agents/skills/vulnerability-scanner/scripts/security_scan.py .` |
-| **performance-optimizer**| `python .agents/skills/performance-profiling/scripts/lighthouse_audit.py <url>` |
-| **test-engineer** | `python .agents/skills/webapp-testing/scripts/playwright_runner.py <url>` |
-| **Any Agent (Lint)** | `python .agents/skills/lint-and-validate/scripts/lint_runner.py .` |
-| **Any Agent (Coverage)**| `python .agents/skills/lint-and-validate/scripts/type_coverage.py .` |
+| **frontend-specialist** | `python3 .agents/skills/frontend-design/scripts/ux_audit.py .` |
+| **frontend-specialist** | `python3 .agents/skills/frontend-design/scripts/accessibility_checker.py .` |
+| **backend-specialist** | `python3 .agents/skills/api-patterns/scripts/api_validator.py .` |
+| **mobile-developer** | `python3 .agents/skills/mobile-design/scripts/mobile_audit.py .` |
+| **database-architect** | `python3 .agents/skills/database-design/scripts/schema_validator.py .` |
+| **security-auditor** | `python3 .agents/skills/vulnerability-scanner/scripts/security_scan.py .` |
+| **performance-optimizer**| `python3 .agents/skills/performance-profiling/scripts/lighthouse_audit.py <url>` |
+| **test-engineer** | `python3 .agents/skills/webapp-testing/scripts/playwright_runner.py <url>` |
+| **Any Agent (Lint)** | `python3 .agents/skills/lint-and-validate/scripts/lint_runner.py .` |
+| **Any Agent (Coverage)**| `python3 .agents/skills/lint-and-validate/scripts/type_coverage.py .` |
 
 ### 8. Verification Output Protocol (READ ➜ SUMMARIZE ➜ ASK)
 When executing any validation script, you must strictly follow this communication cycle:

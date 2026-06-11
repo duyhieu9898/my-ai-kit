@@ -265,11 +265,11 @@ const initCommand = async (options) => {
         if (!isGemini) {
             console.log(chalk.magentaBright(`\n✨ OpenAI Codex mode enabled.`));
             console.log(chalk.gray(`💡 Tip: Natural language commands will automatically load skills!`));
-            console.log(chalk.gray(`   Run tests via: ${chalk.cyan('python .agents/scripts/verify_all.py .')}\n`));
+            console.log(chalk.gray(`   Run tests via: ${chalk.cyan('python3 .agents/scripts/verify_all.py .')}\n`));
         } else {
             console.log(chalk.blueBright(`\n🚀 Gemini Antigravity mode enabled.`));
             console.log(chalk.gray(`💡 Tip: Run slash commands like /plan or /brainstorm in chat.`));
-            console.log(chalk.gray(`   Run tests via: ${chalk.cyan('python .agents/scripts/verify_all.py .')}\n`));
+            console.log(chalk.gray(`   Run tests via: ${chalk.cyan('python3 .agents/scripts/verify_all.py .')}\n`));
         }
         
     } catch (error) {

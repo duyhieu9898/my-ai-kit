@@ -630,7 +630,7 @@ class MobileAuditor:
 
 def main():
     if len(sys.argv) < 2:
-        print("Usage: python mobile_audit.py <directory>")
+        print("Usage: python3 mobile_audit.py <directory>")
         sys.exit(1)
 
     path = sys.argv[1]

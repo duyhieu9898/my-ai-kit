@@ -56,7 +56,7 @@ When tasked with optimizing web assets for search crawler rankings, constructing
 2. Plan image compression.
 
 ### Step 5: Run scan validations & Checklist
-1. Trigger local Python validation checkers (`python scripts/seo_checker.py`).
+1. Trigger local Python validation checkers (`python3 scripts/seo_checker.py`).
 2. Confirm compliance against the **Quality Audit Checklist** before completing.
 
 ---
@@ -195,7 +195,7 @@ Before concluding a search optimization, Schema metadata configuration, or techn
 - [ ] **Metadata Boundaries Met**: Checked titles (50-60 chars) and meta descriptions (150-160 chars).
 - [ ] **E-E-A-T schemas implemented**: Embedded Person/Organization JSON-LD schema blocks to validate credentials.
 - [ ] **Core Web Vitals Checked**: Assured LCP remains under 2.5s, INP under 200ms, and CLS under 0.1.
-- [ ] **Local Checker Executed**: Run target scan verification suites (`python scripts/seo_checker.py`) and recorded findings.
+- [ ] **Local Checker Executed**: Run target scan verification suites (`python3 scripts/seo_checker.py`) and recorded findings.
 
 ---
 
@@ -203,7 +203,7 @@ Before concluding a search optimization, Schema metadata configuration, or techn
 
 | Script | Purpose | Command |
 |--------|---------|---------|
-| [scripts/seo_checker.py](scripts/seo_checker.py) | Python SEO validation utility | `python scripts/seo_checker.py` |
+| [scripts/seo_checker.py](scripts/seo_checker.py) | Python SEO validation utility | `python3 scripts/seo_checker.py` |
 
 ---
 

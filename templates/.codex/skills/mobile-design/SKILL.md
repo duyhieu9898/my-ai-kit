@@ -53,7 +53,7 @@ When tasked with mobile interface design, navigation structure, touch interactio
 2. Read only the relevant references from the Content Map for the requested platform or concern.
 3. Apply platform-native conventions for navigation, typography, controls, gestures, and system feedback.
 4. Validate touch targets, thumb-zone placement, loading/error/offline states, and accessibility labels before completing.
-5. Run `python scripts/mobile_audit.py <project_path>` when a project path is available.
+5. Run `python3 scripts/mobile_audit.py <project_path>` when a project path is available.
 
 ---
 
@@ -63,7 +63,7 @@ When tasked with mobile interface design, navigation structure, touch interactio
 
 | Script | Purpose | Command |
 |--------|---------|---------|
-| [scripts/mobile_audit.py](scripts/mobile_audit.py) | Mobile UX & Touch Audit | `python scripts/mobile_audit.py <project_path>` |
+| [scripts/mobile_audit.py](scripts/mobile_audit.py) | Mobile UX & Touch Audit | `python3 scripts/mobile_audit.py <project_path>` |
 
 ---
 

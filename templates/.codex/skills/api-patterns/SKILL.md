@@ -81,7 +81,7 @@ Use the decision tree in [references/api-style.md](references/api-style.md) to s
 3. Perform security sanity checks against the OWASP API Top 10 checklist in [references/security-testing.md](references/security-testing.md).
 
 ### Step 6: Validate & Document
-1. Run the validator script `python scripts/api_validator.py <project_path>` to ensure code and OpenAPI specs conform to best practices.
+1. Run the validator script `python3 scripts/api_validator.py <project_path>` to ensure code and OpenAPI specs conform to best practices.
 2. Provide complete OpenAPI documentation following [references/documentation.md](references/documentation.md).
 
 ---
@@ -120,4 +120,4 @@ Before finalizing any API design or implementation task, verify the following:
 
 | Script | Purpose | Command |
 |:---|:---|:---|
-| [`scripts/api_validator.py`](scripts/api_validator.py) | API endpoint validation | `python scripts/api_validator.py <project_path>` |
+| [`scripts/api_validator.py`](scripts/api_validator.py) | API endpoint validation | `python3 scripts/api_validator.py <project_path>` |

@@ -88,8 +88,8 @@ Useful commands:
 
 | Task | Command |
 |:---|:---|
-| Manual audit | `python .agents/scripts/checklist.py .` |
-| Full verification | `python .agents/scripts/verify_all.py . --url <URL>` |
+| Manual audit | `python3 .agents/scripts/checklist.py .` |
+| Full verification | `python3 .agents/scripts/verify_all.py . --url <URL>` |
 
 Use `.agents/skills/verify-changes/SKILL.md` for final validation and evidence reporting.
 

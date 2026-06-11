@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 """
 UI/UX Pro Max Search - BM25 search engine for UI/UX style guides
-Usage: python search.py "<query>" [--domain <domain>] [--stack <stack>] [--max-results 3]
-       python search.py "<query>" --design-system [-p "Project Name"]
-       python search.py "<query>" --design-system --persist [-p "Project Name"] [--page "dashboard"]
+Usage: python3 search.py "<query>" [--domain <domain>] [--stack <stack>] [--max-results 3]
+       python3 search.py "<query>" --design-system [-p "Project Name"]
+       python3 search.py "<query>" --design-system --persist [-p "Project Name"] [--page "dashboard"]
 
 Domains: style, prompt, color, chart, landing, product, ux, typography
 Stacks: html-tailwind, react, nextjs

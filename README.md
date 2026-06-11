@@ -160,8 +160,8 @@ npx -y hieund-ai-kit status
 Chạy kiểm tra runtime sau khi cài:
 
 ```bash
-python .agents/scripts/checklist.py .
-python .agents/scripts/verify_all.py . --url http://localhost:3000
+python3 .agents/scripts/checklist.py .
+python3 .agents/scripts/verify_all.py . --url http://localhost:3000
 ```
 
 ## Ghi Chú

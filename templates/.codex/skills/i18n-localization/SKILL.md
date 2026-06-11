@@ -54,7 +54,7 @@ When tasked with internationalizing an application, structuring locale JSONs, or
 2. Integrate dynamic directional styling rules.
 
 ### Step 5: Analyze Hardcoded Mismatches & Verify Checklist
-1. Trigger static detection check scripts (`python scripts/i18n_checker.py <project_path>`).
+1. Trigger static detection check scripts (`python3 scripts/i18n_checker.py <project_path>`).
 2. Confirm compliance against the **Quality Audit Checklist** before completing.
 
 ---
@@ -192,7 +192,7 @@ Before concluding an internationalization setup, locale translation import, or R
 - [ ] **Intl APIs Applied**: Handled all dynamic dates, times, and currency amounts using the standard global `Intl` interfaces.
 - [ ] **RTL Styling Responsive**: Leveraged CSS logical properties (`*-inline-start/end`) instead of strict directional overrides.
 - [ ] **ICU Formatting Used**: Managed pluralized strings or complex variables using official ICU brackets layouts.
-- [ ] **Checker Run Clean**: Triggered the local validator (`python scripts/i18n_checker.py <project_path>`) and resolved all mismatch exceptions.
+- [ ] **Checker Run Clean**: Triggered the local validator (`python3 scripts/i18n_checker.py <project_path>`) and resolved all mismatch exceptions.
 
 ---
 
@@ -200,4 +200,4 @@ Before concluding an internationalization setup, locale translation import, or R
 
 | Script | Purpose | Command |
 |--------|---------|---------|
-| [scripts/i18n_checker.py](scripts/i18n_checker.py) | Detect hardcoded strings & missing translations | `python scripts/i18n_checker.py <project_path>` |
+| [scripts/i18n_checker.py](scripts/i18n_checker.py) | Detect hardcoded strings & missing translations | `python3 scripts/i18n_checker.py <project_path>` |

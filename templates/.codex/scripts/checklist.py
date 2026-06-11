@@ -7,8 +7,8 @@ Orchestrates all validation scripts in priority order.
 Use this for incremental validation during development.
 
 Usage:
-    python scripts/checklist.py .                    # Run core checks
-    python scripts/checklist.py . --url <URL>        # Include performance checks
+    python3 scripts/checklist.py .                    # Run core checks
+    python3 scripts/checklist.py . --url <URL>        # Include performance checks
 
 Priority Order:
     P0: Security Scan (vulnerabilities, secrets)
@@ -87,7 +87,7 @@ def run_script(name: str, script_path: Path, project_path: str, url: Optional[st
     print_step(f"Running: {name}")
     
     # Build command
-    cmd = ["python", str(script_path), project_path]
+    cmd = ["python3", str(script_path), project_path]
     if url and ("lighthouse" in script_path.name.lower() or "playwright" in script_path.name.lower()):
         cmd.append(url)
     
@@ -165,8 +165,8 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  python scripts/checklist.py .                      # Core checks only
-  python scripts/checklist.py . --url http://localhost:3000  # Include performance
+  python3 scripts/checklist.py .                      # Core checks only
+  python3 scripts/checklist.py . --url http://localhost:3000  # Include performance
         """
     )
     parser.add_argument("project", help="Project path to validate")

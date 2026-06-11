@@ -41,7 +41,7 @@ When tasked with diagnosing page speed sluggishness, performing bundle analyses,
 
 ### Step 1: Establish Baseline & Run Audits
 1. Run the automated performance audit script (`scripts/lighthouse_audit.py`) on a baseline target URL:
-   `python scripts/lighthouse_audit.py https://example.com`
+   `python3 scripts/lighthouse_audit.py https://example.com`
 2. Record initial Core Web Vitals targets (LCP, INP, CLS) to track metrics baseline.
 
 ### Step 2: Trace Sluggishness Bottlenecks
@@ -68,7 +68,7 @@ When tasked with diagnosing page speed sluggishness, performing bundle analyses,
 
 | Script | Purpose | Usage |
 |--------|---------|-------|
-| [scripts/lighthouse_audit.py](scripts/lighthouse_audit.py) | Lighthouse performance audit | `python scripts/lighthouse_audit.py https://example.com` |
+| [scripts/lighthouse_audit.py](scripts/lighthouse_audit.py) | Lighthouse performance audit | `python3 scripts/lighthouse_audit.py https://example.com` |
 
 ---
 

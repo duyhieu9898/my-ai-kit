@@ -36,7 +36,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash
 
 | Script | Purpose | Usage |
 |--------|---------|-------|
-| `scripts/ux_audit.py` | UX Psychology & Accessibility Audit | `python scripts/ux_audit.py <project_path>` |
+| `scripts/ux_audit.py` | UX Psychology & Accessibility Audit | `python3 scripts/ux_audit.py <project_path>` |
 
 ---
 

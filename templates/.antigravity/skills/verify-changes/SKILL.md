@@ -56,7 +56,7 @@ node -e "require('./path/to/module'); console.log('✅ Loads correctly')"
 curl http://localhost:3000/api/endpoint
 
 # For scripts
-python script.py --test
+python3 script.py --test
 ```
 
 ### Step 4: Report Evidence

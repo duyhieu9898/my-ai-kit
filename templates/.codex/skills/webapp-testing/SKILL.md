@@ -65,9 +65,9 @@ When tasked with writing web browser E2E flows or routing audits, strictly follo
 
 | Script | Purpose | Usage |
 |--------|---------|-------|
-| [scripts/playwright_runner.py](scripts/playwright_runner.py) | Basic browser test | `python scripts/playwright_runner.py https://example.com` |
-| | With screenshot | `python scripts/playwright_runner.py <url> --screenshot` |
-| | Accessibility check | `python scripts/playwright_runner.py <url> --a11y` |
+| [scripts/playwright_runner.py](scripts/playwright_runner.py) | Basic browser test | `python3 scripts/playwright_runner.py https://example.com` |
+| | With screenshot | `python3 scripts/playwright_runner.py <url> --screenshot` |
+| | Accessibility check | `python3 scripts/playwright_runner.py <url> --a11y` |
 
 **Requires:** `pip install playwright && playwright install chromium`
 

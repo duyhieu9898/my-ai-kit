@@ -100,13 +100,13 @@ The scripts under `scripts/` automate testing, audits, and performance checks. A
 ### 1. `checklist.py` (Core validation)
 Runs basic sanity checks (Security, Code Quality, Schema checks) during active development.
 ```bash
-python .agents/scripts/checklist.py .
+python3 .agents/scripts/checklist.py .
 ```
 
 ### 2. `verify_all.py` (Full release audit)
 Runs the entire verification suite including Lighthouse performance, accessibility audits, and Playwright E2E tests before staging/deploying.
 ```bash
-python .agents/scripts/verify_all.py . --url http://localhost:3000
+python3 .agents/scripts/verify_all.py . --url http://localhost:3000
 ```
 
 ### 3. `auto_preview.py`

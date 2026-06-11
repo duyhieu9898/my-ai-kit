@@ -7,7 +7,7 @@ Runs COMPLETE validation including all checks + performance + E2E.
 Use this before deployment or major releases.
 
 Usage:
-    python scripts/verify_all.py . --url <URL>
+    python3 scripts/verify_all.py . --url <URL>
 
 Includes ALL checks:
     ✅ Security Scan (OWASP, secrets, dependencies)
@@ -157,7 +157,7 @@ def run_script(name: str, script_path: Path, project_path: str, url: Optional[st
     start_time = datetime.now()
     
     # Build command
-    cmd = ["python", str(script_path), project_path]
+    cmd = ["python3", str(script_path), project_path]
     if url and ("lighthouse" in script_path.name.lower() or "playwright" in script_path.name.lower()):
         cmd.append(url)
     
@@ -266,8 +266,8 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  python scripts/verify_all.py . --url http://localhost:3000
-  python scripts/verify_all.py . --url https://staging.example.com --no-e2e
+  python3 scripts/verify_all.py . --url http://localhost:3000
+  python3 scripts/verify_all.py . --url https://staging.example.com --no-e2e
         """
     )
     parser.add_argument("project", help="Project path to validate")

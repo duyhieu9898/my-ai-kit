@@ -229,7 +229,7 @@ When tasked with writing unit/integration tests or designing mock boundaries, st
 
 | Script | Purpose | Command |
 |--------|---------|---------|
-| [scripts/test_runner.py](scripts/test_runner.py) | Python test running utility | `python scripts/test_runner.py` |
+| [scripts/test_runner.py](scripts/test_runner.py) | Python test running utility | `python3 scripts/test_runner.py` |
 
 ---
 

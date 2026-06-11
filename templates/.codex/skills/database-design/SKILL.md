@@ -81,7 +81,7 @@ Before designing schema:
 
 | Script | Purpose | Command |
 |:---|:---|:---|
-| [scripts/schema_validator.py](scripts/schema_validator.py) | Database schema validation | `python scripts/schema_validator.py <project_path>` |
+| [scripts/schema_validator.py](scripts/schema_validator.py) | Database schema validation | `python3 scripts/schema_validator.py <project_path>` |
 
 ---
 

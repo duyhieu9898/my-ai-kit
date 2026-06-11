@@ -56,7 +56,7 @@ When tasked with checking syntax correctness, verifying type definitions, or run
 2. Ensure zero high-risk warnings remain.
 
 ### Step 5: Execute Unified Scans & Verify Checklist
-1. Trigger unified validation checkers (`python scripts/lint_runner.py <project_path>`).
+1. Trigger unified validation checkers (`python3 scripts/lint_runner.py <project_path>`).
 2. Confirm compliance against the **Quality Audit Checklist** before completing.
 
 ---
@@ -86,7 +86,7 @@ Before concluding any code edit, script modification, or task completion, verify
 
 - [ ] **Linter Executed**: Run the appropriate static analysis commands (ESLint/Ruff) and confirmed zero style or syntax violations remain.
 - [ ] **Types Checked Clean**: Verified TypeScript compile parameters (`tsc --noEmit`) or Python type signatures (`mypy`) return error-free.
-- [ ] **Unified Runner Run**: Executed local project scanners (`python scripts/lint_runner.py <project_path>`) and documented outputs.
+- [ ] **Unified Runner Run**: Executed local project scanners (`python3 scripts/lint_runner.py <project_path>`) and documented outputs.
 - [ ] **No High Security Alerts**: Confirmed `npm audit` or `bandit` returns zero critical or high-severity vulnerabilities.
 - [ ] **Zero Failures Policy**: Resolved all warning states before considering the current modification complete.
 
@@ -96,8 +96,8 @@ Before concluding any code edit, script modification, or task completion, verify
 
 | Script | Purpose | Command |
 |--------|---------|---------|
-| [scripts/lint_runner.py](scripts/lint_runner.py) | Unified lint check | `python scripts/lint_runner.py <project_path>` |
-| [scripts/type_coverage.py](scripts/type_coverage.py) | Type coverage analysis | `python scripts/type_coverage.py <project_path>` |
+| [scripts/lint_runner.py](scripts/lint_runner.py) | Unified lint check | `python3 scripts/lint_runner.py <project_path>` |
+| [scripts/type_coverage.py](scripts/type_coverage.py) | Type coverage analysis | `python3 scripts/type_coverage.py <project_path>` |
 
 ---
 

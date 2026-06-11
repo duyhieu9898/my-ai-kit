@@ -5,9 +5,9 @@ Auto Preview - AG Kit
 Manages (start/stop/status) the local development server for previewing the application.
 
 Usage:
-    python .agents/scripts/auto_preview.py start [port]
-    python .agents/scripts/auto_preview.py stop
-    python .agents/scripts/auto_preview.py status
+    python3 .agents/scripts/auto_preview.py start [port]
+    python3 .agents/scripts/auto_preview.py stop
+    python3 .agents/scripts/auto_preview.py status
 """
 
 import os

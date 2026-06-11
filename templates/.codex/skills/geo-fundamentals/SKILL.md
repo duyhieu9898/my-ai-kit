@@ -55,7 +55,7 @@ When tasked with optimizing web pages for LLM searches, building citation value,
 2. Maintain indexing crawl frequencies.
 
 ### Step 5: Perform GEO Scans & Verify Checklist
-1. Run local citation checkers (`python scripts/geo_checker.py <project_path>`).
+1. Run local citation checkers (`python3 scripts/geo_checker.py <project_path>`).
 2. Confirm compliance against the **Quality Audit Checklist** before completing.
 
 ---
@@ -203,7 +203,7 @@ Before concluding a generative search optimization, crawler configuration change
 - [ ] **Citations Easy to Extract**: Leveraged clean tables, definitions lists, or numbered points for rapid RAG parsers crawling.
 - [ ] **Crawlers Access Declared**: Checked `robots.txt` rules to verify that AI User-Agents (e.g. GPTBot, PerplexityBot) are explicitly permitted or blocked.
 - [ ] **Authority Signals Met**: Authenticated content with clear credentials, publication timestamps, and author background.
-- [ ] **GEO Checker Run**: Triggered local diagnostic runner (`python scripts/geo_checker.py <project_path>`) and verified zero citation warnings.
+- [ ] **GEO Checker Run**: Triggered local diagnostic runner (`python3 scripts/geo_checker.py <project_path>`) and verified zero citation warnings.
 
 ---
 
@@ -211,7 +211,7 @@ Before concluding a generative search optimization, crawler configuration change
 
 | Script | Purpose | Command |
 |:---|:---|:---|
-| [scripts/geo_checker.py](scripts/geo_checker.py) | GEO audit (AI citation readiness) | `python scripts/geo_checker.py <project_path>` |
+| [scripts/geo_checker.py](scripts/geo_checker.py) | GEO audit (AI citation readiness) | `python3 scripts/geo_checker.py <project_path>` |
 
 ---
 

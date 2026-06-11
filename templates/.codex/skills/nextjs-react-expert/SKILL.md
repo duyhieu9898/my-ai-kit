@@ -61,7 +61,7 @@ When tasked with building React components, diagnosing UI lag, or optimizing cac
 
 ### Step 3: Run Automated Performance Audits
 1. Run the performance checking utility (`react_performance_checker.py`) via terminal command:
-   `python scripts/react_performance_checker.py <project_path>`
+   `python3 scripts/react_performance_checker.py <project_path>`
 2. Parse output warnings regarding barrel exports, sequential await calls, or client-side fetch patterns.
 
 ### Step 4: Refactor and Eliminate Bottlenecks
@@ -191,7 +191,7 @@ When tasked with building React components, diagnosing UI lag, or optimizing cac
 
 | Script | Purpose | Command |
 |--------|---------|---------|
-| [scripts/react_performance_checker.py](scripts/react_performance_checker.py) | Automated performance audit | `python scripts/react_performance_checker.py <project_path>` |
+| [scripts/react_performance_checker.py](scripts/react_performance_checker.py) | Automated performance audit | `python3 scripts/react_performance_checker.py <project_path>` |
 
 ---
 
