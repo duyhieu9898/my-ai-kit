@@ -11,9 +11,8 @@ Before implementation:
 3. Read only the referenced files needed for the current task.
 4. Prefer bundled scripts when they provide the required operation.
 
-Apply instructions in this order:
-
-`AGENTS.md` > nested `AGENTS.md` > active `SKILL.md` > skill `references/`
+Instructions are cumulative. Within a directory scope, the nearest nested
+`AGENTS.md` takes precedence, followed by the active skill and its references.
 
 Do not load every reference file or activate broad coordination skills for a single-domain task.
 
@@ -37,7 +36,9 @@ Before editing:
 3. Identify callers, imports, tests, and contracts affected by the change.
 4. Preserve unrelated user changes and work with existing modifications.
 
-Follow `.agents/skills/clean-code/SKILL.md` for implementation work. Keep changes scoped, avoid speculative abstractions, and update dependent files in the same task.
+Use `.agents/skills/clean-code/SKILL.md` when writing or refactoring code. Keep
+changes scoped, avoid speculative abstractions, and update dependent files in
+the same task.
 
 Never expose secrets, commit local credentials, or run destructive commands without an explicit request.
 
@@ -55,13 +56,15 @@ Report material assumptions, blockers, and verification results. Avoid fixed ski
 
 ## Verify
 
-Run checks proportional to the change. Use `.agents/skills/verify-changes/SKILL.md` after implementation and do not claim success without execution evidence when tests or builds are available.
+Run checks proportional to the change. Prefer project-native checks. Use
+`.agents/skills/verify-changes/SKILL.md` when executable verification or
+completion evidence is required, and do not claim success without execution
+evidence when tests or builds are available.
 
-Common entry points:
+Toolkit entry points, when they match the changed surface:
 
 ```bash
 python3 .agents/scripts/checklist.py .
-python3 .agents/scripts/verify_all.py . --url <URL>
 ```
 
-Use narrower skill scripts or project-native test commands when they better match the changed surface.
+Use narrower skill scripts when they better match the changed surface.
