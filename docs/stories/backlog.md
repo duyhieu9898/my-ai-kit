@@ -1,7 +1,11 @@
 # Story Backlog
 
-This backlog will be populated after a user provides a project spec or selects a
-specific initiative.
+This backlog tracks product work that is known but not selected for
+implementation. Query durable state with:
+
+```bash
+scripts/bin/harness-cli query backlog --open
+```
 
 Do not create every possible story packet up front. Create story packets when
 the work is selected or when a product decision needs a durable place to land.
@@ -10,4 +14,5 @@ the work is selected or when a product decision needs a durable place to land.
 
 | Epic | Description | Status |
 | --- | --- | --- |
-| TBD | Add candidate epics after spec intake | unsliced |
+| E01 | Installer correctness and isolated target tests | unsliced |
+| E02 | Toolkit metadata, validation, and release quality | unsliced |

@@ -3,7 +3,15 @@
 Stories are work packets. They turn product intent into bounded implementation
 and validation work.
 
-No story packets are active yet.
+The brownfield baseline contains these implemented story packets:
+
+- `KIT-001-cli-command-surface.md`
+- `KIT-002-dual-toolkit-package.md`
+- `KIT-003-instruction-scope-safety.md`
+- `KIT-004-installation-status.md`
+- `KIT-005-backlog-skill.md`
+
+Use `scripts/bin/harness-cli query matrix` for current proof status.
 
 ## Normal Story
 

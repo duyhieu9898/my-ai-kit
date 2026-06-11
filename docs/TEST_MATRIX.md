@@ -20,6 +20,11 @@ of truth and add rows only when a story has executable evidence.
 
 | Story | Contract | Unit | Integration | E2E | Platform | Status | Evidence |
 | --- | --- | --- | --- | --- | --- | --- | --- |
+| KIT-001 | Stable CLI command surface | no | yes | no | yes | implemented | CLI syntax and help commands |
+| KIT-002 | Publish both toolkit modes | no | yes | no | yes | implemented | npm package manifest |
+| KIT-003 | Preserve instruction scopes | yes | yes | no | yes | implemented | source assertions and package manifest |
+| KIT-004 | Report installation status | no | yes | no | yes | implemented | status help and source contract |
+| KIT-005 | Ship validated Backlog skill | yes | yes | no | yes | implemented | 75 offline tests |
 
 ## Evidence Rules
 

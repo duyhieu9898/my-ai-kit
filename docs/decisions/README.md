@@ -3,6 +3,14 @@
 Decision records explain why important product, architecture, or harness choices
 were made.
 
+Project-specific accepted decisions:
+
+- `0008-dual-toolkit-runtime.md`
+- `0009-separate-root-and-toolkit-instructions.md`
+
+The earlier `0001` through `0007` records describe the installed Harness
+framework itself.
+
 Use `docs/templates/decision.md` when adding a new decision.
 
 After adding or updating a markdown decision file, also add or refresh the

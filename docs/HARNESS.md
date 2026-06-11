@@ -1,7 +1,7 @@
 # Harness
 
-The project goal is to provide a reusable operating harness that lets humans and
-agents turn a future product spec into safe, validated work.
+The project goal is to maintain and evolve the `hieund-ai-kit` CLI through
+safe, validated work while preserving its reusable agent-toolkit contracts.
 
 The app is what users touch. The harness is what agents touch.
 
@@ -54,31 +54,29 @@ Every task has two possible outputs:
 2. Harness delta: docs, templates, validation expectations, backlog items, or
    decision records that make the next task easier.
 
-## Harness v0 Scope
+## Project Harness Scope
 
-Harness v0 includes:
+This brownfield Harness includes:
 
 - Agent entrypoint.
-- Empty product documentation structure.
+- Product contracts for CLI and toolkit installation behavior.
 - Feature intake and risk lanes.
 - Story templates.
 - Decision log template.
 - Validation report template.
-- Test matrix placeholder.
+- Durable proof matrix.
 - Harness growth backlog.
 - Durable layer: SQLite database and CLI for operational records.
 
-Harness v0 deliberately excludes:
+The current project deliberately excludes:
 
-- A project-specific `SPEC.md`.
-- Pre-sliced product domains.
-- A locked application stack.
-- App source scaffolding.
-- Package scripts.
-- Test runner config.
-- CI workflows.
+- A monolithic project specification.
+- Application UI or backend scaffolding.
+- Product domains unrelated to toolkit distribution.
+- Durable records for historical behavior that cannot be verified from the
+  current repository.
 
-Those should arrive only when a selected story needs them.
+Add new product docs and proof only when a selected story needs them.
 
 ## Durable Layer
 

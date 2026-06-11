@@ -28,3 +28,13 @@ target repository.
 - Inspect npm package contents before release.
 - Test installation layout in an isolated target directory.
 - Run skill-specific validation when changing bundled skills.
+
+## Current Capabilities
+
+| Capability | Contract | Proof owner |
+| --- | --- | --- |
+| CLI command surface | Expose `init`, `update`, and `status` with documented options | `KIT-001` |
+| Dual toolkit package | Publish Codex and Gemini Antigravity templates | `KIT-002` |
+| Instruction safety | Keep repository and nested toolkit instructions separate | `KIT-003` |
+| Installation detection | Report active and obsolete toolkit locations | `KIT-004` |
+| Backlog integration | Ship a validated Backlog workflow skill | `KIT-005` |
