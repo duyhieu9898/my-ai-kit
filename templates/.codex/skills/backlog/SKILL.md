@@ -1,57 +1,58 @@
 ---
-name: Backlog
-description: Manage configured Backlog projects through local API helper scripts.
+name: backlog
+description: Manage Backlog projects through the bundled CLI, including listing and searching issues, inspecting project metadata, creating or updating issues, creating UT bugs, resolving bugs, reviewing Story/Task deadlines, and reading local metrics or session traces. Use when a user asks Codex to inspect or modify configured Backlog tickets or project workflows.
 ---
 
 # Backlog
 
-## Khi Nào Dùng
+Use the bundled CLI instead of calling the Backlog API directly.
 
-User muốn thao tác Backlog: xem/search issue, tạo/cập nhật issue, tạo UT bug, resolve bug, đổi config, inspect project.
+## Run The CLI
 
-## Quy Ước Chung
+Run commands from this skill directory:
 
-- Entry point duy nhất: `python3 scripts/backlog.py` (chạy từ `skills/backlog/`).
-- Output compact mặc định; `--json-full` cho raw JSON.
-- Lệnh ghi mặc định dry-run; thêm `--apply` để ghi thật.
-- Không truyền `--project` → dùng `default_project_key`; nêu project cụ thể → `--project <KEY>`.
+```bash
+python3 scripts/backlog.py --help
+```
 
-## Quy Tắc Chọn Lệnh
+Load `BACKLOG_API_KEY` from the environment or copy `.env.example` to `.env`.
+Never print the API key or a full request URL containing its query string.
 
-| User muốn | Lệnh |
-|-----------|------|
-| Việc cần làm | `issue list` (thêm `--type Bug`/`--type Story` nếu cần) |
-| Chi tiết issue | `issue get <KEY>` |
-| Tìm keyword | `issue list --query <kw>` (thêm `--project` nếu cần) |
-| Bug open + context | `bug my-open` |
-| Story/Task + due alert | `story overview` |
-| Phân tích bug để fix | `bug context <KEY>` |
-| Tạo/cập nhật issue | `issue create/update` (dry-run mặc định) |
-| Tạo UT bug con | `bug create-ut` (dry-run mặc định) |
-| Resolve bug | `bug resolve <KEY>` → review diff → `--apply` |
-| Rule/field guidance | `bug rules` / `bug fields <field>` |
+## Select A Command
 
-Không đổi `default_project_key` chỉ cho một lệnh; dùng `--project`.
+| Intent | Command |
+|:---|:---|
+| List or search work | `issue list [--query TEXT] [--type TYPE] [--project KEY]` |
+| Read an issue | `issue get ISSUE_KEY` |
+| List open bugs assigned to the configured user | `bug my-open [--project KEY]` |
+| Analyze a bug | `bug context ISSUE_KEY` |
+| Review Story/Task deadlines | `story overview [--project KEY]` |
+| Create or update an issue | `issue create` or `issue update` |
+| Create a UT child bug | `bug create-ut` |
+| Resolve a bug | `bug resolve ISSUE_KEY` |
+| Refresh project metadata | `project inspect PROJECT_KEY` |
+| Inspect workflow rules or fields | `bug rules` or `bug fields [FIELD]` |
 
-## Workflow Cho Agent
+Use `config current` and `config list-projects` when project selection is unclear.
+Pass `--project KEY` for one-off project selection; do not change the default project for a single command.
 
-1. Xác định intent + project.
-2. Metadata lỗi → `project inspect <KEY>` refresh catalog.
-3. Lệnh ghi: kiểm tra field bắt buộc → dry-run → đối chiếu payload → `--apply`.
-4. Thành công → báo issue key. Lỗi → xem `logs/backlog.log`, báo HTTP error.
+## Execute Safely
 
-## Agent Không Nên
+1. Resolve the user's intent, issue key, and project.
+2. Run a read command before constructing a mutation.
+3. Refresh the project catalog with `project inspect` when metadata is missing or stale.
+4. Run mutations without `--apply` and inspect the payload or diff.
+5. Add `--apply` only after the requested values and required fields are unambiguous.
+6. Report the resulting issue key or the API error without guessing the outcome.
 
-- Ghi thật khi request mơ hồ hoặc thiếu dữ liệu bắt buộc.
-- Suy đoán status/category/custom field khi user chưa nói rõ.
-- Đổi status issue nếu user chỉ yêu cầu xem/phân tích.
-- In `.env`, `BACKLOG_API_KEY`, full URL có query string.
+Treat `issue create`, `issue update`, `bug create-ut`, and `bug resolve` as dry runs unless `--apply` is present. Do not change status, assignee, categories, or custom fields unless the request or configured workflow requires it.
 
-## Đọc Thêm (khi cần)
+Use compact output by default. Add global `--json-full` only when raw API data is necessary.
 
-- CLI syntax đầy đủ: `docs/cli_reference.md`
-- Bug workflow chi tiết: `docs/bug_workflow.md`
-- Bug field options: `docs/bug_field_guidance.md`
-- Rule cá nhân: `docs/business_logic.md`
-- Session trace convention: `docs/session_trace.md`
-- Bàn giao / TODO: `HANDOVER.md`
+## Load References As Needed
+
+- Read [references/cli.md](references/cli.md) for complete command syntax.
+- Read [references/workflows.md](references/workflows.md) before creating UT bugs, resolving bugs, or summarizing Story/Task deadlines.
+- Read [references/session-trace.md](references/session-trace.md) only when recording or reading AI session traces.
+
+Prefer `bug rules` and `bug fields` over static prose when current workflow defaults or field options are needed.

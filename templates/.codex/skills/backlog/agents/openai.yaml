@@ -1,0 +1,4 @@
+interface:
+  display_name: "Backlog"
+  short_description: "Manage Backlog issues and project workflows"
+  default_prompt: "Use $backlog to inspect or safely update configured Backlog issues."
