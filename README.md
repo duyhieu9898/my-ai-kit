@@ -51,6 +51,7 @@ Thay `hieund-ai-kit` bằng `npx -y hieund-ai-kit` nếu chưa cài global.
 | `init --target gemini` | Cài gemini thay vì codex |
 | `init --force` | Bỏ qua xác nhận, ghi đè toàn bộ |
 | `init --path <dir>` | Cài vào thư mục chỉ định |
+| `init --ref <tag\|commit>` | Ghim phiên bản theo git ref (tag, commit, branch) |
 | `update` | Cập nhật `.agents/` cho target đang cài (tự nhận diện) |
 | `update --target <name>` | Cập nhật target chỉ định (báo lỗi nếu khác target đang cài) |
 | `status` | Kiểm tra target nào đang cài |
@@ -61,6 +62,16 @@ xác nhận trừ khi dùng `--force`.
 
 > **Lưu ý:** `--gemini` vẫn dùng được nhưng đã deprecated; nó được map sang
 > `--target gemini` kèm cảnh báo.
+
+> **Ghim phiên bản:** Mặc định CLI tải từ nhánh chính của repo. Để tái lập và
+> giảm rủi ro supply-chain, ghim theo git ref bằng `--ref`:
+>
+> ```bash
+> npx -y hieund-ai-kit init --ref v2.0.0
+> npx -y hieund-ai-kit update --ref <commit-sha>
+> ```
+>
+> `--ref` ưu tiên hơn `--branch` nếu cả hai cùng có.
 
 Ví dụ trong thư mục project:
 

@@ -32,6 +32,9 @@ const TARGET_REGISTRY = {
         tagLine: '✨ Codex Standard (Recommended)',
         description: 'Unified composable skills & cascading rules',
         templateDir: 'codex',
+        // Signature root instruction file, used as a detection fallback when
+        // the `.kit-target` marker is missing. Must be unique per target.
+        rootInstruction: 'AGENTS.md',
     },
     gemini: {
         displayName: 'Gemini Antigravity Kit',
@@ -39,6 +42,7 @@ const TARGET_REGISTRY = {
         tagLine: '🚀 Gemini Framework',
         description: 'Multi-agent routing & slash workflows',
         templateDir: 'gemini',
+        rootInstruction: 'GEMINI.md',
     },
 };
 
@@ -80,17 +84,36 @@ const getRootInstructionFiles = (templatePath) => {
 };
 
 /**
- * Detect the installed target by reading the `.agents/.kit-target` marker file.
+ * Detect the installed target.
+ *
+ * Primary signal: the `.agents/.kit-target` marker file. When the marker is
+ * missing or invalid, fall back to detecting a target by its signature root
+ * instruction file (e.g. `AGENTS.md` for codex, `GEMINI.md` for gemini). The
+ * fallback only resolves when exactly one target's signature is present, to
+ * avoid guessing on ambiguous setups.
  * @param {string} projectDir
  * @returns {string|null} target name or null when none is detected
  */
 const detectInstalledTarget = (projectDir) => {
     const markerPath = path.join(projectDir, INSTALL_FOLDER, MARKER_FILE);
-    if (!fs.existsSync(markerPath)) {
-        return null;
+    if (fs.existsSync(markerPath)) {
+        const target = fs.readFileSync(markerPath, 'utf-8').trim();
+        if (TARGET_REGISTRY[target]) {
+            return target;
+        }
     }
-    const target = fs.readFileSync(markerPath, 'utf-8').trim();
-    return TARGET_REGISTRY[target] ? target : null;
+
+    // Fallback: infer from signature root instruction files.
+    const installExists = fs.existsSync(path.join(projectDir, INSTALL_FOLDER));
+    const matches = Object.entries(TARGET_REGISTRY).filter(([, cfg]) =>
+        cfg.rootInstruction && fs.existsSync(path.join(projectDir, cfg.rootInstruction))
+    );
+    // Only trust the fallback when .agents/ exists and exactly one target's
+    // signature file is found.
+    if (installExists && matches.length === 1) {
+        return matches[0][0];
+    }
+    return null;
 };
 
 // ============================================================================
@@ -145,9 +168,34 @@ const cleanup = (tempDir) => {
 };
 
 /**
+ * Atomically replace a destination directory with the contents of `src`.
+ * Copies into a staging sibling directory first (same filesystem as `dest`),
+ * then swaps it in with `rename`. This guarantees `dest` is never left in a
+ * half-written state: on any failure during the copy, the original is
+ * untouched and the staging dir is cleaned up.
+ * @param {string} src source directory
+ * @param {string} dest destination directory
+ */
+const atomicReplaceDir = (src, dest) => {
+    const parent = path.dirname(dest);
+    const staging = path.join(parent, `.${path.basename(dest)}.tmp-${process.pid}-${Date.now()}`);
+    try {
+        fs.rmSync(staging, { recursive: true, force: true });
+        fs.cpSync(src, staging, { recursive: true });
+        // Swap: remove old, move staging into place. The window between these
+        // two calls is tiny; rename within a filesystem is atomic.
+        fs.rmSync(dest, { recursive: true, force: true });
+        fs.renameSync(staging, dest);
+    } catch (error) {
+        fs.rmSync(staging, { recursive: true, force: true });
+        throw error;
+    }
+};
+
+/**
  * Mirror-copy a template directory into the project root. The `.agents/`
- * install folder is always replaced; top-level root instruction files honour
- * the overwrite flag.
+ * install folder (and any other top-level directory) is replaced atomically;
+ * top-level root instruction files honour the overwrite flag.
  * @param {string} templatePath
  * @param {string} projectDir
  * @param {object} options
@@ -164,24 +212,16 @@ const mirrorCopy = (templatePath, projectDir, { overwriteRootInstruction = true 
         const src = path.join(templatePath, entry.name);
         const dest = path.join(projectDir, entry.name);
 
-        if (entry.name === INSTALL_FOLDER) {
-            // Always replace the install folder wholesale.
-            if (fs.existsSync(dest)) {
-                fs.rmSync(dest, { recursive: true, force: true });
-            }
-            fs.cpSync(src, dest, { recursive: true });
-        } else if (entry.isFile()) {
+        if (entry.isFile()) {
             // Root instruction file — respect the overwrite flag.
             if (!overwriteRootInstruction && fs.existsSync(dest)) {
                 continue;
             }
             fs.copyFileSync(src, dest);
         } else {
-            // Any other top-level directory: mirror it recursively.
-            if (fs.existsSync(dest)) {
-                fs.rmSync(dest, { recursive: true, force: true });
-            }
-            fs.cpSync(src, dest, { recursive: true });
+            // The install folder and any other top-level directory: replace
+            // atomically so a failure can't corrupt an existing install.
+            atomicReplaceDir(src, dest);
         }
     }
 };
@@ -207,17 +247,26 @@ const cleanupOldTarget = (oldTemplatePath, projectDir) => {
  * directory (outside the project tree). Returns the path to the temp dir,
  * whose contents are the template files themselves.
  * @param {object} config target configuration
- * @param {string} [branch] optional repository branch
+ * @param {string} [ref] optional repository ref (tag, commit, or branch) used
+ *   to pin the download for reproducibility/security
  * @returns {Promise<string>} path to the downloaded template directory
  */
-const downloadTarget = async (config, branch) => {
+const downloadTarget = async (config, ref) => {
     const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), TEMP_PREFIX));
     const subdir = `${TEMPLATES_FOLDER}/${config.templateDir}`;
-    const ref = branch ? `#${branch}` : '';
-    // giget supports fetching a subdirectory directly: repo/sub/dir#branch
-    await downloadTemplate(`${REPO}/${subdir}${ref}`, { dir: tempDir, force: true });
+    const suffix = ref ? `#${ref}` : '';
+    // giget supports fetching a subdirectory at a given ref: repo/sub/dir#ref
+    await downloadTemplate(`${REPO}/${subdir}${suffix}`, { dir: tempDir, force: true });
     return tempDir;
 };
+
+/**
+ * Resolve the repository ref to download from. `--ref` (tag/commit/branch)
+ * takes precedence over the legacy `--branch` option.
+ * @param {object} options
+ * @returns {string|undefined}
+ */
+const resolveRef = (options) => options.ref || options.branch || undefined;
 
 // ============================================================================
 // COMMANDS
@@ -250,12 +299,13 @@ const initCommand = async (options) => {
 
     let templatePath = null;
     let oldTemplatePath = null;
+    const ref = resolveRef(options);
     try {
-        templatePath = await downloadTarget(config, options.branch);
+        templatePath = await downloadTarget(config, ref);
         // On a switch, fetch the old target's template too so we can detect
         // which root instruction files it left behind.
         if (isSwitch) {
-            oldTemplatePath = await downloadTarget(TARGET_REGISTRY[installedTarget], options.branch);
+            oldTemplatePath = await downloadTarget(TARGET_REGISTRY[installedTarget], ref);
         }
         spinner.stop();
 
@@ -361,7 +411,7 @@ const updateCommand = async (options) => {
 
     let templatePath = null;
     try {
-        templatePath = await downloadTarget(config, options.branch);
+        templatePath = await downloadTarget(config, resolveRef(options));
         spinner.stop();
 
         mirrorCopy(templatePath, projectDir, { overwriteRootInstruction: false });
@@ -425,6 +475,7 @@ program
     .option('-f, --force', 'Overwrite existing files without confirmation', false)
     .option('-p, --path <dir>', 'Path to the project directory', process.cwd())
     .option('-b, --branch <name>', 'Select repository branch')
+    .option('-r, --ref <ref>', 'Pin to a repository ref (tag, commit, or branch); overrides --branch')
     .option('-g, --gemini', '[deprecated] alias for --target gemini', false)
     .action(initCommand);
 
@@ -434,6 +485,7 @@ program
     .option('-t, --target <name>', 'Target to update (defaults to installed target)')
     .option('-p, --path <dir>', 'Path to the project directory', process.cwd())
     .option('-b, --branch <name>', 'Select repository branch')
+    .option('-r, --ref <ref>', 'Pin to a repository ref (tag, commit, or branch); overrides --branch')
     .option('-g, --gemini', '[deprecated] alias for --target gemini', false)
     .action(updateCommand);
 
