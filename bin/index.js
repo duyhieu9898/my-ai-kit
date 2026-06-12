@@ -6,6 +6,7 @@ import ora from 'ora';
 import { downloadTemplate } from 'giget';
 import path from 'path';
 import fs from 'fs';
+import os from 'os';
 import readline from 'readline';
 
 // ============================================================================
@@ -14,7 +15,7 @@ import readline from 'readline';
 
 const REPO = 'github:duyhieu9898/my-ai-kit';
 const TEMPLATES_FOLDER = 'templates';
-const TEMP_FOLDER = '.temp_ag_kit';
+const TEMP_PREFIX = 'hieund-ai-kit-';
 const INSTALL_FOLDER = '.agents';
 const MARKER_FILE = '.kit-target';
 const DEFAULT_TARGET = 'codex';
@@ -60,15 +61,6 @@ const getTargetConfig = (targetName) => {
     }
     return config;
 };
-
-/**
- * Resolve the absolute path to a target's template directory inside a
- * downloaded repository.
- * @param {string} tempDir
- * @param {object} config
- */
-const getTemplatePath = (tempDir, config) =>
-    path.join(tempDir, TEMPLATES_FOLDER, config.templateDir);
 
 /**
  * Convention-based root instruction detection. Returns the names of top-level
@@ -147,7 +139,7 @@ const confirm = (question) => {
  * @param {string} tempDir
  */
 const cleanup = (tempDir) => {
-    if (fs.existsSync(tempDir)) {
+    if (tempDir && fs.existsSync(tempDir)) {
         fs.rmSync(tempDir, { recursive: true, force: true });
     }
 };
@@ -196,17 +188,11 @@ const mirrorCopy = (templatePath, projectDir, { overwriteRootInstruction = true 
 
 /**
  * Delete an installed target's root instruction files from the project root.
- * @param {string} tempDir
+ * @param {string} oldTemplatePath path to the old target's template directory
  * @param {string} projectDir
- * @param {string} oldTargetName
  */
-const cleanupOldTarget = (tempDir, projectDir, oldTargetName) => {
-    const oldConfig = TARGET_REGISTRY[oldTargetName];
-    if (!oldConfig) {
-        return;
-    }
-    const templatePath = getTemplatePath(tempDir, oldConfig);
-    const rootFiles = getRootInstructionFiles(templatePath);
+const cleanupOldTarget = (oldTemplatePath, projectDir) => {
+    const rootFiles = getRootInstructionFiles(oldTemplatePath);
     for (const file of rootFiles) {
         const filePath = path.join(projectDir, file);
         if (fs.existsSync(filePath)) {
@@ -217,13 +203,20 @@ const cleanupOldTarget = (tempDir, projectDir, oldTargetName) => {
 };
 
 /**
- * Download the source repository into the temp directory.
- * @param {string} tempDir
- * @param {string} branch
+ * Download a single target's template subdirectory into a fresh temporary
+ * directory (outside the project tree). Returns the path to the temp dir,
+ * whose contents are the template files themselves.
+ * @param {object} config target configuration
+ * @param {string} [branch] optional repository branch
+ * @returns {Promise<string>} path to the downloaded template directory
  */
-const downloadRepo = async (tempDir, branch) => {
-    const repoSource = branch ? `${REPO}#${branch}` : REPO;
-    await downloadTemplate(repoSource, { dir: tempDir, force: true });
+const downloadTarget = async (config, branch) => {
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), TEMP_PREFIX));
+    const subdir = `${TEMPLATES_FOLDER}/${config.templateDir}`;
+    const ref = branch ? `#${branch}` : '';
+    // giget supports fetching a subdirectory directly: repo/sub/dir#branch
+    await downloadTemplate(`${REPO}/${subdir}${ref}`, { dir: tempDir, force: true });
+    return tempDir;
 };
 
 // ============================================================================
@@ -247,23 +240,24 @@ const initCommand = async (options) => {
     showBanner(config);
 
     const projectDir = path.resolve(options.path || process.cwd());
-    const tempDir = path.join(projectDir, TEMP_FOLDER);
-    const installDir = path.join(projectDir, INSTALL_FOLDER);
 
     const installedTarget = detectInstalledTarget(projectDir);
     const isSwitch = installedTarget && installedTarget !== targetName;
     const isSameTarget = installedTarget === targetName;
+    const installDir = path.join(projectDir, INSTALL_FOLDER);
 
     const spinner = ora({ text: 'Downloading templates from repository...', color: 'cyan' }).start();
 
+    let templatePath = null;
+    let oldTemplatePath = null;
     try {
-        await downloadRepo(tempDir, options.branch);
-        spinner.stop();
-
-        const templatePath = getTemplatePath(tempDir, config);
-        if (!fs.existsSync(templatePath)) {
-            throw new Error(`Template not found: templates/${config.templateDir}/`);
+        templatePath = await downloadTarget(config, options.branch);
+        // On a switch, fetch the old target's template too so we can detect
+        // which root instruction files it left behind.
+        if (isSwitch) {
+            oldTemplatePath = await downloadTarget(TARGET_REGISTRY[installedTarget], options.branch);
         }
+        spinner.stop();
 
         // Determine which existing files would be affected.
         const newRootFiles = getRootInstructionFiles(templatePath);
@@ -274,8 +268,6 @@ const initCommand = async (options) => {
         if (!options.force) {
             if (isSwitch) {
                 console.log(chalk.yellow(`\n⚠️  Switching target: ${chalk.cyan(installedTarget)} → ${chalk.cyan(targetName)}`));
-                const oldConfig = TARGET_REGISTRY[installedTarget];
-                const oldTemplatePath = getTemplatePath(tempDir, oldConfig);
                 const oldRootFiles = getRootInstructionFiles(oldTemplatePath).filter((f) =>
                     fs.existsSync(path.join(projectDir, f))
                 );
@@ -295,7 +287,8 @@ const initCommand = async (options) => {
                 const ok = await confirm('Continue?');
                 if (!ok) {
                     console.log(chalk.gray('Operation cancelled.'));
-                    cleanup(tempDir);
+                    cleanup(templatePath);
+                    cleanup(oldTemplatePath);
                     process.exit(0);
                 }
             }
@@ -303,12 +296,13 @@ const initCommand = async (options) => {
 
         // Clean up the old target's root instructions on a switch.
         if (isSwitch) {
-            cleanupOldTarget(tempDir, projectDir, installedTarget);
+            cleanupOldTarget(oldTemplatePath, projectDir);
         }
 
         // Install.
         mirrorCopy(templatePath, projectDir, { overwriteRootInstruction: true });
-        cleanup(tempDir);
+        cleanup(templatePath);
+        cleanup(oldTemplatePath);
 
         // Success summary.
         console.log(chalk.green(`\n✅ Successfully installed ${config.displayName}!`));
@@ -324,7 +318,8 @@ const initCommand = async (options) => {
     } catch (error) {
         spinner.stop();
         console.error(chalk.red(`❌ Error: ${error.message}`));
-        cleanup(tempDir);
+        cleanup(templatePath);
+        cleanup(oldTemplatePath);
         process.exit(1);
     }
 };
@@ -362,26 +357,21 @@ const updateCommand = async (options) => {
     const config = getTargetConfig(targetName);
     showBanner(config);
 
-    const tempDir = path.join(projectDir, TEMP_FOLDER);
     const spinner = ora({ text: 'Downloading templates from repository...', color: 'cyan' }).start();
 
+    let templatePath = null;
     try {
-        await downloadRepo(tempDir, options.branch);
+        templatePath = await downloadTarget(config, options.branch);
         spinner.stop();
 
-        const templatePath = getTemplatePath(tempDir, config);
-        if (!fs.existsSync(templatePath)) {
-            throw new Error(`Template not found: templates/${config.templateDir}/`);
-        }
-
         mirrorCopy(templatePath, projectDir, { overwriteRootInstruction: false });
-        cleanup(tempDir);
+        cleanup(templatePath);
 
         console.log(chalk.green(`\n✅ Updated ${config.displayName} (${INSTALL_FOLDER}/ refreshed, root instructions preserved).`));
     } catch (error) {
         spinner.stop();
         console.error(chalk.red(`❌ Error: ${error.message}`));
-        cleanup(tempDir);
+        cleanup(templatePath);
         process.exit(1);
     }
 };
