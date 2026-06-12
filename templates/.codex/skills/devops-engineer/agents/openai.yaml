@@ -1,8 +1,0 @@
-interface:
-  display_name: "DevOps Engineer"
-  short_description: "Deployment, CI/CD, rollback, servers, and production safety."
-  brand_color: "#0D9488"
-  default_prompt: "$devops-engineer"
-
-policy:
-  allow_implicit_invocation: true

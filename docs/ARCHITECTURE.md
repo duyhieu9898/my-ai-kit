@@ -15,32 +15,48 @@ toolkits into another repository.
 
 ```text
 bin/index.js
-  CLI configuration, install, update, and status commands
+  CLI configuration, target registry, install, update, and status commands
 
-templates/.codex/
-  Codex toolkit copied into the target `.agents/` directory
+templates/codex/
+  Codex toolkit in mirror layout: top-level AGENTS.md + .agents/ install folder
 
-templates/.antigravity/
-  Gemini Antigravity toolkit copied into the target `.agents/` directory
-
-templates/root/
-  Repository-level instruction files copied outside `.agents/`
+templates/gemini/
+  Gemini Antigravity toolkit in mirror layout: top-level GEMINI.md + .agents/
 
 docs/
   Repository Harness policy, product contracts, stories, and decisions
 ```
 
+## Target Registry
+
+Targets are defined in a `TARGET_REGISTRY` object in `bin/index.js`, keyed by
+target name. Each entry carries display metadata and a `templateDir` pointing at
+`templates/<templateDir>/`. The `--target <name>` option selects an entry;
+`init` defaults to `codex`. Adding a target is one registry entry plus one
+mirror-layout template folder — no command logic changes.
+
+Each template folder mirrors the project layout exactly:
+
+- Top-level files (e.g. `AGENTS.md`, `GEMINI.md`) are Root Instruction Files,
+  copied to the project root.
+- The `.agents/` subdirectory is the install folder, copied to `project/.agents/`.
+- `.agents/.kit-target` is a marker file whose content is the target name; it is
+  the source of truth for `detectInstalledTarget`.
+
 ## Installation Boundaries
 
 - Treat `templates/` as package data; preserve relative paths during
   publication and installation.
-- Copy only the selected toolkit source into `.agents/`.
-- Copy root instructions separately so nested toolkit rules and repository-wide
-  rules can differ.
-- Preserve an existing root instruction during `update`.
-- Overwrite root instructions only during an explicit forced initialization.
-- Append `.agents` and local Harness runtime artifacts to `.gitignore` without
-  duplicating entries.
+- Install is a single mirror-copy: `.agents/` is always replaced; top-level root
+  instruction files honour the overwrite flag.
+- `init` is destructive (replaces install folder and, on switch/force, root
+  instructions) and gates destructive actions behind a confirmation prompt or
+  `--force`.
+- On target switch, the previous target's root instruction files are deleted
+  before installing the new target.
+- `update` refreshes `.agents/` only and preserves existing root instruction
+  files; it auto-detects the installed target via the marker.
+- The CLI does not modify `.gitignore`; users manage it themselves.
 
 ## Instruction Hierarchy
 
@@ -65,12 +81,11 @@ When changing installer behavior, inspect together:
 
 - `bin/index.js`
 - `README.md`
-- `templates/root/`
-- the selected toolkit root under `templates/`
+- the affected target folder under `templates/<target>/`
 - `package.json` package inclusion rules
 
 When changing skill discovery or toolkit structure, update
-`templates/.codex/ARCHITECTURE.md`.
+`templates/codex/.agents/ARCHITECTURE.md`.
 
 ## Validation Ladder
 

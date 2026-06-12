@@ -15,39 +15,90 @@ import readline from 'readline';
 const REPO = 'github:duyhieu9898/my-ai-kit';
 const TEMPLATES_FOLDER = 'templates';
 const TEMP_FOLDER = '.temp_ag_kit';
+const INSTALL_FOLDER = '.agents';
+const MARKER_FILE = '.kit-target';
+const DEFAULT_TARGET = 'codex';
 
 /**
- * Get active folder configuration
- * @param {boolean} isGemini - True if requesting Gemini/Antigravity format
+ * Target registry — maps a target name to its configuration.
+ * Adding a new AI tool target means adding one entry here and one folder
+ * under `templates/<templateDir>/`.
  */
-const getFolderConfig = (isGemini) => {
-    if (isGemini) {
-        return {
-            name: 'Gemini Antigravity Kit',
-            sourceFolder: '.antigravity',
-            installFolder: '.agents',
-            rootInstruction: {
-                source: '.antigravity/rules/GEMINI.md',
-                target: 'GEMINI.md',
-            },
-            bannerColor: chalk.blueBright,
-            tag: '🚀 Gemini Framework',
-            desc: 'Multi-agent routing & slash workflows'
-        };
-    } else {
-        return {
-            name: 'OpenAI Codex Kit',
-            sourceFolder: '.codex',
-            installFolder: '.agents',
-            rootInstruction: {
-                source: 'root/AGENTS.md',
-                target: 'AGENTS.md',
-            },
-            bannerColor: chalk.magentaBright,
-            tag: '✨ Codex Standard (Recommended)',
-            desc: 'Unified composable skills & cascading rules'
-        };
+const TARGET_REGISTRY = {
+    codex: {
+        displayName: 'OpenAI Codex Kit',
+        bannerColor: chalk.magentaBright,
+        tagLine: '✨ Codex Standard (Recommended)',
+        description: 'Unified composable skills & cascading rules',
+        templateDir: 'codex',
+    },
+    gemini: {
+        displayName: 'Gemini Antigravity Kit',
+        bannerColor: chalk.blueBright,
+        tagLine: '🚀 Gemini Framework',
+        description: 'Multi-agent routing & slash workflows',
+        templateDir: 'gemini',
+    },
+};
+
+// ============================================================================
+// REGISTRY & DETECTION
+// ============================================================================
+
+/**
+ * Resolve a target configuration by name. Exits the process with a non-zero
+ * code and a helpful message when the target is unknown.
+ * @param {string} targetName
+ * @returns {object} target configuration
+ */
+const getTargetConfig = (targetName) => {
+    const config = TARGET_REGISTRY[targetName];
+    if (!config) {
+        const validTargets = Object.keys(TARGET_REGISTRY).join(', ');
+        console.error(chalk.red(`❌ Unknown target: "${targetName}". Valid targets: ${validTargets}`));
+        process.exit(1);
     }
+    return config;
+};
+
+/**
+ * Resolve the absolute path to a target's template directory inside a
+ * downloaded repository.
+ * @param {string} tempDir
+ * @param {object} config
+ */
+const getTemplatePath = (tempDir, config) =>
+    path.join(tempDir, TEMPLATES_FOLDER, config.templateDir);
+
+/**
+ * Convention-based root instruction detection. Returns the names of top-level
+ * files in a template directory (everything that is not the `.agents/` install
+ * folder).
+ * @param {string} templatePath
+ * @returns {string[]}
+ */
+const getRootInstructionFiles = (templatePath) => {
+    if (!fs.existsSync(templatePath)) {
+        return [];
+    }
+    return fs
+        .readdirSync(templatePath, { withFileTypes: true })
+        .filter((entry) => entry.isFile())
+        .map((entry) => entry.name);
+};
+
+/**
+ * Detect the installed target by reading the `.agents/.kit-target` marker file.
+ * @param {string} projectDir
+ * @returns {string|null} target name or null when none is detected
+ */
+const detectInstalledTarget = (projectDir) => {
+    const markerPath = path.join(projectDir, INSTALL_FOLDER, MARKER_FILE);
+    if (!fs.existsSync(markerPath)) {
+        return null;
+    }
+    const target = fs.readFileSync(markerPath, 'utf-8').trim();
+    return TARGET_REGISTRY[target] ? target : null;
 };
 
 // ============================================================================
@@ -55,8 +106,8 @@ const getFolderConfig = (isGemini) => {
 // ============================================================================
 
 /**
- * Display dynamic ASCII banner
- * @param {object} config - Active configuration
+ * Display dynamic ASCII banner.
+ * @param {object} config
  */
 const showBanner = (config) => {
     console.log(config.bannerColor(`
@@ -66,15 +117,15 @@ const showBanner = (config) => {
     ║  Target:   %-40s  ║
     ║  Format:   %-40s  ║
     ╚══════════════════════════════════════════════════════╝
-    `), 
-    config.name, 
-    config.tag
+    `),
+    config.displayName,
+    config.tagLine
     );
 };
 
 /**
- * Ask user for confirmation
- * @param {string} question - Question to ask
+ * Ask the user for confirmation.
+ * @param {string} question
  * @returns {Promise<boolean>}
  */
 const confirm = (question) => {
@@ -92,8 +143,8 @@ const confirm = (question) => {
 };
 
 /**
- * Clean up temporary directory
- * @param {string} tempDir - Temp directory path
+ * Remove the temporary directory if present.
+ * @param {string} tempDir
  */
 const cleanup = (tempDir) => {
     if (fs.existsSync(tempDir)) {
@@ -102,93 +153,77 @@ const cleanup = (tempDir) => {
 };
 
 /**
- * Copy dynamic folder from temp to destination
- * @param {string} tempDir - Temp directory
- * @param {string} destDir - Destination directory
- * @param {object} config - Active folder configuration
+ * Mirror-copy a template directory into the project root. The `.agents/`
+ * install folder is always replaced; top-level root instruction files honour
+ * the overwrite flag.
+ * @param {string} templatePath
+ * @param {string} projectDir
+ * @param {object} options
+ * @param {boolean} options.overwriteRootInstruction
  */
-const copyTemplateFolder = (tempDir, destDir, config) => {
-    const sourcePath = path.join(tempDir, TEMPLATES_FOLDER, config.sourceFolder);
-
-    if (!fs.existsSync(sourcePath)) {
-        throw new Error(`Could not find templates/${config.sourceFolder} folder in source repository!`);
+const mirrorCopy = (templatePath, projectDir, { overwriteRootInstruction = true } = {}) => {
+    if (!fs.existsSync(templatePath)) {
+        throw new Error(`Template not found: ${templatePath}`);
     }
 
-    if (fs.existsSync(destDir)) {
-        fs.rmSync(destDir, { recursive: true, force: true });
-    }
+    const entries = fs.readdirSync(templatePath, { withFileTypes: true });
 
-    fs.cpSync(sourcePath, destDir, { recursive: true });
-};
+    for (const entry of entries) {
+        const src = path.join(templatePath, entry.name);
+        const dest = path.join(projectDir, entry.name);
 
-/**
- * Copy the root instruction file used by the target agent runtime.
- * @param {string} tempDir - Temp directory
- * @param {string} targetDir - Target project directory
- * @param {object} config - Active folder configuration
- * @param {boolean} force - Whether to overwrite an existing root instruction
- * @returns {"copied"|"overwritten"|"skipped"|"none"}
- */
-const copyRootInstruction = (tempDir, targetDir, config, force) => {
-    if (!config.rootInstruction) {
-        return 'none';
-    }
-
-    const sourcePath = path.join(tempDir, TEMPLATES_FOLDER, config.rootInstruction.source);
-    const destPath = path.join(targetDir, config.rootInstruction.target);
-
-    if (!fs.existsSync(sourcePath)) {
-        return 'none';
-    }
-
-    const existedBefore = fs.existsSync(destPath);
-
-    if (existedBefore && !force) {
-        return 'skipped';
-    }
-
-    fs.copyFileSync(sourcePath, destPath);
-    return existedBefore ? 'overwritten' : 'copied';
-};
-
-/**
- * Update .gitignore to include target folder
- * @param {string} targetDir - Target project directory
- * @param {string} folderName - Folder to ignore
- * @returns {boolean} - True if .gitignore was updated
- */
-const updateGitignore = (targetDir, folderName) => {
-    const gitignorePath = path.join(targetDir, '.gitignore');
-    const entryToAdd = folderName;
-
-    // Check if .gitignore exists
-    if (fs.existsSync(gitignorePath)) {
-        const content = fs.readFileSync(gitignorePath, 'utf-8');
-        const lines = content.split(/\r?\n/);
-
-        // Check if entry is already in .gitignore
-        const hasEntry = lines.some(line =>
-            line.trim() === entryToAdd ||
-            line.trim() === `${entryToAdd}/` ||
-            line.trim() === `/${entryToAdd}` ||
-            line.trim() === `/${entryToAdd}/`
-        );
-
-        if (!hasEntry) {
-            // Add folder to .gitignore
-            const newContent = content.endsWith('\n')
-                ? `${content}${entryToAdd}\n`
-                : `${content}\n${entryToAdd}\n`;
-            fs.writeFileSync(gitignorePath, newContent);
-            return true;
+        if (entry.name === INSTALL_FOLDER) {
+            // Always replace the install folder wholesale.
+            if (fs.existsSync(dest)) {
+                fs.rmSync(dest, { recursive: true, force: true });
+            }
+            fs.cpSync(src, dest, { recursive: true });
+        } else if (entry.isFile()) {
+            // Root instruction file — respect the overwrite flag.
+            if (!overwriteRootInstruction && fs.existsSync(dest)) {
+                continue;
+            }
+            fs.copyFileSync(src, dest);
+        } else {
+            // Any other top-level directory: mirror it recursively.
+            if (fs.existsSync(dest)) {
+                fs.rmSync(dest, { recursive: true, force: true });
+            }
+            fs.cpSync(src, dest, { recursive: true });
         }
-    } else {
-        // Create new .gitignore
-        fs.writeFileSync(gitignorePath, `${entryToAdd}\n`);
-        return true;
     }
+};
 
-    return false;
+/**
+ * Delete an installed target's root instruction files from the project root.
+ * @param {string} tempDir
+ * @param {string} projectDir
+ * @param {string} oldTargetName
+ */
+const cleanupOldTarget = (tempDir, projectDir, oldTargetName) => {
+    const oldConfig = TARGET_REGISTRY[oldTargetName];
+    if (!oldConfig) {
+        return;
+    }
+    const templatePath = getTemplatePath(tempDir, oldConfig);
+    const rootFiles = getRootInstructionFiles(templatePath);
+    for (const file of rootFiles) {
+        const filePath = path.join(projectDir, file);
+        if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+            console.log(chalk.gray(`  Deleted: ${file}`));
+        }
+    }
+};
+
+/**
+ * Download the source repository into the temp directory.
+ * @param {string} tempDir
+ * @param {string} branch
+ */
+const downloadRepo = async (tempDir, branch) => {
+    const repoSource = branch ? `${REPO}#${branch}` : REPO;
+    await downloadTemplate(repoSource, { dir: tempDir, force: true });
 };
 
 // ============================================================================
@@ -196,171 +231,190 @@ const updateGitignore = (targetDir, folderName) => {
 // ============================================================================
 
 /**
- * Initialize selected kit folder in project
+ * Initialize a selected target in the project. Destructive: replaces the
+ * install folder and (on switch/force) the root instruction files.
  */
 const initCommand = async (options) => {
-    const isGemini = !!options.gemini;
-    const config = getFolderConfig(isGemini);
+    // Handle the deprecated --gemini flag.
+    let targetName = options.target;
+    if (options.gemini) {
+        console.log(chalk.yellow('⚠️  --gemini is deprecated. Use --target gemini instead.'));
+        targetName = targetName && targetName !== DEFAULT_TARGET ? targetName : 'gemini';
+    }
+    targetName = targetName || DEFAULT_TARGET;
+
+    const config = getTargetConfig(targetName);
     showBanner(config);
 
-    const targetDir = path.resolve(options.path || process.cwd());
-    const tempDir = path.join(targetDir, TEMP_FOLDER);
-    const destDir = path.join(targetDir, config.installFolder);
+    const projectDir = path.resolve(options.path || process.cwd());
+    const tempDir = path.join(projectDir, TEMP_FOLDER);
+    const installDir = path.join(projectDir, INSTALL_FOLDER);
 
-    // Check if folder already exists
-    if (fs.existsSync(destDir)) {
-        if (!options.force) {
-            console.log(chalk.yellow(`⚠️  Folder ${chalk.cyan(config.installFolder)} already exists at: ${destDir}`));
-            const shouldOverwrite = await confirm('Do you want to overwrite it?');
+    const installedTarget = detectInstalledTarget(projectDir);
+    const isSwitch = installedTarget && installedTarget !== targetName;
+    const isSameTarget = installedTarget === targetName;
 
-            if (!shouldOverwrite) {
-                console.log(chalk.gray('Operation cancelled.'));
-                process.exit(0);
-            }
-        }
-        console.log(chalk.gray(`Overwriting ${chalk.cyan(config.installFolder)} folder...`));
-    }
-
-    const spinner = ora({
-        text: 'Downloading templates from repository...',
-        color: 'cyan',
-    }).start();
+    const spinner = ora({ text: 'Downloading templates from repository...', color: 'cyan' }).start();
 
     try {
-        // Download repository using giget
-        const repoSource = options.branch ? `${REPO}#${options.branch}` : REPO;
-        await downloadTemplate(repoSource, {
-            dir: tempDir,
-            force: true,
-        });
+        await downloadRepo(tempDir, options.branch);
+        spinner.stop();
 
-        spinner.text = 'Installing kit template...';
+        const templatePath = getTemplatePath(tempDir, config);
+        if (!fs.existsSync(templatePath)) {
+            throw new Error(`Template not found: templates/${config.templateDir}/`);
+        }
 
-        // Copy selected template source into the runtime .agents folder.
-        copyTemplateFolder(tempDir, destDir, config);
-        const shouldOverwriteRoot = options.overwriteRootInstruction ?? !!options.force;
-        const rootInstructionStatus = copyRootInstruction(tempDir, targetDir, config, shouldOverwriteRoot);
+        // Determine which existing files would be affected.
+        const newRootFiles = getRootInstructionFiles(templatePath);
+        const collidingRootFiles = newRootFiles.filter((f) => fs.existsSync(path.join(projectDir, f)));
+        const installExists = fs.existsSync(installDir);
 
-        // Update .gitignore
-        const gitignoreUpdated = updateGitignore(targetDir, config.installFolder);
+        // Confirmation gate (skipped with --force).
+        if (!options.force) {
+            if (isSwitch) {
+                console.log(chalk.yellow(`\n⚠️  Switching target: ${chalk.cyan(installedTarget)} → ${chalk.cyan(targetName)}`));
+                const oldConfig = TARGET_REGISTRY[installedTarget];
+                const oldTemplatePath = getTemplatePath(tempDir, oldConfig);
+                const oldRootFiles = getRootInstructionFiles(oldTemplatePath).filter((f) =>
+                    fs.existsSync(path.join(projectDir, f))
+                );
+                console.log(chalk.gray('   Will delete:'));
+                oldRootFiles.forEach((f) => console.log(chalk.gray(`     - ${f}`)));
+                if (installExists) console.log(chalk.gray(`     - ${INSTALL_FOLDER}/`));
+                console.log(chalk.gray('   Will install:'));
+                newRootFiles.forEach((f) => console.log(chalk.gray(`     + ${f}`)));
+                console.log(chalk.gray(`     + ${INSTALL_FOLDER}/`));
+            } else if (isSameTarget || installExists || collidingRootFiles.length > 0) {
+                console.log(chalk.yellow(`\n⚠️  Existing files will be overwritten:`));
+                if (installExists) console.log(chalk.gray(`     - ${INSTALL_FOLDER}/`));
+                collidingRootFiles.forEach((f) => console.log(chalk.gray(`     - ${f}`)));
+            }
 
-        // Cleanup
+            if (isSwitch || isSameTarget || installExists || collidingRootFiles.length > 0) {
+                const ok = await confirm('Continue?');
+                if (!ok) {
+                    console.log(chalk.gray('Operation cancelled.'));
+                    cleanup(tempDir);
+                    process.exit(0);
+                }
+            }
+        }
+
+        // Clean up the old target's root instructions on a switch.
+        if (isSwitch) {
+            cleanupOldTarget(tempDir, projectDir, installedTarget);
+        }
+
+        // Install.
+        mirrorCopy(templatePath, projectDir, { overwriteRootInstruction: true });
         cleanup(tempDir);
 
-        spinner.succeed(chalk.green(`Successfully installed ${config.name}!`));
-
-        // Success message
+        // Success summary.
+        console.log(chalk.green(`\n✅ Successfully installed ${config.displayName}!`));
         console.log(chalk.gray('\n──────────────────────────────────────────────────────'));
-        console.log(chalk.white('📁 Installed Location:'));
-        console.log(`   ${chalk.cyan(config.installFolder)} → ${chalk.gray(destDir)}`);
-        if (rootInstructionStatus === 'copied' || rootInstructionStatus === 'overwritten') {
-            console.log(`   ${chalk.cyan(config.rootInstruction.target)} → ${chalk.gray(path.join(targetDir, config.rootInstruction.target))}`);
-        } else if (rootInstructionStatus === 'skipped') {
-            console.log(`   ${chalk.yellow(config.rootInstruction.target)} → Existing file kept (use --force to overwrite)`);
-        }
-        if (gitignoreUpdated) {
-            console.log(`   ${chalk.cyan('.gitignore')} → Added ignore entry: ${chalk.yellow(config.installFolder)}`);
-        }
+        console.log(chalk.white('📁 Installed:'));
+        console.log(`   ${chalk.cyan(INSTALL_FOLDER + '/')} → ${chalk.gray(installDir)}`);
+        newRootFiles.forEach((f) => {
+            console.log(`   ${chalk.cyan(f)} → ${chalk.gray(path.join(projectDir, f))}`);
+        });
         console.log(chalk.gray('──────────────────────────────────────────────────────'));
-        
-        if (!isGemini) {
-            console.log(chalk.magentaBright(`\n✨ OpenAI Codex mode enabled.`));
-            console.log(chalk.gray(`💡 Tip: Natural language commands will automatically load skills!`));
-            console.log(chalk.gray(`   Run tests via: ${chalk.cyan('python3 .agents/scripts/verify_all.py .')}\n`));
-        } else {
-            console.log(chalk.blueBright(`\n🚀 Gemini Antigravity mode enabled.`));
-            console.log(chalk.gray(`💡 Tip: Run slash commands like /plan or /brainstorm in chat.`));
-            console.log(chalk.gray(`   Run tests via: ${chalk.cyan('python3 .agents/scripts/verify_all.py .')}\n`));
-        }
-        
+        console.log(config.bannerColor(`\n${config.tagLine}`));
+        console.log(chalk.gray(`💡 Run tests via: ${chalk.cyan('python3 .agents/scripts/verify_all.py .')}\n`));
     } catch (error) {
-        spinner.fail(chalk.red(`❌ Error: ${error.message}`));
+        spinner.stop();
+        console.error(chalk.red(`❌ Error: ${error.message}`));
         cleanup(tempDir);
         process.exit(1);
     }
 };
 
 /**
- * Update existing kit folder
+ * Update the installed target's `.agents/` folder while preserving root
+ * instruction files. Auto-detects the target when --target is omitted.
  */
 const updateCommand = async (options) => {
-    const isGemini = !!options.gemini;
-    const config = getFolderConfig(isGemini);
-    showBanner(config);
+    const projectDir = path.resolve(options.path || process.cwd());
+    const installedTarget = detectInstalledTarget(projectDir);
 
-    const targetDir = path.resolve(options.path || process.cwd());
-    const destDir = path.join(targetDir, config.installFolder);
+    // Resolve which target to update.
+    let targetName = options.target;
+    if (options.gemini) {
+        console.log(chalk.yellow('⚠️  --gemini is deprecated. Use --target gemini instead.'));
+        targetName = targetName || 'gemini';
+    }
 
-    // Check if folder exists
-    if (!fs.existsSync(destDir)) {
-        console.log(chalk.red(`❌ Could not find active ${chalk.cyan(config.installFolder)} folder at: ${targetDir}`));
-        console.log(chalk.yellow(`💡 Tip: Run ${chalk.cyan('hieund-ai-kit init' + (isGemini ? ' --gemini' : ''))} to install first.`));
+    if (!targetName) {
+        // Auto-detect.
+        if (!installedTarget) {
+            console.error(chalk.red('❌ No installed target detected.'));
+            console.log(chalk.yellow(`💡 Run ${chalk.cyan('hieund-ai-kit init')} to install first.`));
+            process.exit(1);
+        }
+        targetName = installedTarget;
+    } else if (installedTarget && installedTarget !== targetName) {
+        // Mismatch.
+        console.error(chalk.red(`❌ Target mismatch: ${chalk.cyan(installedTarget)} is installed, but --target ${chalk.cyan(targetName)} was requested.`));
+        console.log(chalk.yellow(`💡 To switch targets, run ${chalk.cyan('hieund-ai-kit init --target ' + targetName)}.`));
         process.exit(1);
     }
 
-    if (!options.force) {
-        console.log(chalk.yellow(`⚠️  Update will overwrite the entire ${chalk.cyan(config.installFolder)} folder.`));
-        const shouldUpdate = await confirm('Are you sure you want to continue?');
+    const config = getTargetConfig(targetName);
+    showBanner(config);
 
-        if (!shouldUpdate) {
-            console.log(chalk.gray('Operation cancelled.'));
-            process.exit(0);
+    const tempDir = path.join(projectDir, TEMP_FOLDER);
+    const spinner = ora({ text: 'Downloading templates from repository...', color: 'cyan' }).start();
+
+    try {
+        await downloadRepo(tempDir, options.branch);
+        spinner.stop();
+
+        const templatePath = getTemplatePath(tempDir, config);
+        if (!fs.existsSync(templatePath)) {
+            throw new Error(`Template not found: templates/${config.templateDir}/`);
         }
-    }
 
-    // Refresh the toolkit without overwriting repository-specific root instructions.
-    await initCommand({ ...options, force: true, overwriteRootInstruction: false });
+        mirrorCopy(templatePath, projectDir, { overwriteRootInstruction: false });
+        cleanup(tempDir);
+
+        console.log(chalk.green(`\n✅ Updated ${config.displayName} (${INSTALL_FOLDER}/ refreshed, root instructions preserved).`));
+    } catch (error) {
+        spinner.stop();
+        console.error(chalk.red(`❌ Error: ${error.message}`));
+        cleanup(tempDir);
+        process.exit(1);
+    }
 };
 
 /**
- * Show status of installed folders
+ * Show the installation status of the project.
  */
 const statusCommand = (options) => {
-    const targetDir = path.resolve(options.path || process.cwd());
-    
-    const agentsDir = path.join(targetDir, '.agents');
-    const oldCodexDir = path.join(targetDir, '.codex');
-    const oldAgentDir = path.join(targetDir, '.agent');
+    const projectDir = path.resolve(options.path || process.cwd());
+    const installedTarget = detectInstalledTarget(projectDir);
 
     console.log(chalk.blueBright('\n📊 Kit Installation Status\n'));
 
-    let found = false;
-
-    // Check current runtime folder (.agents)
-    if (fs.existsSync(agentsDir)) {
-        found = true;
-        const stats = fs.statSync(agentsDir);
-        const files = fs.readdirSync(agentsDir, { recursive: true });
-        const isAntigravity = fs.existsSync(path.join(agentsDir, 'agents')) || fs.existsSync(path.join(agentsDir, 'workflows'));
-        const label = isAntigravity ? 'Gemini Antigravity Kit' : 'OpenAI Codex Kit';
-        const itemLabel = isAntigravity ? 'agents, workflows & skills' : 'composable skills';
-        
-        console.log(chalk.magentaBright(`${label}: INSTALLED`));
-        console.log(chalk.gray('──────────────────────────────────────────────────────'));
-        console.log(`📁 Path:     ${chalk.cyan(agentsDir)}`);
-        console.log(`📅 Modified: ${chalk.gray(stats.mtime.toLocaleString('en-US'))}`);
-        console.log(`📄 Items:    ${chalk.yellow(files.length)} items (${itemLabel})`);
-        console.log(chalk.gray('──────────────────────────────────────────────────────\n'));
+    if (!installedTarget) {
+        console.log(chalk.red('❌ No target installed in this directory.'));
+        const validTargets = Object.keys(TARGET_REGISTRY).join(', ');
+        console.log(chalk.yellow(`💡 Run ${chalk.cyan('hieund-ai-kit init --target <name>')} (targets: ${validTargets}).\n`));
+        return;
     }
 
-    // Check obsolete folders from older kit versions.
-    if (fs.existsSync(oldCodexDir) || fs.existsSync(oldAgentDir)) {
-        found = true;
-        console.log(chalk.yellow('Old kit folders detected:'));
-        if (fs.existsSync(oldCodexDir)) {
-            console.log(`   ${chalk.cyan(oldCodexDir)} (old Codex install path)`);
-        }
-        if (fs.existsSync(oldAgentDir)) {
-            console.log(`   ${chalk.cyan(oldAgentDir)} (old Gemini/Antigravity install path)`);
-        }
-        console.log(chalk.gray(`   Current installs use ${chalk.cyan('.agents')}.\n`));
-    }
+    const config = TARGET_REGISTRY[installedTarget];
+    const installDir = path.join(projectDir, INSTALL_FOLDER);
+    const stats = fs.statSync(installDir);
+    const files = fs.readdirSync(installDir, { recursive: true });
 
-    if (!found) {
-        console.log(chalk.red('❌ No active kits installed in this directory.'));
-        console.log(chalk.yellow(`💡 Run ${chalk.cyan('hieund-ai-kit init')} to install Codex into .agents.`));
-        console.log(chalk.yellow(`💡 Run ${chalk.cyan('hieund-ai-kit init --gemini')} to install Gemini Antigravity into .agents.\n`));
-    }
+    console.log(config.bannerColor(`${config.displayName}: INSTALLED`));
+    console.log(chalk.gray('──────────────────────────────────────────────────────'));
+    console.log(`🎯 Target:   ${chalk.cyan(installedTarget)}`);
+    console.log(`📝 About:    ${chalk.gray(config.description)}`);
+    console.log(`📁 Path:     ${chalk.cyan(installDir)}`);
+    console.log(`📅 Modified: ${chalk.gray(stats.mtime.toLocaleString('en-US'))}`);
+    console.log(`📄 Items:    ${chalk.yellow(files.length)} items`);
+    console.log(chalk.gray('──────────────────────────────────────────────────────\n'));
 };
 
 // ============================================================================
@@ -371,40 +425,36 @@ const program = new Command();
 
 program
     .name('hieund-ai-kit')
-    .description('Custom CLI tool to install and manage Hieund AI and Codex Kits')
-    .version('1.0.0', '-v, --version', 'Display version number');
+    .description('Custom CLI tool to install and manage Hieund AI Kits')
+    .version('2.0.0', '-v, --version', 'Display version number');
 
-// Command: init
 program
     .command('init')
-    .description('Install Codex or Gemini Antigravity kit into .agents')
-    .option('-f, --force', 'Overwrite if folder already exists', false)
+    .description('Install a target kit into .agents (default: codex)')
+    .option('-t, --target <name>', 'Target to install (codex, gemini)')
+    .option('-f, --force', 'Overwrite existing files without confirmation', false)
     .option('-p, --path <dir>', 'Path to the project directory', process.cwd())
     .option('-b, --branch <name>', 'Select repository branch')
-    .option('-g, --gemini', 'Install Gemini Antigravity format instead of Codex', false)
+    .option('-g, --gemini', '[deprecated] alias for --target gemini', false)
     .action(initCommand);
 
-// Command: update
 program
     .command('update')
-    .description('Update active folder to the latest version')
-    .option('-f, --force', 'Skip confirmation prompt', false)
+    .description('Refresh .agents for the installed target (auto-detected)')
+    .option('-t, --target <name>', 'Target to update (defaults to installed target)')
     .option('-p, --path <dir>', 'Path to the project directory', process.cwd())
     .option('-b, --branch <name>', 'Select repository branch')
-    .option('-g, --gemini', 'Update Gemini Antigravity format in .agents', false)
+    .option('-g, --gemini', '[deprecated] alias for --target gemini', false)
     .action(updateCommand);
 
-// Command: status
 program
     .command('status')
     .description('Check installation status')
     .option('-p, --path <dir>', 'Path to the project directory', process.cwd())
     .action(statusCommand);
 
-// Parse arguments
 program.parse(process.argv);
 
-// Show help if no command provided
 if (!process.argv.slice(2).length) {
     program.outputHelp();
 }

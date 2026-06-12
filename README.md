@@ -2,13 +2,15 @@
 
 CLI cài đặt bộ skill và rule cho AI coding agents vào repository hiện tại.
 
-Mặc định CLI cài bộ OpenAI Codex. Có thể cài bộ Gemini Antigravity bằng `--gemini`.
+CLI chọn tool qua option `--target <name>`. Mặc định là `codex`. Hỗ trợ hiện tại: `codex`, `gemini`.
+
+Mỗi project chỉ cài 1 target tại một thời điểm. `init` lại sẽ xóa target cũ và cài target mới.
 
 ## Cài Đặt Nhanh
 
 Không cần cài global — dùng `npx` (khuyến nghị):
 
-Codex mặc định:
+Codex (mặc định):
 
 ```bash
 npx -y hieund-ai-kit init
@@ -17,26 +19,27 @@ npx -y hieund-ai-kit init
 Gemini Antigravity:
 
 ```bash
-npx -y hieund-ai-kit init --gemini
+npx -y hieund-ai-kit init --target gemini
 ```
 
 Hoặc trỏ thẳng repo GitHub:
 
 ```bash
 npx -y github:duyhieu9898/my-ai-kit init
-npx -y github:duyhieu9898/my-ai-kit init --gemini
+npx -y github:duyhieu9898/my-ai-kit init --target gemini
 ```
 
 > **Lưu ý:** Lệnh `hieund-ai-kit init` (không có `npx`) chỉ chạy được sau khi bạn `npm link` hoặc `npm install -g` trong repo CLI. Nếu terminal báo `command not found`, dùng các lệnh `npx` ở trên.
 
 Kết quả cài đặt:
 
-| Mode | Runtime Folder | Root Instruction |
+| Target | Runtime Folder | Root Instruction |
 |:---|:---|:---|
-| Codex | `.agents/` | `AGENTS.md` |
-| Gemini Antigravity | `.agents/` | `GEMINI.md` |
+| `codex` | `.agents/` | `AGENTS.md` |
+| `gemini` | `.agents/` | `GEMINI.md` |
 
-`.agents/` chứa `skills/`, `scripts/`, và các tài nguyên runtime cần thiết. Folder này được thêm vào `.gitignore`.
+`.agents/` chứa `skills/`, `scripts/`, các tài nguyên runtime, và marker `.kit-target`
+ghi tên target đang cài. CLI **không** tự sửa `.gitignore` — bạn tự quản lý.
 
 ## Lệnh CLI
 
@@ -44,13 +47,20 @@ Thay `hieund-ai-kit` bằng `npx -y hieund-ai-kit` nếu chưa cài global.
 
 | Lệnh | Mô tả |
 |:---|:---|
-| `init` | Cài Codex kit vào repo hiện tại |
-| `init --gemini` | Cài Gemini Antigravity kit vào repo hiện tại |
-| `init --force` | Ghi đè `.agents/` và root instruction nếu đã tồn tại |
+| `init` | Cài codex (mặc định) vào repo hiện tại |
+| `init --target gemini` | Cài gemini thay vì codex |
+| `init --force` | Bỏ qua xác nhận, ghi đè toàn bộ |
 | `init --path <dir>` | Cài vào thư mục chỉ định |
-| `update` | Cập nhật Codex kit trong `.agents/`, giữ nguyên root instruction |
-| `update --gemini` | Cập nhật Gemini Antigravity kit trong `.agents/`, giữ nguyên root instruction |
-| `status` | Kiểm tra trạng thái cài đặt |
+| `update` | Cập nhật `.agents/` cho target đang cài (tự nhận diện) |
+| `update --target <name>` | Cập nhật target chỉ định (báo lỗi nếu khác target đang cài) |
+| `status` | Kiểm tra target nào đang cài |
+
+Khi chuyển target (ví dụ đang codex, chạy `init --target gemini`), CLI sẽ xóa
+root instruction cũ (`AGENTS.md`), xóa `.agents/`, rồi cài target mới — có hỏi
+xác nhận trừ khi dùng `--force`.
+
+> **Lưu ý:** `--gemini` vẫn dùng được nhưng đã deprecated; nó được map sang
+> `--target gemini` kèm cảnh báo.
 
 Ví dụ trong thư mục project:
 
@@ -87,56 +97,50 @@ hieund-ai-kit status
 
 ## Cấu Trúc Template
 
+Mỗi target là một folder **mirror** đúng cấu trúc sẽ copy vào project. CLI chỉ
+việc copy thẳng, không transform.
+
 ```text
 templates/
-├── .codex/          # Source template cho Codex
-├── .antigravity/    # Source template cho Gemini Antigravity
-└── root/            # Root instruction cho Codex
+├── codex/
+│   ├── AGENTS.md            # Root instruction → copy ra project root
+│   └── .agents/             # Install folder → copy vào project/.agents/
+│       ├── .kit-target      # Marker, nội dung: "codex"
+│       ├── AGENTS.md
+│       ├── ARCHITECTURE.md
+│       ├── .shared/
+│       ├── scripts/
+│       └── skills/
+└── gemini/
+    ├── GEMINI.md            # Root instruction → copy ra project root
+    └── .agents/             # Install folder → copy vào project/.agents/
+        ├── .kit-target      # Marker, nội dung: "gemini"
+        ├── ARCHITECTURE.md
+        ├── agents/
+        ├── rules/
+        ├── scripts/
+        ├── skills/
+        └── workflows/
 ```
 
-Khi cài, source template của mode được copy vào `.agents/`; root instruction
-được copy riêng ra thư mục project.
-
-Codex template:
-
-```text
-.agents/
-├── AGENTS.md        # Rules scoped to shared toolkit maintenance
-├── skills/
-├── scripts/
-├── .shared/
-└── ARCHITECTURE.md
-AGENTS.md             # Repository-wide workflow and skill rules
-```
-
-Gemini Antigravity template:
-
-```text
-.agents/
-├── agents/
-├── skills/
-├── workflows/
-├── scripts/
-├── rules/
-└── ARCHITECTURE.md
-GEMINI.md
-```
+Thêm target mới (ví dụ `claude`): thêm 1 entry vào `TARGET_REGISTRY` trong
+`bin/index.js` và tạo folder `templates/claude/` theo đúng cấu trúc mirror.
 
 ## Phát Triển Skill
 
 Codex skills:
 
 ```text
-templates/.codex/skills/<skill-name>/SKILL.md
-templates/.codex/skills/<skill-name>/agents/openai.yaml
-templates/.codex/skills/<skill-name>/references/
-templates/.codex/skills/<skill-name>/scripts/
+templates/codex/.agents/skills/<skill-name>/SKILL.md
+templates/codex/.agents/skills/<skill-name>/agents/openai.yaml
+templates/codex/.agents/skills/<skill-name>/references/
+templates/codex/.agents/skills/<skill-name>/scripts/
 ```
 
 Gemini Antigravity skills:
 
 ```text
-templates/.antigravity/skills/<skill-name>/SKILL.md
+templates/gemini/.agents/skills/<skill-name>/SKILL.md
 ```
 
 Sau khi sửa template, push lên `main`; các project khác có thể cập nhật bằng:

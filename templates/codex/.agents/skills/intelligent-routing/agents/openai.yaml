@@ -1,0 +1,8 @@
+interface:
+  display_name: "Intelligent Routing"
+  short_description: "Request classification, skill selection, and routing rules."
+  brand_color: "#1E3A8A"
+  default_prompt: "Use $intelligent-routing to design or review these request-routing rules."
+
+policy:
+  allow_implicit_invocation: true

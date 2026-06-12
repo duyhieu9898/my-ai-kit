@@ -3,8 +3,7 @@ node_modules
 .env
 .DS_Store
 /.agent
-/.codex
-.agents
+/.agents
 
 # Harness durable layer
 harness.db
