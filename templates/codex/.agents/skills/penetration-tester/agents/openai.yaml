@@ -1,8 +1,0 @@
-interface:
-  display_name: "Penetration Tester"
-  short_description: "Authorized pentesting, red team assessment, and exploit validation."
-  brand_color: "#B91C1C"
-  default_prompt: "$penetration-tester"
-
-policy:
-  allow_implicit_invocation: true

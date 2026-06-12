@@ -1,8 +1,0 @@
-interface:
-  display_name: "Game Development"
-  short_description: "Game architecture, design patterns, physics, input, and platforms."
-  brand_color: "#10B981"
-  default_prompt: "$game-development"
-
-policy:
-  allow_implicit_invocation: true

@@ -1,8 +1,0 @@
-interface:
-  display_name: "Game Developer"
-  short_description: "Game mechanics, engines, performance, graphics, and multiplayer."
-  brand_color: "#EC4899"
-  default_prompt: "$game-developer"
-
-policy:
-  allow_implicit_invocation: true

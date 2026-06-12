@@ -1,8 +1,0 @@
-interface:
-  display_name: "Mobile Developer"
-  short_description: "React Native, Flutter, native features, and mobile release checks."
-  brand_color: "#EC4899"
-  default_prompt: "$mobile-developer"
-
-policy:
-  allow_implicit_invocation: true

@@ -1,8 +1,0 @@
-interface:
-  display_name: "Context Compression"
-  short_description: "Manage and compress conversation context in long sessions"
-  brand_color: "#6B7280"
-  default_prompt: "$context-compression"
-
-policy:
-  allow_implicit_invocation: true

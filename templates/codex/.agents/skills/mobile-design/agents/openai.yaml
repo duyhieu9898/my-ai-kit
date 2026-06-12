@@ -1,8 +1,0 @@
-interface:
-  display_name: "Mobile Design"
-  short_description: "Mobile touch UX, gestures, app performance, and platform divergence."
-  brand_color: "#3B82F6"
-  default_prompt: "$mobile-design"
-
-policy:
-  allow_implicit_invocation: true

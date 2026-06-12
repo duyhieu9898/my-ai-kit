@@ -1,8 +1,0 @@
-interface:
-  display_name: "Bash & Linux"
-  short_description: "Terminal commands, piping, scripting, and system utilities."
-  brand_color: "#4EAA25"
-  default_prompt: "$bash-linux"
-
-policy:
-  allow_implicit_invocation: true

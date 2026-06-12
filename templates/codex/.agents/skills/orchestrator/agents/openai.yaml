@@ -1,8 +1,0 @@
-interface:
-  display_name: "Orchestrator"
-  short_description: "Multi-agent coordination and coordinator-mode orchestration."
-  brand_color: "#8B5CF6"
-  default_prompt: "$orchestrator"
-
-policy:
-  allow_implicit_invocation: true
