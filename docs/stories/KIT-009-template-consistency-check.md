@@ -58,3 +58,5 @@ Adds a reusable validation command for template/doc drift.
 - `scripts/bin/harness-cli story verify KIT-009` passed via
   `npm run check:templates` with `Template consistency check passed:
   319 checks.`
+- `npm pack --dry-run --json` package inspection confirmed
+  `scripts/check-template-consistency.mjs` is included in the npm payload.

@@ -12,6 +12,7 @@
   },
   "files": [
     "bin",
+    "scripts/check-template-consistency.mjs",
     "templates"
   ],
   "repository": {
