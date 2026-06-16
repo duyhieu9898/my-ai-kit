@@ -6,12 +6,14 @@
 
 ## 📋 Overview
 
-Codex Kit is a modular, high-efficiency toolkit built strictly according to the **OpenAI Codex Standard**. It replaces the legacy multi-agent routing model with a unified, composable **Modular Skill Architecture**. 
+Codex Kit is a modular toolkit organized around a unified, composable
+**Modular Skill Architecture**. It replaces the legacy multi-agent routing
+model with skill directories that can be loaded on demand.
 
 The kit contains:
-- **53 Composable Skills** - Direct domain-specific knowledge packages and expert personas under `skills/`.
+- **51 Composable Skills** - Direct domain-specific knowledge packages and expert personas under `skills/`.
 - **4 Master Scripts** - System-level automation and validation scripts under `scripts/`.
-- **Cascading Memory** - Cross-session state and persistence under `memory/`.
+- **Memory Skill** - Procedures for optional cross-session memory files when a project creates `.agents/memory/`.
 
 ---
 
@@ -22,16 +24,18 @@ AGENTS.md                     # Repository-wide workflow and skill rules
 .agents/
 ├── AGENTS.md                # Rules scoped to shared toolkit maintenance
 ├── ARCHITECTURE.md          # This file (Human-developer map)
-├── skills/                  # 53 Composable Skills (Expert Personas + Domain Knowledge)
+├── skills/                  # 51 Composable Skills (Expert Personas + Domain Knowledge)
 │   ├── {skill-name}/
 │   │   ├── SKILL.md         # Metadata, triggers, and prompt guidelines
 │   │   ├── agents/
 │   │   │   └── openai.yaml  # Brand interface configuration
 │   │   ├── references/      # Deep domain documentation
 │   │   └── scripts/         # Skill-level utility scripts
-├── memory/                  # Persistent cross-session memory (MEMORY.md)
 └── scripts/                 # Master validation and automation scripts
 ```
+
+The `memory-system` skill documents how to manage `.agents/memory/MEMORY.md`,
+but the current source template does not ship a `memory/` scaffold.
 
 ---
 
@@ -43,19 +47,19 @@ adds toolkit-maintenance constraints without duplicating the root rules.
 
 The CLI sources these files separately:
 
-- `templates/root/AGENTS.md` installs as root `AGENTS.md`.
-- `templates/.codex/AGENTS.md` installs as `.agents/AGENTS.md`.
+- `templates/codex/AGENTS.md` installs as root `AGENTS.md`.
+- `templates/codex/.agents/AGENTS.md` installs as `.agents/AGENTS.md`.
 
 Kit updates replace `.agents/` but preserve an existing root instruction so
 project-specific rules and external Harness blocks are not lost.
 
 ---
 
-## 🧩 The 53 Composable Skills
+## 🧩 The 51 Composable Skills
 
 In Codex, the boundary between "agents" and "skills" is dissolved. Every specialist capability or expert persona is implemented as a **Skill** that the unified AI engine can dynamically load into its context.
 
-### 🎭 Expert Persona Skills (14)
+### 🎭 Expert Persona Skills (13)
 These skills contain specialized persona prompts, deep domain methodologies, and dynamic color branding for the Codex UI.
 
 | Skill | Focus | Primary Invocation / Triggers |
@@ -71,13 +75,12 @@ These skills contain specialized persona prompts, deep domain methodologies, and
 | `performance-optimizer` | Web speed & Core Web Vitals | Lighthouse audits, bundle size optimization |
 | `seo-specialist` | Page ranking & search visibility | SEO tags, structured data, web vitals |
 | `documentation-writer` | Professional documentation & guides | API docs, user guides, README files |
-| `product-manager` | Business logic & user stories | Feature specifications, user flows |
-| `product-owner` | Backlog strategy & MVP priority | Prioritization, roadmap planning |
+| `product-manager` | Business logic, user stories & backlog/MVP | Feature specifications, user flows, RICE prioritization |
 | `qa-automation-engineer` | E2E automation & regression pipelines| Playwright runners, visual regression |
 
 ---
 
-### 🧩 Domain Knowledge Skills (39)
+### 🧩 Domain Knowledge Skills (38)
 These skills provide specific instructions and toolsets to guide implementation in target technologies and patterns.
 
 | Domain Category | Skills Included |
@@ -86,7 +89,7 @@ These skills provide specific instructions and toolsets to guide implementation 
 | **Backend & API** | `api-patterns`, `nodejs-best-practices`, `python-patterns`, `database-design`, `mcp-builder` |
 | **Testing & QA** | `testing-patterns`, `tdd-workflow`, `verify-changes`, `lint-and-validate`, `clean-code`, `performance-profiling`, `systematic-debugging` |
 | **Security & Audits** | `vulnerability-scanner`, `code-review-checklist`, `code-review-graph` |
-| **Planning & Design** | `app-builder`, `architecture`, `plan-writing`, `brainstorming`, `documentation-templates` |
+| **Planning & Design** | `app-builder`, `architecture`, `plan-writing`, `brainstorming` |
 | **Infrastructure** | `deployment-procedures`, `server-management` |
 | **System Operations** | `backlog`, `batch-operations`, `memory-system`, `simplify-code`, `code-archaeologist`, `explorer-agent` |
 
@@ -98,10 +101,13 @@ These skills provide specific instructions and toolsets to guide implementation 
 User Intent / Prompt → Scan Frontmatter `description` → Auto-inject relevant SKILL.md
 ```
 
-Unlike legacy systems that required hard-routed agent scripts or manual loading tables, the **OpenAI Codex Standard** leverages native **Implicit Invocation**:
-1. When a user requests a task, the AI engine scans the `description` in all `SKILL.md` frontmatters.
-2. Skills matching the context (e.g. React hooks triggering `frontend-specialist` and `react-refactor-patterns`) are dynamically loaded directly into the model's environment context.
-3. This achieves **95%+ token efficiency** by ensuring instructions are only present when active.
+Unlike legacy systems that required hard-routed agent scripts or manual loading
+tables, this toolkit uses skill metadata for selective loading:
+1. Each `SKILL.md` has frontmatter with a `description`.
+2. Matching skills can be loaded for the current task, while unrelated
+   references stay out of context.
+3. Skill files use Content Maps and Related Skills tables to support
+   progressive disclosure.
 
 Negative routing boundaries are part of skill discovery. In particular,
 routine Git inspection, commit, branch, tag, pull, and push operations do not
@@ -130,10 +136,12 @@ python3 .agents/scripts/verify_all.py . --url http://localhost:3000
 Generates live dev server previews and screenshots.
 
 ### 4. `session_manager.py`
-Coordinates context saving and session state backups under `.agents/memory/`.
+Prints project status and package metadata for the current session. It does
+not currently write memory files.
 
 ---
 
 ## 🔗 Quick Reference
 
-For details on the exact metadata formats and writing rules when adding new skills, please refer to the root [CODEX_SKILL_STANDARD.md](../CODEX_SKILL_STANDARD.md) file.
+When adding or changing skills, follow the directory shape documented here and
+the maintenance rules in `.agents/AGENTS.md`.

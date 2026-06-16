@@ -5,24 +5,28 @@
 ### `init`
 
 - Install Codex by default.
-- Install Gemini Antigravity when `--gemini` is supplied.
+- Install Gemini Antigravity when `--target gemini` is supplied.
+- Keep deprecated `--gemini` as a compatibility alias for `--target gemini`.
 - Install the selected toolkit into `.agents/`.
-- Install the mode-specific root instruction outside `.agents/`.
+- Install the target-specific root instruction outside `.agents/`.
 - Require confirmation before replacing an existing `.agents/` unless
   `--force` is supplied.
-- Support `--path` and `--branch`.
+- Support `--path`, `--target`, and `--ref`.
+- Support deprecated `--branch`, with `--ref` taking precedence when both are
+  supplied.
 
 ### `update`
 
 - Require an existing `.agents/` installation.
-- Refresh the selected toolkit.
+- Refresh the toolkit identified by `.agents/.kit-target`.
 - Preserve an existing root instruction, including local or Harness blocks.
-- Support Codex and Gemini modes.
+- Support `--target <name>` only when it matches the installed marker.
+- Support `--ref` for pinned updates.
 
 ### `status`
 
 - Detect the active `.agents/` installation.
-- Distinguish Codex from Gemini Antigravity by installed structure.
+- Distinguish Codex from Gemini Antigravity by `.agents/.kit-target`.
 - Report obsolete `.codex/` or `.agent/` directories.
 
 ## Distribution

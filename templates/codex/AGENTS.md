@@ -27,6 +27,20 @@ Do not load every reference file or activate broad coordination skills for a sin
 
 Mention the applied skill only when it helps the user understand the approach.
 
+## Handle Requests
+
+Classify requests lightly before acting:
+
+- Question: answer directly, with file references when useful.
+- Survey: inspect the relevant files and summarize concrete paths.
+- Narrow edit: read nearby code and implement directly.
+- Broad or risky change: state a short plan before editing.
+- Ambiguous, destructive, security-sensitive, or credential-related work: ask
+  before taking action.
+
+Prefer execution when intent is clear. Ask only when missing information would
+make the next action risky, destructive, or likely wrong.
+
 ## Work Safely
 
 Before editing:
@@ -60,6 +74,15 @@ Run checks proportional to the change. Prefer project-native checks. Use
 `.agents/skills/verify-changes/SKILL.md` when executable verification or
 completion evidence is required, and do not claim success without execution
 evidence when tests or builds are available.
+
+Use this proof ladder:
+
+- Docs-only changes: run targeted searches and `git diff --check`.
+- Code changes: run the narrowest relevant lint, type, or test command.
+- Toolkit or skill changes: validate frontmatter, links, scripts, and changed
+  skill paths.
+- User-facing app changes: verify manually or with browser checks when
+  available.
 
 Toolkit entry points, when they match the changed surface:
 
