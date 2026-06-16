@@ -1,9 +1,8 @@
 ---
 name: playwright-pitfalls
 description: >-
-  Use when refactoring, troubleshooting, or auditing existing Playwright test suites.
-  Playwright pitfalls analysis covering timing, locators, assertions, and state isolation.
-  NOT for new suites.
+  Use ONLY when debugging failed runs, fixing flaky tests, or refactoring existing Playwright test suites.
+  NOT for writing new tests from scratch.
 allowed-tools:
   - Read
   - Write

@@ -82,7 +82,7 @@ Do you approve? (Y/N)
 
 > ✅ After user approval, invoke multiple agents in PARALLEL.
 
-## Available Agents (17 total)
+## Available Agents (14 total)
 
 | Agent | Domain | Use When |
 |-------|--------|----------|
@@ -95,12 +95,10 @@ Do you approve? (Y/N)
 | `penetration-tester` | Security | Active testing |
 | `test-engineer` | Testing | Unit, E2E, Coverage |
 | `devops-engineer` | Ops | CI/CD, Docker, Deploy |
-| `mobile-developer` | Mobile | React Native, Flutter |
 | `performance-optimizer` | Speed | Lighthouse, Profiling |
 | `seo-specialist` | SEO | Meta, Schema, Rankings |
 | `documentation-writer` | Docs | README, API docs |
 | `debugger` | Debug | Error analysis |
-| `game-developer` | Games | Unity, Godot |
 | `orchestrator` | Meta | Coordination |
 
 ---
@@ -116,7 +114,6 @@ Identify ALL domains this task touches:
 □ Database     → database-architect
 □ Testing      → test-engineer
 □ DevOps       → devops-engineer
-□ Mobile       → mobile-developer
 □ Performance  → performance-optimizer
 □ SEO          → seo-specialist
 □ Planning     → project-planner

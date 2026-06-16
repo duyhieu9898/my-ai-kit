@@ -1,8 +1,8 @@
 ---
 name: testing-patterns
 description: >-
-  Use when writing unit or integration tests, setting up mock stubs/spies/fakes, or designing test suites.
-  Core testing patterns (Pyramid, AAA, mocking). NOT for manual QA planning without automated test implementation.
+  Use ONLY when writing unit/integration test code, designing mock boundaries, or configuring test data factories.
+  NOT for framework setup or running test CLIs.
 allowed-tools:
   - Read
   - Write

@@ -151,11 +151,8 @@ conventions and scope rules taking precedence.
 
 | Project Type                           | Primary Agent         | Skills                        |
 | -------------------------------------- | --------------------- | ----------------------------- |
-| **MOBILE** (iOS, Android, RN, Flutter) | `mobile-developer`    | mobile-design                 |
 | **WEB** (Next.js, React web)           | `frontend-specialist` | frontend-design               |
 | **BACKEND** (API, server, DB)          | `backend-specialist`  | api-patterns, database-design |
-
-> 🔴 **Mobile + frontend-specialist = WRONG.** Mobile = mobile-developer ONLY.
 
 ### 🛑 Socratic Gate
 
@@ -243,7 +240,6 @@ conventions and scope rules taking precedence.
 | Task         | Read                            |
 | ------------ | ------------------------------- |
 | Web UI/UX    | `.agents/agents/frontend-specialist.md` |
-| Mobile UI/UX | `.agents/agents/mobile-developer.md`    |
 
 **These agents contain:**
 
@@ -260,7 +256,7 @@ conventions and scope rules taking precedence.
 
 ### Agents & Skills
 
-- **Masters**: `orchestrator`, `project-planner`, `security-auditor` (Cyber/Audit), `backend-specialist` (API/DB), `frontend-specialist` (UI/UX), `mobile-developer`, `debugger`, `game-developer`
+- **Masters**: `orchestrator`, `project-planner`, `security-auditor` (Cyber/Audit), `backend-specialist` (API/DB), `frontend-specialist` (UI/UX), `debugger`
 - **Key Skills**: `clean-code`, `brainstorming`, `app-builder`, `frontend-design`, `mobile-design`, `plan-writing`, `behavioral-modes`
 
 ### Key Scripts

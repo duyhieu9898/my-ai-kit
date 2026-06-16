@@ -1,9 +1,8 @@
 ---
 name: playwright-pro-patterns
 description: >-
-  Use when writing brand-new Playwright test suites from scratch.
-  Professional Playwright E2E standards (waiting, data isolation, POM, web-first assertions).
-  NOT for refactoring existing tests.
+  Use ONLY when writing brand-new Playwright test files from scratch or scaffolding new E2E test suites.
+  NOT for debugging, fixing, or refactoring existing tests.
 allowed-tools:
   - Read
   - Write

@@ -1,7 +1,7 @@
 ---
 name: playwright-pro-patterns
 description: Professional standards for writing new Playwright E2E tests. Focuses on stability, performance, and clean architecture.
-when_to_use: "Activate when writing new Playwright E2E tests from scratch. NOT for refactoring existing tests (use playwright-pitfalls instead)."
+when_to_use: "Activate ONLY when writing brand-new Playwright E2E tests from scratch or scaffolding new E2E test suites. NOT for debugging, fixing, or refactoring existing tests (use playwright-pitfalls instead)."
 allowed-tools: Read, Write, Edit, Glob, Grep
 ---
 

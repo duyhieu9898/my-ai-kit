@@ -1,8 +1,0 @@
-interface:
-  display_name: "Product Owner"
-  short_description: "Requirements, roadmaps, backlog priorities, MVP scope, and PRDs."
-  brand_color: "#D97706"
-  default_prompt: "$product-owner"
-
-policy:
-  allow_implicit_invocation: true

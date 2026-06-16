@@ -1,8 +1,0 @@
-interface:
-  display_name: "Documentation Templates"
-  short_description: "Standard structures and templates for READMEs, APIs, comments, and ADRs."
-  brand_color: "#10B981"
-  default_prompt: "$documentation-templates"
-
-policy:
-  allow_implicit_invocation: true
