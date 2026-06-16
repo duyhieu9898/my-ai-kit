@@ -4,6 +4,9 @@
   "description": "Custom CLI tool to setup Hieund AI Kit skills and MCPs",
   "main": "bin/index.js",
   "type": "module",
+  "scripts": {
+    "check:templates": "node scripts/check-template-consistency.mjs"
+  },
   "bin": {
     "hieund-ai-kit": "./bin/index.js"
   },

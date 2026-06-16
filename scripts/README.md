@@ -47,6 +47,18 @@ Requires: the prebuilt Rust CLI at `scripts/bin/harness-cli` on macOS/Linux or
 Direct database inspection may still use SQLite tools, but normal Harness use
 should go through the Rust CLI.
 
+## Template Consistency
+
+Use the template consistency check after changing toolkit structure,
+architecture docs, or skill metadata:
+
+```bash
+npm run check:templates
+```
+
+The check verifies documented template counts, Codex `openai.yaml` coverage,
+basic `SKILL.md` frontmatter, and known placeholder/runtime-layout contracts.
+
 ### Rust CLI Commands
 
 Current migrated commands:
