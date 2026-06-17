@@ -11,9 +11,8 @@ Codex Kit is a modular toolkit organized around a unified, composable
 model with skill directories that can be loaded on demand.
 
 The kit contains:
-- **51 Composable Skills** - Direct domain-specific knowledge packages and expert personas under `skills/`.
+- **50 Composable Skills** - Direct domain-specific knowledge packages and expert personas under `skills/`.
 - **4 Master Scripts** - System-level automation and validation scripts under `scripts/`.
-- **Memory Skill** - Procedures for optional cross-session memory files when a project creates `.agents/memory/`.
 
 ---
 
@@ -24,7 +23,7 @@ AGENTS.md                     # Repository-wide workflow and skill rules
 .agents/
 ├── AGENTS.md                # Rules scoped to shared toolkit maintenance
 ├── ARCHITECTURE.md          # This file (Human-developer map)
-├── skills/                  # 51 Composable Skills (Expert Personas + Domain Knowledge)
+├── skills/                  # 50 Composable Skills (Expert Personas + Domain Knowledge)
 │   ├── {skill-name}/
 │   │   ├── SKILL.md         # Metadata, triggers, and prompt guidelines
 │   │   ├── agents/
@@ -33,11 +32,6 @@ AGENTS.md                     # Repository-wide workflow and skill rules
 │   │   └── scripts/         # Skill-level utility scripts
 └── scripts/                 # Master validation and automation scripts
 ```
-
-The `memory-system` skill documents how to manage `.agents/memory/MEMORY.md`,
-but the current source template does not ship a `memory/` scaffold.
-
----
 
 ## Instruction Scope
 
@@ -55,7 +49,7 @@ project-specific rules and external Harness blocks are not lost.
 
 ---
 
-## 🧩 The 51 Composable Skills
+## 🧩 The 50 Composable Skills
 
 In Codex, the boundary between "agents" and "skills" is dissolved. Every specialist capability or expert persona is implemented as a **Skill** that the unified AI engine can dynamically load into its context.
 
@@ -80,7 +74,7 @@ These skills contain specialized persona prompts, deep domain methodologies, and
 
 ---
 
-### 🧩 Domain Knowledge Skills (38)
+### 🧩 Domain Knowledge Skills (37)
 These skills provide specific instructions and toolsets to guide implementation in target technologies and patterns.
 
 | Domain Category | Skills Included |
@@ -91,7 +85,7 @@ These skills provide specific instructions and toolsets to guide implementation 
 | **Security & Audits** | `vulnerability-scanner`, `code-review-checklist`, `code-review-graph` |
 | **Planning & Design** | `app-builder`, `architecture`, `plan-writing`, `brainstorming` |
 | **Infrastructure** | `deployment-procedures`, `server-management` |
-| **System Operations** | `backlog`, `batch-operations`, `memory-system`, `simplify-code`, `code-archaeologist`, `explorer-agent` |
+| **System Operations** | `backlog`, `batch-operations`, `simplify-code`, `code-archaeologist`, `explorer-agent` |
 
 ---
 

@@ -174,11 +174,6 @@ record(
   `openai.yaml=${codexOpenAiCount}, skills=${codexSkillCount}`,
 );
 record(
-  "Codex memory scaffold absence matches docs",
-  !exists("templates/codex/.agents/memory"),
-  "templates/codex/.agents/memory should not exist unless docs are updated",
-);
-record(
   "Gemini rules placeholder is empty",
   immediateFiles("templates/gemini/.agents/rules").length === 0,
   "docs/product/toolkits.md describes rules/ as an empty placeholder",

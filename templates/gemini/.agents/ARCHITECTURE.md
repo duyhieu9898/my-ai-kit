@@ -9,8 +9,8 @@
 AG Kit is a modular system consisting of:
 
 - **15 Specialist Agents** - Role-based AI personas
-- **35 Skills** - Domain-specific knowledge modules with conditional loading
-- **14 Workflows** - Slash command procedures
+- **34 Skills** - Domain-specific knowledge modules with conditional loading
+- **13 Workflows** - Slash command procedures
 
 ---
 
@@ -20,8 +20,8 @@ AG Kit is a modular system consisting of:
 .agents/
 ├── ARCHITECTURE.md          # This file
 ├── agents/                  # 15 Specialist Agents
-├── skills/                  # 35 Skills (with conditional loading)
-├── workflows/               # 14 Slash Commands
+├── skills/                  # 34 Skills (with conditional loading)
+├── workflows/               # 13 Slash Commands
 ├── rules/                   # Placeholder for target-specific rule files
 └── scripts/                 # Master Validation Scripts
 ```
@@ -53,7 +53,7 @@ Specialist AI personas for different domains.
 
 ---
 
-## 🧩 Skills (35)
+## 🧩 Skills (34)
 
 Modular knowledge domains that agents can load on-demand based on task context.
 Most Gemini skills have a `when_to_use` frontmatter field for
@@ -125,11 +125,10 @@ only provide `description`.
 | ------------------ | ----------------------------- |
 | `seo-fundamentals` | SEO, E-E-A-T, Core Web Vitals |
 
-### Orchestration & Memory (2026.5.13)
+### Orchestration
 
 | Skill                     | Description                                                 |
 | ------------------------- | ----------------------------------------------------------- |
-| `memory-system`           | Persistent cross-session memory with MEMORY.md index        |
 | `verify-changes`          | Prove code works by running it, not just inspecting         |
 | `batch-operations`        | Multi-file pattern-based modifications                      |
 | `simplify-code`           | Reduce over-engineered complexity                           |
@@ -164,7 +163,6 @@ Slash command procedures. Invoke with `/command`.
 | `/orchestrate`   | Multi-agent coordination                       |
 | `/plan`          | Task breakdown                                 |
 | `/preview`       | Preview changes                                |
-| `/remember`      | **NEW** Save to persistent memory              |
 | `/status`        | Check project status                           |
 | `/test`          | Run tests                                      |
 | `/ui-ux-pro-max` | Design with 50 styles                          |
@@ -260,8 +258,8 @@ The current template ships the runtime scripts directly under `.agents/scripts/`
 | Metric              | Value                             |
 | ------------------- | --------------------------------- |
 | **Total Agents**    | 15                                |
-| **Total Skills**    | 35                                |
-| **Total Workflows** | 14                                |
+| **Total Skills**    | 34                                |
+| **Total Workflows** | 13                                |
 | **Total Scripts**   | 4 master + 12 skill-level script directories |
 
 ---
