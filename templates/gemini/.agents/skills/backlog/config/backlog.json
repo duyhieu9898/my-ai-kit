@@ -1,6 +1,6 @@
 {
   "base_url": "https://bapjp.backlog.com",
-  "default_project_key": "VTO",
+  "default_project_key": "",
   "users": {
     "me": {
       "id": 778617,
@@ -17,8 +17,5 @@
     "assignee": "me",
     "priority_id": 3
   },
-  "source_paths": {
-    "AQM": "/home/hieund/Documents/OSAKA/POC",
-    "VTO": "/home/hieund/Documents/VTO/VTO-FE"
-  }
+  "source_paths": {}
 }

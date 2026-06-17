@@ -17,12 +17,14 @@ WORKFLOW = {
     "estimated_hours": 1,
     "actual_hours": 1,
     "due_in_days": 2,
-    "qc_activity": "Integration Test",
-    "cause_category": "Not Applicable",
-    "bug_origin": "FUN_Incomplete Function",
-    "impacted": "no",
-    "resolution": "fixed",
     "corrective_action": "fixed {description_lower}",
+    "custom_fields": {
+        "qc_activity": "Integration Test",
+        "cause_category": "Not Applicable",
+        "bug_origin": "FUN_Incomplete Function",
+        "impacted": "no",
+        "resolution": "fixed",
+    },
 }
 
 
@@ -58,6 +60,34 @@ class GuidanceTest(unittest.TestCase):
         self.assertEqual("bug_origin", result["field"])
         self.assertEqual("FUN_Incomplete Function", result["default"])
         self.assertIn("UI_Layout", result["options"])
+
+    def test_field_guidance_uses_project_override_defaults(self):
+        workflow = {
+            **WORKFLOW,
+            "custom_fields": {},
+            "project_overrides": {
+                "VTO": {
+                    "custom_fields": {
+                        "bug_origin": "FUN_Wrong Business Logic",
+                        "bug_category": "Not Applicable",
+                    },
+                },
+            },
+        }
+        config = {"default_project_key": "", "projects": ["VTO"]}
+
+        with mock.patch.object(guidance, "load_workflow_config", return_value=workflow):
+            result = guidance.field_guidance("bug_origin", config, "VTO")
+            cause = guidance.field_guidance("cause_category", config, "VTO")
+
+        self.assertEqual("FUN_Wrong Business Logic", result["default"])
+        self.assertEqual("Not Applicable", cause["default"])
+
+    def test_field_guidance_requires_project_when_config_has_no_default(self):
+        config = {"default_project_key": "", "projects": ["VTO"]}
+
+        with self.assertRaisesRegex(ValueError, "Pass --project KEY"):
+            guidance.field_guidance("bug_origin", config)
 
     def test_field_guidance_rejects_unknown_field(self):
         with self.assertRaises(ValueError):

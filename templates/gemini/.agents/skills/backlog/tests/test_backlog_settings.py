@@ -57,6 +57,18 @@ class BacklogSettingsTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Unknown Backlog project"):
             backlog_settings.resolve_project_key(config, "NOPE")
 
+    def test_empty_default_project_is_allowed_but_requires_explicit_project(self):
+        config = {
+            "base_url": "https://example.backlog.com",
+            "default_project_key": "",
+            "projects": ["AQM", "OOP"],
+        }
+
+        backlog_settings.validate_config(config)
+        self.assertEqual("OOP", backlog_settings.resolve_project_key(config, "OOP"))
+        with self.assertRaisesRegex(ValueError, "Pass --project KEY"):
+            backlog_settings.resolve_project_key(config)
+
     def test_log_event_writes_timestamped_redacted_shape_without_newline_leak(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
             old_log_dir = backlog_settings.LOG_DIR

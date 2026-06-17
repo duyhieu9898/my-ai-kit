@@ -57,12 +57,14 @@ RESOLVE_WORKFLOW = {
     "estimated_hours": 1,
     "actual_hours": 1,
     "due_in_days": 2,
-    "qc_activity": "Integration Test",
-    "cause_category": "Not Applicable",
-    "bug_origin": "FUN_Incomplete Function",
-    "impacted": "no",
-    "resolution": "fixed",
     "corrective_action": "fixed {description_lower}",
+    "custom_fields": {
+        "qc_activity": "Integration Test",
+        "cause_category": "Not Applicable",
+        "bug_origin": "FUN_Incomplete Function",
+        "impacted": "no",
+        "resolution": "fixed",
+    },
 }
 
 UT_WORKFLOW = {
@@ -106,6 +108,8 @@ class WorkflowAuditTest(unittest.TestCase):
             "story_task_overview": STORY_WORKFLOW,
         }
         mock.patch.object(audit, "load_workflow_config", side_effect=workflows.get).start()
+        from workflows import resolve_bug
+        mock.patch.object(resolve_bug, "load_workflow_config", return_value=RESOLVE_WORKFLOW).start()
         mock.patch.object(audit, "load_project_catalog", return_value=PROJECT).start()
         mock.patch.object(audit, "project_keys", return_value=["AQM"]).start()
         mock.patch.object(audit, "merge_bug_defaults", return_value=UT_WORKFLOW).start()

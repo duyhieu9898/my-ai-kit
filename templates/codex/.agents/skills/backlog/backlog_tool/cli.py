@@ -134,9 +134,11 @@ def build_parser():
     g.add_argument("description")
     add_apply(g)
 
-    bug.add_parser("rules", help="Print the personal resolve-bug rule")
+    g = bug.add_parser("rules", help="Print the personal resolve-bug rule")
+    add_project(g)
 
     g = bug.add_parser("fields", help="Print field guidance")
+    add_project(g)
     g.add_argument("field", nargs="?")
 
     # config ---------------------------------------------------------------
@@ -241,9 +243,9 @@ def run_handler(config, args):
         if action == "context":
             return get_bug_context(config, args.issue_key)
         if action == "rules":
-            return resolve_rules()
+            return resolve_rules(config, args.project)
         if action == "fields":
-            return field_guidance(args.field)
+            return field_guidance(args.field, config, args.project)
         if action == "resolve":
             return resolve_bug(
                 config, args.issue_key, dry_run=not args.apply,
@@ -274,7 +276,7 @@ def run_config(config, args):
     if args.action == "list-projects":
         return config_projects(config)
     if args.action == "current":
-        return {"defaultProjectKey": config["default_project_key"]}
+        return {"defaultProjectKey": config.get("default_project_key", "")}
     if args.action == "show":
         return config
     if args.action == "audit-workflows":
@@ -291,7 +293,7 @@ def run_config(config, args):
 
 
 def config_projects(config):
-    default_key = config["default_project_key"]
+    default_key = config.get("default_project_key")
     rows = []
     for key in project_keys(config):
         try:

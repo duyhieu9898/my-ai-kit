@@ -85,7 +85,7 @@ class WorkflowConfigContractTest(unittest.TestCase):
                 self.assertIsNotNone(find_option(issue_type_options(project), resolve_workflow["issue_type"], "issue type"))
                 self.assertIsNotNone(find_option(status_options(project), resolve_workflow["status"], "status"))
                 fields = project.get("bug", {}).get("custom_fields", {})
-                
+
                 selections = {
                     "qc_activity": custom_fields["qc_activity"],
                     "bug_origin": custom_fields["bug_origin"],

@@ -6,7 +6,8 @@ This replaces long prose docs: the agent runs `backlog.py bug rules` or
 reading multiple markdown files into context.
 """
 
-from backlog_tool.settings import load_workflow_config
+from backlog_tool.settings import load_workflow_config, resolve_project_key
+from .resolve_bug import merge_resolve_defaults
 from .resolve_policy import (
     GUIDED_FIELDS,
     WORKFLOW_MANAGED_FIELDS,
@@ -14,9 +15,21 @@ from .resolve_policy import (
 )
 
 
-def resolve_rules():
+def guidance_workflow(config=None, project_key=None):
+    if not config:
+        return load_workflow_config("resolve_bug")
+    return merge_resolve_defaults(config, resolve_project_key(config, project_key))
+
+
+def custom_default(custom_fields, field_key):
+    if field_key == "cause_category":
+        return custom_fields.get("cause_category") or custom_fields.get("bug_category")
+    return custom_fields.get(field_key)
+
+
+def resolve_rules(config=None, project_key=None):
     """Return the same policy consumed by the resolve execution workflow."""
-    workflow = load_workflow_config("resolve_bug")
+    workflow = guidance_workflow(config, project_key)
     rules = resolve_rules_from_config(workflow)
     rules["fieldGuidance"] = {
         "supported": list(GUIDED_FIELDS),
@@ -84,11 +97,12 @@ FIELD_GUIDANCE = {
 }
 
 
-def field_guidance(field=None):
-    workflow = load_workflow_config("resolve_bug")
+def field_guidance(field=None, config=None, project_key=None):
+    workflow = guidance_workflow(config, project_key)
     custom_fields = workflow.get("custom_fields", {})
+
     def get_val(key):
-        return custom_fields.get(key)
+        return custom_default(custom_fields, key)
 
     if field is None:
         return {

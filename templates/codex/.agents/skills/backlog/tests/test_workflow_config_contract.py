@@ -75,26 +75,31 @@ class WorkflowConfigContractTest(unittest.TestCase):
                 self.assertTrue(payload)
 
     def test_resolve_bug_workflow_labels_resolve_for_each_project(self):
-        workflow = load_workflow_config("resolve_bug")
-        selections = {
-            "qc_activity": workflow["qc_activity"],
-            "cause_category": workflow["cause_category"],
-            "bug_origin": workflow["bug_origin"],
-            "impacted": workflow["impacted"],
-            "corrective_action": "fixed contract test",
-        }
-
         for project_key in self.config["projects"]:
             with self.subTest(project=project_key):
-                project = load_project_catalog(project_key)
-                self.assertIsNotNone(find_option(issue_type_options(project), workflow["issue_type"], "issue type"))
-                self.assertIsNotNone(find_option(status_options(project), workflow["status"], "status"))
-                fields = project.get("bug", {}).get("custom_fields", {})
-                project_selections = dict(selections)
-                if "resolution" in fields:
-                    project_selections["resolution"] = workflow["resolution"]
+                from workflows.resolve_bug import merge_resolve_defaults
+                resolve_workflow = merge_resolve_defaults(self.config, project_key)
+                custom_fields = resolve_workflow.get("custom_fields", {})
 
-                payload = resolve_custom_field_defaults(project, project_selections)
+                project = load_project_catalog(project_key)
+                self.assertIsNotNone(find_option(issue_type_options(project), resolve_workflow["issue_type"], "issue type"))
+                self.assertIsNotNone(find_option(status_options(project), resolve_workflow["status"], "status"))
+                fields = project.get("bug", {}).get("custom_fields", {})
+
+                selections = {
+                    "qc_activity": custom_fields["qc_activity"],
+                    "bug_origin": custom_fields["bug_origin"],
+                    "impacted": custom_fields["impacted"],
+                    "corrective_action": "fixed contract test",
+                }
+
+                cause_key = "bug_category" if "bug_category" in fields else "cause_category"
+                selections[cause_key] = custom_fields[cause_key]
+
+                if "resolution" in fields:
+                    selections["resolution"] = custom_fields.get("resolution")
+
+                payload = resolve_custom_field_defaults(project, selections)
                 self.assertTrue(payload)
 
     def test_resolve_policy_field_groups_are_consistent(self):

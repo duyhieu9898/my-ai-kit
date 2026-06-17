@@ -13,6 +13,7 @@
 - Run `config audit-workflows` after changing workflow config, policy,
   guidance, output fields, or project catalogs.
 - Refresh the project catalog before guessing a missing status, category, user, or custom-field option.
+- Treat custom field values like `"Update Please"` (case-insensitive placeholder) as empty/unfilled when checking if a field is set.
 - Run every mutation as a dry run first.
 - Use the current local date for start-date rules.
 - Set due date to start date plus two days where the workflow requires it.

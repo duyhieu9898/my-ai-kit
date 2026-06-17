@@ -1,6 +1,6 @@
 {
   "base_url": "https://bapjp.backlog.com",
-  "default_project_key": "AQM",
+  "default_project_key": "",
   "users": {
     "me": {
       "id": 778617,
@@ -10,13 +10,12 @@
   },
   "projects": [
     "OOP",
-    "AQM"
+    "AQM",
+    "VTO"
   ],
   "defaults": {
     "assignee": "me",
     "priority_id": 3
   },
-  "source_paths": {
-    "AQM": "/home/hieund/Documents/OSAKA/POC"
-  }
+  "source_paths": {}
 }

@@ -54,12 +54,11 @@ def save_config(config):
 def validate_config(config):
     if not config.get("base_url"):
         raise ValueError("Missing config.base_url")
-    if not config.get("default_project_key"):
-        raise ValueError("Missing config.default_project_key")
     if not isinstance(config.get("projects"), list) or not config["projects"]:
         raise ValueError("Missing config.projects list")
     project_keys = set(config["projects"])
-    if config["default_project_key"] not in project_keys:
+    default_project_key = config.get("default_project_key")
+    if default_project_key and default_project_key not in project_keys:
         raise ValueError("default_project_key must exist in projects")
 
 
@@ -102,7 +101,9 @@ def project_keys(config):
 
 
 def resolve_project_key(config, project_key=None):
-    key = project_key or config["default_project_key"]
+    key = project_key or config.get("default_project_key")
+    if not key:
+        raise ValueError("Missing Backlog project. Pass --project KEY or set config.default_project_key.")
     if key not in project_keys(config):
         keys = ", ".join(sorted(project_keys(config)))
         raise ValueError(f"Unknown Backlog project '{key}'. Available projects: {keys}")

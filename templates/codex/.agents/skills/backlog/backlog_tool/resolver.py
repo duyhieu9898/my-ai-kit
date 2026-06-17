@@ -12,6 +12,10 @@ def find_option(options, selected, label):
     for option in options:
         if option.get("name") == selected:
             return option.get("id")
+    # Case-insensitive fallback
+    for option in options:
+        if str(option.get("name")).lower() == selected_text.lower():
+            return option.get("id")
     available = ", ".join(str(option.get("name")) for option in options)
     raise ValueError(f"Unknown {label} '{selected}'. Available: {available}")
 
@@ -73,7 +77,8 @@ def resolve_custom_field_value(field_config, selected_value):
 def resolve_custom_fields(project, custom_args):
     payload = {}
     fields = project.get("bug", {}).get("custom_fields", {})
-    for key, selected in parse_custom_args(custom_args).items():
+    parsed = parse_custom_args(custom_args)
+    for key, selected in parsed.items():
         field = fields.get(key)
         if not field:
             available = ", ".join(sorted(fields.keys()))

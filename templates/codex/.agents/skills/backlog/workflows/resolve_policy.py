@@ -31,6 +31,9 @@ def resolve_rules_from_config(workflow):
     due_in_days = require_int(workflow, "due_in_days", WORKFLOW_NAME)
     excluded_statuses = require_list(workflow, "excluded_statuses", WORKFLOW_NAME)
 
+    custom_fields = workflow.get("custom_fields", {})
+    cause_key = "bug_category" if "bug_category" in custom_fields else "cause_category"
+
     return {
         "appliesTo": {
             "issueType": issue_type,
@@ -49,11 +52,11 @@ def resolve_rules_from_config(workflow):
         "onlyWhenEmpty": list(ONLY_WHEN_EMPTY_FIELDS),
         "doNotChange": list(PRESERVED_FIELDS),
         "defaults": {
-            "qc_activity": require_value(workflow, "qc_activity", WORKFLOW_NAME),
-            "cause_category": require_value(workflow, "cause_category", WORKFLOW_NAME),
-            "bug_origin": require_value(workflow, "bug_origin", WORKFLOW_NAME),
-            "impacted": require_value(workflow, "impacted", WORKFLOW_NAME),
-            "resolution": require_value(workflow, "resolution", WORKFLOW_NAME),
+            "qc_activity": custom_fields.get("qc_activity"),
+            "cause_category": custom_fields.get(cause_key) or custom_fields.get("cause_category"),
+            "bug_origin": custom_fields.get("bug_origin"),
+            "impacted": custom_fields.get("impacted"),
+            "resolution": custom_fields.get("resolution"),
             "corrective_action": require_value(workflow, "corrective_action", WORKFLOW_NAME),
         },
         "overrides": dict(OVERRIDES),

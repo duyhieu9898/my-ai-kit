@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 import re
+from copy import deepcopy
 from datetime import date
 
 from .bug_template import bug_context
 from backlog_tool.client import BacklogClient
 from backlog_tool.resolver import resolve_custom_field_defaults, resolve_status
 from backlog_tool.settings import load_workflow_config, log_event, resolve_project, resolve_user_id
-from .config import require_int, require_list, require_value
+from .config import require_int, require_list, require_value, require_mapping
 from .resolve_policy import (
     ALWAYS_OVERWRITE_FIELDS,
     ASSIGNMENT_SOURCE,
@@ -46,8 +47,21 @@ def is_open_bug_for_user(issue, assignee_id, issue_type, excluded_statuses):
     return user_id(issue.get("assignee")) == assignee_id
 
 
-def my_open_bugs(config, project_key=None, query=None):
+def merge_resolve_defaults(config, project_key):
     workflow = load_workflow_config("resolve_bug")
+    merged = {key: deepcopy(value) for key, value in workflow.items() if key != "project_overrides"}
+    override = workflow.get("project_overrides", {}).get(project_key, {})
+    merged.update(override)
+    merged["custom_fields"] = {
+        **workflow.get("custom_fields", {}),
+        **override.get("custom_fields", {}),
+    }
+    return merged
+
+
+def my_open_bugs(config, project_key=None, query=None):
+    project_key = project_key or config.get("default_project_key")
+    workflow = merge_resolve_defaults(config, project_key)
     project = resolve_project(config, project_key)
     assignee_id = resolve_user_id(config, require_value(workflow, "assignee", "resolve_bug"))
     issue_type = require_value(workflow, "issue_type", "resolve_bug")
@@ -63,7 +77,8 @@ def my_open_bugs(config, project_key=None, query=None):
 
 def my_open_bugs_raw(config, project_key=None, query=None):
     """Like my_open_bugs but returns raw API issues (for compact_issue presenter)."""
-    workflow = load_workflow_config("resolve_bug")
+    project_key = project_key or config.get("default_project_key")
+    workflow = merge_resolve_defaults(config, project_key)
     project = resolve_project(config, project_key)
     assignee_id = resolve_user_id(config, require_value(workflow, "assignee", "resolve_bug"))
     issue_type = require_value(workflow, "issue_type", "resolve_bug")
@@ -89,10 +104,15 @@ def created_user_ref(issue):
     return int(created_user_id)
 
 
+IGNORE_VALUES = ["update please"]
+
+
 def has_value(value):
     if value is None:
         return False
     if value == "":
+        return False
+    if isinstance(value, str) and value.strip().lower() in IGNORE_VALUES:
         return False
     if isinstance(value, (list, tuple, dict)) and not value:
         return False
@@ -199,10 +219,10 @@ def build_resolve_bug_payload(
     fix_description=None,
     today=None,
 ):
-    workflow = load_workflow_config("resolve_bug")
+    project_key = issue_key.split("-")[0]
+    workflow = merge_resolve_defaults(config, project_key)
     client = BacklogClient(config)
     issue = client.get_issue(issue_key)
-    project_key = (issue.get("project") or {}).get("projectKey") or config.get("default_project_key")
     project = resolve_project(config, project_key)
     start_date = today or date.today()
     today_text = start_date.strftime("%Y-%m-%d")
@@ -213,12 +233,24 @@ def build_resolve_bug_payload(
         fallback_date=start_date,
     ).strftime("%Y-%m-%d")
     status = status or require_value(workflow, "status", WORKFLOW_NAME)
+    custom_defaults = require_mapping(workflow, "custom_fields", WORKFLOW_NAME)
+
+    cause_key = "bug_category" if "bug_category" in project.get("bug", {}).get("custom_fields", {}) else "cause_category"
+
+    def get_custom_val(key, required=True):
+        val = custom_defaults.get(key)
+        if required and not val:
+            if key in OPTIONAL_FIELDS:
+                return None
+            raise ValueError(f"Missing required custom field '{key}' in workflow.custom_fields configuration.")
+        return val
+
     field_values = {
-        "qc_activity": qc_activity or require_value(workflow, "qc_activity", WORKFLOW_NAME),
-        "cause_category": cause_category or require_value(workflow, "cause_category", WORKFLOW_NAME),
-        "bug_origin": bug_origin or require_value(workflow, "bug_origin", WORKFLOW_NAME),
-        "impacted": impacted or require_value(workflow, "impacted", WORKFLOW_NAME),
-        "resolution": resolution or require_value(workflow, "resolution", WORKFLOW_NAME),
+        "qc_activity": qc_activity or get_custom_val("qc_activity"),
+        cause_key: cause_category or get_custom_val(cause_key),
+        "bug_origin": bug_origin or get_custom_val("bug_origin"),
+        "impacted": impacted or get_custom_val("impacted"),
+        "resolution": resolution or get_custom_val("resolution", required=False),
         "corrective_action": render_corrective_action(
             workflow,
             corrective_action_source(issue, issue_key, fix_description),
@@ -258,16 +290,23 @@ def build_resolve_bug_payload(
     if comment:
         payload["comment"] = comment
 
-    for field_key in ONLY_WHEN_EMPTY_FIELDS:
+    def get_project_field_key(key):
+        if key == "cause_category":
+            return cause_key
+        return key
+
+    for policy_key in ONLY_WHEN_EMPTY_FIELDS:
+        field_key = get_project_field_key(policy_key)
         add_custom_default_if_missing(
             payload,
             issue,
             project,
             field_key,
             field_values[field_key],
-            optional=field_key in OPTIONAL_FIELDS,
+            optional=policy_key in OPTIONAL_FIELDS,
         )
-    for field_key in ALWAYS_OVERWRITE_FIELDS:
+    for policy_key in ALWAYS_OVERWRITE_FIELDS:
+        field_key = get_project_field_key(policy_key)
         add_custom_value(payload, project, field_key, field_values[field_key])
     warnings = []
     if not fix_description:
