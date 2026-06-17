@@ -14,6 +14,7 @@ from .resolve_policy import (
     GUIDED_FIELDS,
     ONLY_WHEN_EMPTY_FIELDS,
     WORKFLOW_MANAGED_FIELDS,
+    OPTIONAL_FIELDS,
 )
 from .ut_bug import merge_bug_defaults
 
@@ -27,12 +28,8 @@ REQUIRED_KEYS = {
         "estimated_hours",
         "actual_hours",
         "due_in_days",
-        "qc_activity",
-        "cause_category",
-        "bug_origin",
-        "impacted",
-        "resolution",
         "corrective_action",
+        "custom_fields",
     },
     "story_task_overview": {
         "issue_types",
@@ -81,25 +78,20 @@ def audit_workflows(config):
         for name in REQUIRED_KEYS
     }
 
-    for name, required_keys in REQUIRED_KEYS.items():
-        missing = sorted(required_keys - set(workflows[name]))
-        checks.append(f"{name}: required keys")
-        if missing:
-            errors.append(f"{name} missing required keys: {', '.join(missing)}")
+    # Check story_task_overview required keys at root (no project_overrides support)
+    story_keys = REQUIRED_KEYS["story_task_overview"]
+    missing = sorted(story_keys - set(workflows["story_task_overview"]))
+    checks.append("story_task_overview: required keys")
+    if missing:
+        errors.append(f"story_task_overview missing required keys: {', '.join(missing)}")
 
-    resolve_workflow = workflows["resolve_bug"]
+    # Policy field groups checks
     field_groups = set(ALWAYS_OVERWRITE_FIELDS) | set(ONLY_WHEN_EMPTY_FIELDS)
     checks.append("resolve_bug: policy field groups")
     if not set(GUIDED_FIELDS).issubset(ONLY_WHEN_EMPTY_FIELDS):
         errors.append("resolve_bug guided fields must be only-when-empty fields")
     if set(WORKFLOW_MANAGED_FIELDS) != set(ALWAYS_OVERWRITE_FIELDS) | {"resolution"}:
         errors.append("resolve_bug workflow-managed fields do not match execution policy")
-    missing_field_defaults = sorted(field_groups - set(resolve_workflow))
-    if missing_field_defaults:
-        errors.append(
-            "resolve_bug missing policy field defaults: "
-            + ", ".join(missing_field_defaults)
-        )
 
     for workflow_name in ("resolve_bug", "ut_bug"):
         workflow = workflows[workflow_name]
@@ -125,11 +117,22 @@ def audit_workflows(config):
         project = load_project_catalog(project_key)
         checks.append(f"{project_key}: resolve_bug catalog compatibility")
         try:
+            from workflows.resolve_bug import merge_resolve_defaults
+            resolve_workflow = merge_resolve_defaults(config, project_key)
+
+            # Check required keys for this project's resolve_bug
+            resolve_keys = set(REQUIRED_KEYS["resolve_bug"])
+            missing_keys = sorted(resolve_keys - set(resolve_workflow))
+            if missing_keys:
+                raise ValueError(f"missing required keys: {', '.join(missing_keys)}")
+
             project_fields = project.get("bug", {}).get("custom_fields", {})
             required_resolve_fields = (
                 set(ALWAYS_OVERWRITE_FIELDS)
                 | set(GUIDED_FIELDS)
             )
+            if "cause_category" in required_resolve_fields and "bug_category" in project_fields and "cause_category" not in project_fields:
+                required_resolve_fields = (required_resolve_fields - {"cause_category"}) | {"bug_category"}
             missing_resolve_fields = sorted(
                 required_resolve_fields - set(project_fields)
             )
@@ -138,6 +141,26 @@ def audit_workflows(config):
                     "missing required custom fields: "
                     + ", ".join(missing_resolve_fields)
                 )
+
+            # Check missing policy field defaults for this project
+            resolve_custom_fields = resolve_workflow.get("custom_fields", {})
+            resolve_all_fields = set(resolve_custom_fields) | set(resolve_workflow)
+            cause_key = "bug_category" if "bug_category" in project_fields else "cause_category"
+            project_field_groups = {
+                ("bug_category" if f == "cause_category" and cause_key == "bug_category" else f)
+                for f in field_groups
+            }
+            required_policy_fields = {
+                f for f in project_field_groups
+                if f in project_fields or f not in OPTIONAL_FIELDS
+            }
+            missing_field_defaults = sorted(required_policy_fields - resolve_all_fields)
+            if missing_field_defaults:
+                raise ValueError(
+                    "missing policy field defaults: "
+                    + ", ".join(missing_field_defaults)
+                )
+
             find_option(
                 issue_type_options(project),
                 resolve_workflow["issue_type"],
@@ -148,13 +171,14 @@ def audit_workflows(config):
                 resolve_workflow["status"],
                 "status",
             )
+            selections = {}
+            for field_key in project_field_groups:
+                if field_key == "resolution" and field_key not in project_fields:
+                    continue
+                selections[field_key] = resolve_custom_fields.get(field_key)
             resolve_custom_field_defaults(
                 project,
-                {
-                    field_key: resolve_workflow[field_key]
-                    for field_key in field_groups
-                    if field_key != "resolution" or field_key in project_fields
-                },
+                selections,
             )
         except ValueError as error:
             errors.append(f"{project_key} resolve_bug: {error}")
@@ -162,6 +186,13 @@ def audit_workflows(config):
         checks.append(f"{project_key}: ut_bug catalog compatibility")
         try:
             ut_defaults = merge_bug_defaults(config, project_key)
+
+            # Check required keys for this project's ut_bug
+            ut_keys = set(REQUIRED_KEYS["ut_bug"])
+            missing_keys = sorted(ut_keys - set(ut_defaults))
+            if missing_keys:
+                raise ValueError(f"missing required keys: {', '.join(missing_keys)}")
+
             find_option(
                 issue_type_options(project),
                 ut_defaults["issue_type"],

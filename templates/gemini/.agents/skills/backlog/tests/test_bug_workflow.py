@@ -119,12 +119,14 @@ class BugWorkflowTest(unittest.TestCase):
                 "estimated_hours": 1,
                 "actual_hours": 1,
                 "due_in_days": 2,
-                "qc_activity": "Integration Test",
-                "cause_category": "Not Applicable",
-                "bug_origin": "FUN_Incomplete Function",
-                "impacted": "no",
-                "resolution": "fixed",
                 "corrective_action": "fixed {description_lower}",
+                "custom_fields": {
+                    "qc_activity": "Integration Test",
+                    "cause_category": "Not Applicable",
+                    "bug_origin": "FUN_Incomplete Function",
+                    "impacted": "no",
+                    "resolution": "fixed",
+                },
             },
         ).start()
         mock.patch.object(bug_workflow, "BacklogClient", return_value=self.client).start()

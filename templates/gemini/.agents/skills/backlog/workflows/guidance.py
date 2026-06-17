@@ -86,11 +86,15 @@ FIELD_GUIDANCE = {
 
 def field_guidance(field=None):
     workflow = load_workflow_config("resolve_bug")
+    custom_fields = workflow.get("custom_fields", {})
+    def get_val(key):
+        return custom_fields.get(key)
+
     if field is None:
         return {
             "fields": list(GUIDED_FIELDS),
             "defaults": {
-                field_key: workflow[field_key]
+                field_key: get_val(field_key)
                 for field_key in GUIDED_FIELDS
             },
             "workflowManagedFields": list(WORKFLOW_MANAGED_FIELDS),
@@ -102,5 +106,5 @@ def field_guidance(field=None):
     return {
         "field": field,
         **FIELD_GUIDANCE[field],
-        "default": workflow[field],
+        "default": get_val(field),
     }
