@@ -20,8 +20,7 @@
 - Preserve its agents, skills, workflows, scripts, and shared assets.
 - The current template ships 15 agent files, 34 skill directories, 11 workflow
   files, and four top-level runtime scripts.
-- The `rules/` directory exists as a placeholder in the template and currently
-  contains no rule files.
+
 
 ## Shared Rules
 

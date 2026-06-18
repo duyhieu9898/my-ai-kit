@@ -209,11 +209,7 @@ record(
   codexOpenAiCount === codexSkillCount,
   `openai.yaml=${codexOpenAiCount}, skills=${codexSkillCount}`,
 );
-record(
-  "Gemini rules placeholder is empty",
-  immediateFiles("templates/gemini/.agents/rules").length === 0,
-  "docs/product/toolkits.md describes rules/ as an empty placeholder",
-);
+
 
 checkSkillFrontmatter("codex", "templates/codex/.agents/skills", true);
 checkSkillFrontmatter("gemini", "templates/gemini/.agents/skills", false);

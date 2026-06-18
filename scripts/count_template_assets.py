@@ -71,7 +71,6 @@ def main():
         'agents': count_items(os.path.join(gemini_base, "agents"), 'file'),
         'skills': count_items(os.path.join(gemini_base, "skills"), 'dir'),
         'workflows': count_items(os.path.join(gemini_base, "workflows"), 'file'),
-        'rules': count_items(os.path.join(gemini_base, "rules")),
         'scripts': count_items(os.path.join(gemini_base, "scripts"), 'file')
     }
     
@@ -80,7 +79,7 @@ def main():
     print_result("Gemini", "Agents", gemini_actual['agents'], gemini_doc.get('agents'))
     print_result("Gemini", "Skills", gemini_actual['skills'], gemini_doc.get('skills'))
     print_result("Gemini", "Workflows", gemini_actual['workflows'], gemini_doc.get('workflows'))
-    print_result("Gemini", "Rules", gemini_actual['rules'], None)
+
     print_result("Gemini", "Scripts", gemini_actual['scripts'], gemini_doc.get('scripts'))
     
     print("|" + "-" * 10 + "|" + "-" * 14 + "|" + "-" * 12 + "|" + "-" * 14 + "|" + "-" * 12 + "|")
@@ -93,7 +92,6 @@ def main():
         'agents': count_items(os.path.join(codex_base, "agents"), 'file'),
         'skills': count_items(os.path.join(codex_base, "skills"), 'dir'),
         'workflows': count_items(os.path.join(codex_base, "workflows"), 'file'),
-        'rules': count_items(os.path.join(codex_base, "rules")),
         'scripts': count_items(os.path.join(codex_base, "scripts"), 'file')
     }
     
@@ -102,7 +100,7 @@ def main():
     print_result("Codex", "Agents", codex_actual['agents'], None)
     print_result("Codex", "Skills", codex_actual['skills'], codex_doc.get('skills'))
     print_result("Codex", "Workflows", codex_actual['workflows'], None)
-    print_result("Codex", "Rules", codex_actual['rules'], None)
+
     print_result("Codex", "Scripts", codex_actual['scripts'], codex_doc.get('scripts'))
     
     print("=" * 60)

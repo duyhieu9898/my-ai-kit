@@ -128,7 +128,6 @@ templates/
         ├── .kit-target      # Marker, nội dung: "gemini"
         ├── ARCHITECTURE.md
         ├── agents/
-        ├── rules/
         ├── scripts/
         ├── skills/
         └── workflows/

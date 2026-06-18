@@ -22,7 +22,6 @@ AG Kit is a modular system consisting of:
 ├── agents/                  # 15 Specialist Agents
 ├── skills/                  # 34 Skills (with conditional loading)
 ├── workflows/               # 11 Slash Commands
-├── rules/                   # Placeholder for target-specific rule files
 └── scripts/                 # Master Validation Scripts
 ```
 
