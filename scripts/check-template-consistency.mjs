@@ -152,6 +152,8 @@ const codexOpenAiCount = immediateDirectories("templates/codex/.agents/skills").
 const geminiSkillCount = immediateDirectories("templates/gemini/.agents/skills").length;
 const geminiAgentCount = immediateFiles("templates/gemini/.agents/agents", ".md").length;
 const geminiWorkflowCount = immediateFiles("templates/gemini/.agents/workflows", ".md").length;
+const codexUxAuditConfigPath = "templates/codex/.agents/ux_audit.json";
+const geminiUxAuditConfigPath = "templates/gemini/.agents/ux_audit.json";
 
 const docsCodexSkillCount = requireMatch(
   toolkitDocs,
@@ -209,6 +211,20 @@ record(
   codexOpenAiCount === codexSkillCount,
   `openai.yaml=${codexOpenAiCount}, skills=${codexSkillCount}`,
 );
+record(
+  "Codex and Gemini UX audit configs both exist",
+  exists(codexUxAuditConfigPath) && exists(geminiUxAuditConfigPath),
+  `${codexUxAuditConfigPath}, ${geminiUxAuditConfigPath}`,
+);
+if (exists(codexUxAuditConfigPath) && exists(geminiUxAuditConfigPath)) {
+  const codexUxAuditConfig = JSON.parse(readText(codexUxAuditConfigPath));
+  const geminiUxAuditConfig = JSON.parse(readText(geminiUxAuditConfigPath));
+  record(
+    "Codex and Gemini UX audit configs match",
+    JSON.stringify(codexUxAuditConfig) === JSON.stringify(geminiUxAuditConfig),
+    `${codexUxAuditConfigPath}, ${geminiUxAuditConfigPath}`,
+  );
+}
 
 
 checkSkillFrontmatter("codex", "templates/codex/.agents/skills", true);

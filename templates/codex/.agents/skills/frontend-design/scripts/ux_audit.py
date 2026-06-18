@@ -96,41 +96,67 @@ import json
 from pathlib import Path
 
 class UXAuditor:
-    def __init__(self):
+    def __init__(self, project_root: Path | None = None):
         self.issues = []
         self.warnings = []
         self.passed_count = 0
         self.files_checked = 0
-    
+        self.project_root = (project_root or Path.cwd()).resolve()
+        self.config = {
+            "banned_colors": [],
+            "max_nav_items": 7,
+            "max_font_families": 3
+        }
+        self.load_config()
+
+    def load_config(self) -> None:
+        paths = [
+            self.project_root / '.agents' / 'ux_audit.json',
+            self.project_root / 'ux_audit.json',
+        ]
+        for p in paths:
+            if p.exists():
+                try:
+                    with open(p, 'r', encoding='utf-8') as f:
+                        user_config = json.load(f)
+                    if not isinstance(user_config, dict):
+                        raise ValueError("configuration root must be an object")
+                    self.config.update(user_config)
+                except (OSError, json.JSONDecodeError, ValueError) as exc:
+                    self.warnings.append(f"[Config] Could not load {p}: {exc}")
+                break
+
     def audit_file(self, filepath: str) -> None:
         try:
             with open(filepath, 'r', encoding='utf-8', errors='replace') as f:
                 content = f.read()
         except: return
-        
+
         self.files_checked += 1
         filename = os.path.basename(filepath)
 
         # Pre-calculate common flags
         has_long_text = bool(re.search(r'<p|<div.*class=.*text|article|<span.*text', content, re.IGNORECASE))
-        has_form = bool(re.search(r'<form|<input|password|credit|card|payment', content, re.IGNORECASE))
+        is_css_file = filepath.endswith('.css') or filepath.endswith('.scss')
+        has_form = bool(re.search(r'<form[\s>]|<input[\s>]|<textarea[\s>]|<select[\s>]', content, re.IGNORECASE)) if not is_css_file else False
         complex_elements = len(re.findall(r'<input|<select|<textarea|<option', content, re.IGNORECASE))
 
         # --- 1. PSYCHOLOGY LAWS ---
         # Hick's Law
         nav_items = len(re.findall(r'<NavLink|<Link|<a\s+href|nav-item', content, re.IGNORECASE))
-        if nav_items > 7:
-            self.issues.append(f"[Hick's Law] {filename}: {nav_items} nav items (Max 7)")
-        
+        max_nav = self.config.get("max_nav_items", 7)
+        if nav_items > max_nav:
+            self.warnings.append(f"[Hick's Law] {filename}: {nav_items} nav items (Max {max_nav})")
+
         # Fitts' Law
         if re.search(r'height:\s*([0-3]\d)px', content) or re.search(r'h-[1-9]\b|h-10\b', content):
             self.warnings.append(f"[Fitts' Law] {filename}: Small targets (< 44px)")
-        
+
         # Miller's Law
         form_fields = len(re.findall(r'<input|<select|<textarea', content, re.IGNORECASE))
         if form_fields > 7 and not re.search(r'step|wizard|stage', content, re.IGNORECASE):
             self.warnings.append(f"[Miller's Law] {filename}: Complex form ({form_fields} fields)")
-            
+
         # Von Restorff
         if 'button' in content.lower() and not re.search(r'primary|bg-primary|Button.*primary|variant=["\']primary', content, re.IGNORECASE):
             self.warnings.append(f"[Von Restorff] {filename}: No primary CTA")
@@ -211,7 +237,7 @@ class UXAuditor:
         if has_form:
             has_standard_labels = bool(re.search(r'<label|placeholder|aria-label', content, re.IGNORECASE))
             if not has_standard_labels:
-                self.issues.append(f"[Cognitive Load] {filename}: Form inputs without labels. Use <label> for accessibility and clarity.")
+                self.warnings.append(f"[Cognitive Load] {filename}: Form inputs without labels. Use <label> for accessibility and clarity.")
 
         # --- 1.8 PERSUASIVE DESIGN (Ethical) ---
 
@@ -261,8 +287,9 @@ class UXAuditor:
             if first_font.lower() not in {'sans-serif', 'serif', 'monospace', 'cursive', 'fantasy', 'system-ui', 'inherit', 'arial', 'georgia', 'times new roman', 'courier new', 'verdana', 'helvetica', 'tahoma'}:
                 font_families.add(first_font.lower())
 
-        if len(font_families) > 3:
-            self.issues.append(f"[Typography] {filename}: {len(font_families)} font families detected. Limit to 2-3 for cohesion.")
+        max_fonts = self.config.get("max_font_families", 3)
+        if len(font_families) > max_fonts:
+            self.warnings.append(f"[Typography] {filename}: {len(font_families)} font families detected. Limit to 2-3 for cohesion.")
 
         # 2.2 Line Length - Character-based width
         if has_long_text and not re.search(r'max-w-(?:prose|[\[\\]?\d+ch[\]\\]?)|max-width:\s*\d+ch', content):
@@ -377,18 +404,18 @@ class UXAuditor:
                 self.warnings.append(f"[Typography] {filename}: Long content without subheadings. Add h2/h3 to break up text.")
 
         # --- 3. VISUAL EFFECTS (visual-effects.md) ---
-        
+
         # Glassmorphism Check
         if 'backdrop-filter' in content or 'blur(' in content:
             if not re.search(r'background:\s*rgba|bg-opacity|bg-[a-z0-9]+\/\d+', content):
                 self.warnings.append(f"[Visual] {filename}: Blur used without semi-transparent background (Glassmorphism fail)")
-        
+
         # GPU Acceleration / Performance
         if re.search(r'@keyframes|transition:', content):
             expensive_props = re.findall(r'width|height|top|left|right|bottom|margin|padding', content)
             if expensive_props:
                 self.warnings.append(f"[Performance] {filename}: Animating expensive properties ({', '.join(set(expensive_props))}). Use transform/opacity where possible.")
-            
+
             # Reduced Motion
             if not re.search(r'prefers-reduced-motion', content):
                 self.warnings.append(f"[Accessibility] {filename}: Animations found without prefers-reduced-motion check")
@@ -473,7 +500,7 @@ class UXAuditor:
             for prop in will_change_props:
                 prop = prop.strip().lower()
                 if prop in ['width', 'height', 'top', 'left', 'right', 'bottom', 'margin', 'padding']:
-                    self.issues.append(f"[Performance] {filename}: will-change on '{prop}' (layout property). Use only for transform/opacity.")
+                    self.warnings.append(f"[Performance] {filename}: will-change on '{prop}' (layout property). Use only for transform/opacity.")
 
         # Check for excessive will-change usage
         will_change_count = len(re.findall(r'will-change:', content))
@@ -497,14 +524,11 @@ class UXAuditor:
 
         # --- 4. COLOR SYSTEM (color-system.md) ---
 
-        # 4.1 PURPLE BAN - Critical check from color-system.md
-        purple_hexes = ['#8B5CF6', '#A855F7', '#9333EA', '#7C3AED', '#6D28D9',
-                        '#8B5CF6', '#A78BFA', '#C4B5FD', '#DDD6FE', '#EDE9FE',
-                        '#8b5cf6', '#a855f7', '#9333ea', '#7c3aed', '#6d28d9',
-                        'purple', 'violet', 'fuchsia', 'magenta', 'lavender']
-        for purple in purple_hexes:
-            if purple.lower() in content.lower():
-                self.issues.append(f"[Color] {filename}: PURPLE DETECTED ('{purple}'). Banned by Maestro rules. Use Teal/Cyan/Emerald instead.")
+        # 4.1 Banned colors check (customizable via configuration)
+        banned_colors = self.config.get("banned_colors", [])
+        for color in banned_colors:
+            if color.lower() in content.lower():
+                self.warnings.append(f"[Color] {filename}: Banned color detected ('{color}'). Please check project color schema guidelines.")
                 break
 
         # 4.2 60-30-10 Rule check
@@ -604,7 +628,7 @@ class UXAuditor:
         if has_scroll_anim:
             # Check if using expensive properties in scroll handlers
             if re.search(r'onScroll.*[^\w](width|height|top|left)', content):
-                self.issues.append(f"[Animation] {filename}: Scroll handler animating layout properties. Use transform/opacity for 60fps.")
+                self.warnings.append(f"[Animation] {filename}: Scroll handler animating layout properties. Use transform/opacity for 60fps.")
 
         # --- 6. MOTION GRAPHICS (motion-graphics.md) ---
 
@@ -622,7 +646,7 @@ class UXAuditor:
             # Check for cleanup patterns
             has_gsap_cleanup = bool(re.search(r'kill\(|revert\(|useEffect.*return.*gsap', content))
             if not has_gsap_cleanup:
-                self.issues.append(f"[Motion] {filename}: GSAP animation without cleanup (kill/revert). Memory leak risk on unmount.")
+                self.warnings.append(f"[Motion] {filename}: GSAP animation without cleanup (kill/revert). Memory leak risk on unmount.")
 
         # 6.3 SVG Animation Performance
         svg_animations = re.findall(r'<animate|<animateTransform|stroke-dasharray|stroke-dashoffset', content)
@@ -652,7 +676,7 @@ class UXAuditor:
             # Check for throttling/debouncing
             has_throttle = bool(re.search(r'throttle|debounce|requestAnimationFrame', content))
             if not has_throttle:
-                self.issues.append(f"[Motion] {filename}: Scroll-driven animation without throttling. Add requestAnimationFrame for 60fps.")
+                self.warnings.append(f"[Motion] {filename}: Scroll-driven animation without throttling. Add requestAnimationFrame for 60fps.")
 
         # 6.7 Motion Decision Tree - Context Check
         # Check if animation serves purpose (not just decoration)
@@ -669,10 +693,10 @@ class UXAuditor:
 
         # --- 7. ACCESSIBILITY ---
         if re.search(r'<img(?![^>]*alt=)[^>]*>', content):
-            self.issues.append(f"[Accessibility] {filename}: Missing img alt text")
+            self.warnings.append(f"[Accessibility] {filename}: Missing img alt text")
 
     def audit_directory(self, directory: str) -> None:
-        extensions = {'.tsx', '.jsx', '.html', '.vue', '.svelte', '.css'}
+        extensions = {'.tsx', '.jsx', '.html', '.vue', '.svelte', '.css', '.scss'}
         for root, dirs, files in os.walk(directory):
             dirs[:] = [d for d in dirs if d not in {'node_modules', '.git', 'dist', 'build', '.next'}]
             for file in files:
@@ -688,18 +712,35 @@ class UXAuditor:
             "compliant": len(self.issues) == 0
         }
 
+
+def find_project_root(path: Path) -> Path:
+    if path.is_dir():
+        return path
+
+    for candidate in (path.parent, *path.parents):
+        if (
+            (candidate / '.agents' / 'ux_audit.json').exists()
+            or (candidate / 'ux_audit.json').exists()
+        ):
+            return candidate
+    return path.parent
+
+
 def main():
     if len(sys.argv) < 2: sys.exit(1)
-    
-    path = sys.argv[1]
+
+    path = Path(sys.argv[1]).resolve()
     is_json = "--json" in sys.argv
-    
-    auditor = UXAuditor()
-    if os.path.isfile(path): auditor.audit_file(path)
-    else: auditor.audit_directory(path)
-    
+
+    project_root = find_project_root(path)
+    auditor = UXAuditor(project_root)
+    if path.is_file():
+        auditor.audit_file(str(path))
+    else:
+        auditor.audit_directory(str(path))
+
     report = auditor.get_report()
-    
+
     if is_json:
         print(json.dumps(report))
     else:
