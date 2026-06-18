@@ -13,6 +13,7 @@ const sharedRoot = path.join(repoRoot, "shared/runtime");
 const targets = ["codex", "gemini"];
 
 const sharedDirectories = [
+  ".agents/.shared",
   ".agents/skills/backlog/backlog_tool",
   ".agents/skills/backlog/config",
   ".agents/skills/backlog/references",

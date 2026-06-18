@@ -12,6 +12,28 @@ const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "shared-runtime-test-"));
 const syncScript = path.join(repoRoot, "scripts/sync-shared-runtime.mjs");
 const scriptExtensions = new Set([".py", ".js", ".mjs", ".sh"]);
 
+function listFiles(root) {
+  const files = [];
+
+  function walk(currentPath) {
+    for (const entry of fs.readdirSync(currentPath, { withFileTypes: true })) {
+      if (entry.name === "__pycache__" || entry.name.endsWith(".pyc")) {
+        continue;
+      }
+
+      const entryPath = path.join(currentPath, entry.name);
+      if (entry.isDirectory()) {
+        walk(entryPath);
+      } else if (entry.isFile()) {
+        files.push(path.relative(root, entryPath));
+      }
+    }
+  }
+
+  walk(root);
+  return files.sort();
+}
+
 function listExecutableScripts(root) {
   const scripts = [];
 
@@ -49,9 +71,29 @@ try {
   const codexScripts = listExecutableScripts(codexRoot);
   const geminiScripts = listExecutableScripts(geminiRoot);
   const sharedScripts = listExecutableScripts(sharedAgentsRoot);
+  const sharedResourcePaths = listFiles(path.join(sharedAgentsRoot, ".shared"));
 
   assert.deepEqual(codexScripts, geminiScripts);
   assert.deepEqual(sharedScripts, codexScripts);
+  assert.deepEqual(
+    sharedResourcePaths,
+    listFiles(path.join(codexRoot, ".shared")),
+  );
+  assert.deepEqual(
+    sharedResourcePaths,
+    listFiles(path.join(geminiRoot, ".shared")),
+  );
+  assert.ok(
+    fs.existsSync(
+      path.join(sharedAgentsRoot, "skills/backlog/.env.example"),
+    ),
+  );
+  assert.ok(
+    fs.existsSync(path.join(sharedAgentsRoot, "skills/backlog/.gitignore")),
+  );
+  assert.ok(
+    !fs.existsSync(path.join(sharedAgentsRoot, "skills/backlog/.env")),
+  );
   for (const relativePath of codexScripts) {
     assert.deepEqual(
       fs.readFileSync(path.join(codexRoot, relativePath)),

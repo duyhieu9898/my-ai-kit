@@ -25,11 +25,14 @@ trees.
 
 - All 41 executable script paths shared by Codex and Gemini are edited under
   `shared/runtime/` and synchronized to both templates.
+- The full `.shared` resource folder is canonical under `shared/runtime/` and
+  synchronized to both templates.
 - Shared Backlog runtime directories are canonical under `shared/runtime/`:
   `backlog_tool/`, `config/`, `references/`, `scripts/`, `tests/`, and
   `workflows/`.
 - Backlog `SKILL.md`, Codex `agents/openai.yaml`, `.env`, and `logs/` remain
-  target-specific and are not overwritten by synchronization.
+  target-specific and are not overwritten by synchronization. Backlog
+  `.env.example` and `.gitignore` are synchronized support files.
 - `npm run sync:shared-runtime` repairs target drift.
 - `npm run check:shared-runtime` fails on drift without writing files.
 - Installation remains a direct target-template mirror-copy.
@@ -59,8 +62,8 @@ source and drift check.
 ## Evidence
 
 - `npm run test:shared-runtime` introduced controlled Gemini drift, confirmed
-  check failure, repaired it, and preserved Gemini Backlog `SKILL.md` plus
-  Codex `agents/openai.yaml`.
+  check failure, repaired it, verified full `.shared` resource coverage, and
+  preserved Gemini Backlog `SKILL.md` plus Codex `agents/openai.yaml`.
 - `npm run check:shared-runtime` passed for all 41 shared executable scripts
   and six Backlog runtime directories across both targets.
 - `python3 scripts/test-validator-regressions.py` passed 16 tests.
@@ -71,7 +74,7 @@ source and drift check.
 - `config audit-workflows` passed 11 checks for each target.
 - `npm run check:templates` passed 322 checks.
 - `npm pack --dry-run --json` retained the existing 501-file installer shape,
-  sampled generated copies from top-level, `.shared`, and skill scripts,
+  sampled generated copies from `.shared` data/scripts and Backlog `.env.example`,
   excluded development-only shared source and sync scripts, and contained no
   Python cache artifacts.
 - `git diff --check` passed.

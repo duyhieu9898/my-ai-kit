@@ -25,17 +25,17 @@
 ## Shared Rules
 
 - Preserve relative paths within each toolkit.
-- All executable scripts present in both targets, plus shared Backlog runtime,
-  have their canonical source under `shared/runtime/`. Both target templates
-  retain committed generated copies so installation remains a direct
-  mirror-copy with no composition step.
+- All executable scripts present in both targets, `.shared` resources, and
+  shared Backlog runtime have their canonical source under `shared/runtime/`.
+  Both target templates retain committed generated copies so installation
+  remains a direct mirror-copy with no composition step.
 - Canonical source and sync tooling are development-only; npm installation
   ships the generated target templates without extra shared-source payload.
 - Use `npm run sync:shared-runtime` after editing canonical files and
   `npm run check:shared-runtime` to detect drift.
 - Backlog target metadata and runtime artifacts are not shared: keep
   `SKILL.md`, Codex `agents/openai.yaml`, `.env`, and `logs/` in their target
-  trees.
+  trees. Backlog `.env.example` and `.gitignore` are shared support files.
 - Do not package credentials, logs, caches, or runtime databases.
 - Update toolkit architecture documentation when discovery or directory
   conventions change.
