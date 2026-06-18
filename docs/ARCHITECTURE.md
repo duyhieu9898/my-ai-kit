@@ -23,6 +23,10 @@ templates/codex/
 templates/gemini/
   Gemini Antigravity toolkit in mirror layout: top-level GEMINI.md + .agents/
 
+shared/runtime/
+  Canonical source for all executable scripts and Backlog runtime shared by
+  both targets
+
 docs/
   Repository Harness policy, product contracts, stories, and decisions
 ```
@@ -47,6 +51,12 @@ Each template folder mirrors the project layout exactly:
 
 - Treat `templates/` as package data; preserve relative paths during
   publication and installation.
+- Edit shared executable scripts and Backlog runtime under `shared/runtime/`,
+  then run
+  `npm run sync:shared-runtime` to refresh their committed copies under both
+  target templates.
+- Keep target-specific metadata such as `SKILL.md`, Codex `agents/openai.yaml`,
+  environment files, and runtime logs outside the shared source.
 - Install is a single mirror-copy: `.agents/` is always replaced; top-level root
   instruction files honour the overwrite flag.
 - `init` is destructive (replaces install folder and, on switch/force, root

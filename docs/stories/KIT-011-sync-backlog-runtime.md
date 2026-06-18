@@ -52,8 +52,9 @@ When updating durable proof status, use numeric booleans:
 
 ## Harness Delta
 
-Records that Backlog runtime changes should stay synchronized across Codex and
-Gemini templates without overwriting target-specific skill metadata.
+Backlog runtime now has one canonical source under
+`shared/runtime/.agents/skills/backlog/`. The sync command refreshes both
+templates without overwriting target-specific skill metadata.
 
 ## Evidence
 

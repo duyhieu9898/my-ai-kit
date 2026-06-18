@@ -159,6 +159,17 @@ Sau khi sửa template, push lên `main`; các project khác có thể cập nh�
 npx -y hieund-ai-kit update
 ```
 
+Toàn bộ executable scripts dùng chung giữa Codex và Gemini, cùng runtime
+Backlog, có source chính tại `shared/runtime/`. Chỉ sửa bản shared rồi đồng bộ
+các bản template:
+
+```bash
+npm run sync:shared-runtime
+npm run check:shared-runtime
+```
+
+Installer vẫn copy thẳng template đã sinh; không compose file trong lúc cài.
+
 ## Kiểm Tra
 
 Kiểm tra CLI (trong repo `my-ai-kit`):

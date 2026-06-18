@@ -2,11 +2,14 @@
 """Regression tests for validators shared by the Codex and Gemini templates."""
 
 import importlib.util
+import io
 import json
 import subprocess
 import tempfile
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
+from unittest.mock import patch
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -17,8 +20,22 @@ def script_path(target: str, relative_path: str) -> Path:
     return REPO_ROOT / "templates" / target / ".agents" / "skills" / relative_path
 
 
+def agent_script_path(target: str, script_name: str) -> Path:
+    return REPO_ROOT / "templates" / target / ".agents" / "scripts" / script_name
+
+
 def load_module(target: str, name: str, relative_path: str):
     path = script_path(target, relative_path)
+    spec = importlib.util.spec_from_file_location(f"{target}_{name}", path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"Could not load {path}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def load_agent_script(target: str, name: str, script_name: str):
+    path = agent_script_path(target, script_name)
     spec = importlib.util.spec_from_file_location(f"{target}_{name}", path)
     if spec is None or spec.loader is None:
         raise RuntimeError(f"Could not load {path}")
@@ -237,6 +254,37 @@ class ValidatorRegressionTests(unittest.TestCase):
                     issues,
                 )
 
+    def test_page_scanners_ignore_agent_virtualenv_content(self):
+        for target in TARGETS:
+            with self.subTest(target=target), tempfile.TemporaryDirectory() as temp_dir:
+                project = Path(temp_dir) / "project"
+                app_page = project / "app" / "page.tsx"
+                agent_page = project / ".agents" / ".venv" / "app" / "page.tsx"
+                app_page.parent.mkdir(parents=True)
+                agent_page.parent.mkdir(parents=True)
+                app_page.write_text(
+                    "export default function Page() { return <main>App</main> }\n",
+                    encoding="utf-8",
+                )
+                agent_page.write_text(
+                    "export default function Page() { return <main>Tooling</main> }\n",
+                    encoding="utf-8",
+                )
+
+                accessibility = load_module(
+                    target,
+                    "accessibility_skips",
+                    "frontend-design/scripts/accessibility_checker.py",
+                )
+                seo = load_module(
+                    target,
+                    "seo_skips",
+                    "seo-fundamentals/scripts/seo_checker.py",
+                )
+
+                self.assertEqual(accessibility.find_html_files(project), [app_page])
+                self.assertEqual(seo.find_pages(project), [app_page])
+
     def test_seo_checks_static_next_metadata_fields(self):
         for target in TARGETS:
             with self.subTest(target=target), tempfile.TemporaryDirectory() as temp_dir:
@@ -321,6 +369,168 @@ class ValidatorRegressionTests(unittest.TestCase):
 
                 self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
                 self.assertIn("[!] 1 files may have hardcoded strings", result.stdout)
+
+    def test_verify_all_help_does_not_bootstrap_playwright(self):
+        for target in TARGETS:
+            with self.subTest(target=target):
+                result = subprocess.run(
+                    ["python3", str(agent_script_path(target, "verify_all.py")), "--help"],
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                )
+
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                self.assertIn("--verbose", result.stdout)
+                self.assertNotIn("Initializing isolated environment", result.stdout)
+
+    def test_verify_all_bootstraps_playwright_with_uv_in_target_venv(self):
+        for target in TARGETS:
+            with self.subTest(target=target), tempfile.TemporaryDirectory() as temp_dir:
+                project = Path(temp_dir)
+                venv_dir = project / ".agents" / ".venv"
+                venv_python = venv_dir / "bin" / "python"
+                venv_python.parent.mkdir(parents=True)
+                venv_python.touch()
+                verify_all = load_agent_script(
+                    target,
+                    "verify_all_bootstrap",
+                    "verify_all.py",
+                )
+
+                with (
+                    patch.object(verify_all.shutil, "which", return_value="/usr/bin/uv"),
+                    patch.object(
+                        verify_all.subprocess,
+                        "run",
+                        side_effect=[
+                            subprocess.CompletedProcess([], 1),
+                            subprocess.CompletedProcess([], 0),
+                            subprocess.CompletedProcess([], 1),
+                            subprocess.CompletedProcess([], 0),
+                            subprocess.CompletedProcess([], 0),
+                        ],
+                    ) as run,
+                ):
+                    result = verify_all.check_and_bootstrap_venv(project)
+
+                commands = [call.args[0] for call in run.call_args_list]
+                self.assertEqual(result, venv_python)
+                self.assertIn(
+                    [
+                        "/usr/bin/uv",
+                        "pip",
+                        "install",
+                        "--python",
+                        str(venv_python),
+                        "playwright",
+                    ],
+                    commands,
+                )
+                self.assertIn(
+                    [
+                        str(venv_python),
+                        "-m",
+                        "playwright",
+                        "install",
+                        "chromium",
+                    ],
+                    commands,
+                )
+                self.assertIn(
+                    [
+                        str(venv_python),
+                        "-m",
+                        "playwright",
+                        "install-deps",
+                        "--dry-run",
+                        "chromium",
+                    ],
+                    commands,
+                )
+
+    def test_verify_all_missing_required_script_fails(self):
+        for target in TARGETS:
+            with self.subTest(target=target), tempfile.TemporaryDirectory() as temp_dir:
+                verify_all = load_agent_script(
+                    target,
+                    "verify_all_required",
+                    "verify_all.py",
+                )
+
+                result = verify_all.run_script(
+                    "Required Check",
+                    Path(temp_dir) / "missing.py",
+                    temp_dir,
+                    required=True,
+                )
+
+                self.assertFalse(result["passed"])
+                self.assertFalse(result["skipped"])
+                self.assertIn("Required script not found", result["error"])
+
+    def test_verify_all_uses_custom_python_only_for_selected_check(self):
+        for target in TARGETS:
+            with self.subTest(target=target), tempfile.TemporaryDirectory() as temp_dir:
+                project = Path(temp_dir)
+                script = project / "check.py"
+                script.touch()
+                verify_all = load_agent_script(
+                    target,
+                    "verify_all_interpreter",
+                    "verify_all.py",
+                )
+
+                with patch.object(
+                    verify_all.subprocess,
+                    "run",
+                    return_value=subprocess.CompletedProcess([], 0, "", ""),
+                ) as run:
+                    verify_all.run_script(
+                        "Playwright Check",
+                        script,
+                        str(project),
+                        python_executable=Path("/isolated/python"),
+                    )
+                    verify_all.run_script(
+                        "Regular Check",
+                        script,
+                        str(project),
+                    )
+
+                self.assertEqual(run.call_args_list[0].args[0][0], "/isolated/python")
+                self.assertEqual(run.call_args_list[1].args[0][0], verify_all.sys.executable)
+
+    def test_verify_all_prints_stdout_and_stderr_for_failed_checks(self):
+        for target in TARGETS:
+            with self.subTest(target=target), tempfile.TemporaryDirectory() as temp_dir:
+                project = Path(temp_dir)
+                failing_script = project / "failing_check.py"
+                failing_script.write_text(
+                    "import sys\n"
+                    "print('actionable stdout detail')\n"
+                    "print('actionable stderr detail', file=sys.stderr)\n"
+                    "raise SystemExit(1)\n",
+                    encoding="utf-8",
+                )
+                verify_all = load_agent_script(
+                    target,
+                    "verify_all",
+                    "verify_all.py",
+                )
+                output = io.StringIO()
+
+                with redirect_stdout(output):
+                    result = verify_all.run_script(
+                        "Failing Check",
+                        failing_script,
+                        str(project),
+                    )
+
+                rendered = output.getvalue()
+                self.assertFalse(result["passed"])
+                self.assertIn("actionable stdout detail", rendered)
+                self.assertIn("actionable stderr detail", rendered)
 
 
 if __name__ == "__main__":
