@@ -34,7 +34,7 @@ Specialist AI personas for different domains.
 
 | Agent                    | Focus                      | Skills Used                                              |
 | ------------------------ | -------------------------- | -------------------------------------------------------- |
-| `project-planner`        | Discovery, task planning   | brainstorming, plan-writing, architecture                |
+| `project-planner`        | Self-contained initiative roadmaps | None required                                     |
 | `frontend-specialist`    | Web UI/UX & Architecture   | frontend-design, nextjs-react-expert, react-refactor-patterns, tailwind-patterns, frontend-specialist |
 | `backend-specialist`     | API, business logic        | api-patterns, nodejs-best-practices, database-design     |
 | `database-architect`     | Schema, SQL                | database-design                                          |
@@ -116,7 +116,7 @@ only provide `description`.
 | --------------- | -------------------------- |
 | `app-builder`   | Full-stack app scaffolding |
 | `architecture`  | System design patterns     |
-| `plan-writing`  | Task planning, breakdown   |
+| `plan-writing`  | Bounded implementation plans |
 | `brainstorming` | Socratic questioning       |
 
 ### SEO & Growth

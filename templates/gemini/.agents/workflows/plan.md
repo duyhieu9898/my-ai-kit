@@ -1,89 +1,36 @@
 ---
-description: Create project plan using project-planner agent. No code writing - only plan file generation.
+description: Create a repository-aware initiative roadmap without modifying production code.
 ---
 
-# /plan - Project Planning Mode
+# /plan - Project Planning
 
 $ARGUMENTS
 
----
+Use the `project-planner` agent to create a roadmap for the requested project,
+major feature, migration, or cross-module initiative.
 
-## 🔴 CRITICAL RULES
+## Rules
 
-1. **NO CODE WRITING** - This command creates plan file only
-2. **Use project-planner agent** - NOT AG Kit Agent's native Plan mode
-3. **Socratic Gate** - Ask clarifying questions before planning
-4. **Dynamic Naming** - Plan file named based on task
+1. Inspect repository context with read-only operations.
+2. Reuse decisions already provided by the user.
+3. Ask only when missing information materially changes scope or architecture.
+4. Do not modify production code, install tools, scaffold files, or run
+   mutating project commands.
+5. Do not assume specialist agents or skills exist; confirm availability before
+   recommending one.
+6. Select verification from the actual project and label it as planned evidence.
+7. Create the plan at `docs/PLAN-{task-slug}.md`, unless the user or repository
+   defines a stronger path convention.
 
----
+## Required Output
 
-## Task
+- objective, assumptions, scope, and success criteria;
+- proposed architecture and affected surfaces;
+- milestone-level tasks with `INPUT -> OUTPUT -> VERIFY`;
+- dependency and parallelism map;
+- risks, rollback notes, and open decisions;
+- project-specific verification strategy and exit criteria;
+- exact plan path in the final response.
 
-Use the `project-planner` agent with this context:
-
-```
-CONTEXT:
-- User Request: $ARGUMENTS
-- Mode: PLANNING ONLY (no code)
-- Output: docs/PLAN-{task-slug}.md (dynamic naming)
-
-NAMING RULES:
-1. Extract 2-3 key words from request
-2. Lowercase, hyphen-separated
-3. Max 30 characters
-4. Example: "e-commerce cart" → PLAN-ecommerce-cart.md
-
-RULES:
-1. Follow project-planner.md Phase -1 (Context Check)
-2. Follow project-planner.md Phase 0 (Socratic Gate)
-3. Create PLAN-{slug}.md with task breakdown
-4. DO NOT write any code files
-5. REPORT the exact file name created
-```
-
----
-
-## Expected Output
-
-| Deliverable | Location |
-|-------------|----------|
-| Project Plan | `docs/PLAN-{task-slug}.md` |
-| Task Breakdown | Inside plan file |
-| Agent Assignments | Inside plan file |
-| Verification Checklist | Phase X in plan file |
-
----
-
-## After Planning
-
-Tell user:
-```
-[OK] Plan created: docs/PLAN-{slug}.md
-
-Next steps:
-- Review the plan
-- Run `/create` to start implementation
-- Or modify plan manually
-```
-
----
-
-## Naming Examples
-
-| Request | Plan File |
-|---------|-----------|
-| `/plan e-commerce site with cart` | `docs/PLAN-ecommerce-cart.md` |
-| `/plan mobile app for fitness` | `docs/PLAN-fitness-app.md` |
-| `/plan add dark mode feature` | `docs/PLAN-dark-mode.md` |
-| `/plan fix authentication bug` | `docs/PLAN-auth-fix.md` |
-| `/plan SaaS dashboard` | `docs/PLAN-saas-dashboard.md` |
-
----
-
-## Usage
-
-```
-/plan e-commerce site with cart
-/plan mobile app for fitness tracking
-/plan SaaS dashboard with analytics
-```
+Use `plan-writing` instead when the request is a bounded implementation plan for
+a known change.

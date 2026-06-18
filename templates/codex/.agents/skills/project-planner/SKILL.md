@@ -1,485 +1,156 @@
 ---
 name: project-planner
 description: >-
-  Use when starting new projects or planning major features to break down tasks and design architectures.
-  Smart project planning agent that maps files, dependencies, and agent roles.
-  NOT for direct implementation coding or trivial single-step edits.
-allowed-tools:
-  - Read
-  - Write
-  - Edit
-  - Glob
-  - Grep
-  - Bash
+  Create project-level roadmaps for new products, major features, migrations,
+  or cross-module initiatives. Map scope, architecture boundaries, milestones,
+  dependencies, risks, ownership capabilities, and project-specific validation
+  into an executable plan. Use for broad planning that spans multiple work
+  streams. NOT for trivial edits, direct implementation, or a bounded
+  file-by-file action plan that belongs in plan-writing.
 ---
 
-# Project Planner - Smart Project Planning
+# Project Planner
 
-You are a project planning expert. You analyze user requests, break them into tasks, and create an executable plan.
+Create a decision-ready roadmap without implementing production code.
 
----
+## Operating Boundary
 
-## 📑 Content Map
+- Work at project, initiative, or major-feature level.
+- Inspect the repository with read-only commands when concrete context is needed.
+- Write only the requested planning artifact.
+- Do not modify production code, install tools, scaffold files, or run mutating
+  project commands while planning.
+- Do not assume that any specialist skill exists. Name the required capability
+  or owner; recommend an installed skill only after confirming it is available.
+- Use `plan-writing` instead when the request needs a bounded implementation
+  checklist for a known change.
 
-| File | Description | When to Read |
-|:---|:---|:---|
-| _No supplementary files_ | Main project planning procedures are in this file | Use this file by default |
+## Workflow
 
----
+### 1. Establish Context
 
-## 🔗 Related Skills
+1. Restate the objective and expected user or business outcome.
+2. Inspect repository instructions, architecture, existing plans, and relevant
+   code or documentation.
+3. Reuse decisions already supplied by the user. Ask only when a missing answer
+   would materially change scope, architecture, or sequencing.
+4. Record assumptions explicitly instead of presenting them as facts.
 
-| Need | Skill |
-|:---|:---|
-| Orchestration and multi-agent coordination | [`orchestrator`](../orchestrator/SKILL.md) |
-| Scaffolding and system build orchestration | [`app-builder`](../app-builder/SKILL.md) |
+### 2. Define Scope
 
----
+Identify:
 
-## 🛠️ Instructions / Procedures
+- in-scope and out-of-scope behavior;
+- project type and affected platforms;
+- constraints such as timeline, compatibility, security, data, and operations;
+- success criteria and non-functional requirements;
+- unresolved questions and decisions.
 
-When tasked with starting new projects or planning major features, strictly follow this step-by-step procedure:
+Do not force a project into only WEB, MOBILE, or BACKEND. Classify it using the
+actual repository and request, including desktop, CLI, library, data, and
+infrastructure work when applicable.
 
-### Step 1: Pre-flight Context & Capability Discovery
-1. Check `.agents/ARCHITECTURE.md` to identify the OS field (Windows/macOS/Linux).
-2. Execute the auto-integration check for `code-review-graph` (Phase 0).
-3. Read existing context parameters, previous Q&As, and previous plan logs in prompt history (Phase -1).
+### 3. Map The System
 
-### Step 2: Request Parsing & Project Type Selection
-1. Perform Request Analysis to determine features, timeline constraints, and tech stacks (Step 1: Request Analysis).
-2. Determine project type (WEB, MOBILE, BACKEND) using the trigger rules (Step 2: Component Identification). Mappings to `mobile-developer` vs `frontend-specialist` must be exclusive.
+Describe only structures supported by repository evidence or clearly marked as
+proposed:
 
-### Step 3: File Layout & Component Mapping
-1. Draft the proposed directory layout and file structures based on target project needs.
-2. Outline database schemas, API specs, and E2E testing boundaries across components.
+- affected modules, files, services, and interfaces;
+- data, API, event, and state boundaries;
+- external systems and operational dependencies;
+- testing and rollout boundaries;
+- compatibility and migration concerns.
 
-### Step 4: Write Dynamic Plan Document
-1. Build the task list. Each task MUST declare: `task_id`, `name`, `agent`, `skills`, `priority`, `dependencies`, and explicit `INPUT->OUTPUT->VERIFY` criteria.
-2. Store the plan dynamically as `docs/PLAN-{task-slug}.md` using a kebab-case dynamic slug mapping to request keywords (Plan Naming).
-3. Enforce the Plan Mode absolute ban: do not write, modify, or execute any production code files.
+Avoid inventing schemas, endpoints, or directories when discovery has not
+established them.
 
-### Step 5: Verification Mapping & Exit Gates
-1. Declare the Phase X verification sequence including `verify_all.py` or separate check commands.
-2. Ensure the plan file contains all required sections prior to completing the planning gate check.
+### 4. Build The Roadmap
 
----
+Group work into milestones that each end in a coherent, verifiable state. For
+every task include:
 
-## 🛑 PHASE 0: CONTEXT CHECK (QUICK)
+- `task_id` and concise action;
+- outcome and rationale;
+- affected surface;
+- required capability or owner;
+- hard dependencies;
+- risk or rollback note when relevant;
+- `INPUT -> OUTPUT -> VERIFY`.
 
-**Check for existing context before starting:**
-1.  **Read** `.agents/ARCHITECTURE.md` -> Check **OS** field (Windows/macOS/Linux)
-2.  **Read** any existing plan files in project root
-3.  **Check** if request is clear enough to proceed
-4.  **Auto-Integration Check (MANDATORY TOOL USE):** If `.code-review-graph/` directory is missing:
-    - **Step 1:** You MUST explicitly use your terminal/bash execution tool to run `Get-Command code-review-graph` (Win) or `which code-review-graph` (Mac/Linux).
-    - **Step 2:** If the exit code is 0 (INSTALLED): You MUST use your terminal tool to run `code-review-graph build` to optimize token usage.
-    - **Step 3:** If exit code is non-zero (NOT INSTALLED) and project is > 200 files: **ASK the user** "Would you like me to run `pip install code-review-graph` to build a local map and optimize your token usage by ~8x for this project?"
-5.  **If unclear:** Ask 1-2 quick questions, then proceed
+Use dependencies only for real blockers. Mark independent tasks as parallel.
+Keep task size large enough to represent meaningful project progress; defer
+atomic file-level steps to `plan-writing`.
 
-> 🔴 **OS Rule:** Use OS-appropriate commands!
-> - Windows -> Use Claude Write tool for files, PowerShell for commands
-> - macOS/Linux -> Can use `touch`, `mkdir -p`, bash commands
+### 5. Select Proportional Verification
 
----
+Choose evidence from the actual project rather than prescribing one stack:
 
-## 🔴 PHASE -1: CONVERSATION CONTEXT (BEFORE ANYTHING)
+| Surface | Example evidence |
+|---|---|
+| Library or CLI | Unit tests, type or syntax checks, command smoke tests |
+| Backend or API | Contract tests, integration tests, request/response probes |
+| Web UI | Component tests, build, browser checks, accessibility checks |
+| Mobile or desktop | Platform build, device or emulator tests, native smoke tests |
+| Data or migration | Migration dry run, integrity queries, rollback rehearsal |
+| Infrastructure | Config validation, deployment dry run, health and rollback checks |
 
-**You are likely invoked by Orchestrator. Check the PROMPT for prior context:**
+Include only checks relevant to the planned change. During planning, document
+commands and expected evidence; do not claim they passed.
 
-1. **Look for CONTEXT section:** User request, decisions, previous work
-2. **Look for previous Q&A:** What was already asked and answered?
-3. **Check plan files:** If plan file exists in workspace, READ IT FIRST
+### 6. Write The Plan
 
-> 🔴 **CRITICAL PRIORITY:**
-> 
-> **Conversation history > Plan files in workspace > Any files > Folder name**
-> 
-> **NEVER infer project type from folder name. Use ONLY provided context.**
+For planning mode, save the artifact at:
 
-| If You See | Then |
-|------------|------|
-| "User Request: X" in prompt | Use X as the task, ignore folder name |
-| "Decisions: Y" in prompt | Apply Y without re-asking |
-| Existing plan in workspace | Read and CONTINUE it, don't restart |
-| Nothing provided | Ask Socratic questions (Phase 0) |
-
-
-## Your Role
-
-1. Analyze user request (after Explorer Agent's survey)
-2. Identify required components based on Explorer's map
-3. Plan file structure
-4. Create and order tasks
-5. Generate task dependency graph
-6. Assign specialized agents
-7. **Create `docs/PLAN-{task-slug}.md` (MANDATORY for PLANNING mode)**
-8. **Verify plan file exists before exiting (PLANNING mode CHECKPOINT)**
-
----
-
-## 🔴 PLAN FILE NAMING (DYNAMIC)
-
-> **Plan files are named based on the task, NOT a fixed name.**
-
-### Naming Convention
-
-| User Request | Plan File Name |
-|--------------|----------------|
-| "e-commerce site with cart" | `ecommerce-cart.md` |
-| "add dark mode feature" | `dark-mode.md` |
-| "fix login bug" | `login-fix.md` |
-| "mobile fitness app" | `fitness-app.md` |
-| "refactor auth system" | `auth-refactor.md` |
-
-### Naming Rules
-
-1. **Extract 2-3 key words** from the request
-2. **Lowercase, hyphen-separated** (kebab-case)
-3. **Max 30 characters** for the slug
-4. **No special characters** except hyphen
-5. **Location:** Project root (current directory)
-
-### File Name Generation
-
-```
-User Request: "Create a dashboard with analytics"
-                    ↓
-Key Words:    [dashboard, analytics]
-                    ↓
-Slug:         dashboard-analytics
-                    ↓
-File:         ./dashboard-analytics.md (project root)
+```text
+docs/PLAN-{task-slug}.md
 ```
 
----
+Generate `{task-slug}` from two or three meaningful request keywords:
 
-## 🔴 PLAN MODE: NO CODE WRITING (ABSOLUTE BAN)
+- lowercase kebab-case;
+- no special characters other than hyphens;
+- no generic names such as `plan.md`;
+- maximum 30 characters.
 
-> **During planning phase, agents MUST NOT write any code files!**
+If the user specifies another path or the repository defines a stronger
+planning convention, follow that authority instead.
 
-| ❌ FORBIDDEN in Plan Mode | ✅ ALLOWED in Plan Mode |
-|---------------------------|-------------------------|
-| Writing `.ts`, `.js`, `.vue` files | Writing `docs/PLAN-{task-slug}.md` only |
-| Creating components | Documenting file structure |
-| Implementing features | Listing dependencies |
-| Any code execution | Task breakdown |
+## Required Plan Sections
 
-> 🔴 **VIOLATION:** Skipping phases or writing code before SOLUTIONING = FAILED workflow.
-
----
-
-## 🧠 Core Principles
-
-| Principle | Meaning |
-|-----------|---------|
-| **Tasks Are Verifiable** | Each task has concrete INPUT -> OUTPUT -> VERIFY criteria |
-| **Explicit Dependencies** | No "maybe" relationships—only hard blockers |
-| **Rollback Awareness** | Every task has a recovery strategy |
-| **Context-Rich** | Tasks explain WHY they matter, not just WHAT |
-| **Small & Focused** | 2-10 minutes per task, one clear outcome |
-
----
-
-## 📊 4-PHASE WORKFLOW (BMAD-Inspired)
-
-### Phase Overview
-
-| Phase | Name | Focus | Output | Code? |
-|-------|------|-------|--------|-------|
-| 1 | **ANALYSIS** | Research, brainstorm, explore | Decisions | ❌ NO |
-| 2 | **PLANNING** | Create plan | `docs/PLAN-{task-slug}.md` | ❌ NO |
-| 3 | **SOLUTIONING** | Architecture, design | Design docs | ❌ NO |
-| 4 | **IMPLEMENTATION** | Code per PLAN.md | Working code | ✅ YES |
-| X | **VERIFICATION** | Test & validate | Verified project | ✅ Scripts |
-
-> 🔴 **Flow:** ANALYSIS -> PLANNING -> USER APPROVAL -> SOLUTIONING -> DESIGN APPROVAL -> IMPLEMENTATION -> VERIFICATION
-
----
-
-### Implementation Priority Order
-
-| Priority | Phase | Agents | When to Use |
-|----------|-------|--------|-------------|
-| **P0** | Foundation | `database-architect` -> `security-auditor` | If project needs DB |
-| **P1** | Core | `backend-specialist` | If project has backend |
-| **P2** | UI/UX | `frontend-specialist` OR `mobile-developer` | Web OR Mobile (not both!) |
-| **P3** | Polish | `test-engineer`, `performance-optimizer`, `seo-specialist` | Based on needs |
-
-> 🔴 **Agent Selection Rule:**
-> - Web app -> `frontend-specialist` (NO `mobile-developer`)
-> - Mobile app -> `mobile-developer` (NO `frontend-specialist`)
-> - API only -> `backend-specialist` (NO frontend, NO mobile)
-
----
-
-### Verification Phase (PHASE X)
-
-| Step | Action | Command |
-|------|--------|---------|
-| 1 | Checklist | Purple check, Template check, Socratic respected? |
-| 2 | Scripts | `security_scan.py`, `ux_audit.py`, `lighthouse_audit.py` |
-| 3 | Build | `npm run build` |
-| 4 | Run & Test | `npm run dev` + manual test |
-| 5 | Complete | Mark all `[ ]` -> `[x]` in PLAN.md |
-
-> 🔴 **Rule:** DO NOT mark `[x]` without actually running the check!
-
-
-
-> **Parallel:** Different agents/files OK. **Serial:** Same file, Component->Consumer, Schema->Types.
-
----
-
-## Planning Process
-
-### Step 1: Request Analysis
-
-```
-Parse the request to understand:
-├── Domain: What type of project? (ecommerce, auth, realtime, cms, etc.)
-├── Features: Explicit + Implied requirements
-├── Constraints: Tech stack, timeline, scale, budget
-└── Risk Areas: Complex integrations, security, performance
-```
-
-### Step 2: Component Identification
-
-**🔴 PROJECT TYPE DETECTION (MANDATORY)**
-
-Before assigning agents, determine project type:
-
-| Trigger | Project Type | Primary Agent | DO NOT USE |
-|---------|--------------|---------------|------------|
-| "mobile app", "iOS", "Android", "React Native", "Flutter", "Expo" | **MOBILE** | `mobile-developer` | ❌ frontend-specialist, backend-specialist |
-| "website", "web app", "Next.js", "React" (web) | **WEB** | `frontend-specialist` | ❌ mobile-developer |
-| "API", "backend", "server", "database" (standalone) | **BACKEND** | `backend-specialist | - |
-
-> 🔴 **CRITICAL:** Mobile project + frontend-specialist = WRONG. Mobile project = mobile-developer ONLY.
-
----
-
-**Components by Project Type:**
-
-| Component | WEB Agent | MOBILE Agent |
-|-----------|-----------|---------------|
-| Database/Schema | `database-architect` | `mobile-developer` |
-| API/Backend | `backend-specialist` | `mobile-developer` |
-| Auth | `security-auditor` | `mobile-developer` |
-| UI/Styling | `frontend-specialist` | `mobile-developer` |
-| Tests | `test-engineer` | `mobile-developer` |
-| Deploy | `devops-engineer` | `mobile-developer` |
-
-> `mobile-developer` is full-stack for mobile projects.
-
----
-
-### Step 3: Task Format
-
-**Required fields:** `task_id`, `name`, `agent`, `skills`, `priority`, `dependencies`, `INPUT->OUTPUT->VERIFY`
-
-> [!TIP]
-> **Bonus**: For each task, indicate the best agent AND the best skill from the project to implement it.
-
-> Tasks without verification criteria are incomplete.
-
----
-
-## 🟢 ANALYTICAL MODE vs. PLANNING MODE
-
-**Before generating a file, decide the mode:**
-
-| Mode | Trigger | Action | Plan File? |
-|------|---------|--------|------------|
-| **SURVEY** | "analyze", "find", "explain" | Research + Survey Report | ❌ NO |
-| **PLANNING**| "build", "refactor", "create"| Task Breakdown + Dependencies| ✅ YES |
-
----
-
-## Output Format
-
-**PRINCIPLE:** Structure matters, content is unique to each project.
-
-### 🔴 Step 6: Create Plan File (DYNAMIC NAMING)
-
-> 🔴 **ABSOLUTE REQUIREMENT:** Plan MUST be created before exiting PLANNING mode.
-> **BAN:** NEVER use generic names like `plan.md`, `PLAN.md`, or `plan.dm`.
-
-**Plan Storage (For PLANNING Mode):** `docs/PLAN-{task-slug}.md`
-
-```bash
-# File name based on task:
-# "e-commerce site" -> docs/PLAN-ecommerce-site.md
-# "add auth feature" -> docs/PLAN-auth-feature.md
-```
-
-> 🔴 **Location:** `docs/` folder with the `PLAN-` prefix.
-
-**Required Plan structure:**
-
-| Section | Must Include |
-|---------|--------------|
-| **Overview** | What & why |
-| **Project Type** | WEB/MOBILE/BACKEND (explicit) |
-| **Success Criteria** | Measurable outcomes |
-| **Tech Stack** | Technologies with rationale |
-| **File Structure** | Directory layout |
-| **Task Breakdown** | All tasks with Agent + Skill recommendations and INPUT->OUTPUT->VERIFY |
-| **Phase X** | Final verification checklist |
-
-**EXIT GATE:**
-```
-[IF PLANNING MODE]
-[OK] Plan file written to docs/PLAN-{slug}.md
-[OK] Read docs/PLAN-{slug}.md returns content
-[OK] All required sections present
--> ONLY THEN can you exit planning.
-
-[IF SURVEY MODE]
--> Report findings in chat and exit.
-```
-
-> 🔴 **VIOLATION:** Exiting WITHOUT a plan file in **PLANNING MODE** = FAILED.
-
----
-
-### Required Sections
-
-| Section | Purpose | PRINCIPLE |
-|---------|---------|-----------|
-| **Overview** | What & why | Context-first |
-| **Success Criteria** | Measurable outcomes | Verification-first |
-| **Tech Stack** | Technology choices with rationale | Trade-off awareness |
-| **File Structure** | Directory layout | Organization clarity |
-| **Task Breakdown** | Detailed tasks (see format below) | INPUT -> OUTPUT -> VERIFY |
-| **Phase X: Verification** | Mandatory checklist | Definition of done |
-
-### Phase X: Final Verification (MANDATORY SCRIPT EXECUTION)
-
-> 🔴 **DO NOT mark project complete until ALL scripts pass.**
-> 🔴 **ENFORCEMENT: You MUST execute these Python scripts!**
-
-> 💡 **Script paths are relative to `.agents/` directory**
-
-#### 1. Run All Verifications (RECOMMENDED)
-
-```bash
-# SINGLE COMMAND - Runs all checks in priority order:
-python3 .agents/scripts/verify_all.py . --url http://localhost:3000
-
-# Priority Order:
-# P0: Security Scan (vulnerabilities, secrets)
-# P1: Color Contrast (WCAG AA accessibility)
-# P1.5: UX Audit (Psychology laws, Fitts, Hick, Trust)
-# P2: Touch Target (mobile accessibility)
-# P3: Lighthouse Audit (performance, SEO)
-# P4: Playwright Tests (E2E)
-```
-
-#### 2. Or Run Individually
-
-```bash
-# P0: Lint & Type Check
-npm run lint && npx tsc --noEmit
-
-# P0: Security Scan
-python3 .agents/skills/vulnerability-scanner/scripts/security_scan.py .
-
-# P1: UX Audit
-python3 .agents/skills/frontend-design/scripts/ux_audit.py .
-
-# P3: Lighthouse (requires running server)
-python3 .agents/skills/performance-profiling/scripts/lighthouse_audit.py http://localhost:3000
-
-# P4: Playwright E2E (requires running server)
-python3 .agents/skills/webapp-testing/scripts/playwright_runner.py http://localhost:3000 --screenshot
-```
-
-#### 3. Build Verification
-```bash
-# For Node.js projects:
-npm run build
-# -> IF warnings/errors: Fix before continuing
-```
-
-#### 4. Runtime Verification
-```bash
-# Start dev server and test:
-npm run dev
-
-# Optional: Run Playwright tests if available
-python3 .agents/skills/webapp-testing/scripts/playwright_runner.py http://localhost:3000 --screenshot
-```
-
-#### 4. Rule Compliance (Manual Check)
-- [ ] No purple/violet hex codes
-- [ ] No standard template layouts
-- [ ] Socratic Gate was respected
-
-#### 5. Phase X Completion Marker
 ```markdown
-# Add this to the plan file after ALL checks pass:
-## ✅ PHASE X COMPLETE
-- Lint: ✅ Pass
-- Security: ✅ No critical issues
-- Build: ✅ Success
-- Date: [Current Date]
+# [Initiative Name]
+
+## Objective
+## Context And Assumptions
+## Scope
+## Success Criteria
+## Proposed Architecture And Affected Surfaces
+## Milestones And Task Breakdown
+## Dependency And Parallelism Map
+## Risks, Rollback, And Open Decisions
+## Verification Strategy
+## Exit Criteria
 ```
 
-> 🔴 **EXIT GATE:** Phase X marker MUST be in `docs/PLAN-{task-slug}.md` before project is complete.
+Adapt section depth to the request. Do not add empty ceremony.
 
----
+## Exit Gate
 
-## Missing Information Detection
+Before concluding:
 
-**PRINCIPLE:** Unknowns become risks. Identify them early.
+- confirm the plan path and slug;
+- confirm assumptions and unknowns are visible;
+- confirm every task has `INPUT -> OUTPUT -> VERIFY`;
+- confirm dependencies are hard blockers rather than guesses;
+- confirm verification is project-specific;
+- confirm no production code or project state was changed;
+- distinguish planned checks from checks that were actually executed.
 
-| Signal | Action |
-|--------|--------|
-| "I think..." phrase | Defer to explorer-agent for codebase analysis |
-| Ambiguous requirement | Ask clarifying question before proceeding |
-| Missing dependency | Add task to resolve, mark as blocker |
+## Anti-Patterns
 
-**When to defer to explorer-agent:**
-- Complex existing codebase needs mapping
-- File dependencies unclear
-- Impact of changes uncertain
-
----
-
-## Best Practices (Quick Reference)
-
-| # | Principle | Rule | Why |
-|---|-----------|------|-----|
-| 1 | **Task Size** | 2-10 min, one clear outcome | Easy verification & rollback |
-| 2 | **Dependencies** | Explicit blockers only | No hidden failures |
-| 3 | **Parallel** | Different files/agents OK | Avoid merge conflicts |
-| 4 | **Verify-First** | Define success before coding | Prevents "done but broken" |
-| 5 | **Rollback** | Every task has recovery path | Tasks fail, prepare for it |
-| 6 | **Context** | Explain WHY not just WHAT | Better agent decisions |
-| 7 | **Risks** | Identify before they happen | Prepared responses |
-| 8 | **DYNAMIC NAMING** | `docs/PLAN-{task-slug}.md` | Easy to find, multiple plans OK |
-| 9 | **Milestones** | Each phase ends with working state | Continuous value |
-| 10 | **Phase X** | Verification is ALWAYS final | Definition of done |
-
----
-
-## ❌ Anti-Patterns
-
-- Writing production code during planning mode.
-- Creating generic plan files such as `plan.md` instead of `docs/PLAN-{task-slug}.md`.
-- Assigning `frontend-specialist` to mobile app implementation or `mobile-developer` to web-only work.
-- Leaving tasks without explicit `INPUT -> OUTPUT -> VERIFY` criteria.
-- Marking Phase X complete before running the stated verification commands.
-
----
-
-## ✅ Quality Audit Checklist
-
-Before concluding project planning or exiting Planning Mode, verify compliance with the following:
-
-- [ ] **Context Verified**: Checked `.agents/ARCHITECTURE.md`, OS rules, and prior context logs.
-- [ ] **Project Type Routed**: Verified project trigger (WEB vs MOBILE vs BACKEND) and correctly mapped domain-specific primary agents.
-- [ ] **Plan File Written**: Generated plan file at `docs/PLAN-{task-slug}.md` using a kebab-case dynamic naming convention.
-- [ ] **Plan Content Complete**: Plan file contains Overview, Success Criteria, Tech Stack, File Structure, Task Breakdown (with verification criteria), and Phase X verification details.
-- [ ] **No Code Written**: Strictly enforced the Plan Mode absolute ban (no production code written, modified, or executed).
-- [ ] **Validation Scripts Outlined**: Outlined execution paths for standard checks (`verify_all.py`, `security_scan.py`, `ux_audit.py`).
+- Referencing skills or agents that are not installed.
+- Requiring web or Node.js checks for every project type.
+- Inferring platform or architecture from a folder name.
+- Installing discovery tools as a prerequisite for planning.
+- Mixing roadmap planning with implementation.
+- Producing a generic plan that ignores repository evidence.

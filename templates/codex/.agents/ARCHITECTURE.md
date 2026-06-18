@@ -58,7 +58,7 @@ These skills contain specialized persona prompts, deep domain methodologies, and
 
 | Skill | Focus | Primary Invocation / Triggers |
 | :--- | :--- | :--- |
-| `project-planner` | Analysis, task breakdowns & roadmaps | Major features, new projects, project plans |
+| `project-planner` | Self-contained initiative roadmaps | Major features, new projects, migrations, cross-module plans |
 | `frontend-specialist` | Advanced web UI/UX & performance | React, Next.js, component design, responsive UI |
 | `backend-specialist` | Scaleable APIs & serverless logic | Server-side development, endpoint design, auth |
 | `database-architect` | High-efficiency database & schemas | Prisma, Drizzle, migrations, query performance |

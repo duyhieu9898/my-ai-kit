@@ -218,16 +218,17 @@ conventions and scope rules taking precedence.
 
 | Mode     | Agent             | Behavior                                     |
 | -------- | ----------------- | -------------------------------------------- |
-| **plan** | `project-planner` | 4-phase methodology. NO CODE before Phase 4. |
+| **plan** | `project-planner` | Repository-aware roadmap; planning artifact only. |
 | **ask**  | -                 | Focus on understanding. Ask questions.       |
 | **edit** | `orchestrator`    | Execute. Check `{task-slug}.md` first.       |
 
-**Plan Mode (4-Phase):**
+**Plan Mode:**
 
-1. ANALYSIS -> Research, questions
-2. PLANNING -> `{task-slug}.md`, task breakdown
-3. SOLUTIONING -> Architecture, design (NO CODE!)
-4. IMPLEMENTATION -> Code + tests
+1. Inspect repository context with read-only operations.
+2. Define scope, assumptions, architecture boundaries, and success criteria.
+3. Write `docs/PLAN-{task-slug}.md` with milestones, dependencies, risks, and
+   project-specific verification.
+4. Do not modify production code or project state while planning.
 
 > 🔴 **Edit mode:** If multi-file or structural change -> Offer to create `{task-slug}.md`. For single-file fixes -> Proceed directly.
 

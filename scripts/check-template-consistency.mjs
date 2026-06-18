@@ -104,9 +104,44 @@ function checkSkillFrontmatter(targetName, skillsPath, requireOpenAiYaml) {
   }
 }
 
+function markdownRelativeLinks(relativePath) {
+  const text = readText(relativePath);
+  return [...text.matchAll(/\[[^\]]+\]\(([^)#]+)(?:#[^)]+)?\)/g)]
+    .map((match) => match[1])
+    .filter((target) => !target.startsWith("#") && !/^[a-z]+:/i.test(target));
+}
+
+function checkRelativeLinks(relativePath) {
+  for (const target of markdownRelativeLinks(relativePath)) {
+    const resolved = path.resolve(
+      path.dirname(path.join(repoRoot, relativePath)),
+      target,
+    );
+    record(
+      `${relativePath} link resolves: ${target}`,
+      fs.existsSync(resolved),
+      resolved,
+    );
+  }
+}
+
 const toolkitDocs = readText("docs/product/toolkits.md");
 const codexArchitecture = readText("templates/codex/.agents/ARCHITECTURE.md");
 const geminiArchitecture = readText("templates/gemini/.agents/ARCHITECTURE.md");
+const projectPlannerPath =
+  "templates/codex/.agents/skills/project-planner/SKILL.md";
+const planWritingPath = "templates/codex/.agents/skills/plan-writing/SKILL.md";
+const projectPlannerOpenAiPath =
+  "templates/codex/.agents/skills/project-planner/agents/openai.yaml";
+const projectPlanner = readText(projectPlannerPath);
+const projectPlannerOpenAi = readText(projectPlannerOpenAiPath);
+const geminiProjectPlannerPath =
+  "templates/gemini/.agents/agents/project-planner.md";
+const geminiPlanWritingPath =
+  "templates/gemini/.agents/skills/plan-writing/SKILL.md";
+const geminiPlanWorkflowPath = "templates/gemini/.agents/workflows/plan.md";
+const geminiProjectPlanner = readText(geminiProjectPlannerPath);
+const geminiPlanWorkflow = readText(geminiPlanWorkflowPath);
 
 const codexSkillCount = immediateDirectories("templates/codex/.agents/skills").length;
 const codexOpenAiCount = immediateDirectories("templates/codex/.agents/skills").filter(
@@ -181,6 +216,64 @@ record(
 
 checkSkillFrontmatter("codex", "templates/codex/.agents/skills", true);
 checkSkillFrontmatter("gemini", "templates/gemini/.agents/skills", false);
+checkRelativeLinks(projectPlannerPath);
+checkRelativeLinks(planWritingPath);
+checkRelativeLinks(geminiProjectPlannerPath);
+checkRelativeLinks(geminiPlanWritingPath);
+checkRelativeLinks(geminiPlanWorkflowPath);
+
+record(
+  "project-planner uses one canonical default plan path",
+  projectPlanner.includes("docs/PLAN-{task-slug}.md") &&
+    !projectPlanner.includes("./{task-slug}.md (project root)"),
+  projectPlannerPath,
+);
+record(
+  "project-planner does not require removed specialist skills",
+  !/\b(orchestrator|mobile-developer|coordinator-mode|context-compression)\b/.test(
+    projectPlanner,
+  ),
+  projectPlannerPath,
+);
+record(
+  "project-planner verification remains stack-neutral",
+  projectPlanner.includes("Select Proportional Verification") &&
+    !projectPlanner.includes("npm run build") &&
+    !projectPlanner.includes("verify_all.py"),
+  projectPlannerPath,
+);
+record(
+  "project-planner default prompt is actionable",
+  /default_prompt:\s*"Use \$project-planner .+"/.test(projectPlannerOpenAi),
+  projectPlannerOpenAiPath,
+);
+record(
+  "Gemini project-planner uses one canonical default plan path",
+  geminiProjectPlanner.includes("docs/PLAN-{task-slug}.md") &&
+    !geminiProjectPlanner.includes("./{task-slug}.md (project root)"),
+  geminiProjectPlannerPath,
+);
+record(
+  "Gemini project-planner does not require removed specialist skills",
+  !/\b(mobile-developer|coordinator-mode|context-compression)\b/.test(
+    geminiProjectPlanner,
+  ),
+  geminiProjectPlannerPath,
+);
+record(
+  "Gemini project-planner verification remains stack-neutral",
+  geminiProjectPlanner.includes("Select Proportional Verification") &&
+    !geminiProjectPlanner.includes("npm run build") &&
+    !geminiProjectPlanner.includes("verify_all.py"),
+  geminiProjectPlannerPath,
+);
+record(
+  "Gemini plan workflow matches planner output contract",
+  geminiPlanWorkflow.includes("docs/PLAN-{task-slug}.md") &&
+    geminiPlanWorkflow.includes("INPUT -> OUTPUT -> VERIFY") &&
+    !geminiPlanWorkflow.includes("Phase X"),
+  geminiPlanWorkflowPath,
+);
 
 const failed = checks.filter((check) => !check.passed);
 

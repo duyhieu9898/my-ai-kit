@@ -1,13 +1,11 @@
 ---
 name: plan-writing
 description: >-
-  Use when implementing new features, preparing bug fixes, planning multi-file refactors, or generating action plans.
-  Structured task planning framework for small verifiable breakdowns.
-  NOT for trivial single-step edits or executing an existing plan without changes.
-allowed-tools:
-  - Read
-  - Glob
-  - Grep
+  Create bounded implementation plans for known features, bug fixes, and
+  multi-file refactors. Produce small file-aware tasks with explicit
+  verification criteria. Use after scope and architecture are sufficiently
+  understood. NOT for trivial edits, executing an existing plan, new-product
+  roadmaps, or cross-workstream initiatives that belong in project-planner.
 ---
 
 # Plan Writing
@@ -29,8 +27,6 @@ allowed-tools:
 | Need | Skill |
 |:---|:---|
 | Orchestrating large-scale multi-agent planner loops | [`project-planner`](../project-planner/SKILL.md) |
-| Managing and coordinating specialist execution workers | [`coordinator-mode`](../coordinator-mode/SKILL.md) |
-| Consolidating token-compressed task states | [`context-compression`](../context-compression/SKILL.md) |
 
 ---
 
@@ -205,10 +201,3 @@ Before concluding a plan writing, task decomposition, or feature design task, ve
 - [ ] **Dynamic Naming Applied**: Slugs reflect the main feature action in a clean kebab-case format.
 
 ---
-
-## When to Use
-
-- New project from scratch
-- Adding a feature
-- Fixing a bug (if complex)
-- Refactoring multiple files

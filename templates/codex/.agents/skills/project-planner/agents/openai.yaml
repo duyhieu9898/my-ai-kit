@@ -1,8 +1,8 @@
 interface:
   display_name: "Project Planner"
-  short_description: "Project plans, task breakdowns, dependencies, and agent routing."
+  short_description: "Roadmaps, dependencies, risks, and verification"
   brand_color: "#7C3AED"
-  default_prompt: "$project-planner"
+  default_prompt: "Use $project-planner to create a repository-aware roadmap for this initiative."
 
 policy:
   allow_implicit_invocation: true
