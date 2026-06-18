@@ -262,7 +262,7 @@ Examples:
         """
     )
     parser.add_argument("project", help="Project path to validate")
-    parser.add_argument("--url", required=True, help="URL for performance & E2E checks")
+    parser.add_argument("--url", help="URL for performance & E2E checks")
     parser.add_argument("--no-e2e", action="store_true", help="Skip E2E tests")
     parser.add_argument("--stop-on-fail", action="store_true", help="Stop on first failure")
     
@@ -276,7 +276,7 @@ Examples:
     
     print_header("🚀 ANTIGRAVITY KIT - FULL VERIFICATION SUITE")
     print(f"Project: {project_path}")
-    print(f"URL: {args.url}")
+    print(f"URL: {args.url if args.url else 'Not provided (skipping E2E and performance checks)'}")
     print(f"Started: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     
     start_time = datetime.now()
