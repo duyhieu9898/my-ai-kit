@@ -10,7 +10,7 @@
 | **Session** | Traditional web, simple |
 | **OAuth 2.0** | Third-party integration |
 | **API Keys** | Server-to-server, public APIs |
-| **Passkey** | Modern passwordless (2025+) |
+| **Passkey** | Modern passwordless authentication |
 
 ## JWT Principles
 

@@ -1,13 +1,16 @@
 ---
 name: api-patterns
-description: API design principles and decision-making. REST vs GraphQL vs tRPC selection, response formats, versioning, pagination.
-when_to_use: "When designing REST/GraphQL/tRPC APIs, defining response formats, versioning, pagination, or API authentication. NOT for UI/frontend work."
+description: >-
+  Use when designing or reviewing REST, GraphQL, or tRPC contracts, response
+  formats, pagination, versioning, authentication, or API protection.
+  Provides API-style decisions and contract review guidance. NOT for
+  frontend-only work or routine endpoint implementation.
 allowed-tools: Read, Write, Edit, Glob, Grep
 ---
 
 # API Patterns
 
-> API design principles and decision-making for 2025.
+> API design principles and context-aware decision-making.
 > **Learn to THINK, not copy fixed patterns.**
 
 ## 🎯 Selective Reading Rule
@@ -37,23 +40,22 @@ allowed-tools: Read, Write, Edit, Glob, Grep
 
 | Need | Skill |
 |------|-------|
-| API implementation | `@[skills/backend-development]` |
-| Data structure | `@[skills/database-design]` |
-| Security details | `@[skills/security-hardening]` |
+| API implementation | `backend-specialist` |
+| Data structure | `database-design` |
+| Security details | `security-auditor` |
 
 ---
 
-## ✅ Decision Checklist
+## 🛠️ Workflow
 
-Before designing an API:
+Apply only the steps relevant to the requested design or review:
 
-- [ ] **Asked user about API consumers?**
-- [ ] **Chosen API style for THIS context?** (REST/GraphQL/tRPC)
-- [ ] **Defined consistent response format?**
-- [ ] **Planned versioning strategy?**
-- [ ] **Considered authentication needs?**
-- [ ] **Planned rate limiting?**
-- [ ] **Documentation approach defined?**
+1. Identify consumers, trust boundaries, caching, performance, and real-time needs.
+2. Choose an API style with `api-style.md`; do not redesign an established API without a concrete reason.
+3. Define interface, error, compatibility, and pagination contracts relevant to the request.
+4. Select authentication, rate limiting, and security review only when the trust, abuse, cost, or capacity model requires them.
+5. For public or contract-driven HTTP APIs, document the interface with `documentation.md`.
+6. When matching source or OpenAPI files exist, run `python3 .agents/skills/api-patterns/scripts/api_validator.py <project_path>` from the project root.
 
 ---
 
@@ -64,7 +66,7 @@ Before designing an API:
 - Use verbs in REST endpoints (/getUsers)
 - Return inconsistent response formats
 - Expose internal errors to clients
-- Skip rate limiting
+- Skip abuse controls when the threat or capacity model requires them
 
 **DO:**
 - Choose API style based on context
@@ -78,5 +80,4 @@ Before designing an API:
 
 | Script | Purpose | Command |
 |--------|---------|---------|
-| `scripts/api_validator.py` | API endpoint validation | `python3 scripts/api_validator.py <project_path>` |
-
+| `scripts/api_validator.py` | API source and OpenAPI sanity checks | `python3 .agents/skills/api-patterns/scripts/api_validator.py <project_path>` |

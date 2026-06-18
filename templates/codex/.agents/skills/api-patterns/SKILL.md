@@ -1,10 +1,10 @@
 ---
 name: api-patterns
 description: >-
-  Use when designing or reviewing API architecture, defining response formats,
-  planning versioning strategy, or selecting REST vs GraphQL vs tRPC authentication patterns.
-  Contains REST, GraphQL, and tRPC design principles, pagination, and auth standards.
-  NOT for UI/frontend implementation.
+  Use when designing or reviewing REST, GraphQL, or tRPC contracts, response
+  formats, pagination, versioning, authentication, or API protection.
+  Provides API-style decisions and contract review guidance. NOT for
+  frontend-only work or routine endpoint implementation.
 allowed-tools:
   - Read
   - Write
@@ -15,7 +15,7 @@ allowed-tools:
 
 # API Patterns
 
-> API design principles and decision-making for 2025.
+> API design principles and context-aware decision-making.
 > **Learn to THINK, not copy fixed patterns.**
 
 ## 🎯 Selective Reading Rule
@@ -53,7 +53,8 @@ allowed-tools:
 
 ## 🛠️ Instructions / Procedures
 
-When asked to design, review, or implement an API, follow these sequential steps:
+When asked to design or review an API, apply only the steps relevant to the
+requested scope. Use `backend-specialist` for routine implementation.
 
 ### Step 1: Identify API Consumers & Requirements
 1. Determine who the primary consumers of the API will be (e.g., public developers, internal services, a single-page TypeScript frontend).
@@ -71,18 +72,18 @@ Use the decision tree in [references/api-style.md](references/api-style.md) to s
 * **For tRPC**: Declare input/output schemas directly in TypeScript routers using a validation library (Zod) following [references/trpc.md](references/trpc.md).
 
 ### Step 4: Standardize Responses & Pagination
-1. Establish a single, consistent response format across all endpoints using guidelines in [references/response.md](references/response.md).
+1. Establish a consistent response format appropriate to the API style using guidelines in [references/response.md](references/response.md).
 2. Define a unified error schema that returns programmatic error codes without leaking internal details.
-3. Select and apply the appropriate pagination pattern (Offset vs. Cursor vs. Keyset).
+3. Select a pagination pattern only for collection operations that need it.
 
 ### Step 5: Implement Authentication & Security
-1. Select the appropriate security pattern (JWT, Sessions, OAuth 2.0, Passkey, or API Keys) following [references/auth.md](references/auth.md).
-2. Plan and enforce rate limiting using the principles in [references/rate-limiting.md](references/rate-limiting.md).
-3. Perform security sanity checks against the OWASP API Top 10 checklist in [references/security-testing.md](references/security-testing.md).
+1. If the API crosses a trust boundary, select an authentication pattern following [references/auth.md](references/auth.md).
+2. If abuse, cost, or capacity risks apply, plan rate limiting using [references/rate-limiting.md](references/rate-limiting.md).
+3. For security reviews or exposed APIs, use the checks in [references/security-testing.md](references/security-testing.md).
 
 ### Step 6: Validate & Document
-1. Run the validator script `python3 scripts/api_validator.py <project_path>` to ensure code and OpenAPI specs conform to best practices.
-2. Provide complete OpenAPI documentation following [references/documentation.md](references/documentation.md).
+1. When API source or OpenAPI files exist, run `python3 .agents/skills/api-patterns/scripts/api_validator.py <project_path>` from the project root.
+2. For public or contract-driven HTTP APIs, document the interface following [references/documentation.md](references/documentation.md).
 
 ---
 
@@ -93,7 +94,7 @@ Use the decision tree in [references/api-style.md](references/api-style.md) to s
 - Use verbs in REST endpoints (/getUsers)
 - Return inconsistent response formats
 - Expose internal errors to clients
-- Skip rate limiting
+- Skip abuse controls when the threat or capacity model requires them
 
 **DO:**
 - Choose API style based on context
@@ -109,10 +110,10 @@ Before finalizing any API design or implementation task, verify the following:
 
 - [ ] **API Style Alignment**: Selected REST, GraphQL, or tRPC based on the decision tree in `references/api-style.md`.
 - [ ] **REST Conventions (if applicable)**: Resource paths use plural nouns, lowercase with hyphens, and proper HTTP verbs/status codes as defined in `references/rest.md`.
-- [ ] **Response Consistency**: The API returns a unified response envelope and secure, detailed error schemas without leaking internal traces (see `references/response.md`).
-- [ ] **Security & Auth**: Appropriate authentication (JWT/OAuth/Passkey) and rate-limiting headers are planned or verified (see `references/auth.md` and `references/rate-limiting.md`).
-- [ ] **Security Auditing**: The API endpoints are checked against the OWASP API Top 10 guidelines in `references/security-testing.md`.
-- [ ] **Validation & Verification**: Input validation is enforced on all dynamic parameters and `scripts/api_validator.py` has been executed.
+- [ ] **Response Consistency**: Success and error representations fit the chosen API style and do not leak internal details (see `references/response.md`).
+- [ ] **Security & Auth**: Authentication and abuse controls are planned when the API's trust, cost, or capacity boundaries require them.
+- [ ] **Security Auditing**: Exposed or security-sensitive APIs are checked against `references/security-testing.md`.
+- [ ] **Validation & Verification**: Dynamic inputs are validated, and the bundled validator has been run when matching source or OpenAPI files exist.
 
 ---
 
@@ -120,4 +121,4 @@ Before finalizing any API design or implementation task, verify the following:
 
 | Script | Purpose | Command |
 |:---|:---|:---|
-| [`scripts/api_validator.py`](scripts/api_validator.py) | API endpoint validation | `python3 scripts/api_validator.py <project_path>` |
+| [`scripts/api_validator.py`](scripts/api_validator.py) | API source and OpenAPI sanity checks | `python3 .agents/skills/api-patterns/scripts/api_validator.py <project_path>` |

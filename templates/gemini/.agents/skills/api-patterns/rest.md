@@ -20,7 +20,7 @@ Principles:
 | **GET** | Read resource(s) | Yes | No |
 | **POST** | Create new resource | No | Yes |
 | **PUT** | Replace entire resource | Yes | Yes |
-| **PATCH** | Partial update | No | Yes |
+| **PATCH** | Partial update | Depends on operation semantics | Yes |
 | **DELETE** | Remove resource | Yes | No |
 
 ## Status Code Selection

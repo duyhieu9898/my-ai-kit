@@ -1,211 +1,251 @@
 #!/usr/bin/env python3
-"""
-API Validator - Checks API endpoints for best practices.
-Validates OpenAPI specs, response formats, and common issues.
-"""
-import sys
+"""Run lightweight structural checks on API source and OpenAPI documents."""
+
+import argparse
 import json
 import re
+import sys
 from pathlib import Path
 
-# Fix Windows console encoding for Unicode output
-try:
-    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
-    sys.stderr.reconfigure(encoding='utf-8', errors='replace')
-except AttributeError:
-    pass  # Python < 3.7
 
-def find_api_files(project_path: Path) -> list:
-    """Find API-related files."""
-    patterns = [
-        "**/*api*.ts", "**/*api*.js", "**/*api*.py",
-        "**/routes/*.ts", "**/routes/*.js", "**/routes/*.py",
-        "**/controllers/*.ts", "**/controllers/*.js",
-        "**/endpoints/*.ts", "**/endpoints/*.py",
-        "**/*.openapi.json", "**/*.openapi.yaml",
-        "**/swagger.json", "**/swagger.yaml",
-        "**/openapi.json", "**/openapi.yaml"
-    ]
-    
-    files = []
-    for pattern in patterns:
-        files.extend(project_path.glob(pattern))
-    
-    # Exclude node_modules, etc.
-    return [f for f in files if not any(x in str(f) for x in ['node_modules', '.git', 'dist', 'build', '__pycache__'])]
+SOURCE_SUFFIXES = (".ts", ".js", ".py")
+SOURCE_PATTERNS = (
+    "**/api.ts",
+    "**/api.js",
+    "**/api.py",
+    "**/*.api.ts",
+    "**/*.api.js",
+    "**/*_api.py",
+    "**/route.ts",
+    "**/route.js",
+)
+SOURCE_DIRECTORIES = ("api", "routes", "controllers", "endpoints")
+SPEC_PATTERNS = (
+    "**/*.openapi.json",
+    "**/*.openapi.yaml",
+    "**/*.openapi.yml",
+    "**/openapi.json",
+    "**/openapi.yaml",
+    "**/openapi.yml",
+    "**/swagger.json",
+    "**/swagger.yaml",
+    "**/swagger.yml",
+)
+EXCLUDED_PARTS = {
+    ".git",
+    ".next",
+    ".venv",
+    "__pycache__",
+    "build",
+    "coverage",
+    "dist",
+    "node_modules",
+    "test",
+    "tests",
+    "vendor",
+}
+HTTP_METHODS = {"get", "post", "put", "patch", "delete", "options", "head", "trace"}
+
+
+def is_excluded(path: Path) -> bool:
+    """Return whether a path belongs to a non-production or generated area."""
+    return any(part.lower() in EXCLUDED_PARTS for part in path.parts)
+
+
+def find_api_files(project_path: Path) -> list[Path]:
+    """Find likely API implementation files and OpenAPI documents."""
+    candidates: set[Path] = set()
+
+    for pattern in SOURCE_PATTERNS + SPEC_PATTERNS:
+        candidates.update(project_path.glob(pattern))
+
+    for directory_name in SOURCE_DIRECTORIES:
+        for directory in project_path.glob(f"**/{directory_name}"):
+            if directory.is_dir() and not is_excluded(directory):
+                for suffix in SOURCE_SUFFIXES:
+                    candidates.update(directory.rglob(f"*{suffix}"))
+
+    this_file = Path(__file__).resolve()
+    return sorted(
+        path
+        for path in candidates
+        if path.is_file()
+        and not is_excluded(path.relative_to(project_path))
+        and path.resolve() != this_file
+    )
+
+
+def result(file_path: Path, passed: list[str], issues: list[str], kind: str) -> dict:
+    """Build a consistent validation result."""
+    return {
+        "file": str(file_path),
+        "passed": passed,
+        "issues": issues,
+        "type": kind,
+    }
+
+
+def check_openapi_json(file_path: Path, content: str) -> dict:
+    """Validate required OpenAPI structure in a JSON document."""
+    passed: list[str] = []
+    issues: list[str] = []
+
+    try:
+        spec = json.loads(content)
+    except json.JSONDecodeError as error:
+        return result(file_path, passed, [f"[X] Invalid JSON: {error}"], "openapi")
+
+    if not isinstance(spec, dict):
+        return result(file_path, passed, ["[X] OpenAPI document must be an object"], "openapi")
+
+    if "openapi" in spec or "swagger" in spec:
+        passed.append("[OK] OpenAPI/Swagger version defined")
+    else:
+        issues.append("[X] OpenAPI/Swagger version missing")
+
+    info = spec.get("info")
+    if not isinstance(info, dict):
+        issues.append("[X] Info section missing")
+    else:
+        if info.get("title"):
+            passed.append("[OK] API title defined")
+        else:
+            issues.append("[X] API title missing")
+        if info.get("version"):
+            passed.append("[OK] API version defined")
+        else:
+            issues.append("[X] API version missing")
+        if not info.get("description"):
+            issues.append("[!] API description missing")
+
+    paths = spec.get("paths")
+    if not isinstance(paths, dict):
+        issues.append("[X] Paths section missing or invalid")
+    else:
+        passed.append(f"[OK] {len(paths)} paths defined")
+        check_operations(paths, passed, issues)
+
+    return result(file_path, passed, issues, "openapi")
+
+
+def check_openapi_yaml(file_path: Path, content: str) -> dict:
+    """Validate required root fields in YAML without adding a YAML dependency."""
+    passed: list[str] = []
+    issues: list[str] = []
+
+    required_fields = {
+        "version": r"^(openapi|swagger)\s*:",
+        "info": r"^info\s*:",
+        "paths": r"^paths\s*:",
+    }
+    for field, pattern in required_fields.items():
+        if re.search(pattern, content, re.MULTILINE):
+            passed.append(f"[OK] {field.capitalize()} section defined")
+        else:
+            issues.append(f"[X] Required {field} field missing")
+
+    return result(file_path, passed, issues, "openapi")
+
+
+def check_operations(paths: dict, passed: list[str], issues: list[str]) -> None:
+    """Check operation-level documentation and response declarations."""
+    for path, path_item in paths.items():
+        if not isinstance(path_item, dict):
+            issues.append(f"[X] {path}: Path item must be an object")
+            continue
+        for method, details in path_item.items():
+            if method.lower() not in HTTP_METHODS:
+                continue
+            if not isinstance(details, dict):
+                issues.append(f"[X] {method.upper()} {path}: Operation must be an object")
+                continue
+            if "responses" not in details:
+                issues.append(f"[X] {method.upper()} {path}: Responses missing")
+            if "summary" not in details and "description" not in details:
+                issues.append(f"[!] {method.upper()} {path}: Description missing")
+
 
 def check_openapi_spec(file_path: Path) -> dict:
-    """Check OpenAPI/Swagger specification."""
-    issues = []
-    passed = []
-    
+    """Check an OpenAPI or Swagger document."""
     try:
-        content = file_path.read_text(encoding='utf-8')
-        
-        if file_path.suffix == '.json':
-            spec = json.loads(content)
-        else:
-            # Basic YAML check
-            if 'openapi:' in content or 'swagger:' in content:
-                passed.append("[OK] OpenAPI/Swagger version defined")
-            else:
-                issues.append("[X] No OpenAPI version found")
-            
-            if 'paths:' in content:
-                passed.append("[OK] Paths section exists")
-            else:
-                issues.append("[X] No paths defined")
-            
-            if 'components:' in content or 'definitions:' in content:
-                passed.append("[OK] Schema components defined")
-            
-            return {'file': str(file_path), 'passed': passed, 'issues': issues, 'type': 'openapi'}
-        
-        # JSON OpenAPI checks
-        if 'openapi' in spec or 'swagger' in spec:
-            passed.append("[OK] OpenAPI version defined")
-        
-        if 'info' in spec:
-            if 'title' in spec['info']:
-                passed.append("[OK] API title defined")
-            if 'version' in spec['info']:
-                passed.append("[OK] API version defined")
-            if 'description' not in spec['info']:
-                issues.append("[!] API description missing")
-        
-        if 'paths' in spec:
-            path_count = len(spec['paths'])
-            passed.append(f"[OK] {path_count} endpoints defined")
-            
-            # Check each path
-            for path, methods in spec['paths'].items():
-                for method, details in methods.items():
-                    if method in ['get', 'post', 'put', 'patch', 'delete']:
-                        if 'responses' not in details:
-                            issues.append(f"[X] {method.upper()} {path}: No responses defined")
-                        if 'summary' not in details and 'description' not in details:
-                            issues.append(f"[!] {method.upper()} {path}: No description")
-        
-    except Exception as e:
-        issues.append(f"[X] Parse error: {e}")
-    
-    return {'file': str(file_path), 'passed': passed, 'issues': issues, 'type': 'openapi'}
+        content = file_path.read_text(encoding="utf-8")
+    except OSError as error:
+        return result(file_path, [], [f"[X] Read error: {error}"], "openapi")
+
+    if file_path.suffix.lower() == ".json":
+        return check_openapi_json(file_path, content)
+    return check_openapi_yaml(file_path, content)
+
 
 def check_api_code(file_path: Path) -> dict:
-    """Check API code for common issues."""
-    issues = []
-    passed = []
-    
+    """Run advisory source checks without assuming a specific framework."""
     try:
-        content = file_path.read_text(encoding='utf-8')
-        
-        # Check for error handling
-        error_patterns = [
-            r'try\s*{', r'try:', r'\.catch\(',
-            r'except\s+', r'catch\s*\('
-        ]
-        has_error_handling = any(re.search(p, content) for p in error_patterns)
-        if has_error_handling:
-            passed.append("[OK] Error handling present")
-        else:
-            issues.append("[X] No error handling found")
-        
-        # Check for status codes
-        status_patterns = [
-            r'status\s*\(\s*\d{3}\s*\)', r'statusCode\s*[=:]\s*\d{3}',
-            r'HttpStatus\.', r'status_code\s*=\s*\d{3}',
-            r'\.status\(\d{3}\)', r'res\.status\('
-        ]
-        has_status = any(re.search(p, content) for p in status_patterns)
-        if has_status:
-            passed.append("[OK] HTTP status codes used")
-        else:
-            issues.append("[!] No explicit HTTP status codes")
-        
-        # Check for validation
-        validation_patterns = [
-            r'validate', r'schema', r'zod', r'joi', r'yup',
-            r'pydantic', r'@Body\(', r'@Query\('
-        ]
-        has_validation = any(re.search(p, content, re.I) for p in validation_patterns)
-        if has_validation:
-            passed.append("[OK] Input validation present")
-        else:
-            issues.append("[!] No input validation detected")
-        
-        # Check for auth middleware
-        auth_patterns = [
-            r'auth', r'jwt', r'bearer', r'token',
-            r'middleware', r'guard', r'@Authenticated'
-        ]
-        has_auth = any(re.search(p, content, re.I) for p in auth_patterns)
-        if has_auth:
-            passed.append("[OK] Authentication/authorization detected")
-        
-        # Check for rate limiting
-        rate_patterns = [r'rateLimit', r'throttle', r'rate.?limit']
-        has_rate = any(re.search(p, content, re.I) for p in rate_patterns)
-        if has_rate:
-            passed.append("[OK] Rate limiting present")
-        
-        # Check for logging
-        log_patterns = [r'console\.log', r'logger\.', r'logging\.', r'log\.']
-        has_logging = any(re.search(p, content) for p in log_patterns)
-        if has_logging:
-            passed.append("[OK] Logging present")
-        
-    except Exception as e:
-        issues.append(f"[X] Read error: {e}")
-    
-    return {'file': str(file_path), 'passed': passed, 'issues': issues, 'type': 'code'}
+        content = file_path.read_text(encoding="utf-8")
+    except OSError as error:
+        return result(file_path, [], [f"[X] Read error: {error}"], "code")
 
-def main():
-    target = sys.argv[1] if len(sys.argv) > 1 else "."
-    project_path = Path(target)
-    
-    print("\n" + "=" * 60)
-    print("  API VALIDATOR - Endpoint Best Practices Check")
-    print("=" * 60 + "\n")
-    
+    passed: list[str] = []
+    issues: list[str] = []
+    checks = (
+        ("Error handling detected", r"try\s*[{:]|\.catch\(|except\s+|catch\s*\("),
+        ("HTTP status handling detected", r"\.status\(\s*\d{3}|status_code\s*=\s*\d{3}|HttpStatus\."),
+        ("Input validation detected", r"\b(validate|schema|zod|joi|yup|pydantic)\b|@(?:Body|Query)\("),
+        ("Authentication/authorization detected", r"\b(auth|jwt|bearer|middleware|guard)\b|@Authenticated"),
+        ("Rate limiting detected", r"\b(rate.?limit|throttle)\b"),
+    )
+    for message, pattern in checks:
+        if re.search(pattern, content, re.IGNORECASE):
+            passed.append(f"[OK] {message}")
+
+    if not passed:
+        issues.append("[!] No common API safeguards detected; review framework-level controls")
+
+    return result(file_path, passed, issues, "code")
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("project_path", nargs="?", default=".", help="Project directory to scan")
+    return parser.parse_args()
+
+
+def main() -> int:
+    args = parse_args()
+    project_path = Path(args.project_path).expanduser()
+
+    if not project_path.exists():
+        print(f"[X] Target does not exist: {project_path}", file=sys.stderr)
+        return 2
+    if not project_path.is_dir():
+        print(f"[X] Target is not a directory: {project_path}", file=sys.stderr)
+        return 2
+
     api_files = find_api_files(project_path)
-    
     if not api_files:
-        print("[!] No API files found.")
-        print("   Looking for: routes/, controllers/, api/, openapi.json/yaml")
-        sys.exit(0)
-    
-    results = []
-    for file_path in api_files[:15]:  # Limit
-        if 'openapi' in file_path.name.lower() or 'swagger' in file_path.name.lower():
-            result = check_openapi_spec(file_path)
-        else:
-            result = check_api_code(file_path)
-        results.append(result)
-    
-    # Print results
-    total_issues = 0
-    total_passed = 0
-    
-    for result in results:
-        print(f"\n[FILE] {result['file']} [{result['type']}]")
-        for item in result['passed']:
+        print("[X] No API source or OpenAPI files found.", file=sys.stderr)
+        return 2
+
+    results = [
+        check_openapi_spec(path)
+        if "openapi" in path.name.lower() or "swagger" in path.name.lower()
+        else check_api_code(path)
+        for path in api_files
+    ]
+
+    critical_issues = 0
+    passed_checks = 0
+    for validation in results:
+        print(f"\n[FILE] {validation['file']} [{validation['type']}]")
+        for item in validation["passed"]:
             print(f"   {item}")
-            total_passed += 1
-        for item in result['issues']:
+            passed_checks += 1
+        for item in validation["issues"]:
             print(f"   {item}")
-            if item.startswith("[X]"):
-                total_issues += 1
-    
-    print("\n" + "=" * 60)
-    print(f"[RESULTS] {total_passed} passed, {total_issues} critical issues")
-    print("=" * 60)
-    
-    if total_issues == 0:
-        print("[OK] API validation passed")
-        sys.exit(0)
-    else:
-        print("[X] Fix critical issues before deployment")
-        sys.exit(1)
+            critical_issues += item.startswith("[X]")
+
+    print(f"\n[RESULTS] {passed_checks} passed, {critical_issues} critical issues")
+    return 1 if critical_issues else 0
+
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

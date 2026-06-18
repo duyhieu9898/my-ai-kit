@@ -23,9 +23,9 @@ Protect against:
 ## Response Headers
 
 ```
-Include in headers:
-├── X-RateLimit-Limit (max requests)
-├── X-RateLimit-Remaining (requests left)
-├── X-RateLimit-Reset (when limit resets)
-└── Return 429 when exceeded
+When exposing limit state:
+├── Prefer the standardized RateLimit fields when supported
+├── Keep legacy X-RateLimit-* fields only for compatibility
+├── Return 429 when the active policy rejects a request
+└── Include Retry-After when the retry time is known
 ```
