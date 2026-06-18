@@ -22,7 +22,7 @@ allowed-tools:
 | File | Description | When to Read |
 |:---|:---|:---|
 | [scripts/lint_runner.py](scripts/lint_runner.py) | Unified lint runner | Running local lint validation |
-| [scripts/type_coverage.py](scripts/type_coverage.py) | Type coverage analyzer | Checking typed-code coverage |
+| [scripts/type_coverage.py](scripts/type_coverage.py) | Annotation and unsafe `Any` heuristic | Reviewing annotation usage after compiler checks |
 
 ---
 
@@ -97,7 +97,7 @@ Before concluding any code edit, script modification, or task completion, verify
 | Script | Purpose | Command |
 |--------|---------|---------|
 | [scripts/lint_runner.py](scripts/lint_runner.py) | Unified lint check | `python3 scripts/lint_runner.py <project_path>` |
-| [scripts/type_coverage.py](scripts/type_coverage.py) | Type coverage analysis | `python3 scripts/type_coverage.py <project_path>` |
+| [scripts/type_coverage.py](scripts/type_coverage.py) | Advisory annotation analysis; not a compiler substitute | `python3 scripts/type_coverage.py <project_path>` |
 
 ---
 

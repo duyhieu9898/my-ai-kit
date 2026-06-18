@@ -48,8 +48,99 @@ class ValidatorRegressionTests(unittest.TestCase):
                 result = module.check_typescript_coverage(project)
 
                 self.assertEqual(result["files"], 1)
-                self.assertEqual(result["stats"]["untyped_functions"], 2)
+                self.assertEqual(result["stats"]["untyped_functions"], 1)
+                self.assertEqual(result["stats"]["inferred_react_components"], 1)
                 self.assertEqual(result["stats"]["total_functions"], 2)
+
+    def test_type_coverage_recognizes_contextual_and_inferred_react_types(self):
+        for target in TARGETS:
+            with self.subTest(target=target), tempfile.TemporaryDirectory() as temp_dir:
+                project = Path(temp_dir) / "project"
+                source = project / "components.tsx"
+                source.parent.mkdir(parents=True)
+                source.write_text(
+                    "type Props = { label: string }\n"
+                    "export const Card: React.FC<Props> = ({ label }) => <div>{label}</div>\n"
+                    "export const Badge = ({ label }: Props) => <span>{label}</span>\n"
+                    "export const identity = <T,>(value: T): T => value\n"
+                    "const formatter: (value: number) => string = (value) => String(value)\n"
+                    "export default function Page() { return <main>Hello</main> }\n"
+                    "const helper = () => 1\n",
+                    encoding="utf-8",
+                )
+                module = load_module(
+                    target,
+                    "type_coverage_contextual",
+                    "lint-and-validate/scripts/type_coverage.py",
+                )
+
+                result = module.check_typescript_coverage(project)
+                messages = "\n".join(result["passed"] + result["issues"])
+
+                self.assertEqual(result["stats"]["total_functions"], 6)
+                self.assertEqual(result["stats"]["annotated_functions"], 3)
+                self.assertEqual(result["stats"]["inferred_react_components"], 2)
+                self.assertEqual(result["stats"]["untyped_functions"], 1)
+                self.assertIn("Explicit/contextual annotation coverage: 83%", messages)
+                self.assertNotIn("Type coverage:", messages)
+
+    def test_low_typescript_annotation_coverage_is_advisory(self):
+        for target in TARGETS:
+            with self.subTest(target=target), tempfile.TemporaryDirectory() as temp_dir:
+                project = Path(temp_dir) / "project"
+                source = project / "helpers.ts"
+                source.parent.mkdir(parents=True)
+                source.write_text(
+                    "export function first() { return 1 }\n"
+                    "export function second() { return 2 }\n",
+                    encoding="utf-8",
+                )
+                checker = script_path(
+                    target,
+                    "lint-and-validate/scripts/type_coverage.py",
+                )
+
+                result = subprocess.run(
+                    ["python3", str(checker), str(project)],
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                )
+
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                self.assertIn(
+                    "[!] Explicit/contextual annotation coverage: 0%",
+                    result.stdout,
+                )
+                self.assertNotIn("[X] Type coverage", result.stdout)
+
+    def test_unsafe_any_usage_remains_a_critical_signal(self):
+        for target in TARGETS:
+            with self.subTest(target=target), tempfile.TemporaryDirectory() as temp_dir:
+                project = Path(temp_dir) / "project"
+                source = project / "unsafe.ts"
+                source.parent.mkdir(parents=True)
+                source.write_text(
+                    "\n".join(
+                        f"export const value{index}: any = {index}"
+                        for index in range(6)
+                    ),
+                    encoding="utf-8",
+                )
+                checker = script_path(
+                    target,
+                    "lint-and-validate/scripts/type_coverage.py",
+                )
+
+                result = subprocess.run(
+                    ["python3", str(checker), str(project)],
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                )
+
+                self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+                self.assertIn("[X] 6 'any' types found", result.stdout)
 
     def test_ux_audit_loads_project_config_and_scans_css(self):
         for target in TARGETS:

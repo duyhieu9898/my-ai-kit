@@ -1,14 +1,27 @@
 #!/usr/bin/env python3
 """
-Type Coverage Checker - Measures TypeScript/Python type coverage.
-Identifies untyped functions, any usage, and type safety issues.
+Type Annotation Checker - Measures explicit annotations and unsafe Any usage.
+This is a lightweight heuristic, not a replacement for TypeScript or Python
+type checking.
 """
 import sys
 import re
-import subprocess
 from pathlib import Path
 
 SKIP_DIRS = {'node_modules', '.next', 'dist', 'build', '.git', '.agents'}
+FUNCTION_DECLARATION_PATTERN = re.compile(
+    r'\bfunction\s+(?P<name>\w+)'
+    r'(?:\s*<[^>{}\n]+>)?\s*'
+    r'\((?P<params>[^)]*)\)\s*'
+    r'(?::\s*(?P<return_type>[^{\n]+))?\s*{',
+)
+ARROW_FUNCTION_PATTERN = re.compile(
+    r'\b(?:export\s+)?const\s+(?P<name>\w+)\s*'
+    r'(?::\s*(?P<variable_type>(?:[^=\n]|=>)+?))?\s*=\s*'
+    r'(?:async\s+)?(?:<[^>\n]+>\s*)?'
+    r'\((?P<params>[^)]*)\)\s*'
+    r'(?::\s*(?P<return_type>(?:[^=\n]|=>)+?))?\s*=>',
+)
 
 # Fix Windows console encoding for Unicode output
 try:
@@ -18,10 +31,16 @@ except AttributeError:
     pass  # Python < 3.7
 
 def check_typescript_coverage(project_path: Path) -> dict:
-    """Check TypeScript type coverage."""
+    """Estimate TypeScript annotation coverage without judging inference as unsafe."""
     issues = []
     passed = []
-    stats = {'any_count': 0, 'untyped_functions': 0, 'total_functions': 0}
+    stats = {
+        'any_count': 0,
+        'untyped_functions': 0,
+        'annotated_functions': 0,
+        'inferred_react_components': 0,
+        'total_functions': 0,
+    }
 
     ts_files = list(project_path.rglob("*.ts")) + list(project_path.rglob("*.tsx"))
     ts_files = [
@@ -41,16 +60,29 @@ def check_typescript_coverage(project_path: Path) -> dict:
             any_matches = re.findall(r':\s*any\b', content)
             stats['any_count'] += len(any_matches)
 
-            # Find functions without explicit return types, including zero-argument
-            # Next.js page/layout components and arrow functions.
-            untyped = re.findall(r'function\s+\w+\s*\([^)]*\)\s*{', content)
-            untyped += re.findall(r'=\s*\([^)]*\)\s*=>', content)
-            stats['untyped_functions'] += len(untyped)
+            is_tsx = file_path.suffix == '.tsx'
 
-            # Count typed functions
-            typed = re.findall(r'function\s+\w+\s*\([^)]*\)\s*:\s*\w+', content)
-            typed += re.findall(r':\s*\([^)]*\)\s*=>\s*\w+', content)
-            stats['total_functions'] += len(typed) + len(untyped)
+            for match in FUNCTION_DECLARATION_PATTERN.finditer(content):
+                stats['total_functions'] += 1
+                if match.group('return_type'):
+                    stats['annotated_functions'] += 1
+                elif is_tsx and match.group('name')[0].isupper():
+                    # React and Next.js components commonly rely on a JSX return
+                    # type inferred by the compiler.
+                    stats['inferred_react_components'] += 1
+                else:
+                    stats['untyped_functions'] += 1
+
+            for match in ARROW_FUNCTION_PATTERN.finditer(content):
+                stats['total_functions'] += 1
+                if match.group('variable_type') or match.group('return_type'):
+                    # Covers React.FC, callable variable types, and explicit
+                    # arrow-function return annotations.
+                    stats['annotated_functions'] += 1
+                elif is_tsx and match.group('name')[0].isupper():
+                    stats['inferred_react_components'] += 1
+                else:
+                    stats['untyped_functions'] += 1
 
         except Exception:
             continue
@@ -64,13 +96,26 @@ def check_typescript_coverage(project_path: Path) -> dict:
         issues.append(f"[X] {stats['any_count']} 'any' types found (too many)")
 
     if stats['total_functions'] > 0:
-        typed_ratio = (stats['total_functions'] - stats['untyped_functions']) / stats['total_functions'] * 100
-        if typed_ratio >= 80:
-            passed.append(f"[OK] Type coverage: {typed_ratio:.0f}%")
-        elif typed_ratio >= 30:
-            issues.append(f"[!] Type coverage: {typed_ratio:.0f}% (improve)")
+        covered_functions = (
+            stats['annotated_functions']
+            + stats['inferred_react_components']
+        )
+        annotation_ratio = covered_functions / stats['total_functions'] * 100
+        if annotation_ratio >= 80:
+            passed.append(
+                f"[OK] Explicit/contextual annotation coverage: {annotation_ratio:.0f}%"
+            )
         else:
-            issues.append(f"[X] Type coverage: {typed_ratio:.0f}% (too low)")
+            issues.append(
+                f"[!] Explicit/contextual annotation coverage: {annotation_ratio:.0f}% "
+                "(TypeScript inference may cover the remainder)"
+            )
+
+        if stats['inferred_react_components'] > 0:
+            passed.append(
+                f"[OK] {stats['inferred_react_components']} React component(s) "
+                "use compiler-inferred JSX return types"
+            )
 
     passed.append(f"[OK] Analyzed {len(ts_files)} TypeScript files")
 
@@ -139,7 +184,7 @@ def main():
     project_path = Path(target)
 
     print("\n" + "=" * 60)
-    print("  TYPE COVERAGE CHECKER")
+    print("  TYPE ANNOTATION CHECKER")
     print("=" * 60 + "\n")
 
     results = []
@@ -172,10 +217,10 @@ def main():
 
     print("\n" + "=" * 60)
     if critical_issues == 0:
-        print("[OK] TYPE COVERAGE: ACCEPTABLE")
+        print("[OK] TYPE ANNOTATION CHECK: ACCEPTABLE")
         sys.exit(0)
     else:
-        print(f"[X] TYPE COVERAGE: {critical_issues} critical issues")
+        print(f"[X] TYPE ANNOTATION CHECK: {critical_issues} critical issues")
         sys.exit(1)
 
 if __name__ == "__main__":
