@@ -150,24 +150,27 @@ def run_accessibility_check(url: str) -> dict:
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print(json.dumps({
-            "error": "Usage: python3 playwright_runner.py <url> [--screenshot] [--a11y]",
-            "examples": [
-                "python3 playwright_runner.py https://example.com",
-                "python3 playwright_runner.py https://example.com --screenshot",
-                "python3 playwright_runner.py https://example.com --a11y"
-            ]
-        }, indent=2))
-        sys.exit(1)
-    
-    url = sys.argv[1]
-    take_screenshot = "--screenshot" in sys.argv
-    check_a11y = "--a11y" in sys.argv
-    
-    if check_a11y:
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Run basic Playwright browser tests")
+    parser.add_argument("args", nargs="+", help="Positional arguments: [project_path] <url>")
+    parser.add_argument("--screenshot", action="store_true", help="Take a screenshot")
+    parser.add_argument("--a11y", action="store_true", help="Run accessibility check")
+
+    parsed_args = parser.parse_args()
+
+    url = next(
+        (arg for arg in parsed_args.args if arg.startswith(("http://", "https://"))),
+        None,
+    )
+    if url is None:
+        parser.error("a URL starting with http:// or https:// is required")
+
+    if parsed_args.a11y:
         result = run_accessibility_check(url)
     else:
-        result = run_basic_test(url, take_screenshot)
-    
+        result = run_basic_test(url, parsed_args.screenshot)
+
     print(json.dumps(result, indent=2))
+    if "error" in result or result.get("status") in {"error", "failed"}:
+        sys.exit(1)
