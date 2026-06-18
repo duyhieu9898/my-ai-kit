@@ -18,7 +18,7 @@
 - Runtime destination: `.agents/`.
 - Repository instruction: `templates/gemini/GEMINI.md` to root `GEMINI.md`.
 - Preserve its agents, skills, workflows, scripts, and shared assets.
-- The current template ships 15 agent files, 34 skill directories, 13 workflow
+- The current template ships 15 agent files, 34 skill directories, 11 workflow
   files, and four top-level runtime scripts.
 - The `rules/` directory exists as a placeholder in the template and currently
   contains no rule files.

@@ -46,7 +46,6 @@ command without explicit authorization.
 ## Choose Supporting Skills
 
 - Use `deployment-procedures` for detailed release and rollback planning.
-- Use `bash-linux` for shell implementation details.
 - Use `database-architect` when migrations or production data are involved.
 - Use `backend-specialist` when runtime failures require application changes.
 - Use `verify-changes` for proportional release evidence.

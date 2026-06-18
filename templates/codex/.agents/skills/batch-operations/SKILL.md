@@ -28,7 +28,6 @@ allowed-tools:
 
 | Skill | Relationship | When to Use Together |
 |:---|:---|:---|
-| [`bash-linux`](../bash-linux/SKILL.md) | Shell command patterns and safety | When batch work uses terminal pipelines or scripts |
 | [`clean-code`](../clean-code/SKILL.md) | Code quality guardrails | When bulk edits affect readability, naming, or structure |
 | [`lint-and-validate`](../lint-and-validate/SKILL.md) | Verification commands | When batch changes need lint, type, build, or test checks |
 | [`code-review-checklist`](../code-review-checklist/SKILL.md) | Review discipline | When multi-file changes need a focused review pass |

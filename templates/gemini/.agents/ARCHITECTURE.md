@@ -10,7 +10,7 @@ AG Kit is a modular system consisting of:
 
 - **15 Specialist Agents** - Role-based AI personas
 - **34 Skills** - Domain-specific knowledge modules with conditional loading
-- **13 Workflows** - Slash command procedures
+- **11 Workflows** - Slash command procedures
 
 ---
 
@@ -21,7 +21,7 @@ AG Kit is a modular system consisting of:
 ├── ARCHITECTURE.md          # This file
 ├── agents/                  # 15 Specialist Agents
 ├── skills/                  # 34 Skills (with conditional loading)
-├── workflows/               # 13 Slash Commands
+├── workflows/               # 11 Slash Commands
 ├── rules/                   # Placeholder for target-specific rule files
 └── scripts/                 # Master Validation Scripts
 ```
@@ -145,19 +145,17 @@ only provide `description`.
 
 ---
 
-## 🔄 Workflows (14)
+## 🔄 Workflows (11)
 
 Slash command procedures. Invoke with `/command`.
 
 | Command          | Description                                    |
 | ---------------- | ---------------------------------------------- |
 | `/brainstorm`    | Socratic discovery                             |
-| `/coordinate`    | **NEW** Advanced multi-agent coordination      |
 | `/create`        | Create new features                            |
 | `/debug`         | Debug issues                                   |
 | `/deploy`        | Deploy application                             |
 | `/enhance`       | Improve existing code                          |
-| `/orchestrate`   | Multi-agent coordination                       |
 | `/plan`          | Task breakdown                                 |
 | `/preview`       | Preview changes                                |
 | `/status`        | Check project status                           |
@@ -256,7 +254,7 @@ The current template ships the runtime scripts directly under `.agents/scripts/`
 | ------------------- | --------------------------------- |
 | **Total Agents**    | 15                                |
 | **Total Skills**    | 34                                |
-| **Total Workflows** | 13                                |
+| **Total Workflows** | 11                                |
 | **Total Scripts**   | 4 master + 12 skill-level script directories |
 
 ---

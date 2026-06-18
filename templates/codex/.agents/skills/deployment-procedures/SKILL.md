@@ -41,7 +41,6 @@ This skill teaches **deployment principles**, not bash scripts to copy.
 | [`devops-engineer`](../devops-engineer/SKILL.md) | Production operations and platform management | When deployment work involves server access, CI/CD, or incident response |
 | [`verify-changes`](../verify-changes/SKILL.md) | Final validation workflow | When release readiness needs lint, build, test, or smoke checks |
 | [`database-architect`](../database-architect/SKILL.md) | Migration and data safety | When deploys include schema or data changes |
-| [`bash-linux`](../bash-linux/SKILL.md) | Shell command safety | When deployment steps require terminal commands or scripts |
 
 ---
 
