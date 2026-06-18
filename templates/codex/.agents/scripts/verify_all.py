@@ -19,7 +19,6 @@ Includes ALL checks:
     ✅ Lighthouse (Core Web Vitals)
     ✅ Playwright E2E
     ✅ Bundle Analysis (if applicable)
-    ✅ Mobile Audit (if applicable)
 """
 
 import sys
@@ -107,7 +106,6 @@ VERIFICATION_SUITE = [
         "category": "SEO & Content",
         "checks": [
             ("SEO Check", ".agents/skills/seo-fundamentals/scripts/seo_checker.py", False),
-            ("GEO Check", ".agents/skills/geo-fundamentals/scripts/geo_checker.py", False),
         ]
     },
     
@@ -129,14 +127,7 @@ VERIFICATION_SUITE = [
             ("Playwright E2E", ".agents/skills/webapp-testing/scripts/playwright_runner.py", False),
         ]
     },
-    
-    # P8: Mobile (if applicable)
-    {
-        "category": "Mobile",
-        "checks": [
-            ("Mobile Audit", ".agents/skills/mobile-design/scripts/mobile_audit.py", False),
-        ]
-    },
+
     
     # P9: Internationalization
     {

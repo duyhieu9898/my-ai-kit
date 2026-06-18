@@ -331,8 +331,6 @@ Generates markdown wiki of codebase structure — every module, its public API, 
 
 | AG Kit Skill | How It Complements |
 |-------------------|--------------------|
-| [`context-compression`](../context-compression/SKILL.md) | Graph reduces input context; compression reduces output verbosity |
-| [`coordinator-mode`](../coordinator-mode/SKILL.md) | Graph-aware workers can be dispatched with precise file lists |
 | [`verify-changes`](../verify-changes/SKILL.md) | After graph-informed review, verify changes via execution |
 | [`batch-operations`](../batch-operations/SKILL.md) | Graph's blast radius informs which files need batch updates |
 
@@ -341,9 +339,7 @@ Generates markdown wiki of codebase structure — every module, its public API, 
 ```
 1. Start fresh session for each distinct task
 2. Graph pre-filters context → AI reads only blast radius
-3. Context compression summarizes completed phases
-4. Memory system saves key decisions for next session
-5. Result: minimum tokens, maximum quality
+3. Result: minimum tokens, maximum quality
 ```
 
 ---

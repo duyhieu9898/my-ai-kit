@@ -10,7 +10,7 @@ $ARGUMENTS
 
 ## 🔴 CRITICAL RULES
 
-1. **Load coordinator-mode skill** — Read `.agents/skills/coordinator-mode/SKILL.md` first
+1. **Focus on planning-first approach** — Understand task boundaries first
 2. **Phase-based execution** — Research → Synthesis → Implementation → Verification
 3. **Never delegate understanding** — Write specific prompts, not vague instructions
 4. **Parallel reads, sequential writes** — Read-only tasks can run in parallel
@@ -19,13 +19,13 @@ $ARGUMENTS
 
 ## Task
 
-Use the `orchestrator` agent with this context:
+Use the `project-planner` agent with this context:
 
 ```
 CONTEXT:
 - User Request: $ARGUMENTS
 - Mode: COORDINATOR (advanced orchestration)
-- Skill: Load coordinator-mode skill for patterns
+- Skill: Load plan-writing and brainstorming skills for planning patterns
 
 WORKFLOW:
 1. DECOMPOSE the request into worker subtasks
@@ -35,7 +35,7 @@ WORKFLOW:
 5. VERIFY completeness before reporting to user
 
 RULES:
-1. Follow coordinator-mode/SKILL.md protocol
+1. Follow plan-writing/SKILL.md protocol
 2. Brief workers like smart colleagues — full context, specific scope
 3. Never write "based on your findings, fix it" — prove YOU understood
 4. Start with 2-3 workers, add more after synthesis if needed

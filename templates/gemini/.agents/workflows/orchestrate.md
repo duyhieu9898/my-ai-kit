@@ -32,7 +32,7 @@ $ARGUMENTS
 | **Database** | database-architect, backend-specialist, security-auditor |
 | **Full Stack** | project-planner, frontend-specialist, backend-specialist, devops-engineer |
 | **Debug** | debugger, explorer-agent, test-engineer |
-| **Security** | security-auditor, penetration-tester, devops-engineer |
+| **Security** | security-auditor, devops-engineer |
 
 ---
 
@@ -82,7 +82,7 @@ Do you approve? (Y/N)
 
 > ✅ After user approval, invoke multiple agents in PARALLEL.
 
-## Available Agents (14 total)
+## Available Agents (12 total)
 
 | Agent | Domain | Use When |
 |-------|--------|----------|
@@ -92,14 +92,12 @@ Do you approve? (Y/N)
 | `backend-specialist` | Server | API, Node.js, Python |
 | `database-architect` | Data | SQL, NoSQL, Schema |
 | `security-auditor` | Security | Vulnerabilities, Auth |
-| `penetration-tester` | Security | Active testing |
 | `test-engineer` | Testing | Unit, E2E, Coverage |
 | `devops-engineer` | Ops | CI/CD, Docker, Deploy |
 | `performance-optimizer` | Speed | Lighthouse, Profiling |
 | `seo-specialist` | SEO | Meta, Schema, Rankings |
 | `documentation-writer` | Docs | README, API docs |
 | `debugger` | Debug | Error analysis |
-| `orchestrator` | Meta | Coordination |
 
 ---
 
@@ -108,7 +106,7 @@ Do you approve? (Y/N)
 ### Step 1: Analyze Task Domains
 Identify ALL domains this task touches:
 ```
-□ Security     → security-auditor, penetration-tester
+□ Security     → security-auditor
 □ Backend/API  → backend-specialist
 □ Frontend/UI  → frontend-specialist
 □ Database     → database-architect

@@ -29,7 +29,6 @@ You are an expert at exploring and understanding complex codebases, mapping arch
 
 | Need | Skill |
 |:---|:---|
-| High-level task orchestration and delegation | [`orchestrator`](../orchestrator/SKILL.md) |
 | Planning high-complexity project tracks | [`project-planner`](../project-planner/SKILL.md) |
 | Optimizing large-repository token usage | [`code-review-graph`](../code-review-graph/SKILL.md) |
 | Architectural decision analysis | [`architecture`](../architecture/SKILL.md) |
@@ -70,7 +69,7 @@ When tasked with conducting code repository discovery, health audits, or feasibi
 3.  **Dependency Intelligence**: Analyzes not just *what* is used, but *how* it's coupled.
 4.  **Risk Analysis**: Proactively identifies potential conflicts or breaking changes before they happen.
 5.  **Research & Feasibility**: Investigates external APIs, libraries, and new feature viability.
-6.  **Knowledge Synthesis**: Acts as the primary information source for `orchestrator` and `project-planner`.
+6.  **Knowledge Synthesis**: Acts as the primary information source for `project-planner`.
 
 ## Advanced Exploration Modes
 
@@ -127,4 +126,4 @@ Before concluding a codebase discovery, health audit, or research task, verify c
 - To map out a plan for a complex refactor.
 - To research the feasibility of a third-party integration.
 - For deep-dive architectural audits.
-- When an "orchestrator" needs a detailed map of the system before distributing tasks.
+- When creating a detailed plan before distributing tasks.

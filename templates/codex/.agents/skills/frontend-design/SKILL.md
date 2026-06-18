@@ -43,7 +43,6 @@ allowed-tools:
 | Implementing web UI from design guidance | [`frontend-specialist`](../frontend-specialist/SKILL.md) |
 | Next.js and React implementation details | [`nextjs-react-expert`](../nextjs-react-expert/SKILL.md) |
 | Post-coding layout audit, accessibility, perf | [`web-design-guidelines`](../web-design-guidelines/SKILL.md) |
-| Native mobile interface guidance | [`mobile-design`](../mobile-design/SKILL.md) |
 
 ---
 

@@ -46,7 +46,7 @@ Agent activated -> Check frontmatter "skills:" -> Read SKILL.md (INDEX) -> Read 
 
 **ALWAYS ACTIVE: Before responding to ANY request, automatically analyze and select the best agent(s).**
 
-> 🔴 **MANDATORY:** You MUST follow the protocol defined in `@[skills/intelligent-routing]`.
+> 🔴 **MANDATORY:** You MUST follow the Auto-Selection Protocol defined below.
 
 ### Auto-Selection Protocol
 
@@ -69,7 +69,7 @@ When auto-applying an agent, inform the user:
 
 1. **Silent Analysis**: No verbose meta-commentary ("I am analyzing...").
 2. **Respect Overrides**: If user mentions `@agent`, use it.
-3. **Complex Tasks**: For multi-domain requests, use `orchestrator` and ask Socratic questions first.
+3. **Complex Tasks**: For multi-domain requests, use the `project-planner` and ask Socratic questions first.
 
 ### ⚠️ AGENT ROUTING CHECKLIST (MANDATORY BEFORE EVERY CODE/DESIGN RESPONSE)
 
@@ -208,7 +208,6 @@ conventions and scope rules taking precedence.
 | `accessibility_checker.py` | frontend-design       | After UI change     |
 | `seo_checker.py`           | seo-fundamentals      | After page change   |
 | `bundle_analyzer.py`       | performance-profiling | Before deploy       |
-| `mobile_audit.py`          | mobile-design         | After mobile change |
 | `lighthouse_audit.py`      | performance-profiling | Before deploy       |
 | `playwright_runner.py`     | webapp-testing        | Before deploy       |
 
@@ -220,7 +219,7 @@ conventions and scope rules taking precedence.
 | -------- | ----------------- | -------------------------------------------- |
 | **plan** | `project-planner` | Repository-aware roadmap; planning artifact only. |
 | **ask**  | -                 | Focus on understanding. Ask questions.       |
-| **edit** | `orchestrator`    | Execute. Check `{task-slug}.md` first.       |
+| **edit** | Specialist Agent  | Execute. Check `{task-slug}.md` first for complex changes. |
 
 **Plan Mode:**
 
@@ -257,14 +256,14 @@ conventions and scope rules taking precedence.
 
 ### Agents & Skills
 
-- **Masters**: `orchestrator`, `project-planner`, `security-auditor` (Cyber/Audit), `backend-specialist` (API/DB), `frontend-specialist` (UI/UX), `debugger`
-- **Key Skills**: `clean-code`, `brainstorming`, `app-builder`, `frontend-design`, `mobile-design`, `plan-writing`, `behavioral-modes`
+- **Masters**: `project-planner`, `security-auditor` (Cyber/Audit), `backend-specialist` (API/DB), `frontend-specialist` (UI/UX), `debugger`
+- **Key Skills**: `clean-code`, `brainstorming`, `app-builder`, `frontend-design`, `plan-writing`
 
 ### Key Scripts
 
 - **Verify**: `.agents/scripts/verify_all.py`, `.agents/scripts/checklist.py`
 - **Scanners**: `security_scan.py`, `dependency_analyzer.py`
-- **Audits**: `ux_audit.py`, `mobile_audit.py`, `lighthouse_audit.py`, `seo_checker.py`
+- **Audits**: `ux_audit.py`, `lighthouse_audit.py`, `seo_checker.py`
 - **Test**: `playwright_runner.py`, `test_runner.py`
 
 ---

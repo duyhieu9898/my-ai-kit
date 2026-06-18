@@ -40,7 +40,6 @@ Specialist AI personas for different domains.
 | `database-architect`     | Schema, SQL                | database-design                                          |
 | `devops-engineer`        | CI/CD, Docker              | deployment-procedures                                    |
 | `security-auditor`       | Security compliance        | vulnerability-scanner                                    |
-| `penetration-tester`     | Offensive security         | -                                                        |
 | `test-engineer`          | Testing strategies         | testing-patterns, tdd-workflow, webapp-testing, playwright-pitfalls, playwright-pro-patterns |
 | `debugger`               | Root cause analysis        | systematic-debugging                                     |
 | `performance-optimizer`  | Speed, Web Vitals          | performance-profiling                                    |
@@ -69,7 +68,6 @@ only provide `description`.
 | `web-design-guidelines`       | Web UI audit - 100+ rules for accessibility, UX, performance (Vercel) |
 | `tailwind-patterns`           | Tailwind CSS v4 utilities                                             |
 | `frontend-design`             | UI/UX patterns, design systems                                        |
-| `frontend-specialist`         | Senior Frontend Architect instructions and UI decision frameworks      |
 
 ### Backend & API
 
@@ -140,7 +138,6 @@ only provide `description`.
 | ------------------------- | ------------------------- |
 | `clean-code`              | Scoped implementation quality heuristics |
 | `mcp-builder`             | Model Context Protocol    |
-| `documentation-writer`    | Technical documentation & templates |
 | `i18n-localization`       | Internationalization      |
 | `performance-profiling`   | Web Vitals, optimization  |
 | `systematic-debugging`    | Troubleshooting           |
