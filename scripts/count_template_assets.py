@@ -89,18 +89,13 @@ def main():
     codex_arch = os.path.join(codex_base, "ARCHITECTURE.md")
     
     codex_actual = {
-        'agents': count_items(os.path.join(codex_base, "agents"), 'file'),
         'skills': count_items(os.path.join(codex_base, "skills"), 'dir'),
-        'workflows': count_items(os.path.join(codex_base, "workflows"), 'file'),
         'scripts': count_items(os.path.join(codex_base, "scripts"), 'file')
     }
     
     codex_doc = parse_documented_codex(codex_arch)
     
-    print_result("Codex", "Agents", codex_actual['agents'], None)
     print_result("Codex", "Skills", codex_actual['skills'], codex_doc.get('skills'))
-    print_result("Codex", "Workflows", codex_actual['workflows'], None)
-
     print_result("Codex", "Scripts", codex_actual['scripts'], codex_doc.get('scripts'))
     
     print("=" * 60)
