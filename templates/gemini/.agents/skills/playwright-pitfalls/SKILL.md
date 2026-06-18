@@ -1,9 +1,10 @@
 ---
 name: playwright-pitfalls
-description: 7 Critical Playwright pitfalls and fixes. Focuses on timing, isolation, and assertion integrity.
-when_to_use: "Activate ONLY when debugging failed runs, fixing flaky tests, or refactoring existing Playwright test suites. NOT for writing new tests from scratch."
+description: Use ONLY when debugging failed runs, fixing flaky tests, or refactoring
+  existing Playwright test suites. NOT for writing new tests from scratch.
 allowed-tools: Read, Write, Edit, Glob, Grep
 ---
+
 
 # 7 Critical Playwright Pitfalls
 

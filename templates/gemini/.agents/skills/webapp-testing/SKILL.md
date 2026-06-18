@@ -1,9 +1,11 @@
 ---
 name: webapp-testing
-description: Web application testing principles. E2E, Playwright, deep audit strategies.
-when_to_use: "When writing E2E tests with Playwright, performing deep web app audits, or testing user flows. Use with /test workflow."
+description: Use when writing E2E web browser test flows or conducting deep web application
+  routing audits. Systematic web app testing (Playwright, accessibility). NOT for
+  unit-only tests or manual QA without browser automation.
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash
 ---
+
 
 # Web App Testing
 

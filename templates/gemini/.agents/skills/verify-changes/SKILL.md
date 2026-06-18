@@ -1,8 +1,12 @@
 ---
 name: verify-changes
-description: Prove changed behavior with proportional executable evidence selected from project-native checks, Harness risk lanes, story criteria, and the proof matrix. Use after code changes or explicit verification requests; do not automatically run every available check.
+description: Use after code changes or when the user asks to test, verify, or prove
+  behavior. Selects proportional, executable evidence from project-native checks,
+  Harness risk lanes, story acceptance criteria, and the proof matrix. NOT for writing
+  unrelated implementation or automatically running every available check.
 allowed-tools: Read, Bash, Grep, Glob
 ---
+
 
 # Verify Changes
 

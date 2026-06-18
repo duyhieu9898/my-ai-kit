@@ -1,9 +1,13 @@
 ---
 name: plan-writing
-description: Creates bounded implementation plans for known features, bug fixes, and multi-file refactors. Produces small file-aware tasks with explicit verification criteria. Use after scope and architecture are understood; not for new-product roadmaps, cross-workstream initiatives, trivial edits, or executing an existing plan.
-when_to_use: "Use when converting a known change into a concise implementation checklist. Use project-planner for broad initiatives or new-product roadmaps."
+description: Create bounded implementation plans for known features, bug fixes, and
+  multi-file refactors. Produce small file-aware tasks with explicit verification
+  criteria. Use after scope and architecture are sufficiently understood. NOT for
+  trivial edits, executing an existing plan, new-product roadmaps, or cross-workstream
+  initiatives that belong in project-planner.
 allowed-tools: Read, Glob, Grep
 ---
+
 
 # Plan Writing
 

@@ -1,9 +1,12 @@
 ---
 name: frontend-design
-description: Design thinking and decision-making for web UI. Use when designing components, layouts, color schemes, typography, or creating aesthetic interfaces. Teaches principles, not fixed values.
-when_to_use: "When designing web UI components, choosing color schemes, typography, layouts, or creating aesthetic interfaces. NOT for mobile apps."
+description: Use when designing component layouts, establishing color palettes, font
+  systems, or writing modern responsive interfaces. Design thinking and UX guidelines
+  covering proportional grids, typography, shadow effects, and Next.js Form patterns.
+  NOT for native mobile apps.
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash
 ---
+
 
 # Frontend Design System
 

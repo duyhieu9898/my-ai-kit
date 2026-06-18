@@ -1,9 +1,11 @@
 ---
 name: seo-fundamentals
-description: SEO fundamentals, E-E-A-T, Core Web Vitals, and Google algorithm principles.
-when_to_use: "When optimizing web pages for search engines, implementing meta tags, improving E-E-A-T, or fixing Core Web Vitals."
+description: Use when optimizing web pages for search visibility, meta tags, page
+  speed, sitemaps or robots.txt. SEO fundamentals covering E-E-A-T, Core Web Vitals,
+  and Schema. NOT for visual layout styling.
 allowed-tools: Read, Glob, Grep
 ---
+
 
 # SEO Fundamentals
 

@@ -1,9 +1,12 @@
 ---
 name: nodejs-best-practices
-description: Node.js development principles and decision-making. Framework selection, async patterns, security, and architecture. Teaches thinking, not copying.
-when_to_use: "When building Node.js backends, selecting frameworks (Express/Fastify/NestJS), or implementing async patterns."
+description: Use when building Node.js backends, selecting frameworks, implementing
+  async patterns, or validating APIs. Node.js development principles (Express, Fastify,
+  NestJS, Hono), security, and architecture. NOT for frontend-only UI components or
+  non-JavaScript backend stacks.
 allowed-tools: Read, Write, Edit, Glob, Grep
 ---
+
 
 # Node.js Best Practices
 

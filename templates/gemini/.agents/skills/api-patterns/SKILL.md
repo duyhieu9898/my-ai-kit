@@ -1,12 +1,12 @@
 ---
 name: api-patterns
-description: >-
-  Use when designing or reviewing REST, GraphQL, or tRPC contracts, response
-  formats, pagination, versioning, authentication, or API protection.
-  Provides API-style decisions and contract review guidance. NOT for
-  frontend-only work or routine endpoint implementation.
+description: Use when designing or reviewing REST, GraphQL, or tRPC contracts, response
+  formats, pagination, versioning, authentication, or API protection. Provides API-style
+  decisions and contract review guidance. NOT for frontend-only work or routine endpoint
+  implementation.
 allowed-tools: Read, Write, Edit, Glob, Grep
 ---
+
 
 # API Patterns
 

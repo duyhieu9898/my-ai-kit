@@ -1,9 +1,13 @@
 ---
 name: brainstorming
-description: Socratic questioning protocol + user communication. MANDATORY for complex requests, new features, or unclear requirements. Includes progress reporting and error handling.
-when_to_use: "When exploring options before implementation, clarifying requirements, or when the user needs creative problem-solving. Use with /brainstorm workflow."
+description: Use when exploring greenfield projects/features, clarifying ambiguous
+  user requests, defining must-have vs nice-to-have options, or handling exceptions.
+  Socratic questioning protocol and developer-user communication guidelines covering
+  trade-offs, status reporting, and completion summaries. NOT for standard task automation
+  or standalone code modifications.
 allowed-tools: Read, Glob, Grep
 ---
+
 
 # Brainstorming & Communication Protocol
 

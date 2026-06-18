@@ -1,9 +1,12 @@
 ---
 name: systematic-debugging
-description: 4-phase systematic debugging methodology with root cause analysis and evidence-based verification. Use when debugging complex issues.
-when_to_use: "When debugging complex issues, performing root cause analysis, or using evidence-based problem solving. Use with /debug workflow."
+description: Use when debugging complex bugs, resolving unexpected errors, conducting
+  root cause (5 Whys), or setting up regression tests. Systematic debugging methodology
+  (Reproduce, Isolate, Understand, Fix & Verify). NOT for implementing unrelated new
+  features or speculative code cleanup.
 allowed-tools: Read, Glob, Grep
 ---
+
 
 # Systematic Debugging
 

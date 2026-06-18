@@ -1,9 +1,11 @@
 ---
 name: tdd-workflow
-description: Test-Driven Development workflow principles. RED-GREEN-REFACTOR cycle.
-when_to_use: "When practicing Test-Driven Development, following RED-GREEN-REFACTOR cycle, or writing tests before implementation."
+description: Use when practicing TDD, writing unit/integration tests before implementing,
+  or debugging via test-first bug replication. Test-Driven Development (TDD) RED-GREEN-REFACTOR
+  workflow. NOT for purely visual layout tweaks or exploratory spikes.
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash
 ---
+
 
 # TDD Workflow
 

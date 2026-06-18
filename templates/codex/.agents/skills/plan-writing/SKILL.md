@@ -10,194 +10,109 @@ description: >-
 
 # Plan Writing
 
-> Distilled from production-proven planning frameworks. Breaks down complex tracks into atomic, verifiable actions.
+Create a concise implementation plan for a bounded, understood change.
 
----
+## Operating Boundary
 
-## 📑 Content Map
+- Use for a known feature, bug fix, or multi-file refactor.
+- Use when affected files and behavior can be identified.
+- Use when each task can have a concrete verification method.
+- Do not use for new-product roadmaps or cross-workstream initiatives.
+- Do not use for trivial one-step edits or direct execution of an existing plan.
+- Use [`project-planner`](../project-planner/SKILL.md) when scope spans multiple
+  work streams or still requires project-level architecture decisions.
 
-| File | Description | When to Read |
-|:---|:---|:---|
-| _No supplementary files_ | Main plan writing procedures are in this file | Use this file by default |
+## Workflow
 
----
+1. Restate the goal and implementation boundary.
+2. Inspect the affected files, callers, tests, and project commands.
+3. Identify hard dependencies and tasks that can run in parallel.
+4. Break work into five to ten small, independently verifiable tasks.
+5. Give every task a specific action and `Verify:` criterion.
+6. Select checks from the actual project; do not copy generic commands.
+7. Save the plan using the repository's convention or the default path below.
 
-## 🔗 Related Skills
+Do not implement tasks or mark checks complete while writing the plan.
 
-| Need | Skill |
-|:---|:---|
-| Orchestrating large-scale multi-agent planner loops | [`project-planner`](../project-planner/SKILL.md) |
+## Default Plan Path
 
----
+Save bounded implementation plans in the project root as:
 
-## 🛠️ Instructions / Procedures
-
-When tasked with writing action plans, decomposing new features, planning refactors, or documenting bug fixes, strictly follow this step-by-step procedure:
-
-### Step 1: Query Intent & Preferences
-1. Query the user for technology preferences, MVP constraints, or legacy compatibility layers.
-2. Isolate the target boundaries (what files are affected, what dependencies are needed).
-
-### Step 2: Establish Verification Boundaries
-1. Design explicit, actionable verification methods for the overall objective.
-2. Outline specific success criteria (e.g. CLI calls returning specific codes, network request responses, local server interactions).
-
-### Step 3: Decompose into Atomic Tasks
-1. Break down the work into 5-10 small, focused, verifiable tasks taking 2-5 minutes each.
-2. For each task, write a clear, one-line action and a dedicated `Verify: [How to check]` parameter.
-
-### Step 4: Write Action Plan to Project Root
-1. Generate the structured task plan following the minimal plan structure format.
-2. Save the plan file directly to the PROJECT ROOT directory as `{task-slug}.md` (never inside `.claude/`, `docs/`, or temporary paths).
-
-### Step 5: Mark Progress & Checklist Verification
-1. Execute tasks step-by-step, updating task checkmarks `[x]` as they complete.
-2. Confirm overall compliance against the **Quality Audit Checklist** before concluding.
-
----
-
-## Overview
-This skill provides a framework for breaking down work into clear, actionable tasks with verification criteria.
-
-## Task Breakdown Principles
-
-### 1. Small, Focused Tasks
-- Each task should take 2-5 minutes
-- One clear outcome per task
-- Independently verifiable
-
-### 2. Clear Verification
-- How do you know it's done?
-- What can you check/test?
-- What's the expected output?
-
-### 3. Logical Ordering
-- Dependencies identified
-- Parallel work where possible
-- Critical path highlighted
-- **Phase X: Verification is always LAST**
-
-### 4. Dynamic Naming in Project Root
-- Plan files are saved as `{task-slug}.md` in the PROJECT ROOT
-- Name derived from task (e.g., "add auth" → `auth-feature.md`)
-- **NEVER** inside `.claude/`, `docs/`, or temp folders
-
-## Planning Principles (NOT Templates!)
-
-> 🔴 **NO fixed templates. Each plan is UNIQUE to the task.**
-
-### Principle 1: Keep It SHORT
-
-| ❌ Wrong | ✅ Right |
-|----------|----------|
-| 50 tasks with sub-sub-tasks | 5-10 clear tasks max |
-| Every micro-step listed | Only actionable items |
-| Verbose descriptions | One-line per task |
-
-> **Rule:** If plan is longer than 1 page, it's too long. Simplify.
-
----
-
-### Principle 2: Be SPECIFIC, Not Generic
-
-| ❌ Wrong | ✅ Right |
-|----------|----------|
-| "Set up project" | "Run `npx create-next-app`" |
-| "Add authentication" | "Install next-auth, create `/api/auth/[...nextauth].ts`" |
-| "Style the UI" | "Add Tailwind classes to `Header.tsx`" |
-
-> **Rule:** Each task should have a clear, verifiable outcome.
-
----
-
-### Principle 3: Dynamic Content Based on Project Type
-
-**For NEW PROJECT:**
-- What tech stack? (decide first)
-- What's the MVP? (minimal features)
-- What's the file structure?
-
-**For FEATURE ADDITION:**
-- Which files are affected?
-- What dependencies needed?
-- How to verify it works?
-
-**For BUG FIX:**
-- What's the root cause?
-- What file/line to change?
-- How to test the fix?
-
----
-
-### Principle 4: Scripts Are Project-Specific
-
-> 🔴 **DO NOT copy-paste script commands. Choose based on project type.**
-
-| Project Type | Relevant Scripts |
-|--------------|------------------|
-| Frontend/React | `ux_audit.py`, `accessibility_checker.py` |
-| Backend/API | `api_validator.py`, `security_scan.py` |
-| Mobile | `mobile_audit.py` |
-| Database | `schema_validator.py` |
-| Full-stack | Mix of above based on what you touched |
-
-**Wrong:** Adding all scripts to every plan
-**Right:** Only scripts relevant to THIS task
-
----
-
-### Principle 5: Verification is Simple
-
-| ❌ Wrong | ✅ Right |
-|----------|----------|
-| "Verify the component works correctly" | "Run `npm run dev`, click button, see toast" |
-| "Test the API" | "curl localhost:3000/api/users returns 200" |
-| "Check styles" | "Open browser, verify dark mode toggle works" |
-
----
-
-## Plan Structure (Flexible, Not Fixed!)
-
+```text
+{task-slug}.md
 ```
-# [Task Name]
+
+Use lowercase kebab-case derived from the requested change. If the repository or
+user specifies another location, follow that stronger authority.
+
+## Task Quality
+
+Each task must:
+
+- name the affected file, module, interface, or command;
+- describe one clear outcome;
+- identify hard blockers only;
+- state how completion will be verified;
+- avoid speculative cleanup outside the requested scope.
+
+Prefer:
+
+```markdown
+- [ ] Update `src/auth/session.ts` to reject expired refresh tokens.
+  Verify: Run the focused auth test and confirm the expired-token case returns
+  the expected error.
+```
+
+Avoid:
+
+```markdown
+- [ ] Improve authentication.
+```
+
+## Project-Specific Verification
+
+Choose checks according to the changed surface:
+
+| Surface | Example verification |
+|---|---|
+| CLI or library | Unit tests, syntax or type checks, command smoke test |
+| Backend or API | Contract or integration test, focused request probe |
+| Web UI | Component test, build, browser interaction |
+| Mobile or desktop | Platform build, emulator or device smoke test |
+| Data | Migration dry run, integrity query, rollback check |
+| Infrastructure | Config validation, deployment dry run |
+
+Do not require every script for every plan. Document expected checks without
+claiming they have already passed.
+
+## Minimal Structure
+
+```markdown
+# [Change Name]
 
 ## Goal
-One sentence: What are we building/fixing?
+[One sentence]
+
+## Scope
+- In:
+- Out:
 
 ## Tasks
-- [ ] Task 1: [Specific action] → Verify: [How to check]
-- [ ] Task 2: [Specific action] → Verify: [How to check]
-- [ ] Task 3: [Specific action] → Verify: [How to check]
+- [ ] [Specific action]
+  Verify: [Executable or observable evidence]
 
 ## Done When
-- [ ] [Main success criteria]
+- [ ] [Main success criterion]
 ```
 
-> **That's it.** No phases, no sub-sections unless truly needed.
-> Keep it minimal. Add complexity only when required.
+Add risks, rollback, or dependency sections only when they materially help.
 
-## Notes
-[Any important considerations]
+## Quality Checklist
 
----
-
-## ❌ Anti-Patterns
-
-- Writing generic template plans that do not name the actual files, commands, or checks.
-- Creating plans for trivial one-step edits where direct execution is clearer.
-- Saving plan files inside `.claude/`, `docs/`, or temporary paths instead of the project root.
-- Listing broad phases without concrete `Verify:` criteria for each task.
-
----
-
-## ✅ Quality Audit Checklist
-
-Before concluding a plan writing, task decomposition, or feature design task, verify compliance with the following:
-
-- [ ] **Small Focused Tasks**: Decomposed the target into 5-10 atomic tasks taking 2-5 minutes each.
-- [ ] **Clear Verification Defined**: Every task includes an explicit, actionable, and testable `Verify: [How to check]` condition.
-- [ ] **Saved in Project Root**: The generated action plan is stored precisely as `{task-slug}.md` in the project root.
-- [ ] **No Template Bloat**: Kept it minimal, readable, and highly specific to the project context (avoiding generic copy-paste structures).
-- [ ] **Dynamic Naming Applied**: Slugs reflect the main feature action in a clean kebab-case format.
-
----
+- [ ] The change is bounded and understood.
+- [ ] Tasks name concrete affected surfaces.
+- [ ] Every task has an actionable `Verify:` criterion.
+- [ ] Hard dependencies and parallel work are clear.
+- [ ] Verification matches the project and changed behavior.
+- [ ] The plan stays within the requested scope.
+- [ ] No implementation task was executed or marked complete.

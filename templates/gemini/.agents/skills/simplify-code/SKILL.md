@@ -1,10 +1,12 @@
 ---
 name: simplify-code
-description: Reduce complexity of over-engineered code. Identify unnecessary abstractions, remove dead code, flatten deep nesting, and simplify logic while preserving behavior.
-when_to_use: "When code is over-engineered, overly abstract, deeply nested, or more complex than needed. When user asks to 'simplify', 'clean up', 'reduce complexity', or 'make this simpler'. NOT for adding new features."
+description: Use when codebase suffers from over-abstraction, excessive nesting, or
+  unnecessary cognitive load. Code complexity reduction patterns (early returns, flattening,
+  abstraction pruning). NOT for new features.
 allowed-tools: Read, Write, Edit, Grep, Glob
 effort: medium
 ---
+
 
 # Simplify Code — Reduce Unnecessary Complexity
 

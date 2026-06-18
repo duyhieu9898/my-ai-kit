@@ -134,6 +134,7 @@ const planWritingPath = "templates/codex/.agents/skills/plan-writing/SKILL.md";
 const projectPlannerOpenAiPath =
   "templates/codex/.agents/skills/project-planner/agents/openai.yaml";
 const projectPlanner = readText(projectPlannerPath);
+const planWriting = readText(planWritingPath);
 const projectPlannerOpenAi = readText(projectPlannerOpenAiPath);
 const geminiProjectPlannerPath =
   "templates/gemini/.agents/agents/project-planner.md";
@@ -246,6 +247,15 @@ record(
   "project-planner default prompt is actionable",
   /default_prompt:\s*"Use \$project-planner .+"/.test(projectPlannerOpenAi),
   projectPlannerOpenAiPath,
+);
+record(
+  "plan-writing stays bounded and planning-only",
+  planWriting.includes("bounded, understood change") &&
+    planWriting.includes("../project-planner/SKILL.md") &&
+    !planWriting.includes("For NEW PROJECT") &&
+    !planWriting.includes("Execute tasks step-by-step") &&
+    !planWriting.includes("Phase X"),
+  planWritingPath,
 );
 record(
   "Gemini project-planner uses one canonical default plan path",

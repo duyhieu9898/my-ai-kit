@@ -1,9 +1,12 @@
 ---
 name: python-patterns
-description: Python development principles and decision-making. Framework selection, async patterns, type hints, project structure. Teaches thinking, not copying.
-when_to_use: "When writing Python code, selecting Python frameworks, implementing type hints, or structuring Python projects."
+description: Use when writing Python code, selecting frameworks, implementing type
+  hints, or structuring Python projects. Python development principles (FastAPI, Django,
+  Flask), async vs sync, and Pydantic validation. NOT for non-Python backend stacks
+  or frontend-only implementation work.
 allowed-tools: Read, Write, Edit, Glob, Grep
 ---
+
 
 # Python Patterns
 

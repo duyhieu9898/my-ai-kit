@@ -1,9 +1,13 @@
 ---
 name: backlog
-description: Manage Backlog projects through the bundled CLI, including listing and searching issues, inspecting project metadata, creating or updating issues, creating UT bugs, resolving bugs, reviewing Story/Task deadlines, and reading local metrics or session traces.
-when_to_use: "When asked to inspect or modify configured Backlog tickets or project workflows."
+description: Manage Backlog projects through the bundled CLI, including listing and
+  searching issues, inspecting project metadata, creating or updating issues, creating
+  UT bugs, resolving bugs, reviewing Story/Task deadlines, and reading local metrics
+  or session traces. Use when a user asks Codex to inspect or modify configured Backlog
+  tickets or project workflows.
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash
 ---
+
 
 # Backlog
 

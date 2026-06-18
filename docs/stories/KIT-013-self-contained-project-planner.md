@@ -30,6 +30,8 @@ verification stack.
 - `project-planner` contains no links or routing requirements for removed
   specialist skills.
 - Project roadmaps and bounded implementation plans have distinct triggers.
+- Codex `plan-writing` body remains bounded and planning-only; it does not
+  route new projects or instruct the agent to execute plan tasks.
 - The planner uses one canonical default path: `docs/PLAN-{task-slug}.md`.
 - Planning permits read-only discovery but prohibits production mutations.
 - Project classification and verification work across web, backend, mobile,
@@ -67,8 +69,10 @@ semantic regression coverage.
   the skill retains the Antigravity-specific `when_to_use` trigger.
 - Both changed `openai.yaml` files parsed successfully and use actionable
   `$skill-name` prompts.
-- `npm run check:templates` passed 320 checks, including cross-target planner link and
+- `npm run check:templates` passed 321 checks, including cross-target planner link and
   semantic assertions.
+- Codex `plan-writing` was rewritten to match its bounded trigger and gained a
+  regression assertion against new-project, execution, and Phase X guidance.
 - `scripts/bin/harness-cli story verify KIT-013` passed.
 - `npm pack --dry-run --json` included the changed skills, metadata, and
   template consistency script.

@@ -1,16 +1,16 @@
 ---
 name: clean-code
-description: >-
-  Use when writing, editing, or refactoring code. Provides pragmatic quality
-  heuristics for scoped changes, readable naming, simple control flow, useful
-  abstractions, comments, and dependency impact. Follow repository conventions
-  over generic style preferences. NOT for planning, documentation-only work, or
-  selecting validation commands.
+description: Use when writing, editing, or refactoring code. Provides pragmatic quality
+  heuristics for scoped changes, readable naming, simple control flow, useful abstractions,
+  comments, and dependency impact. Follow repository conventions over generic style
+  preferences. NOT for planning, documentation-only work, or selecting validation
+  commands.
 allowed-tools:
-  - Read
-  - Write
-  - Edit
+- Read
+- Write
+- Edit
 ---
+
 
 # Clean Code
 

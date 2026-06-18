@@ -1,8 +1,10 @@
 ---
 name: react-refactor-patterns
-description: Deep guide to React refactoring. Contains FULL detailed Before/After examples and comparison tables from original architecture documents. Use when code optimization or complex logic handling is needed.
-when_to_use: "Activate ONLY when refactoring, restructuring, or optimizing existing React code. NOT for building new features from scratch."
+description: Use when refactoring, modularizing, or optimizing existing React components.
+  Refactoring legacy React code (business logic extraction, React Query, Zustand,
+  hooks). NOT for new features.
 ---
+
 
 # Architecture Refactor Skill
 

@@ -1,9 +1,12 @@
 ---
 name: nextjs-react-expert
-description: React and Next.js performance optimization from Vercel Engineering. Use when building React components, optimizing performance, eliminating waterfalls, reducing bundle size, reviewing code for performance issues, or implementing server/client-side optimizations.
-when_to_use: "When building React components, optimizing Next.js performance, eliminating waterfalls, or reducing bundle size. For React/Next.js web projects."
+description: Use when building React components, optimizing Next.js routing/fetching,
+  diagnosing UI lag, or configuring Next.js 16+ caching/PPR. Next.js and React performance
+  optimization rules covering waterfalls, bundle size, and memoization. NOT for basic
+  HTML templates.
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash
 ---
+
 
 # Next.js & React Performance Expert
 

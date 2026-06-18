@@ -1,9 +1,12 @@
 ---
 name: architecture
-description: Architectural decision-making framework. Requirements analysis, trade-off evaluation, ADR documentation. Use when making architecture decisions or analyzing system design.
-when_to_use: "When making architectural decisions, evaluating trade-offs, writing ADRs, or analyzing system design. NOT for direct code implementation."
+description: Use when making major architectural decisions, evaluating technical trade-offs,
+  writing Architecture Decision Records (ADRs), or analyzing system designs. Architectural
+  decision-making framework covering requirements analysis, constraints identification,
+  trade-offs, and patterns. NOT for direct code implementation.
 allowed-tools: Read, Glob, Grep
 ---
+
 
 # Architecture Decision Framework
 

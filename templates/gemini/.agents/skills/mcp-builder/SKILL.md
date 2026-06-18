@@ -1,9 +1,11 @@
 ---
 name: mcp-builder
-description: MCP (Model Context Protocol) server building principles. Tool design, resource patterns, best practices.
-when_to_use: "When building MCP (Model Context Protocol) servers, designing MCP tools, or implementing MCP resource patterns."
+description: Use when building or modifying custom MCP servers, designing JSON schemas
+  for tools, or configuring Claude Desktop. Model Context Protocol (MCP) server building
+  principles covering stdio, tools, and error handling. NOT for frontend layouts.
 allowed-tools: Read, Write, Edit, Glob, Grep
 ---
+
 
 # MCP Builder
 
