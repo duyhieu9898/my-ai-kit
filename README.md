@@ -33,13 +33,16 @@ npx -y github:duyhieu9898/my-ai-kit init --target gemini
 
 Kết quả cài đặt:
 
-| Target | Runtime Folder | Root Instruction |
-|:---|:---|:---|
-| `codex` | `.agents/` | `AGENTS.md` |
-| `gemini` | `.agents/` | `GEMINI.md` |
+| Target | Runtime Folder | Integration Config | Root Instruction |
+|:---|:---|:---|:---|
+| `codex` | `.agents/` | `.codex/` hooks | `AGENTS.md` |
+| `gemini` | `.agents/` | — | `GEMINI.md` |
 
 `.agents/` chứa `skills/`, `scripts/`, các tài nguyên runtime, và marker `.kit-target`
 ghi tên target đang cài. CLI **không** tự sửa `.gitignore` — bạn tự quản lý.
+Với Codex, `.codex/hooks.json` được merge với hooks hiện có thay vì thay thế
+toàn bộ cấu hình `.codex/`. Codex sẽ yêu cầu review/trust hook mới hoặc hook đã
+thay đổi trước khi chạy.
 
 ## Lệnh CLI
 
@@ -115,6 +118,10 @@ việc copy thẳng, không transform.
 templates/
 ├── codex/
 │   ├── AGENTS.md            # Root instruction → copy ra project root
+│   ├── .codex/              # Codex hooks → merge vào project/.codex/
+│   │   ├── hooks.json
+│   │   └── hooks/
+│   │       └── harness_guard.py
 │   └── .agents/             # Install folder → copy vào project/.agents/
 │       ├── .kit-target      # Marker, nội dung: "codex"
 │       ├── AGENTS.md
@@ -158,6 +165,9 @@ Sau khi sửa template, push lên `main`; các project khác có thể cập nh�
 ```bash
 npx -y hieund-ai-kit update
 ```
+
+`update` thay thế `.agents/`, merge cấu hình `.codex/` do kit quản lý, và giữ
+nguyên root instruction hiện có.
 
 Toàn bộ executable scripts dùng chung giữa Codex và Gemini, cùng runtime
 Backlog, có source chính tại `shared/runtime/`. Chỉ sửa bản shared rồi đồng bộ

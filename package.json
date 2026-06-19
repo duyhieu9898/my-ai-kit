@@ -8,6 +8,7 @@
     "sync:shared-runtime": "node scripts/sync-shared-runtime.mjs",
     "check:shared-runtime": "node scripts/sync-shared-runtime.mjs --check",
     "test:shared-runtime": "node scripts/test-shared-runtime.mjs",
+    "test:installer": "node scripts/test-installer.mjs",
     "check:templates": "npm run check:shared-runtime && node scripts/check-template-consistency.mjs"
   },
   "bin": {
@@ -16,6 +17,7 @@
   "files": [
     "bin",
     "scripts/check-template-consistency.mjs",
+    "scripts/test-installer.mjs",
     "templates"
   ],
   "repository": {

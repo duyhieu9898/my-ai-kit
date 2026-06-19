@@ -154,6 +154,8 @@ const geminiAgentCount = immediateFiles("templates/gemini/.agents/agents", ".md"
 const geminiWorkflowCount = immediateFiles("templates/gemini/.agents/workflows", ".md").length;
 const codexUxAuditConfigPath = "templates/codex/.agents/ux_audit.json";
 const geminiUxAuditConfigPath = "templates/gemini/.agents/ux_audit.json";
+const codexHooksConfigPath = "templates/codex/.codex/hooks.json";
+const codexHarnessGuardPath = "templates/codex/.codex/hooks/harness_guard.py";
 
 const docsCodexSkillCount = requireMatch(
   toolkitDocs,
@@ -216,6 +218,20 @@ record(
   exists(codexUxAuditConfigPath) && exists(geminiUxAuditConfigPath),
   `${codexUxAuditConfigPath}, ${geminiUxAuditConfigPath}`,
 );
+record(
+  "Codex lifecycle hook files exist",
+  exists(codexHooksConfigPath) && exists(codexHarnessGuardPath),
+  `${codexHooksConfigPath}, ${codexHarnessGuardPath}`,
+);
+if (exists(codexHooksConfigPath)) {
+  const codexHooksConfig = JSON.parse(readText(codexHooksConfigPath));
+  const hookText = JSON.stringify(codexHooksConfig);
+  record(
+    "Codex hook config targets current shell tool names",
+    hookText.includes("exec_command") && hookText.includes("harness_guard.py"),
+    codexHooksConfigPath,
+  );
+}
 if (exists(codexUxAuditConfigPath) && exists(geminiUxAuditConfigPath)) {
   const codexUxAuditConfig = JSON.parse(readText(codexUxAuditConfigPath));
   const geminiUxAuditConfig = JSON.parse(readText(geminiUxAuditConfigPath));

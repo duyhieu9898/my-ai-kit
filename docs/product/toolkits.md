@@ -5,6 +5,9 @@
 - Source: `templates/codex/`.
 - Runtime destination: `.agents/`.
 - Repository instruction: `templates/codex/AGENTS.md` to root `AGENTS.md`.
+- Lifecycle integration: `templates/codex/.codex/` merges into root `.codex/`.
+  Preserve unrelated project config and custom hooks while updating the
+  kit-managed Harness guard.
 - Nested instruction: `templates/codex/.agents/AGENTS.md` to
   `.agents/AGENTS.md`.
 - Skills use `SKILL.md`, required `agents/openai.yaml`, optional `references/`,

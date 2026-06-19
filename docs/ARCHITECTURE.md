@@ -18,7 +18,7 @@ bin/index.js
   CLI configuration, target registry, install, update, and status commands
 
 templates/codex/
-  Codex toolkit in mirror layout: top-level AGENTS.md + .agents/ install folder
+  Codex toolkit in mirror layout: AGENTS.md + .agents/ runtime + .codex/ hooks
 
 templates/gemini/
   Gemini Antigravity toolkit in mirror layout: top-level GEMINI.md + .agents/
@@ -44,6 +44,8 @@ Each template folder mirrors the project layout exactly:
 - Top-level files (e.g. `AGENTS.md`, `GEMINI.md`) are Root Instruction Files,
   copied to the project root.
 - The `.agents/` subdirectory is the install folder, copied to `project/.agents/`.
+- The Codex `.codex/` subdirectory contains lifecycle hooks. It is merged into
+  `project/.codex/`; existing project config and unrelated hooks are preserved.
 - `.agents/.kit-target` is a marker file whose content is the target name; it is
   the source of truth for `detectInstalledTarget`.
 
@@ -57,15 +59,15 @@ Each template folder mirrors the project layout exactly:
   target templates.
 - Keep target-specific metadata such as `SKILL.md`, Codex `agents/openai.yaml`,
   environment files, and runtime logs outside the shared source.
-- Install is a single mirror-copy: `.agents/` is always replaced; top-level root
-  instruction files honour the overwrite flag.
+- Install uses mirror ownership rules: `.agents/` is replaced, `.codex/` is
+  merged, and top-level root instruction files honour the overwrite flag.
 - `init` is destructive (replaces install folder and, on switch/force, root
   instructions) and gates destructive actions behind a confirmation prompt or
   `--force`.
 - On target switch, the previous target's root instruction files are deleted
   before installing the new target.
-- `update` refreshes `.agents/` only and preserves existing root instruction
-  files; it auto-detects the installed target via the marker.
+- `update` refreshes `.agents/`, updates kit-managed Codex hooks through a
+  structured merge, and preserves existing root instruction files.
 - The CLI does not modify `.gitignore`; users manage it themselves.
 
 ## Instruction Hierarchy
@@ -73,6 +75,9 @@ Each template folder mirrors the project layout exactly:
 ```text
 target/AGENTS.md
   repository-wide workflow and skill loading
+
+target/.codex/hooks.json
+  warning-only lifecycle guardrails merged with project hooks
 
 target/.agents/AGENTS.md
   maintenance rules scoped to the installed toolkit

@@ -8,6 +8,7 @@ import path from 'path';
 import fs from 'fs';
 import os from 'os';
 import readline from 'readline';
+import { pathToFileURL } from 'url';
 
 // ============================================================================
 // CONSTANTS & CONFIGURATION
@@ -19,6 +20,8 @@ const TEMP_PREFIX = 'hieund-ai-kit-';
 const INSTALL_FOLDER = '.agents';
 const MARKER_FILE = '.kit-target';
 const DEFAULT_TARGET = 'codex';
+const CODEX_CONFIG_FOLDER = '.codex';
+const KIT_HOOK_COMMAND_MARKER = '.codex/hooks/harness_guard.py';
 
 /**
  * Target registry — maps a target name to its configuration.
@@ -192,10 +195,79 @@ const atomicReplaceDir = (src, dest) => {
     }
 };
 
+const isKitHookGroup = (group) =>
+    Array.isArray(group?.hooks) &&
+    group.hooks.some((hook) =>
+        typeof hook?.command === 'string' && hook.command.includes(KIT_HOOK_COMMAND_MARKER)
+    );
+
+const mergeHooksFile = (src, dest) => {
+    const incoming = JSON.parse(fs.readFileSync(src, 'utf8'));
+    const existing = fs.existsSync(dest)
+        ? JSON.parse(fs.readFileSync(dest, 'utf8'))
+        : {};
+    const merged = { ...existing, hooks: { ...(existing.hooks || {}) } };
+
+    for (const [event, incomingGroups] of Object.entries(incoming.hooks || {})) {
+        const existingGroups = Array.isArray(merged.hooks[event])
+            ? merged.hooks[event].filter((group) => !isKitHookGroup(group))
+            : [];
+        merged.hooks[event] = [...existingGroups, ...incomingGroups];
+    }
+
+    fs.mkdirSync(path.dirname(dest), { recursive: true });
+    fs.writeFileSync(dest, `${JSON.stringify(merged, null, 2)}\n`);
+};
+
+const mergeDirectory = (src, dest) => {
+    fs.mkdirSync(dest, { recursive: true });
+    for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
+        const entrySrc = path.join(src, entry.name);
+        const entryDest = path.join(dest, entry.name);
+        if (entry.isDirectory()) {
+            mergeDirectory(entrySrc, entryDest);
+        } else if (
+            path.basename(src) === CODEX_CONFIG_FOLDER &&
+            entry.name === 'hooks.json'
+        ) {
+            mergeHooksFile(entrySrc, entryDest);
+        } else {
+            fs.copyFileSync(entrySrc, entryDest);
+        }
+    }
+};
+
+const removeKitCodexHooks = (projectDir) => {
+    const hooksPath = path.join(projectDir, CODEX_CONFIG_FOLDER, 'hooks.json');
+    if (fs.existsSync(hooksPath)) {
+        const config = JSON.parse(fs.readFileSync(hooksPath, 'utf8'));
+        const hooks = {};
+        for (const [event, groups] of Object.entries(config.hooks || {})) {
+            const retained = Array.isArray(groups)
+                ? groups.filter((group) => !isKitHookGroup(group))
+                : groups;
+            if (!Array.isArray(retained) || retained.length > 0) {
+                hooks[event] = retained;
+            }
+        }
+        const updated = { ...config, hooks };
+        if (Object.keys(hooks).length === 0 && Object.keys(updated).length === 1) {
+            fs.rmSync(hooksPath);
+        } else {
+            fs.writeFileSync(hooksPath, `${JSON.stringify(updated, null, 2)}\n`);
+        }
+    }
+
+    fs.rmSync(
+        path.join(projectDir, CODEX_CONFIG_FOLDER, 'hooks', 'harness_guard.py'),
+        { force: true }
+    );
+};
+
 /**
  * Mirror-copy a template directory into the project root. The `.agents/`
- * install folder (and any other top-level directory) is replaced atomically;
- * top-level root instruction files honour the overwrite flag.
+ * install folder is replaced atomically. Shared configuration directories such
+ * as `.codex/` are merged so project-local settings are preserved.
  * @param {string} templatePath
  * @param {string} projectDir
  * @param {object} options
@@ -218,9 +290,9 @@ const mirrorCopy = (templatePath, projectDir, { overwriteRootInstruction = true 
                 continue;
             }
             fs.copyFileSync(src, dest);
+        } else if (entry.name === CODEX_CONFIG_FOLDER) {
+            mergeDirectory(src, dest);
         } else {
-            // The install folder and any other top-level directory: replace
-            // atomically so a failure can't corrupt an existing install.
             atomicReplaceDir(src, dest);
         }
     }
@@ -239,6 +311,9 @@ const cleanupOldTarget = (oldTemplatePath, projectDir) => {
             fs.unlinkSync(filePath);
             console.log(chalk.gray(`  Deleted: ${file}`));
         }
+    }
+    if (fs.existsSync(path.join(oldTemplatePath, CODEX_CONFIG_FOLDER))) {
+        removeKitCodexHooks(projectDir);
     }
 };
 
@@ -350,6 +425,7 @@ const initCommand = async (options) => {
         }
 
         // Install.
+        const installsCodexConfig = fs.existsSync(path.join(templatePath, CODEX_CONFIG_FOLDER));
         mirrorCopy(templatePath, projectDir, { overwriteRootInstruction: true });
         cleanup(templatePath);
         cleanup(oldTemplatePath);
@@ -359,6 +435,9 @@ const initCommand = async (options) => {
         console.log(chalk.gray('\n──────────────────────────────────────────────────────'));
         console.log(chalk.white('📁 Installed:'));
         console.log(`   ${chalk.cyan(INSTALL_FOLDER + '/')} → ${chalk.gray(installDir)}`);
+        if (installsCodexConfig) {
+            console.log(`   ${chalk.cyan(CODEX_CONFIG_FOLDER + '/')} → ${chalk.gray(path.join(projectDir, CODEX_CONFIG_FOLDER))}`);
+        }
         newRootFiles.forEach((f) => {
             console.log(`   ${chalk.cyan(f)} → ${chalk.gray(path.join(projectDir, f))}`);
         });
@@ -417,7 +496,7 @@ const updateCommand = async (options) => {
         mirrorCopy(templatePath, projectDir, { overwriteRootInstruction: false });
         cleanup(templatePath);
 
-        console.log(chalk.green(`\n✅ Updated ${config.displayName} (${INSTALL_FOLDER}/ refreshed, root instructions preserved).`));
+        console.log(chalk.green(`\n✅ Updated ${config.displayName} (${INSTALL_FOLDER}/ refreshed, shared config merged, root instructions preserved).`));
     } catch (error) {
         spinner.stop();
         console.error(chalk.red(`❌ Error: ${error.message}`));
@@ -470,7 +549,7 @@ program
 
 program
     .command('init')
-    .description('Install a target kit into .agents (default: codex)')
+    .description('Install a target kit and integrations (default: codex)')
     .option('-t, --target <name>', 'Target to install (codex, gemini)')
     .option('-f, --force', 'Overwrite existing files without confirmation', false)
     .option('-p, --path <dir>', 'Path to the project directory', process.cwd())
@@ -481,7 +560,7 @@ program
 
 program
     .command('update')
-    .description('Refresh .agents for the installed target (auto-detected)')
+    .description('Refresh the installed target runtime and integrations')
     .option('-t, --target <name>', 'Target to update (defaults to installed target)')
     .option('-p, --path <dir>', 'Path to the project directory', process.cwd())
     .option('-b, --branch <name>', 'Select repository branch')
@@ -495,8 +574,12 @@ program
     .option('-p, --path <dir>', 'Path to the project directory', process.cwd())
     .action(statusCommand);
 
-program.parse(process.argv);
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+    program.parse(process.argv);
 
-if (!process.argv.slice(2).length) {
-    program.outputHelp();
+    if (!process.argv.slice(2).length) {
+        program.outputHelp();
+    }
 }
+
+export { mirrorCopy, removeKitCodexHooks };

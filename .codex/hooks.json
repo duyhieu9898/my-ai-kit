@@ -1,0 +1,30 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|exec_command|functions\\.exec_command|apply_patch|Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/bin/python3 \"$(git rev-parse --show-toplevel)/.codex/hooks/harness_guard.py\" pre-tool",
+            "timeout": 10,
+            "statusMessage": "Checking Harness guardrails"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash|exec_command|functions\\.exec_command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/bin/python3 \"$(git rev-parse --show-toplevel)/.codex/hooks/harness_guard.py\" post-tool",
+            "timeout": 10,
+            "statusMessage": "Checking context scope"
+          }
+        ]
+      }
+    ]
+  }
+}

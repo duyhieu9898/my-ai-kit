@@ -20,6 +20,10 @@ The kit contains:
 
 ```plaintext
 AGENTS.md                     # Repository-wide workflow and skill rules
+.codex/
+├── hooks.json               # Codex lifecycle hook registration
+└── hooks/
+    └── harness_guard.py     # Warning-only context and safety guardrails
 .agents/
 ├── AGENTS.md                # Rules scoped to shared toolkit maintenance
 ├── ARCHITECTURE.md          # This file (Human-developer map)
@@ -42,10 +46,13 @@ adds toolkit-maintenance constraints without duplicating the root rules.
 The CLI sources these files separately:
 
 - `templates/codex/AGENTS.md` installs as root `AGENTS.md`.
+- `templates/codex/.codex/` merges into root `.codex/` without replacing
+  unrelated project configuration or custom hooks.
 - `templates/codex/.agents/AGENTS.md` installs as `.agents/AGENTS.md`.
 
-Kit updates replace `.agents/` but preserve an existing root instruction so
-project-specific rules and external Harness blocks are not lost.
+Kit updates replace `.agents/`, merge kit-managed `.codex/` hooks, and preserve
+an existing root instruction so project-specific rules and external Harness
+blocks are not lost.
 
 ---
 
