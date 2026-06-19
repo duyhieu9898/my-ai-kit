@@ -24,6 +24,8 @@ target repository.
 
 ## Validation Contract
 
+- Use `npm run verify` as the standard local verification entrypoint for the
+  kit repository.
 - Validate CLI syntax and help output.
 - Inspect npm package contents before release.
 - Test installation layout in an isolated target directory.

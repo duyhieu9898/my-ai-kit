@@ -28,6 +28,7 @@ const CODEX_HOOK_COMMAND_MARKERS = [
 const GEMINI_HOOK_CONFIG = 'hooks.json';
 const GEMINI_HOOK_FOLDER = 'hooks';
 const KIT_GEMINI_HOOK_KEY = 'hieund-ai-kit-harness-guard';
+const INSTRUCTION_BLOCK_PATTERN = /^<!--\s*([A-Z0-9_-]+):BEGIN\s*-->[\s\S]*?^<!--\s*\1:END\s*-->/gm;
 
 /**
  * Target registry — maps a target name to its configuration.
@@ -244,6 +245,56 @@ const mergeDirectory = (src, dest) => {
     }
 };
 
+const extractInstructionBlocks = (text) =>
+    [...text.matchAll(INSTRUCTION_BLOCK_PATTERN)].map((match) => ({
+        name: match[1],
+        text: match[0],
+    }));
+
+const mergeInstructionBlocks = (incomingText, existingText) => {
+    const existingBlocks = extractInstructionBlocks(existingText);
+    if (existingBlocks.length === 0) {
+        return incomingText;
+    }
+
+    let mergedText = incomingText;
+    const incomingBlockNames = new Set(extractInstructionBlocks(incomingText).map((block) => block.name));
+    const appendedBlocks = [];
+
+    for (const block of existingBlocks) {
+        if (incomingBlockNames.has(block.name)) {
+            const blockPattern = new RegExp(
+                `^<!--\\s*${block.name}:BEGIN\\s*-->[\\s\\S]*?^<!--\\s*${block.name}:END\\s*-->`,
+                'm',
+            );
+            mergedText = mergedText.replace(blockPattern, block.text);
+        } else {
+            appendedBlocks.push(block.text);
+        }
+    }
+
+    if (appendedBlocks.length === 0) {
+        return mergedText;
+    }
+
+    return `${mergedText.trimEnd()}\n\n${appendedBlocks.join('\n\n')}\n`;
+};
+
+const copyRootInstructionFile = (src, dest, overwriteRootInstruction) => {
+    if (!overwriteRootInstruction && fs.existsSync(dest)) {
+        return;
+    }
+
+    if (!fs.existsSync(dest)) {
+        fs.copyFileSync(src, dest);
+        return;
+    }
+
+    const incomingText = fs.readFileSync(src, 'utf8');
+    const existingText = fs.readFileSync(dest, 'utf8');
+    fs.writeFileSync(dest, mergeInstructionBlocks(incomingText, existingText));
+};
+
 const mergeGeminiHooks = (existingPath, incomingPath, destinationPath) => {
     const existing = fs.existsSync(existingPath)
         ? JSON.parse(fs.readFileSync(existingPath, 'utf8'))
@@ -344,11 +395,7 @@ const mirrorCopy = (templatePath, projectDir, { overwriteRootInstruction = true 
         const dest = path.join(projectDir, entry.name);
 
         if (entry.isFile()) {
-            // Root instruction file — respect the overwrite flag.
-            if (!overwriteRootInstruction && fs.existsSync(dest)) {
-                continue;
-            }
-            fs.copyFileSync(src, dest);
+            copyRootInstructionFile(src, dest, overwriteRootInstruction);
         } else if (entry.name === CODEX_CONFIG_FOLDER) {
             mergeDirectory(src, dest);
         } else if (entry.name === INSTALL_FOLDER) {

@@ -12,6 +12,11 @@ const codexTemplatePath = path.join(repoRoot, "templates", "codex");
 const geminiTemplatePath = path.join(repoRoot, "templates", "gemini");
 const codexProjectDir = fs.mkdtempSync(path.join(os.tmpdir(), "hieund-ai-kit-codex-"));
 const geminiProjectDir = fs.mkdtempSync(path.join(os.tmpdir(), "hieund-ai-kit-gemini-"));
+const harnessBlock = `<!-- HARNESS:BEGIN -->
+## Harness
+
+Project-specific Harness instructions stay here.
+<!-- HARNESS:END -->`;
 
 const customHook = {
   matcher: "custom_tool",
@@ -28,9 +33,29 @@ try {
     path.join(codexProjectDir, ".codex", "hooks.json"),
     `${JSON.stringify({ hooks: { PreToolUse: [customHook] } }, null, 2)}\n`,
   );
+  fs.writeFileSync(
+    path.join(codexProjectDir, "AGENTS.md"),
+    `# Project Instructions
+
+${harnessBlock}
+`,
+  );
 
   mirrorCopy(codexTemplatePath, codexProjectDir);
   mirrorCopy(codexTemplatePath, codexProjectDir, { overwriteRootInstruction: false });
+
+  const codexRootInstruction = fs.readFileSync(
+    path.join(codexProjectDir, "AGENTS.md"),
+    "utf8",
+  );
+  assert.ok(
+    codexRootInstruction.includes("# AGENTS.md - Workspace Rules"),
+    "Codex root instruction must be refreshed from the template",
+  );
+  assert.ok(
+    codexRootInstruction.includes(harnessBlock),
+    "Codex install must preserve project-specific Harness blocks",
+  );
 
   assert.equal(
     fs.readFileSync(path.join(codexProjectDir, ".codex", "config.toml"), "utf8"),
@@ -143,7 +168,7 @@ try {
     "Gemini hook adapter must be installed",
   );
 
-  console.log("Installer hook merge tests passed.");
+  console.log("Installer regression tests passed.");
 } finally {
   fs.rmSync(codexProjectDir, { recursive: true, force: true });
   fs.rmSync(geminiProjectDir, { recursive: true, force: true });

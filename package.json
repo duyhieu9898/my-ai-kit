@@ -12,7 +12,8 @@
     "check:shared-hooks": "node scripts/sync-shared-hooks.mjs --check",
     "test:hooks": "python3 scripts/test-hooks.py",
     "test:installer": "node scripts/test-installer.mjs",
-    "check:templates": "npm run check:shared-runtime && npm run check:shared-hooks && node scripts/check-template-consistency.mjs"
+    "check:templates": "npm run check:shared-runtime && npm run check:shared-hooks && node scripts/check-template-consistency.mjs",
+    "verify": "node --check bin/index.js && npm run test:installer && npm run test:hooks && npm run check:templates"
   },
   "bin": {
     "hieund-ai-kit": "./bin/index.js"

@@ -202,6 +202,12 @@ Installer vẫn copy thẳng template đã sinh; không compose file trong lúc 
 Kiểm tra CLI (trong repo `my-ai-kit`):
 
 ```bash
+npm run verify
+```
+
+Hoặc chạy từng kiểm tra hẹp hơn:
+
+```bash
 node --check bin/index.js
 node bin/index.js --help
 ```
