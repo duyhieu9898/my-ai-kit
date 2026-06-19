@@ -690,4 +690,4 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
     }
 }
 
-export { mirrorCopy, removeKitCodexHooks };
+export { cleanupOldTarget, detectInstalledTarget, mirrorCopy, removeKitCodexHooks };

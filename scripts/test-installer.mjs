@@ -5,7 +5,12 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { mirrorCopy, removeKitCodexHooks } from "../bin/index.js";
+import {
+  cleanupOldTarget,
+  detectInstalledTarget,
+  mirrorCopy,
+  removeKitCodexHooks,
+} from "../bin/index.js";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const codexTemplatePath = path.join(repoRoot, "templates", "codex");
@@ -23,16 +28,27 @@ const customHook = {
   hooks: [{ type: "command", command: "echo custom-hook" }],
 };
 
+function readJson(filePath) {
+  return JSON.parse(fs.readFileSync(filePath, "utf8"));
+}
+
+function readText(filePath) {
+  return fs.readFileSync(filePath, "utf8");
+}
+
+function writeJson(filePath, value) {
+  fs.writeFileSync(filePath, `${JSON.stringify(value, null, 2)}\n`);
+}
+
 try {
   fs.mkdirSync(path.join(codexProjectDir, ".codex"), { recursive: true });
   fs.writeFileSync(
     path.join(codexProjectDir, ".codex", "config.toml"),
     'model = "custom-model"\n',
   );
-  fs.writeFileSync(
-    path.join(codexProjectDir, ".codex", "hooks.json"),
-    `${JSON.stringify({ hooks: { PreToolUse: [customHook] } }, null, 2)}\n`,
-  );
+  writeJson(path.join(codexProjectDir, ".codex", "hooks.json"), {
+    hooks: { PreToolUse: [customHook] },
+  });
   fs.writeFileSync(
     path.join(codexProjectDir, "AGENTS.md"),
     `# Project Instructions
@@ -42,23 +58,47 @@ ${harnessBlock}
   );
 
   mirrorCopy(codexTemplatePath, codexProjectDir);
-  mirrorCopy(codexTemplatePath, codexProjectDir, { overwriteRootInstruction: false });
 
-  const codexRootInstruction = fs.readFileSync(
-    path.join(codexProjectDir, "AGENTS.md"),
-    "utf8",
-  );
+  const codexRootInstruction = readText(path.join(codexProjectDir, "AGENTS.md"));
   assert.ok(
     codexRootInstruction.includes("# AGENTS.md - Workspace Rules"),
-    "Codex root instruction must be refreshed from the template",
+    "force-style Codex install must refresh the root instruction from the template",
   );
   assert.ok(
     codexRootInstruction.includes(harnessBlock),
-    "Codex install must preserve project-specific Harness blocks",
+    "force-style Codex install must preserve project-specific Harness blocks",
+  );
+  assert.equal(
+    detectInstalledTarget(codexProjectDir),
+    "codex",
+    "status detection must read the Codex marker file",
+  );
+
+  fs.rmSync(path.join(codexProjectDir, ".agents", ".kit-target"));
+  assert.equal(
+    detectInstalledTarget(codexProjectDir),
+    "codex",
+    "status detection must fall back to the Codex root instruction",
+  );
+  fs.writeFileSync(path.join(codexProjectDir, "GEMINI.md"), "# Gemini\n");
+  assert.equal(
+    detectInstalledTarget(codexProjectDir),
+    null,
+    "status fallback must avoid guessing when root instructions are ambiguous",
+  );
+  fs.rmSync(path.join(codexProjectDir, "GEMINI.md"));
+  fs.writeFileSync(path.join(codexProjectDir, ".agents", ".kit-target"), "codex\n");
+
+  fs.writeFileSync(path.join(codexProjectDir, "AGENTS.md"), "# Local Codex Instructions\n");
+  mirrorCopy(codexTemplatePath, codexProjectDir, { overwriteRootInstruction: false });
+  assert.equal(
+    readText(path.join(codexProjectDir, "AGENTS.md")),
+    "# Local Codex Instructions\n",
+    "update-style Codex install must preserve existing root instructions",
   );
 
   assert.equal(
-    fs.readFileSync(path.join(codexProjectDir, ".codex", "config.toml"), "utf8"),
+    readText(path.join(codexProjectDir, ".codex", "config.toml")),
     'model = "custom-model"\n',
     "custom Codex config must be preserved",
   );
@@ -75,9 +115,7 @@ ${harnessBlock}
     "runtime folder must be installed",
   );
 
-  const merged = JSON.parse(
-    fs.readFileSync(path.join(codexProjectDir, ".codex", "hooks.json"), "utf8"),
-  );
+  const merged = readJson(path.join(codexProjectDir, ".codex", "hooks.json"));
   const preToolGroups = merged.hooks.PreToolUse;
   assert.equal(
     preToolGroups.filter((group) =>
@@ -95,9 +133,7 @@ ${harnessBlock}
   );
 
   removeKitCodexHooks(codexProjectDir);
-  const cleaned = JSON.parse(
-    fs.readFileSync(path.join(codexProjectDir, ".codex", "hooks.json"), "utf8"),
-  );
+  const cleaned = readJson(path.join(codexProjectDir, ".codex", "hooks.json"));
   assert.deepEqual(
     cleaned.hooks.PreToolUse,
     [customHook],
@@ -113,6 +149,29 @@ ${harnessBlock}
     false,
     "switch cleanup must remove the Codex adapter",
   );
+  mirrorCopy(codexTemplatePath, codexProjectDir);
+  cleanupOldTarget(codexTemplatePath, codexProjectDir);
+  assert.equal(
+    fs.existsSync(path.join(codexProjectDir, "AGENTS.md")),
+    false,
+    "target switch cleanup must remove the old Codex root instruction",
+  );
+  assert.equal(
+    fs.existsSync(path.join(codexProjectDir, ".codex", "hooks", "harness_guard.py")),
+    false,
+    "target switch cleanup must remove kit-owned Codex hook files",
+  );
+  assert.deepEqual(
+    readJson(path.join(codexProjectDir, ".codex", "hooks.json")).hooks.PreToolUse,
+    [customHook],
+    "target switch cleanup must preserve project-owned Codex hooks",
+  );
+  mirrorCopy(geminiTemplatePath, codexProjectDir);
+  assert.equal(
+    detectInstalledTarget(codexProjectDir),
+    "gemini",
+    "status detection must detect Gemini after an isolated target switch",
+  );
 
   const customGeminiHook = {
     enabled: true,
@@ -124,10 +183,9 @@ ${harnessBlock}
     ],
   };
   fs.mkdirSync(path.join(geminiProjectDir, ".agents", "hooks"), { recursive: true });
-  fs.writeFileSync(
-    path.join(geminiProjectDir, ".agents", "hooks.json"),
-    `${JSON.stringify({ "custom-project-hook": customGeminiHook }, null, 2)}\n`,
-  );
+  writeJson(path.join(geminiProjectDir, ".agents", "hooks.json"), {
+    "custom-project-hook": customGeminiHook,
+  });
   fs.writeFileSync(
     path.join(geminiProjectDir, ".agents", "hooks", "custom.py"),
     'print("custom")\n',
@@ -138,9 +196,12 @@ ${harnessBlock}
     overwriteRootInstruction: false,
   });
 
-  const geminiHooks = JSON.parse(
-    fs.readFileSync(path.join(geminiProjectDir, ".agents", "hooks.json"), "utf8"),
+  assert.equal(
+    detectInstalledTarget(geminiProjectDir),
+    "gemini",
+    "status detection must read the Gemini marker file",
   );
+  const geminiHooks = readJson(path.join(geminiProjectDir, ".agents", "hooks.json"));
   assert.deepEqual(
     geminiHooks["custom-project-hook"],
     customGeminiHook,
