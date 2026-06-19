@@ -18,28 +18,21 @@ Do not load every reference file or activate broad coordination skills for a sin
 
 ## Route Requests
 
-- Answer simple questions directly.
-- Use a discovery skill for repository surveys or unfamiliar codebases.
-- Use the relevant domain skill for clear edits and bug fixes.
-- Add planning only for broad, risky, or cross-module work.
-- Use orchestration only when multiple domains require independent coordination.
-- Route native mobile work through mobile skills, not web frontend skills.
-
-Mention the applied skill only when it helps the user understand the approach.
-
-## Handle Requests
-
-Classify requests lightly before acting:
-
 - Question: answer directly, with file references when useful.
-- Survey: inspect the relevant files and summarize concrete paths.
-- Narrow edit: read nearby code and implement directly.
+- Repository survey or unfamiliar codebase: use a discovery skill, inspect the
+  relevant files, and summarize concrete paths.
+- Clear edit or bug fix: use the relevant domain skill, read nearby code, and
+  implement directly.
 - Broad or risky change: state a short plan before editing.
+- Multi-domain work: use orchestration only when independent coordination is
+  required.
+- Native mobile work: route through mobile skills, not web frontend skills.
 - Ambiguous, destructive, security-sensitive, or credential-related work: ask
   before taking action.
 
 Prefer execution when intent is clear. Ask only when missing information would
 make the next action risky, destructive, or likely wrong.
+Mention the applied skill only when it helps the user understand the approach.
 
 ## Work Safely
 
