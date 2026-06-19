@@ -63,8 +63,20 @@ Every skill must start with a YAML frontmatter block enclosed in triple-dashes (
 
 | Field | Required? | Constraints / Format | Description |
 |:---|:---|:---|:---|
-| `name` | Optional | Lowercase, alphanumeric, hyphens for spaces (e.g., `code-review`). | A unique identifier for the skill. **Defaults to the folder name** if omitted. |
+| `name` | ✅ Required | 1–64 characters. Lowercase letters, numbers, and hyphens only. Must match the folder name. | A unique identifier for the skill. |
 | `description` | ✅ Required | 1–1024 characters. Write in the **third person**. | Clear description of what the skill does and when the agent should trigger it. |
+| `license` | Optional | Short license name or reference to a bundled license file. | Declares the license for the skill. |
+| `compatibility` | Optional | 1–500 characters. | Describes environment or product requirements when the skill is not broadly portable. |
+| `metadata` | Optional | YAML mapping of string keys to string values. | Stores kit-specific metadata such as `effort` without adding non-standard top-level fields. |
+| `allowed-tools` | Optional | Space-separated string of pre-approved tools. Experimental; client support may vary. | Documents tool access expected by the skill. |
+
+Do not add custom top-level frontmatter fields outside the Agent Skills
+whitelist above. Put client- or kit-specific values under `metadata` instead:
+
+```yaml
+metadata:
+  effort: medium
+```
 
 ### 4.2 Description Trigger Optimization (Keywords & Style)
 Because the description is the sole driver for implicit activation, follow these guidelines:

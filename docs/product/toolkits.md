@@ -55,3 +55,7 @@
 - Update toolkit architecture documentation when discovery or directory
   conventions change.
 - Validate the narrowest affected skill or script before broad verification.
+  For skill frontmatter and naming compatibility, run `skills-ref validate` on
+  affected skill directories, then apply `CODEX_SKILL_STANDARD.md` or
+  `ANTIGRAVITY_SKILL_STANDARD.md` for target-specific quality and conversion
+  rules.

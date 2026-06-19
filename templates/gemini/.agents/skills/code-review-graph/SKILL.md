@@ -5,7 +5,8 @@ description: Use when analyzing large projects (500+ files), computing blast rad
   code review using Tree-sitter AST graphs and SQLite database MCP server. NOT for
   small codebases under 200 files or purely dynamic codebases.
 allowed-tools: Read, Grep, Glob, Bash
-effort: medium
+metadata:
+  effort: medium
 ---
 
 

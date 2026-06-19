@@ -4,7 +4,8 @@ description: Use when codebase suffers from over-abstraction, excessive nesting,
   unnecessary cognitive load. Code complexity reduction patterns (early returns, flattening,
   abstraction pruning). NOT for new features.
 allowed-tools: Read, Write, Edit, Grep, Glob
-effort: medium
+metadata:
+  effort: medium
 ---
 
 

@@ -6,7 +6,8 @@ description: Use when changing multiple files with the same pattern, renaming ac
   modifications and search-and-replace. NOT for single-file edits or unique changes
   per file.
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash
-effort: medium
+metadata:
+  effort: medium
 ---
 
 
