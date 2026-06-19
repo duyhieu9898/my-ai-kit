@@ -42,25 +42,6 @@ function immediateFiles(relativePath, extension = null) {
     .sort();
 }
 
-function allFiles(relativePath) {
-  const absolutePath = path.join(repoRoot, relativePath);
-  if (!fs.existsSync(absolutePath)) return [];
-
-  const files = [];
-  function walk(directory, prefix = "") {
-    for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
-      const relativeEntry = path.join(prefix, entry.name);
-      if (entry.isDirectory()) {
-        walk(path.join(directory, entry.name), relativeEntry);
-      } else {
-        files.push(relativeEntry);
-      }
-    }
-  }
-  walk(absolutePath);
-  return files.sort();
-}
-
 function record(name, passed, detail = "") {
   checks.push({ name, passed, detail });
 }
@@ -179,7 +160,6 @@ const codexHookAdapterPath = "templates/codex/.codex/hooks/codex_adapter.py";
 const geminiHooksConfigPath = "templates/gemini/.agents/hooks.json";
 const geminiHarnessGuardPath = "templates/gemini/.agents/hooks/harness_guard.py";
 const geminiHookAdapterPath = "templates/gemini/.agents/hooks/gemini_adapter.py";
-const kiroHookPath = "templates/kiro/.kiro/hooks/harness-guard.kiro.hook";
 
 const docsCodexSkillCount = requireMatch(
   toolkitDocs,
@@ -281,31 +261,6 @@ if (exists(codexHarnessGuardPath) && exists(geminiHarnessGuardPath)) {
     "Codex and Gemini share the same Harness guard policy",
     readText(codexHarnessGuardPath) === readText(geminiHarnessGuardPath),
     `${codexHarnessGuardPath}, ${geminiHarnessGuardPath}`,
-  );
-}
-record(
-  "Standalone Kiro Harness hook exists",
-  exists(kiroHookPath),
-  kiroHookPath,
-);
-if (exists(kiroHookPath)) {
-  const kiroHook = JSON.parse(readText(kiroHookPath));
-  record(
-    "Kiro hook uses native preToolUse askAgent schema",
-    kiroHook.enabled === true &&
-      kiroHook.when?.type === "preToolUse" &&
-      kiroHook.then?.type === "askAgent" &&
-      Array.isArray(kiroHook.when?.toolTypes) &&
-      kiroHook.when.toolTypes.includes("shell") &&
-      kiroHook.when.toolTypes.includes("write"),
-    kiroHookPath,
-  );
-  record(
-    "Kiro template contains only hook artifacts",
-    allFiles("templates/kiro").every((entry) =>
-      entry.startsWith(`.kiro${path.sep}hooks${path.sep}`)
-    ),
-    "templates/kiro",
   );
 }
 if (exists(codexUxAuditConfigPath) && exists(geminiUxAuditConfigPath)) {

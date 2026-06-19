@@ -33,17 +33,6 @@
 - The current template ships 15 agent files, 34 skill directories, 11 workflow
   files, and four top-level runtime scripts.
 
-## Kiro Hook Artifact
-
-- Source: `templates/kiro/.kiro/hooks/harness-guard.kiro.hook`.
-- Scope: one standalone Kiro IDE hook only.
-- It is not a CLI target and does not install agents, skills, rules, workflows,
-  runtime scripts, or root instructions.
-- The hook uses `preToolUse` with `askAgent` for `shell` and `write` tools.
-- Kiro IDE command hooks currently lack reliable structured tool arguments, so
-  this artifact does not use the shared deterministic Python guard.
-
-
 ## Shared Rules
 
 - Preserve relative paths within each toolkit.

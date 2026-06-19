@@ -151,10 +151,6 @@ templates/
 Thêm target mới (ví dụ `claude`): thêm 1 entry vào `TARGET_REGISTRY` trong
 `bin/index.js` và tạo folder `templates/claude/` theo đúng cấu trúc mirror.
 
-Repo cũng đóng gói một hook Kiro độc lập tại
-`templates/kiro/.kiro/hooks/harness-guard.kiro.hook`. Đây không phải target của
-CLI và không kèm agent, skill, workflow hay instruction file.
-
 ## Phát Triển Skill
 
 Codex skills:

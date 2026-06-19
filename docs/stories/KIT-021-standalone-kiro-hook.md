@@ -2,7 +2,7 @@
 
 ## Status
 
-implemented
+retired
 
 ## Lane
 
@@ -10,9 +10,9 @@ normal
 
 ## Product Contract
 
-The package contains a standalone Kiro IDE hook that provides bounded Harness
-safety review without creating a Kiro toolkit target or installing agents,
-skills, rules, workflows, or root instructions.
+The package must not ship the standalone Kiro `askAgent` guard because its
+per-tool model calls add credit, token, and latency cost without providing the
+deterministic boundary available in Codex and Gemini.
 
 ## Relevant Product Docs
 
@@ -21,48 +21,45 @@ skills, rules, workflows, or root instructions.
 
 ## Acceptance Criteria
 
-- The hook is stored at
-  `templates/kiro/.kiro/hooks/harness-guard.kiro.hook`.
-- The Kiro template contains no files outside `.kiro/hooks/`.
-- The hook uses Kiro's native `preToolUse` and `askAgent` schema.
-- The hook is limited to `shell` and `write` tool categories.
-- The prompt covers destructive commands, sensitive values, and Harness
-  high-risk edit surfaces.
-- Kiro is not added to `TARGET_REGISTRY`; this is a standalone artifact rather
-  than a complete install target.
-- Template checks validate the JSON shape and npm packaging includes the hook.
+- Remove `templates/kiro/.kiro/hooks/harness-guard.kiro.hook`.
+- Remove Kiro hook assertions and package documentation.
+- Keep Kiro out of `TARGET_REGISTRY`.
+- Preserve this story as the reason not to reintroduce an always-on
+  `preToolUse` `askAgent` guard.
+- Reconsider a deterministic Kiro adapter only after Kiro IDE command hooks
+  expose complete structured tool arguments.
 
 ## Design Notes
 
-- Kiro IDE `runCommand` hooks do not currently receive complete tool arguments,
-  so the shared deterministic Python policy cannot inspect the proposed
-  operation reliably.
-- `askAgent` can inspect the active tool context but consumes credits and is
-  less deterministic than the Codex and Gemini adapters.
-- Read tools are intentionally excluded because invoking an agent hook before
-  every file read would add substantial token and latency overhead.
-- The hook is warning/confirmation oriented; it is not presented as a complete
-  security boundary.
+- Kiro IDE `runCommand` hooks currently lack complete tool arguments.
+- `askAgent` before common shell/write calls invokes another model loop and can
+  be slower, noisier, and more expensive than the behavior it protects.
+- Agent self-review is not an independent deterministic safety boundary.
+- A future Kiro hook should use a command adapter only when structured tool
+  payloads are available and verified.
 
 ## Validation
 
 | Layer | Expected proof |
 | --- | --- |
-| Unit | JSON shape assertions in template consistency checks |
+| Unit | Kiro-specific assertions removed without breaking template checks |
 | Integration | Not required; no installer target is added |
-| E2E | Future real Kiro IDE session |
-| Platform | npm package contains the `.kiro.hook` file |
+| E2E | Not required |
+| Platform | npm package contains no `templates/kiro/` artifact |
 | Release | `git diff --check` |
 
 ## Harness Delta
 
-Kiro now has a minimal standalone guard artifact while cross-runtime policy
-sharing remains limited to runtimes with usable structured tool payloads.
+The experimental Kiro hook was rolled back after review showed its
+`askAgent` implementation worked against the kit's token and latency goals.
 
 ## Evidence
 
-- Kiro hook JSON schema assertion passed.
-- `npm run check:templates` passed 330 checks.
-- `npm pack --dry-run --json` included only the standalone Kiro artifact under
-  `templates/kiro/`.
+- Initial experiment: native Kiro hook schema and package checks passed.
+- Review outcome: remove the hook because correctness depended on another LLM
+  call for every matched tool invocation.
+- `npm run check:templates` passed 327 checks after removal.
+- `npm run test:hooks` passed 9 tests.
+- `npm run test:installer` passed.
+- `npm pack --dry-run --json` contains no `templates/kiro/` artifacts.
 - `git diff --check` passed.
