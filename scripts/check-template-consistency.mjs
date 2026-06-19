@@ -42,6 +42,25 @@ function immediateFiles(relativePath, extension = null) {
     .sort();
 }
 
+function recursiveFiles(relativePath, extension = null) {
+  const absolutePath = path.join(repoRoot, relativePath);
+  if (!fs.existsSync(absolutePath)) return [];
+
+  return fs
+    .readdirSync(absolutePath, { withFileTypes: true })
+    .flatMap((entry) => {
+      const child = path.join(relativePath, entry.name);
+      if (entry.isDirectory()) {
+        return recursiveFiles(child, extension);
+      }
+      if (entry.isFile() && (!extension || entry.name.endsWith(extension))) {
+        return [child];
+      }
+      return [];
+    })
+    .sort();
+}
+
 function record(name, passed, detail = "") {
   checks.push({ name, passed, detail });
 }
@@ -125,6 +144,23 @@ function checkRelativeLinks(relativePath) {
   }
 }
 
+function checkSkillReferenceLinks(targetName, skillsPath, markdownPaths) {
+  const skillNames = new Set(immediateDirectories(skillsPath));
+
+  for (const relativePath of markdownPaths) {
+    for (const target of markdownRelativeLinks(relativePath)) {
+      const match = target.match(/(?:^|\/)([a-z0-9-]+)\/SKILL\.md$/);
+      if (!match) continue;
+
+      record(
+        `${targetName}:${relativePath} skill reference exists: ${match[1]}`,
+        skillNames.has(match[1]),
+        target,
+      );
+    }
+  }
+}
+
 const toolkitDocs = readText("docs/product/toolkits.md");
 const codexArchitecture = readText("templates/codex/.agents/ARCHITECTURE.md");
 const geminiArchitecture = readText("templates/gemini/.agents/ARCHITECTURE.md");
@@ -160,6 +196,16 @@ const codexHookAdapterPath = "templates/codex/.codex/hooks/codex_adapter.py";
 const geminiHooksConfigPath = "templates/gemini/.agents/hooks.json";
 const geminiHarnessGuardPath = "templates/gemini/.agents/hooks/harness_guard.py";
 const geminiHookAdapterPath = "templates/gemini/.agents/hooks/gemini_adapter.py";
+const codexSkillMarkdownPaths = recursiveFiles("templates/codex/.agents/skills", ".md");
+const geminiSkillMarkdownPaths = recursiveFiles("templates/gemini/.agents/skills", ".md");
+const geminiAgentMarkdownPaths = recursiveFiles("templates/gemini/.agents/agents", ".md");
+const geminiWorkflowMarkdownPaths = recursiveFiles("templates/gemini/.agents/workflows", ".md");
+const templateMarkdownPaths = [
+  ...codexSkillMarkdownPaths,
+  ...geminiSkillMarkdownPaths,
+  ...geminiAgentMarkdownPaths,
+  ...geminiWorkflowMarkdownPaths,
+];
 
 const docsCodexSkillCount = requireMatch(
   toolkitDocs,
@@ -276,11 +322,19 @@ if (exists(codexUxAuditConfigPath) && exists(geminiUxAuditConfigPath)) {
 
 checkSkillFrontmatter("codex", "templates/codex/.agents/skills", true);
 checkSkillFrontmatter("gemini", "templates/gemini/.agents/skills", false);
-checkRelativeLinks(projectPlannerPath);
-checkRelativeLinks(planWritingPath);
-checkRelativeLinks(geminiProjectPlannerPath);
-checkRelativeLinks(geminiPlanWritingPath);
-checkRelativeLinks(geminiPlanWorkflowPath);
+for (const markdownPath of templateMarkdownPaths) {
+  checkRelativeLinks(markdownPath);
+}
+checkSkillReferenceLinks(
+  "codex",
+  "templates/codex/.agents/skills",
+  codexSkillMarkdownPaths,
+);
+checkSkillReferenceLinks(
+  "gemini",
+  "templates/gemini/.agents/skills",
+  [...geminiSkillMarkdownPaths, ...geminiAgentMarkdownPaths, ...geminiWorkflowMarkdownPaths],
+);
 
 record(
   "project-planner uses one canonical default plan path",

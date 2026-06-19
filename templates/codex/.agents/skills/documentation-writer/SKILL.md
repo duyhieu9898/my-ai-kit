@@ -95,8 +95,8 @@ npm run dev
 
 ## Documentation
 
-- [API Reference](./docs/api.md)
-- [Architecture Decision Records](./docs/adr/)
+- API Reference: `docs/api.md`
+- Architecture Decision Records: `docs/adr/`
 ```
 
 ### 2. API Endpoint Template

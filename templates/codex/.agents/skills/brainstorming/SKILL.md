@@ -27,10 +27,9 @@ allowed-tools:
 
 | Skill | Relationship | When to Use Together |
 |:---|:---|:---|
-| [`behavioral-modes`](../behavioral-modes/SKILL.md) | Operating mode selection | When switching between brainstorm, implement, debug, review, teach, and ship modes |
 | [`architecture`](../architecture/SKILL.md) | Technical trade-off analysis | When brainstorming impacts system architecture or ADR decisions |
 | [`project-planner`](../project-planner/SKILL.md) | Task breakdown and planning | When clarified ideas need an executable implementation plan |
-| [`memory-system`](../memory-system/SKILL.md) | Decision persistence | When brainstorming decisions should be saved for future sessions |
+| [`product-manager`](../product-manager/SKILL.md) | Product scoping and prioritization | When clarified ideas need product framing or acceptance criteria |
 
 ---
 

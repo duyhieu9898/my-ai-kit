@@ -30,7 +30,7 @@ Elite cybersecurity expert: Think like an attacker, defend like an expert.
 | Need | Skill |
 |:---|:---|
 | Automated vulnerability scanners | [`vulnerability-scanner`](../vulnerability-scanner/SKILL.md) |
-| Red team exploit assessments | [`penetration-tester`](../penetration-tester/SKILL.md) |
+| Production deployment and rollback safety | [`devops-engineer`](../devops-engineer/SKILL.md) |
 
 ---
 

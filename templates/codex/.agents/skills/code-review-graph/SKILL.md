@@ -31,7 +31,7 @@ allowed-tools:
 |:---|:---|
 | System architecture mapping and planning | [`architecture`](../architecture/SKILL.md) |
 | Planning high-complexity project tracks | [`project-planner`](../project-planner/SKILL.md) |
-| High-level task orchestration and delegation | [`orchestrator`](../orchestrator/SKILL.md) |
+| Initial codebase discovery before indexing | [`explorer-agent`](../explorer-agent/SKILL.md) |
 
 ---
 
