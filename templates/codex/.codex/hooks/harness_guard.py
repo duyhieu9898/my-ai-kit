@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
-"""Warning-only Codex hook for Harness context and safety guardrails."""
+"""Shared warning-only Harness context and safety policy."""
 
 from __future__ import annotations
 
-import json
 import re
-import sys
 from typing import Any, Iterable
 
 
@@ -52,10 +50,12 @@ COMMAND_KEYS = {
     "arguments",
     "cmd",
     "command",
+    "commandline",
     "input",
     "params",
     "patch",
     "script",
+    "tool_args",
     "tool_input",
 }
 
@@ -63,38 +63,52 @@ SHELL_TOOL_NAMES = {
     "bash",
     "exec_command",
     "functions.exec_command",
+    "run_command",
+    "run_shell_command",
     "shell",
 }
 
+FILE_READ_TOOL_NAMES = {
+    "read_file",
+    "view_file",
+}
 
-def main() -> int:
-    event = sys.argv[1] if len(sys.argv) > 1 else "unknown"
-    payload = read_payload()
+FILE_EDIT_TOOL_NAMES = {
+    "apply_patch",
+    "delete_file",
+    "edit",
+    "multi_replace_file_content",
+    "replace_file_content",
+    "write",
+    "write_file",
+    "write_to_file",
+}
+
+PATH_KEYS = {
+    "absolutepath",
+    "file",
+    "file_path",
+    "filepath",
+    "path",
+}
+
+
+def evaluate(event: str, payload: Any) -> list[str]:
+    """Return warnings for a normalized pre-tool or post-tool event."""
     text = extract_relevant_text(payload)
     tool_name = find_tool_name(payload).lower()
 
     warnings: list[str] = []
     if event == "pre-tool":
         warnings.extend(check_destructive_or_secret_command(text))
-        if tool_name and tool_name not in SHELL_TOOL_NAMES:
+        if tool_name in FILE_READ_TOOL_NAMES:
+            warnings.extend(check_sensitive_native_read(text))
+        if tool_name in FILE_EDIT_TOOL_NAMES:
             warnings.extend(check_high_risk_edit(text))
     elif event == "post-tool":
-        warnings.extend(check_broad_context_read(text))
+        warnings.extend(check_broad_context_read(text, payload, tool_name))
 
-    for warning in dedupe(warnings):
-        print(f"[harness-guard] {warning}", file=sys.stderr)
-
-    return 0
-
-
-def read_payload() -> Any:
-    raw = sys.stdin.read()
-    if not raw.strip():
-        return {}
-    try:
-        return json.loads(raw)
-    except json.JSONDecodeError:
-        return {"raw": raw}
+    return dedupe(warnings)
 
 
 def extract_strings(value: Any) -> Iterable[str]:
@@ -124,8 +138,11 @@ def extract_command_strings(value: Any, *, in_command_field: bool = False) -> It
             yield value
     elif isinstance(value, dict):
         for key, item in value.items():
-            key_is_command = str(key) in COMMAND_KEYS
-            yield from extract_command_strings(item, in_command_field=in_command_field or key_is_command)
+            key_is_command = str(key).lower() in COMMAND_KEYS
+            yield from extract_command_strings(
+                item,
+                in_command_field=in_command_field or key_is_command,
+            )
     elif isinstance(value, list):
         for item in value:
             yield from extract_command_strings(item, in_command_field=in_command_field)
@@ -181,23 +198,81 @@ def check_high_risk_edit(text: str) -> list[str]:
     return []
 
 
-def check_broad_context_read(text: str) -> list[str]:
+def check_sensitive_native_read(text: str) -> list[str]:
+    if any(pattern.search(text) for pattern in SECRET_PATTERNS):
+        return [
+            "Possible secret-bearing file or variable read detected. Avoid exposing credentials in the conversation."
+        ]
+    return []
+
+
+def check_broad_context_read(text: str, payload: Any, tool_name: str) -> list[str]:
     warnings: list[str] = []
     normalized_text = normalize_paths(text)
     docs_read = [doc for doc in HARNESS_DOCS if doc in normalized_text]
     content_read_docs = [doc for doc in docs_read if reads_file_content(normalized_text, doc)]
+
+    native_read = native_file_read(payload) if tool_name in FILE_READ_TOOL_NAMES else None
+    if native_read:
+        path, start, end = native_read
+        normalized_path = normalize_paths(path)
+        native_doc = next((doc for doc in HARNESS_DOCS if doc in normalized_path), None)
+        if native_doc and (start is None or end is None or end - start + 1 > 180):
+            content_read_docs.append(native_doc)
+            docs_read.append(native_doc)
+
     if len(set(docs_read)) >= 4 and content_read_docs:
         warnings.append(
             "Bulk Harness document read detected. For tiny/question work, prefer AGENTS.md, FEATURE_INTAKE, matrix, and targeted rg/sed sections."
         )
 
-    for doc in docs_read:
-        if reads_file_content(normalized_text, doc):
-            warnings.append(
-                f"Large read of {doc} detected. Use the smallest section that answers the current phase/lane question."
-            )
+    for doc in dedupe(content_read_docs):
+        warnings.append(
+            f"Large read of {doc} detected. Use the smallest section that answers the current phase/lane question."
+        )
 
     return warnings
+
+
+def native_file_read(payload: Any) -> tuple[str, int | None, int | None] | None:
+    args = find_mapping(payload, ("tool_args", "tool_input", "arguments", "args"))
+    if not args:
+        return None
+
+    normalized = {str(key).lower(): value for key, value in args.items()}
+    path = next(
+        (value for key, value in normalized.items() if key in PATH_KEYS and isinstance(value, str)),
+        None,
+    )
+    if not path:
+        return None
+
+    start = parse_int(normalized.get("startline") or normalized.get("start_line"))
+    end = parse_int(normalized.get("endline") or normalized.get("end_line"))
+    return path, start, end
+
+
+def find_mapping(value: Any, keys: tuple[str, ...]) -> dict[str, Any] | None:
+    if not isinstance(value, dict):
+        return None
+    for key in keys:
+        item = value.get(key)
+        if isinstance(item, dict):
+            return item
+    for item in value.values():
+        if isinstance(item, dict):
+            nested = find_mapping(item, keys)
+            if nested:
+                return nested
+    return None
+
+
+def parse_int(value: Any) -> int | None:
+    if isinstance(value, int):
+        return value
+    if isinstance(value, str) and value.isdigit():
+        return int(value)
+    return None
 
 
 def reads_file_content(text: str, doc: str) -> bool:
@@ -231,7 +306,3 @@ def dedupe(items: Iterable[str]) -> list[str]:
             seen.add(item)
             result.append(item)
     return result
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())

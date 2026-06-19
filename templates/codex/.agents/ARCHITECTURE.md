@@ -23,7 +23,8 @@ AGENTS.md                     # Repository-wide workflow and skill rules
 .codex/
 ├── hooks.json               # Codex lifecycle hook registration
 └── hooks/
-    └── harness_guard.py     # Warning-only context and safety guardrails
+    ├── harness_guard.py     # Shared warning-only Harness policy
+    └── codex_adapter.py     # Codex payload and response adapter
 .agents/
 ├── AGENTS.md                # Rules scoped to shared toolkit maintenance
 ├── ARCHITECTURE.md          # This file (Human-developer map)
@@ -36,6 +37,9 @@ AGENTS.md                     # Repository-wide workflow and skill rules
 │   │   └── scripts/         # Skill-level utility scripts
 └── scripts/                 # Master validation and automation scripts
 ```
+
+The hook files are generated from the repository-level `shared/hooks/`
+canonical source. Edit that source and run `npm run sync:shared-hooks`.
 
 ## Instruction Scope
 

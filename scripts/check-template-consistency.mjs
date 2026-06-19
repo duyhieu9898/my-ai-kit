@@ -42,6 +42,25 @@ function immediateFiles(relativePath, extension = null) {
     .sort();
 }
 
+function allFiles(relativePath) {
+  const absolutePath = path.join(repoRoot, relativePath);
+  if (!fs.existsSync(absolutePath)) return [];
+
+  const files = [];
+  function walk(directory, prefix = "") {
+    for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+      const relativeEntry = path.join(prefix, entry.name);
+      if (entry.isDirectory()) {
+        walk(path.join(directory, entry.name), relativeEntry);
+      } else {
+        files.push(relativeEntry);
+      }
+    }
+  }
+  walk(absolutePath);
+  return files.sort();
+}
+
 function record(name, passed, detail = "") {
   checks.push({ name, passed, detail });
 }
@@ -156,6 +175,11 @@ const codexUxAuditConfigPath = "templates/codex/.agents/ux_audit.json";
 const geminiUxAuditConfigPath = "templates/gemini/.agents/ux_audit.json";
 const codexHooksConfigPath = "templates/codex/.codex/hooks.json";
 const codexHarnessGuardPath = "templates/codex/.codex/hooks/harness_guard.py";
+const codexHookAdapterPath = "templates/codex/.codex/hooks/codex_adapter.py";
+const geminiHooksConfigPath = "templates/gemini/.agents/hooks.json";
+const geminiHarnessGuardPath = "templates/gemini/.agents/hooks/harness_guard.py";
+const geminiHookAdapterPath = "templates/gemini/.agents/hooks/gemini_adapter.py";
+const kiroHookPath = "templates/kiro/.kiro/hooks/harness-guard.kiro.hook";
 
 const docsCodexSkillCount = requireMatch(
   toolkitDocs,
@@ -220,16 +244,68 @@ record(
 );
 record(
   "Codex lifecycle hook files exist",
-  exists(codexHooksConfigPath) && exists(codexHarnessGuardPath),
-  `${codexHooksConfigPath}, ${codexHarnessGuardPath}`,
+  exists(codexHooksConfigPath) &&
+    exists(codexHarnessGuardPath) &&
+    exists(codexHookAdapterPath),
+  `${codexHooksConfigPath}, ${codexHarnessGuardPath}, ${codexHookAdapterPath}`,
+);
+record(
+  "Gemini lifecycle hook files exist",
+  exists(geminiHooksConfigPath) &&
+    exists(geminiHarnessGuardPath) &&
+    exists(geminiHookAdapterPath),
+  `${geminiHooksConfigPath}, ${geminiHarnessGuardPath}, ${geminiHookAdapterPath}`,
 );
 if (exists(codexHooksConfigPath)) {
   const codexHooksConfig = JSON.parse(readText(codexHooksConfigPath));
   const hookText = JSON.stringify(codexHooksConfig);
   record(
     "Codex hook config targets current shell tool names",
-    hookText.includes("exec_command") && hookText.includes("harness_guard.py"),
+    hookText.includes("exec_command") && hookText.includes("codex_adapter.py"),
     codexHooksConfigPath,
+  );
+}
+if (exists(geminiHooksConfigPath)) {
+  const geminiHooksConfig = JSON.parse(readText(geminiHooksConfigPath));
+  const managedHook = geminiHooksConfig["hieund-ai-kit-harness-guard"];
+  record(
+    "Gemini hook config uses native lifecycle events",
+    Array.isArray(managedHook?.PreToolUse) &&
+      managedHook?.PostToolUse === undefined &&
+      JSON.stringify(managedHook).includes("gemini_adapter.py"),
+    geminiHooksConfigPath,
+  );
+}
+if (exists(codexHarnessGuardPath) && exists(geminiHarnessGuardPath)) {
+  record(
+    "Codex and Gemini share the same Harness guard policy",
+    readText(codexHarnessGuardPath) === readText(geminiHarnessGuardPath),
+    `${codexHarnessGuardPath}, ${geminiHarnessGuardPath}`,
+  );
+}
+record(
+  "Standalone Kiro Harness hook exists",
+  exists(kiroHookPath),
+  kiroHookPath,
+);
+if (exists(kiroHookPath)) {
+  const kiroHook = JSON.parse(readText(kiroHookPath));
+  record(
+    "Kiro hook uses native preToolUse askAgent schema",
+    kiroHook.enabled === true &&
+      kiroHook.when?.type === "preToolUse" &&
+      kiroHook.then?.type === "askAgent" &&
+      Array.isArray(kiroHook.when?.toolTypes) &&
+      kiroHook.when.toolTypes.includes("shell") &&
+      kiroHook.when.toolTypes.includes("write"),
+    kiroHookPath,
+  );
+  record(
+    "Kiro template contains only hook artifacts",
+    allFiles("templates/kiro").every((entry) =>
+      entry.startsWith(`.kiro${path.sep}hooks${path.sep}`)
+    ),
+    "templates/kiro",
   );
 }
 if (exists(codexUxAuditConfigPath) && exists(geminiUxAuditConfigPath)) {

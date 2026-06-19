@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/usr/bin/python3 \"$(git rev-parse --show-toplevel)/.codex/hooks/harness_guard.py\" pre-tool",
+            "command": "/usr/bin/python3 \"$(git rev-parse --show-toplevel)/.codex/hooks/codex_adapter.py\" pre-tool",
             "timeout": 10,
             "statusMessage": "Checking Harness guardrails"
           }
@@ -19,7 +19,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/usr/bin/python3 \"$(git rev-parse --show-toplevel)/.codex/hooks/harness_guard.py\" post-tool",
+            "command": "/usr/bin/python3 \"$(git rev-parse --show-toplevel)/.codex/hooks/codex_adapter.py\" post-tool",
             "timeout": 10,
             "statusMessage": "Checking context scope"
           }

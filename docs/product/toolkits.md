@@ -8,6 +8,8 @@
 - Lifecycle integration: `templates/codex/.codex/` merges into root `.codex/`.
   Preserve unrelated project config and custom hooks while updating the
   kit-managed Harness guard.
+- Hook policy: generated from `shared/hooks/harness_guard.py`; the Codex
+  adapter maps native lifecycle payloads and warning output.
 - Nested instruction: `templates/codex/.agents/AGENTS.md` to
   `.agents/AGENTS.md`.
 - Skills use `SKILL.md`, required `agents/openai.yaml`, optional `references/`,
@@ -20,9 +22,26 @@
 - Source: `templates/gemini/`.
 - Runtime destination: `.agents/`.
 - Repository instruction: `templates/gemini/GEMINI.md` to root `GEMINI.md`.
+- Lifecycle integration: `templates/gemini/.agents/hooks.json` and
+  `.agents/hooks/` install warning-only Antigravity guards. Preserve unrelated
+  hook entries and scripts while updating the kit-managed entry.
+- Hook policy: generated from `shared/hooks/harness_guard.py`; the Gemini
+  adapter maps Antigravity payloads and returns an allow decision with warning
+  context. Context-read warnings run at `PreToolUse` because Antigravity's
+  `PostToolUse` payload does not include tool arguments.
 - Preserve its agents, skills, workflows, scripts, and shared assets.
 - The current template ships 15 agent files, 34 skill directories, 11 workflow
   files, and four top-level runtime scripts.
+
+## Kiro Hook Artifact
+
+- Source: `templates/kiro/.kiro/hooks/harness-guard.kiro.hook`.
+- Scope: one standalone Kiro IDE hook only.
+- It is not a CLI target and does not install agents, skills, rules, workflows,
+  runtime scripts, or root instructions.
+- The hook uses `preToolUse` with `askAgent` for `shell` and `write` tools.
+- Kiro IDE command hooks currently lack reliable structured tool arguments, so
+  this artifact does not use the shared deterministic Python guard.
 
 
 ## Shared Rules
@@ -32,10 +51,14 @@
   shared Backlog runtime have their canonical source under `shared/runtime/`.
   Both target templates retain committed generated copies so installation
   remains a direct mirror-copy with no composition step.
+- Shared lifecycle policy and target adapters have canonical sources under
+  `shared/hooks/` and committed generated copies in each target template.
 - Canonical source and sync tooling are development-only; npm installation
   ships the generated target templates without extra shared-source payload.
 - Use `npm run sync:shared-runtime` after editing canonical files and
   `npm run check:shared-runtime` to detect drift.
+- Use `npm run sync:shared-hooks`, `npm run check:shared-hooks`, and
+  `npm run test:hooks` after editing lifecycle guards.
 - Backlog target metadata and runtime artifacts are not shared: keep
   `SKILL.md`, Codex `agents/openai.yaml`, `.env`, and `logs/` in their target
   trees. Backlog `.env.example` and `.gitignore` are shared support files.

@@ -36,13 +36,17 @@ Kết quả cài đặt:
 | Target | Runtime Folder | Integration Config | Root Instruction |
 |:---|:---|:---|:---|
 | `codex` | `.agents/` | `.codex/` hooks | `AGENTS.md` |
-| `gemini` | `.agents/` | — | `GEMINI.md` |
+| `gemini` | `.agents/` | `.agents/hooks.json` | `GEMINI.md` |
 
 `.agents/` chứa `skills/`, `scripts/`, các tài nguyên runtime, và marker `.kit-target`
 ghi tên target đang cài. CLI **không** tự sửa `.gitignore` — bạn tự quản lý.
 Với Codex, `.codex/hooks.json` được merge với hooks hiện có thay vì thay thế
 toàn bộ cấu hình `.codex/`. Codex sẽ yêu cầu review/trust hook mới hoặc hook đã
 thay đổi trước khi chạy.
+
+Với Gemini Antigravity, `.agents/hooks.json` và các script hook tùy chỉnh hiện
+có được giữ lại khi `init` hoặc `update`; kit chỉ thay entry
+`hieund-ai-kit-harness-guard` do nó quản lý.
 
 ## Lệnh CLI
 
@@ -133,6 +137,10 @@ templates/
     ├── GEMINI.md            # Root instruction → copy ra project root
     └── .agents/             # Install folder → copy vào project/.agents/
         ├── .kit-target      # Marker, nội dung: "gemini"
+        ├── hooks.json       # Antigravity lifecycle hooks → merge theo entry
+        ├── hooks/
+        │   ├── harness_guard.py
+        │   └── gemini_adapter.py
         ├── ARCHITECTURE.md
         ├── agents/
         ├── scripts/
@@ -142,6 +150,10 @@ templates/
 
 Thêm target mới (ví dụ `claude`): thêm 1 entry vào `TARGET_REGISTRY` trong
 `bin/index.js` và tạo folder `templates/claude/` theo đúng cấu trúc mirror.
+
+Repo cũng đóng gói một hook Kiro độc lập tại
+`templates/kiro/.kiro/hooks/harness-guard.kiro.hook`. Đây không phải target của
+CLI và không kèm agent, skill, workflow hay instruction file.
 
 ## Phát Triển Skill
 
@@ -176,6 +188,15 @@ các bản template:
 ```bash
 npm run sync:shared-runtime
 npm run check:shared-runtime
+```
+
+Harness lifecycle guard dùng chung có source chính tại `shared/hooks/`; mỗi
+target giữ một adapter nhỏ cho payload/output native:
+
+```bash
+npm run sync:shared-hooks
+npm run check:shared-hooks
+npm run test:hooks
 ```
 
 Installer vẫn copy thẳng template đã sinh; không compose file trong lúc cài.

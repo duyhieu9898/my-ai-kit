@@ -21,7 +21,13 @@ const INSTALL_FOLDER = '.agents';
 const MARKER_FILE = '.kit-target';
 const DEFAULT_TARGET = 'codex';
 const CODEX_CONFIG_FOLDER = '.codex';
-const KIT_HOOK_COMMAND_MARKER = '.codex/hooks/harness_guard.py';
+const CODEX_HOOK_COMMAND_MARKERS = [
+    '.codex/hooks/codex_adapter.py',
+    '.codex/hooks/harness_guard.py',
+];
+const GEMINI_HOOK_CONFIG = 'hooks.json';
+const GEMINI_HOOK_FOLDER = 'hooks';
+const KIT_GEMINI_HOOK_KEY = 'hieund-ai-kit-harness-guard';
 
 /**
  * Target registry — maps a target name to its configuration.
@@ -195,13 +201,14 @@ const atomicReplaceDir = (src, dest) => {
     }
 };
 
-const isKitHookGroup = (group) =>
+const isKitCodexHookGroup = (group) =>
     Array.isArray(group?.hooks) &&
     group.hooks.some((hook) =>
-        typeof hook?.command === 'string' && hook.command.includes(KIT_HOOK_COMMAND_MARKER)
+        typeof hook?.command === 'string' &&
+        CODEX_HOOK_COMMAND_MARKERS.some((marker) => hook.command.includes(marker))
     );
 
-const mergeHooksFile = (src, dest) => {
+const mergeCodexHooksFile = (src, dest) => {
     const incoming = JSON.parse(fs.readFileSync(src, 'utf8'));
     const existing = fs.existsSync(dest)
         ? JSON.parse(fs.readFileSync(dest, 'utf8'))
@@ -210,7 +217,7 @@ const mergeHooksFile = (src, dest) => {
 
     for (const [event, incomingGroups] of Object.entries(incoming.hooks || {})) {
         const existingGroups = Array.isArray(merged.hooks[event])
-            ? merged.hooks[event].filter((group) => !isKitHookGroup(group))
+            ? merged.hooks[event].filter((group) => !isKitCodexHookGroup(group))
             : [];
         merged.hooks[event] = [...existingGroups, ...incomingGroups];
     }
@@ -230,10 +237,58 @@ const mergeDirectory = (src, dest) => {
             path.basename(src) === CODEX_CONFIG_FOLDER &&
             entry.name === 'hooks.json'
         ) {
-            mergeHooksFile(entrySrc, entryDest);
+            mergeCodexHooksFile(entrySrc, entryDest);
         } else {
             fs.copyFileSync(entrySrc, entryDest);
         }
+    }
+};
+
+const mergeGeminiHooks = (existingPath, incomingPath, destinationPath) => {
+    const existing = fs.existsSync(existingPath)
+        ? JSON.parse(fs.readFileSync(existingPath, 'utf8'))
+        : {};
+    const incoming = JSON.parse(fs.readFileSync(incomingPath, 'utf8'));
+    const merged = {
+        ...existing,
+        ...incoming,
+        [KIT_GEMINI_HOOK_KEY]: incoming[KIT_GEMINI_HOOK_KEY],
+    };
+    fs.writeFileSync(destinationPath, `${JSON.stringify(merged, null, 2)}\n`);
+};
+
+const atomicReplaceInstallDir = (src, dest) => {
+    const incomingHooksPath = path.join(src, GEMINI_HOOK_CONFIG);
+    if (!fs.existsSync(incomingHooksPath)) {
+        atomicReplaceDir(src, dest);
+        return;
+    }
+
+    const parent = path.dirname(dest);
+    const staging = path.join(parent, `.${path.basename(dest)}.tmp-${process.pid}-${Date.now()}`);
+    try {
+        fs.rmSync(staging, { recursive: true, force: true });
+        fs.mkdirSync(staging, { recursive: true });
+
+        const existingHookFolder = path.join(dest, GEMINI_HOOK_FOLDER);
+        if (fs.existsSync(existingHookFolder)) {
+            fs.cpSync(existingHookFolder, path.join(staging, GEMINI_HOOK_FOLDER), {
+                recursive: true,
+            });
+        }
+
+        fs.cpSync(src, staging, { recursive: true });
+        mergeGeminiHooks(
+            path.join(dest, GEMINI_HOOK_CONFIG),
+            incomingHooksPath,
+            path.join(staging, GEMINI_HOOK_CONFIG),
+        );
+
+        fs.rmSync(dest, { recursive: true, force: true });
+        fs.renameSync(staging, dest);
+    } catch (error) {
+        fs.rmSync(staging, { recursive: true, force: true });
+        throw error;
     }
 };
 
@@ -244,7 +299,7 @@ const removeKitCodexHooks = (projectDir) => {
         const hooks = {};
         for (const [event, groups] of Object.entries(config.hooks || {})) {
             const retained = Array.isArray(groups)
-                ? groups.filter((group) => !isKitHookGroup(group))
+                ? groups.filter((group) => !isKitCodexHookGroup(group))
                 : groups;
             if (!Array.isArray(retained) || retained.length > 0) {
                 hooks[event] = retained;
@@ -260,6 +315,10 @@ const removeKitCodexHooks = (projectDir) => {
 
     fs.rmSync(
         path.join(projectDir, CODEX_CONFIG_FOLDER, 'hooks', 'harness_guard.py'),
+        { force: true }
+    );
+    fs.rmSync(
+        path.join(projectDir, CODEX_CONFIG_FOLDER, 'hooks', 'codex_adapter.py'),
         { force: true }
     );
 };
@@ -292,6 +351,8 @@ const mirrorCopy = (templatePath, projectDir, { overwriteRootInstruction = true 
             fs.copyFileSync(src, dest);
         } else if (entry.name === CODEX_CONFIG_FOLDER) {
             mergeDirectory(src, dest);
+        } else if (entry.name === INSTALL_FOLDER) {
+            atomicReplaceInstallDir(src, dest);
         } else {
             atomicReplaceDir(src, dest);
         }

@@ -21,7 +21,10 @@ templates/codex/
   Codex toolkit in mirror layout: AGENTS.md + .agents/ runtime + .codex/ hooks
 
 templates/gemini/
-  Gemini Antigravity toolkit in mirror layout: top-level GEMINI.md + .agents/
+  Gemini Antigravity toolkit: GEMINI.md + .agents/ runtime and native hooks
+
+shared/hooks/
+  Canonical Harness guard policy plus target-specific lifecycle adapters
 
 shared/runtime/
   Canonical source for all executable scripts and Backlog runtime shared by
@@ -46,6 +49,9 @@ Each template folder mirrors the project layout exactly:
 - The `.agents/` subdirectory is the install folder, copied to `project/.agents/`.
 - The Codex `.codex/` subdirectory contains lifecycle hooks. It is merged into
   `project/.codex/`; existing project config and unrelated hooks are preserved.
+- The Gemini `.agents/hooks.json` lifecycle entry and `.agents/hooks/` scripts
+  are merged during the otherwise atomic `.agents/` replacement so
+  project-owned hooks survive updates.
 - `.agents/.kit-target` is a marker file whose content is the target name; it is
   the source of truth for `detectInstalledTarget`.
 
@@ -59,15 +65,18 @@ Each template folder mirrors the project layout exactly:
   target templates.
 - Keep target-specific metadata such as `SKILL.md`, Codex `agents/openai.yaml`,
   environment files, and runtime logs outside the shared source.
-- Install uses mirror ownership rules: `.agents/` is replaced, `.codex/` is
-  merged, and top-level root instruction files honour the overwrite flag.
+- Edit shared lifecycle policy and adapters under `shared/hooks/`, then run
+  `npm run sync:shared-hooks` to refresh committed target copies.
+- Install uses mirror ownership rules: `.agents/` is replaced except for
+  merged Gemini hook customizations, `.codex/` is merged, and top-level root
+  instruction files honour the overwrite flag.
 - `init` is destructive (replaces install folder and, on switch/force, root
   instructions) and gates destructive actions behind a confirmation prompt or
   `--force`.
 - On target switch, the previous target's root instruction files are deleted
   before installing the new target.
-- `update` refreshes `.agents/`, updates kit-managed Codex hooks through a
-  structured merge, and preserves existing root instruction files.
+- `update` refreshes `.agents/`, updates kit-managed Codex and Gemini hooks
+  through structured merges, and preserves existing root instruction files.
 - The CLI does not modify `.gitignore`; users manage it themselves.
 
 ## Instruction Hierarchy
@@ -78,6 +87,9 @@ target/AGENTS.md
 
 target/.codex/hooks.json
   warning-only lifecycle guardrails merged with project hooks
+
+target/.agents/hooks.json
+  Gemini Antigravity lifecycle adapter using the same shared guard policy
 
 target/.agents/AGENTS.md
   maintenance rules scoped to the installed toolkit

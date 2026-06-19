@@ -19,6 +19,8 @@ AG Kit is a modular system consisting of:
 ```plaintext
 .agents/
 ├── ARCHITECTURE.md          # This file
+├── hooks.json               # Antigravity lifecycle hook registration
+├── hooks/                   # Shared Harness policy + Gemini adapter
 ├── agents/                  # 15 Specialist Agents
 ├── skills/                  # 34 Skills (with conditional loading)
 ├── workflows/               # 11 Slash Commands
