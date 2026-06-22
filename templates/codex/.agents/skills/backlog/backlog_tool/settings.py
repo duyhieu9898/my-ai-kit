@@ -11,7 +11,7 @@ CONFIG_PATH = os.path.join(SKILL_DIR, "config", "backlog.json")
 PROJECTS_CONFIG_DIR = os.path.join(SKILL_DIR, "config", "projects")
 WORKFLOWS_CONFIG_DIR = os.path.join(SKILL_DIR, "config", "workflows")
 ENV_PATH = os.path.join(SKILL_DIR, ".env")
-LOG_DIR = os.path.expanduser("~/.hieund-ai-kit/backlog/logs")
+LOG_DIR = "/home/hieund/Documents/hieund-ai-kit-cli/logs/backlog"
 LOG_PATH = os.path.join(LOG_DIR, "backlog.log")
 METRICS_PATH = os.path.join(LOG_DIR, "metrics.log")
 REQUEST_TIMEOUT_SECONDS = 20
@@ -180,16 +180,20 @@ def log_event(level, event, **fields):
         os.makedirs(LOG_DIR, exist_ok=True)
         rotate_file_if_needed(LOG_PATH)
         timestamp = datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds")
-        parts = [timestamp, level.upper(), f"event={event}"]
+        record = {
+            "ts": timestamp,
+            "level": level.upper(),
+            "event": event,
+        }
         for key, value in fields.items():
             if value is None:
                 continue
-            text = str(value).replace("\n", "\\n")
+            text = str(value)
             if len(text) > MAX_LOG_VALUE_LENGTH:
                 text = text[:MAX_LOG_VALUE_LENGTH] + "...<truncated>"
-            parts.append(f"{key}={json.dumps(text, ensure_ascii=False)}")
+            record[key] = text
         with open(LOG_PATH, "a", encoding="utf-8") as log_file:
-            log_file.write(" ".join(parts) + "\n")
+            log_file.write(json.dumps(record, ensure_ascii=False) + "\n")
     except Exception:
         pass
 

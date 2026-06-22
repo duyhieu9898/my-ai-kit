@@ -118,11 +118,15 @@ class BacklogSettingsTest(unittest.TestCase):
                 backlog_settings.LOG_DIR = old_log_dir
                 backlog_settings.LOG_PATH = old_log_path
 
-        self.assertIn("INFO event=api", content)
-        self.assertIn('method="GET"', content)
-        self.assertIn('path="/issues"', content)
-        self.assertIn("line one\\\\nline two", content)
+        import json
+        data = json.loads(content.strip())
+        self.assertEqual("INFO", data["level"])
+        self.assertEqual("api", data["event"])
+        self.assertEqual("GET", data["method"])
+        self.assertEqual("/issues", data["path"])
+        self.assertEqual("line one\nline two", data["body"])
         self.assertEqual(1, len(content.splitlines()))
+
 
 
 if __name__ == "__main__":
