@@ -11,7 +11,7 @@ Codex Kit is a modular toolkit organized around a unified, composable
 model with skill directories that can be loaded on demand.
 
 The kit contains:
-- **50 Composable Skills** - Direct domain-specific knowledge packages and expert personas under `skills/`.
+- **49 Composable Skills** - Direct domain-specific knowledge packages and expert personas under `skills/`.
 - **4 Master Scripts** - System-level automation and validation scripts under `scripts/`.
 
 ---
@@ -28,7 +28,7 @@ AGENTS.md                     # Repository-wide workflow and skill rules
 .agents/
 ├── AGENTS.md                # Rules scoped to shared toolkit maintenance
 ├── ARCHITECTURE.md          # This file (Human-developer map)
-├── skills/                  # 50 Composable Skills (Expert Personas + Domain Knowledge)
+├── skills/                  # 49 Composable Skills (Expert Personas + Domain Knowledge)
 │   ├── {skill-name}/
 │   │   ├── SKILL.md         # Metadata, triggers, and prompt guidelines
 │   │   ├── agents/
@@ -60,7 +60,7 @@ blocks are not lost.
 
 ---
 
-## 🧩 The 50 Composable Skills
+## 🧩 The 49 Composable Skills
 
 In Codex, the boundary between "agents" and "skills" is dissolved. Every specialist capability or expert persona is implemented as a **Skill** that the unified AI engine can dynamically load into its context.
 
@@ -85,7 +85,7 @@ These skills contain specialized persona prompts, deep domain methodologies, and
 
 ---
 
-### 🧩 Domain Knowledge Skills (37)
+### 🧩 Domain Knowledge Skills (36)
 These skills provide specific instructions and toolsets to guide implementation in target technologies and patterns.
 
 | Domain Category | Skills Included |
@@ -96,7 +96,7 @@ These skills provide specific instructions and toolsets to guide implementation 
 | **Security & Audits** | `vulnerability-scanner`, `code-review-checklist`, `code-review-graph` |
 | **Planning & Design** | `app-builder`, `architecture`, `plan-writing`, `brainstorming` |
 | **Infrastructure** | `deployment-procedures`, `server-management` |
-| **System Operations** | `backlog`, `batch-operations`, `simplify-code`, `code-archaeologist`, `explorer-agent` |
+| **System Operations** | `batch-operations`, `simplify-code`, `code-archaeologist`, `explorer-agent` |
 
 ---
 

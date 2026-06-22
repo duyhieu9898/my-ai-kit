@@ -1,0 +1,3 @@
+[console_scripts]
+backlog-cli = backlog_tool.cli:main
+backlog-mcp = backlog_mcp.server:main

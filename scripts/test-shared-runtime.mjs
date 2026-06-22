@@ -39,7 +39,7 @@ function listExecutableScripts(root) {
 
   function walk(currentPath) {
     for (const entry of fs.readdirSync(currentPath, { withFileTypes: true })) {
-      if (entry.name === "__pycache__" || entry.name === "tests") {
+      if (entry.name === "__pycache__" || entry.name === "tests" || entry.name === "hooks") {
         continue;
       }
 
@@ -83,17 +83,6 @@ try {
     sharedResourcePaths,
     listFiles(path.join(geminiRoot, ".shared")),
   );
-  assert.ok(
-    fs.existsSync(
-      path.join(sharedAgentsRoot, "skills/backlog/.env.example"),
-    ),
-  );
-  assert.ok(
-    fs.existsSync(path.join(sharedAgentsRoot, "skills/backlog/.gitignore")),
-  );
-  assert.ok(
-    !fs.existsSync(path.join(sharedAgentsRoot, "skills/backlog/.env")),
-  );
   for (const relativePath of codexScripts) {
     assert.deepEqual(
       fs.readFileSync(path.join(codexRoot, relativePath)),
@@ -121,11 +110,11 @@ try {
   );
   const geminiSkill = path.join(
     tempRoot,
-    "templates/gemini/.agents/skills/backlog/SKILL.md",
+    "templates/gemini/.agents/skills/api-patterns/SKILL.md",
   );
   const codexOpenAi = path.join(
     tempRoot,
-    "templates/codex/.agents/skills/backlog/agents/openai.yaml",
+    "templates/codex/.agents/skills/api-patterns/scripts/api_validator.py",
   );
   const originalSkill = fs.readFileSync(geminiSkill);
   const originalOpenAi = fs.readFileSync(codexOpenAi);

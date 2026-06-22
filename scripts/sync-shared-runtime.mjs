@@ -14,12 +14,6 @@ const targets = ["codex", "gemini"];
 
 const sharedDirectories = [
   ".agents/.shared",
-  ".agents/skills/backlog/backlog_tool",
-  ".agents/skills/backlog/config",
-  ".agents/skills/backlog/references",
-  ".agents/skills/backlog/scripts",
-  ".agents/skills/backlog/tests",
-  ".agents/skills/backlog/workflows",
 ];
 
 function listFiles(root) {

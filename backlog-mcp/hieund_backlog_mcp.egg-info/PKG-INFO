@@ -1,0 +1,9 @@
+Metadata-Version: 2.4
+Name: hieund-backlog-mcp
+Version: 0.1.0
+Summary: Workstation-local MCP server for Backlog workflows
+Requires-Python: >=3.10
+Requires-Dist: mcp<2,>=1.27
+Requires-Dist: requests<3,>=2.31
+Provides-Extra: dev
+Requires-Dist: pytest<9,>=8; extra == "dev"

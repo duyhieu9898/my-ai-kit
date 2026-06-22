@@ -14,7 +14,7 @@
   `.agents/AGENTS.md`.
 - Skills use `SKILL.md`, required `agents/openai.yaml`, optional `references/`,
   `scripts/`, and `assets/`.
-- The current template ships 50 skill directories and four top-level runtime
+- The current template ships 49 skill directories and four top-level runtime
   scripts.
 
 ## Gemini Antigravity
@@ -30,14 +30,13 @@
   context. Context-read warnings run at `PreToolUse` because Antigravity's
   `PostToolUse` payload does not include tool arguments.
 - Preserve its agents, skills, workflows, scripts, and shared assets.
-- The current template ships 15 agent files, 34 skill directories, 11 workflow
+- The current template ships 15 agent files, 33 skill directories, 11 workflow
   files, and four top-level runtime scripts.
 
 ## Shared Rules
 
 - Preserve relative paths within each toolkit.
-- All executable scripts present in both targets, `.shared` resources, and
-  shared Backlog runtime have their canonical source under `shared/runtime/`.
+- All executable scripts present in both targets and `.shared` resources have their canonical source under `shared/runtime/`.
   Both target templates retain committed generated copies so installation
   remains a direct mirror-copy with no composition step.
 - Shared lifecycle policy and target adapters have canonical sources under
@@ -48,9 +47,6 @@
   `npm run check:shared-runtime` to detect drift.
 - Use `npm run sync:shared-hooks`, `npm run check:shared-hooks`, and
   `npm run test:hooks` after editing lifecycle guards.
-- Backlog target metadata and runtime artifacts are not shared: keep
-  `SKILL.md`, Codex `agents/openai.yaml`, `.env`, and `logs/` in their target
-  trees. Backlog `.env.example` and `.gitignore` are shared support files.
 - Do not package credentials, logs, caches, or runtime databases.
 - Update toolkit architecture documentation when discovery or directory
   conventions change.

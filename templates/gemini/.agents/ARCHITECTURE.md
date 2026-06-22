@@ -9,7 +9,7 @@
 AG Kit is a modular system consisting of:
 
 - **15 Specialist Agents** - Role-based AI personas
-- **34 Skills** - Domain-specific knowledge modules with conditional loading
+- **33 Skills** - Domain-specific knowledge modules with conditional loading
 - **11 Workflows** - Slash command procedures
 
 ---
@@ -22,7 +22,7 @@ AG Kit is a modular system consisting of:
 ├── hooks.json               # Antigravity lifecycle hook registration
 ├── hooks/                   # Shared Harness policy + Gemini adapter
 ├── agents/                  # 15 Specialist Agents
-├── skills/                  # 34 Skills (with conditional loading)
+├── skills/                  # 33 Skills (with conditional loading)
 ├── workflows/               # 11 Slash Commands
 └── scripts/                 # Master Validation Scripts
 ```
@@ -53,7 +53,7 @@ Specialist AI personas for different domains.
 
 ---
 
-## 🧩 Skills (34)
+## 🧩 Skills (33)
 
 Modular knowledge domains that agents can load on-demand based on task context.
 Most Gemini skills have a `when_to_use` frontmatter field for
@@ -142,7 +142,6 @@ only provide `description`.
 | `i18n-localization`       | Internationalization      |
 | `performance-profiling`   | Web Vitals, optimization  |
 | `systematic-debugging`    | Troubleshooting           |
-| `backlog`                 | Manage Backlog projects through the CLI                    |
 
 ---
 
