@@ -69,6 +69,15 @@ class BacklogSettingsTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Pass --project KEY"):
             backlog_settings.resolve_project_key(config)
 
+    def test_invalid_default_project_key_raises_error(self):
+        config = {
+            "base_url": "https://example.backlog.com",
+            "default_project_key": "INVALID",
+            "projects": ["AQM", "OOP"],
+        }
+        with self.assertRaisesRegex(ValueError, "default_project_key 'INVALID' configured in config/backlog.json is invalid"):
+            backlog_settings.resolve_project_key(config)
+
     def test_resolve_project_key_for_issue_prefers_issue_prefix_over_default(self):
         config = {
             "base_url": "https://example.backlog.com",

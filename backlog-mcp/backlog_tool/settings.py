@@ -112,13 +112,26 @@ def project_key_from_issue_id(issue_id):
 
 
 def resolve_project_key(config, project_key=None):
-    key = project_key or config.get("default_project_key")
-    if not key:
-        raise ValueError("Missing Backlog project. Pass --project KEY or set config.default_project_key.")
-    if key not in project_keys(config):
+    if project_key:
+        key = project_key
+        if key not in project_keys(config):
+            keys = ", ".join(sorted(project_keys(config)))
+            raise ValueError(f"Unknown Backlog project '{key}'. Available projects: {keys}")
+        return key
+
+    default_key = config.get("default_project_key")
+    if not default_key:
+        raise ValueError(
+            "default_project_key is not configured or is empty in config/backlog.json. "
+            "Please configure it or Pass --project KEY."
+        )
+    if default_key not in project_keys(config):
         keys = ", ".join(sorted(project_keys(config)))
-        raise ValueError(f"Unknown Backlog project '{key}'. Available projects: {keys}")
-    return key
+        raise ValueError(
+            f"default_project_key '{default_key}' configured in config/backlog.json is invalid. "
+            f"Available projects: {keys}. Please update your configuration."
+        )
+    return default_key
 
 
 def resolve_project_key_for_issue(config, issue_id, project_key=None):
