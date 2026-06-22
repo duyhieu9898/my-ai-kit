@@ -8,7 +8,7 @@ import path from 'path';
 import fs from 'fs';
 import os from 'os';
 import readline from 'readline';
-import { pathToFileURL } from 'url';
+import { fileURLToPath } from 'url';
 
 // ============================================================================
 // CONSTANTS & CONFIGURATION
@@ -451,6 +451,18 @@ const downloadTarget = async (config, ref) => {
  */
 const resolveRef = (options) => options.ref || options.branch || undefined;
 
+const isDirectCliInvocation = () => {
+    if (!process.argv[1]) {
+        return false;
+    }
+
+    try {
+        return fs.realpathSync(process.argv[1]) === fs.realpathSync(fileURLToPath(import.meta.url));
+    } catch {
+        return false;
+    }
+};
+
 // ============================================================================
 // COMMANDS
 // ============================================================================
@@ -682,7 +694,7 @@ program
     .option('-p, --path <dir>', 'Path to the project directory', process.cwd())
     .action(statusCommand);
 
-if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (isDirectCliInvocation()) {
     program.parse(process.argv);
 
     if (!process.argv.slice(2).length) {

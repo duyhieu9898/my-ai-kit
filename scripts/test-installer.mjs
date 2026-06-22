@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -17,6 +18,7 @@ const codexTemplatePath = path.join(repoRoot, "templates", "codex");
 const geminiTemplatePath = path.join(repoRoot, "templates", "gemini");
 const codexProjectDir = fs.mkdtempSync(path.join(os.tmpdir(), "hieund-ai-kit-codex-"));
 const geminiProjectDir = fs.mkdtempSync(path.join(os.tmpdir(), "hieund-ai-kit-gemini-"));
+const binLinkPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "hieund-ai-kit-bin-")), "hieund-ai-kit");
 const harnessBlock = `<!-- HARNESS:BEGIN -->
 ## Harness
 
@@ -41,6 +43,15 @@ function writeJson(filePath, value) {
 }
 
 try {
+  fs.symlinkSync(path.join(repoRoot, "bin", "index.js"), binLinkPath);
+  const symlinkHelp = execFileSync(process.execPath, [binLinkPath, "--help"], {
+    encoding: "utf8",
+  });
+  assert.ok(
+    symlinkHelp.includes("Usage: hieund-ai-kit [options] [command]"),
+    "CLI must parse when invoked through an npm-style symlink",
+  );
+
   fs.mkdirSync(path.join(codexProjectDir, ".codex"), { recursive: true });
   fs.writeFileSync(
     path.join(codexProjectDir, ".codex", "config.toml"),
@@ -233,4 +244,5 @@ ${harnessBlock}
 } finally {
   fs.rmSync(codexProjectDir, { recursive: true, force: true });
   fs.rmSync(geminiProjectDir, { recursive: true, force: true });
+  fs.rmSync(path.dirname(binLinkPath), { recursive: true, force: true });
 }
