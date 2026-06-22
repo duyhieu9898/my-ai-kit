@@ -147,7 +147,6 @@ def build_parser():
     # config ---------------------------------------------------------------
     config_group = groups.add_parser("config", help="Skill config").add_subparsers(dest="action", required=True)
     config_group.add_parser("list-projects", help="List configured projects")
-    config_group.add_parser("current", help="Print current default project")
     config_group.add_parser("audit-workflows", help="Validate workflow config, policy, and project catalogs")
     g = config_group.add_parser("set-default", help="Set default project")
     g.add_argument("project_key")
@@ -256,8 +255,6 @@ def run_handler(config, args):
 def run_config(config, args):
     if args.action == "list-projects":
         return config_projects(config)
-    if args.action == "current":
-        return {"defaultProjectKey": config.get("default_project_key", "")}
     if args.action == "show":
         return config
     if args.action == "audit-workflows":

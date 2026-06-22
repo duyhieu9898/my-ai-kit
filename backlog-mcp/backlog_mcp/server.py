@@ -273,12 +273,6 @@ def get_config_project_list() -> Any:
 
 
 @mcp.tool()
-def get_config_current_project() -> Any:
-    """Return the default project used when a tool omits project."""
-    return _invoke(["config", "current"])
-
-
-@mcp.tool()
 def get_config() -> Any:
     """Return the local Backlog configuration; credentials are never included."""
     return _invoke(["config", "show"])

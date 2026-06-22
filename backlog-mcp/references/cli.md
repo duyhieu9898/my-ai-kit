@@ -14,7 +14,6 @@ Run all commands from the skill directory with `python3 scripts/backlog.py`.
 
 ```bash
 python3 scripts/backlog.py config list-projects
-python3 scripts/backlog.py config current
 python3 scripts/backlog.py config set-default AQM
 python3 scripts/backlog.py config show
 python3 scripts/backlog.py project inspect AQM
