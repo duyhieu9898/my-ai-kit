@@ -174,7 +174,7 @@ def update_issue(
 @mcp.tool()
 def get_my_open_bugs(project: str | None = None, query: str | None = None, full: bool = False) -> Any:
     """List open bugs assigned to the configured user in one project."""
-    args = ["bug", "my-open"]
+    args = ["bug", "list"]
     _append(args, "--project", project)
     _append(args, "--query", query)
     return _invoke(args, full)

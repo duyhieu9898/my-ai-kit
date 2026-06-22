@@ -61,7 +61,7 @@ Create and update also accept `--project`, `--priority`, `--assignee`,
 ## Bug Workflows
 
 ```bash
-python3 scripts/backlog.py bug my-open --project AQM
+python3 scripts/backlog.py bug list --project AQM
 python3 scripts/backlog.py bug context AQM-123
 python3 scripts/backlog.py bug rules
 python3 scripts/backlog.py bug fields

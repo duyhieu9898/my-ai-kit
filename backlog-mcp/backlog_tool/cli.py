@@ -108,7 +108,7 @@ def build_parser():
     # bug ------------------------------------------------------------------
     bug = groups.add_parser("bug", help="Personal bug workflow").add_subparsers(dest="action", required=True)
 
-    g = bug.add_parser("my-open", help="List open bugs assigned to me")
+    g = bug.add_parser("list", help="List open bugs assigned to me")
     add_project(g)
     g.add_argument("--query")
 
@@ -222,7 +222,7 @@ def run_handler(config, args):
             return update_issue(config, args)
 
     if group == "bug":
-        if action == "my-open":
+        if action == "list":
             from workflows.resolve_bug import my_open_bugs_raw
             return my_open_bugs_raw(config, project_key=args.project, query=args.query)
         if action == "context":
@@ -313,7 +313,7 @@ def present(result, args):
             return result
         return presenter.compact_issue(result)
 
-    if group == "bug" and action == "my-open":
+    if group == "bug" and action == "list":
         return [presenter.compact_issue(item) for item in result]
     if group == "bug" and action == "context":
         return result

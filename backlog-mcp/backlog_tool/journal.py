@@ -20,7 +20,7 @@ def _now():
 
 
 def _safe_command(command):
-    """Turn 'bug:my-open' into 'bug_my-open' for filename."""
+    """Turn 'bug:list' into 'bug_list' for filename."""
     return command.replace(":", "_").replace("/", "_").replace(" ", "_")
 
 

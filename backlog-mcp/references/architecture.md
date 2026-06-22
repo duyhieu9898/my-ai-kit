@@ -69,7 +69,7 @@ graph TD
 Tệp `scripts/backlog.py` là một wrapper mỏng thực hiện điều hướng đường dẫn để import module `backlog_tool.cli`. 
 Module `cli.py` sử dụng thư viện `argparse` chuẩn của Python để tổ chức các nhóm lệnh:
 *   `issue`: Thao tác CRUD chung.
-*   `bug`: Các luồng công việc dành riêng cho lập trình viên (ví dụ: `my-open`, `resolve`, `create-ut`).
+*   `bug`: Các luồng công việc dành riêng cho lập trình viên (ví dụ: `list`, `resolve`, `create-ut`).
 *   `config` & `project`: Quản lý môi trường và đồng bộ hóa siêu dữ liệu của dự án Backlog về máy cục bộ.
 *   `story`: Cung cấp chế độ xem tổng quan về deadline.
 *   `metrics` & `journal`: Đọc và phân tích lịch sử log phiên.
