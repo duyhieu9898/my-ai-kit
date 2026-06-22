@@ -344,34 +344,81 @@ const atomicReplaceInstallDir = (src, dest) => {
 };
 
 const removeKitCodexHooks = (projectDir) => {
-    const hooksPath = path.join(projectDir, CODEX_CONFIG_FOLDER, 'hooks.json');
+    const codexConfigDir = path.join(projectDir, CODEX_CONFIG_FOLDER);
+    const hooksDir = path.join(codexConfigDir, 'hooks');
+    const hooksPath = path.join(codexConfigDir, 'hooks.json');
+
     if (fs.existsSync(hooksPath)) {
-        const config = JSON.parse(fs.readFileSync(hooksPath, 'utf8'));
-        const hooks = {};
-        for (const [event, groups] of Object.entries(config.hooks || {})) {
-            const retained = Array.isArray(groups)
-                ? groups.filter((group) => !isKitCodexHookGroup(group))
-                : groups;
-            if (!Array.isArray(retained) || retained.length > 0) {
-                hooks[event] = retained;
+        try {
+            const config = JSON.parse(fs.readFileSync(hooksPath, 'utf8'));
+            const hooks = {};
+            for (const [event, groups] of Object.entries(config.hooks || {})) {
+                const retained = Array.isArray(groups)
+                    ? groups.filter((group) => !isKitCodexHookGroup(group))
+                    : groups;
+                if (!Array.isArray(retained) || retained.length > 0) {
+                    hooks[event] = retained;
+                }
             }
-        }
-        const updated = { ...config, hooks };
-        if (Object.keys(hooks).length === 0 && Object.keys(updated).length === 1) {
-            fs.rmSync(hooksPath);
-        } else {
-            fs.writeFileSync(hooksPath, `${JSON.stringify(updated, null, 2)}\n`);
+            const updated = { ...config, hooks };
+            if (Object.keys(hooks).length === 0 && Object.keys(updated).length === 1) {
+                fs.rmSync(hooksPath, { force: true });
+            } else {
+                fs.writeFileSync(hooksPath, `${JSON.stringify(updated, null, 2)}\n`);
+            }
+        } catch (e) {
+            // Ignore error
         }
     }
 
     fs.rmSync(
-        path.join(projectDir, CODEX_CONFIG_FOLDER, 'hooks', 'harness_guard.py'),
+        path.join(hooksDir, 'harness_guard.py'),
         { force: true }
     );
     fs.rmSync(
-        path.join(projectDir, CODEX_CONFIG_FOLDER, 'hooks', 'codex_adapter.py'),
+        path.join(hooksDir, 'codex_adapter.py'),
         { force: true }
     );
+
+    // Clean up __pycache__ inside hooksDir
+    const pycacheDir = path.join(hooksDir, '__pycache__');
+    if (fs.existsSync(pycacheDir)) {
+        try {
+            const pycacheFiles = fs.readdirSync(pycacheDir);
+            for (const file of pycacheFiles) {
+                if (file.startsWith('harness_guard.cpython-') || file.startsWith('codex_adapter.cpython-')) {
+                    fs.rmSync(path.join(pycacheDir, file), { force: true });
+                }
+            }
+            if (fs.readdirSync(pycacheDir).length === 0) {
+                fs.rmSync(pycacheDir, { recursive: true, force: true });
+            }
+        } catch (e) {
+            // Ignore
+        }
+    }
+
+    // Clean up hooks directory if empty
+    if (fs.existsSync(hooksDir)) {
+        try {
+            if (fs.readdirSync(hooksDir).length === 0) {
+                fs.rmSync(hooksDir, { recursive: true, force: true });
+            }
+        } catch (e) {
+            // Ignore
+        }
+    }
+
+    // Clean up .codex directory if empty
+    if (fs.existsSync(codexConfigDir)) {
+        try {
+            if (fs.readdirSync(codexConfigDir).length === 0) {
+                fs.rmSync(codexConfigDir, { recursive: true, force: true });
+            }
+        } catch (e) {
+            // Ignore
+        }
+    }
 };
 
 /**
@@ -411,7 +458,7 @@ const mirrorCopy = (templatePath, projectDir, { overwriteRootInstruction = true 
  * @param {string} oldTemplatePath path to the old target's template directory
  * @param {string} projectDir
  */
-const cleanupOldTarget = (oldTemplatePath, projectDir) => {
+const cleanupOldTarget = (oldTemplatePath, projectDir, oldTarget) => {
     const rootFiles = getRootInstructionFiles(oldTemplatePath);
     for (const file of rootFiles) {
         const filePath = path.join(projectDir, file);
@@ -420,7 +467,7 @@ const cleanupOldTarget = (oldTemplatePath, projectDir) => {
             console.log(chalk.gray(`  Deleted: ${file}`));
         }
     }
-    if (fs.existsSync(path.join(oldTemplatePath, CODEX_CONFIG_FOLDER))) {
+    if (oldTarget === 'codex' || fs.existsSync(path.join(oldTemplatePath, CODEX_CONFIG_FOLDER))) {
         removeKitCodexHooks(projectDir);
     }
 };
@@ -541,7 +588,7 @@ const initCommand = async (options) => {
 
         // Clean up the old target's root instructions on a switch.
         if (isSwitch) {
-            cleanupOldTarget(oldTemplatePath, projectDir);
+            cleanupOldTarget(oldTemplatePath, projectDir, installedTarget);
         }
 
         // Install.
