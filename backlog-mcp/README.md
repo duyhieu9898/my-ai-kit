@@ -25,7 +25,7 @@ Use the absolute path to this directory. Codex stores user-scoped MCP servers
 in `~/.codex/config.toml`, shared by its CLI and IDE extension:
 
 ```bash
-codex mcp add backlog -- uv --directory /absolute/path/to/hieund-ai-kit-cli/backlog-mcp run backlog-mcp
+codex mcp add backlog -- uv --directory /absolute/path/to/hieund-ai-kit-cli/backlog-mcp run backlog-mcp-server
 ```
 
 Equivalent `config.toml`:
@@ -37,7 +37,7 @@ args = [
   "--directory",
   "/absolute/path/to/hieund-ai-kit-cli/backlog-mcp",
   "run",
-  "backlog-mcp",
+  "backlog-mcp-server",
 ]
 startup_timeout_sec = 20
 tool_timeout_sec = 60
@@ -52,7 +52,7 @@ For Gemini or another MCP client, register the same stdio command globally:
     "--directory",
     "/absolute/path/to/hieund-ai-kit-cli/backlog-mcp",
     "run",
-    "backlog-mcp"
+    "backlog-mcp-server"
   ]
 }
 ```
@@ -62,10 +62,10 @@ daemon or remote server is required.
 
 ## Safety
 
-- `issue_create`, `issue_update`, `bug_create_ut`, and `bug_resolve` are dry
+- `add_issue`, `update_issue`, `add_ut_bug`, and `resolve_bug` are dry
   runs unless `apply=true`.
-- `config_set_default` is a dry run unless `apply=true`.
-- `project_inspect` only prints fetched metadata unless `write=true`.
+- `set_config_default_project` is a dry run unless `apply=true`.
+- `inspect_project` only prints fetched metadata unless `write=true`.
 - Generic queries use only `config.default_project_key`; tools never loop over
   all projects implicitly.
 - API keys and full request URLs containing query strings are never logged.
@@ -86,7 +86,7 @@ Historical logs from removed skill copies are retained under `logs/legacy/`.
 ```bash
 uv run --extra dev pytest
 uv run backlog-cli config audit-workflows
-uv run backlog-mcp
+uv run backlog-mcp-server
 ```
 
 The last command speaks MCP over stdio; use an MCP client or Inspector rather

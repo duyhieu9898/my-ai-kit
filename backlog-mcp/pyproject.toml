@@ -16,7 +16,7 @@ dependencies = [
 dev = ["pytest>=8,<9"]
 
 [project.scripts]
-backlog-mcp = "backlog_mcp.server:main"
+backlog-mcp-server = "backlog_mcp.server:main"
 backlog-cli = "backlog_tool.cli:main"
 
 [tool.setuptools.packages.find]

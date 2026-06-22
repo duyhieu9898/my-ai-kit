@@ -42,13 +42,13 @@ def _invoke(args: list[str], full: bool = False) -> Any:
 
 
 @mcp.tool()
-def issue_get(issue_id: str, full: bool = False) -> Any:
+def get_issue(issue_id: str, full: bool = False) -> Any:
     """Get one Backlog issue by key or numeric ID."""
     return _invoke(["issue", "get", issue_id], full)
 
 
 @mcp.tool()
-def issue_list(
+def get_issues(
     project: str | None = None,
     query: str | None = None,
     issue_types: list[str] | None = None,
@@ -92,7 +92,7 @@ def _append_issue_fields(
 
 
 @mcp.tool()
-def issue_create(
+def add_issue(
     summary: str,
     project: str | None = None,
     issue_type: str | None = None,
@@ -131,7 +131,7 @@ def issue_create(
 
 
 @mcp.tool()
-def issue_update(
+def update_issue(
     issue_id: str,
     project: str | None = None,
     summary: str | None = None,
@@ -172,7 +172,7 @@ def issue_update(
 
 
 @mcp.tool()
-def bug_my_open(project: str | None = None, query: str | None = None, full: bool = False) -> Any:
+def get_my_open_bugs(project: str | None = None, query: str | None = None, full: bool = False) -> Any:
     """List open bugs assigned to the configured user in one project."""
     args = ["bug", "my-open"]
     _append(args, "--project", project)
@@ -181,13 +181,13 @@ def bug_my_open(project: str | None = None, query: str | None = None, full: bool
 
 
 @mcp.tool()
-def bug_context(issue_key: str) -> Any:
+def get_bug_context(issue_key: str) -> Any:
     """Get structured bug context, including current assignee and reporter."""
     return _invoke(["bug", "context", issue_key])
 
 
 @mcp.tool()
-def bug_resolve(
+def resolve_bug(
     issue_key: str,
     status: str | None = None,
     actual_hours: float | None = None,
@@ -224,7 +224,7 @@ def bug_resolve(
 
 
 @mcp.tool()
-def bug_create_ut(
+def add_ut_bug(
     parent_key: str,
     module: str,
     description: str,
@@ -240,7 +240,7 @@ def bug_create_ut(
 
 
 @mcp.tool()
-def bug_rules(project: str | None = None) -> Any:
+def get_bug_rules(project: str | None = None) -> Any:
     """Return current resolve-bug workflow rules for one project."""
     args = ["bug", "rules"]
     _append(args, "--project", project)
@@ -248,7 +248,7 @@ def bug_rules(project: str | None = None) -> Any:
 
 
 @mcp.tool()
-def bug_fields(field: str | None = None, project: str | None = None) -> Any:
+def get_bug_fields(field: str | None = None, project: str | None = None) -> Any:
     """Return configured guidance for bug workflow fields."""
     args = ["bug", "fields"]
     if field is not None:
@@ -258,7 +258,7 @@ def bug_fields(field: str | None = None, project: str | None = None) -> Any:
 
 
 @mcp.tool()
-def story_overview(project: str | None = None, query: str | None = None) -> Any:
+def get_story_overview(project: str | None = None, query: str | None = None) -> Any:
     """Return Story and Task deadlines assigned to the configured user."""
     args = ["story", "overview"]
     _append(args, "--project", project)
@@ -267,31 +267,31 @@ def story_overview(project: str | None = None, query: str | None = None) -> Any:
 
 
 @mcp.tool()
-def config_list_projects() -> Any:
+def get_config_project_list() -> Any:
     """List configured Backlog projects without querying every project."""
     return _invoke(["config", "list-projects"])
 
 
 @mcp.tool()
-def config_current() -> Any:
+def get_config_current_project() -> Any:
     """Return the default project used when a tool omits project."""
     return _invoke(["config", "current"])
 
 
 @mcp.tool()
-def config_show() -> Any:
+def get_config() -> Any:
     """Return the local Backlog configuration; credentials are never included."""
     return _invoke(["config", "show"])
 
 
 @mcp.tool()
-def config_audit_workflows() -> Any:
+def audit_config_workflows() -> Any:
     """Validate workflow config, policies, and project catalogs for drift."""
     return _invoke(["config", "audit-workflows"])
 
 
 @mcp.tool()
-def config_set_default(project_key: str, apply: bool = False) -> Any:
+def set_config_default_project(project_key: str, apply: bool = False) -> Any:
     """Preview or apply a change to the workstation-wide default project."""
     config = load_config()
     if project_key not in project_keys(config):
@@ -307,7 +307,7 @@ def config_set_default(project_key: str, apply: bool = False) -> Any:
 
 
 @mcp.tool()
-def project_inspect(project_key: str, write: bool = False) -> Any:
+def inspect_project(project_key: str, write: bool = False) -> Any:
     """Fetch project metadata; set write=true to refresh the local catalog."""
     args = ["project", "inspect", project_key]
     if not write:
