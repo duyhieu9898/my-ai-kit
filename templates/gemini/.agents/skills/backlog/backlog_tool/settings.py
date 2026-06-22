@@ -11,7 +11,7 @@ CONFIG_PATH = os.path.join(SKILL_DIR, "config", "backlog.json")
 PROJECTS_CONFIG_DIR = os.path.join(SKILL_DIR, "config", "projects")
 WORKFLOWS_CONFIG_DIR = os.path.join(SKILL_DIR, "config", "workflows")
 ENV_PATH = os.path.join(SKILL_DIR, ".env")
-LOG_DIR = os.path.join(SKILL_DIR, "logs")
+LOG_DIR = os.path.expanduser("~/.hieund-ai-kit/backlog/logs")
 LOG_PATH = os.path.join(LOG_DIR, "backlog.log")
 METRICS_PATH = os.path.join(LOG_DIR, "metrics.log")
 REQUEST_TIMEOUT_SECONDS = 20
@@ -176,19 +176,22 @@ def rotate_file_if_needed(path, max_bytes=5 * 1024 * 1024, backup_count=3):
 
 
 def log_event(level, event, **fields):
-    os.makedirs(LOG_DIR, exist_ok=True)
-    rotate_file_if_needed(LOG_PATH)
-    timestamp = datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds")
-    parts = [timestamp, level.upper(), f"event={event}"]
-    for key, value in fields.items():
-        if value is None:
-            continue
-        text = str(value).replace("\n", "\\n")
-        if len(text) > MAX_LOG_VALUE_LENGTH:
-            text = text[:MAX_LOG_VALUE_LENGTH] + "...<truncated>"
-        parts.append(f"{key}={json.dumps(text, ensure_ascii=False)}")
-    with open(LOG_PATH, "a", encoding="utf-8") as log_file:
-        log_file.write(" ".join(parts) + "\n")
+    try:
+        os.makedirs(LOG_DIR, exist_ok=True)
+        rotate_file_if_needed(LOG_PATH)
+        timestamp = datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds")
+        parts = [timestamp, level.upper(), f"event={event}"]
+        for key, value in fields.items():
+            if value is None:
+                continue
+            text = str(value).replace("\n", "\\n")
+            if len(text) > MAX_LOG_VALUE_LENGTH:
+                text = text[:MAX_LOG_VALUE_LENGTH] + "...<truncated>"
+            parts.append(f"{key}={json.dumps(text, ensure_ascii=False)}")
+        with open(LOG_PATH, "a", encoding="utf-8") as log_file:
+            log_file.write(" ".join(parts) + "\n")
+    except Exception:
+        pass
 
 
 def response_error_body(response):
@@ -201,21 +204,24 @@ def log_metric(command, output_bytes, duration_ms, status, dry_run=None, project
 
     output_bytes is a proxy for token cost; comparing compact vs --json-full
     runs over time shows the real saving during live testing."""
-    os.makedirs(LOG_DIR, exist_ok=True)
-    rotate_file_if_needed(METRICS_PATH)
-    estimated_tokens = round(output_bytes / 4)
-    record = {
-        "ts": datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds"),
-        "command": command,
-        "status": status,
-        "outputBytes": output_bytes,
-        "estimatedTokens": estimated_tokens,
-        "durationMs": duration_ms,
-        "dryRun": dry_run,
-        "project": project,
-    }
-    with open(METRICS_PATH, "a", encoding="utf-8") as metrics_file:
-        metrics_file.write(json.dumps(record, ensure_ascii=False) + "\n")
+    try:
+        os.makedirs(LOG_DIR, exist_ok=True)
+        rotate_file_if_needed(METRICS_PATH)
+        estimated_tokens = round(output_bytes / 4)
+        record = {
+            "ts": datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds"),
+            "command": command,
+            "status": status,
+            "outputBytes": output_bytes,
+            "estimatedTokens": estimated_tokens,
+            "durationMs": duration_ms,
+            "dryRun": dry_run,
+            "project": project,
+        }
+        with open(METRICS_PATH, "a", encoding="utf-8") as metrics_file:
+            metrics_file.write(json.dumps(record, ensure_ascii=False) + "\n")
+    except Exception:
+        pass
 
 
 def read_metrics():

@@ -28,58 +28,56 @@ def session_path(command, project=None, ts=None):
     ts = ts or _now()
     date_str = ts.strftime("%Y-%m-%d")
     safe_cmd = _safe_command(command)
-    if project:
-        safe_project = _safe_command(project)
-        return os.path.join(SESSIONS_DIR, safe_project, f"{date_str}_{safe_cmd}.jsonl")
     return os.path.join(SESSIONS_DIR, f"{date_str}_{safe_cmd}.jsonl")
 
 
 def log_cli(command, cli_output, project=None, issue_key=None):
     """Log a CLI execution. Called automatically by cli.py after each run."""
-    ts = _now()
-    path = session_path(command, project, ts)
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    record = {
-        "ts": ts.isoformat(timespec="seconds"),
-        "step": "cli",
-        "command": command,
-        "project": project,
-        "issueKey": issue_key,
-        "cliOutput": cli_output,
-    }
-    with open(path, "a", encoding="utf-8") as f:
-        f.write(json.dumps(record, ensure_ascii=False) + "\n")
+    try:
+        ts = _now()
+        path = session_path(command, project, ts)
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        record = {
+            "ts": ts.isoformat(timespec="seconds"),
+            "step": "cli",
+            "command": command,
+            "project": project,
+            "issueKey": issue_key,
+            "cliOutput": cli_output,
+        }
+        with open(path, "a", encoding="utf-8") as f:
+            f.write(json.dumps(record, ensure_ascii=False) + "\n")
+    except Exception:
+        pass
 
 
 def log_ai(command, user_request, ai_response, project=None, issue_key=None):
     """Log an AI interaction. Called by hook after tool use."""
-    ts = _now()
-    path = session_path(command, project, ts)
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    record = {
-        "ts": ts.isoformat(timespec="seconds"),
-        "step": "ai",
-        "command": command,
-        "project": project,
-        "issueKey": issue_key,
-        "userRequest": user_request,
-        "aiResponse": ai_response,
-    }
-    with open(path, "a", encoding="utf-8") as f:
-        f.write(json.dumps(record, ensure_ascii=False) + "\n")
+    try:
+        ts = _now()
+        path = session_path(command, project, ts)
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        record = {
+            "ts": ts.isoformat(timespec="seconds"),
+            "step": "ai",
+            "command": command,
+            "project": project,
+            "issueKey": issue_key,
+            "userRequest": user_request,
+            "aiResponse": ai_response,
+        }
+        with open(path, "a", encoding="utf-8") as f:
+            f.write(json.dumps(record, ensure_ascii=False) + "\n")
+    except Exception:
+        pass
 
 
 def list_sessions():
-    """List available session files recursively."""
+    """List available session files."""
     if not os.path.isdir(SESSIONS_DIR):
         return []
-    files = []
-    for root, _, filenames in os.walk(SESSIONS_DIR):
-        for f in filenames:
-            if f.endswith(".jsonl"):
-                rel_path = os.path.relpath(os.path.join(root, f), SESSIONS_DIR)
-                files.append(rel_path)
-    return sorted(files)
+    files = sorted(f for f in os.listdir(SESSIONS_DIR) if f.endswith(".jsonl"))
+    return files
 
 
 def read_session(filename):

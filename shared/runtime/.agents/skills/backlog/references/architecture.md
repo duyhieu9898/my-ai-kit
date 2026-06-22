@@ -11,7 +11,7 @@ Skill `backlog` là một module đóng gói (self-contained) cho phép AI Agent
 Mục tiêu thiết kế chính:
 *   **An toàn dữ liệu (Safety-first)**: Mọi thao tác thay đổi dữ liệu mặc định chỉ là chạy thử nghiệm (dry-run) cho đến khi người dùng thêm cờ `--apply`.
 *   **Hiệu năng tối ưu (Token-efficient)**: Cung cấp các presenter định dạng rút gọn (compact format) và các nhánh truy cập nhanh không cản trở (fast path) để giảm chi phí token tiêu thụ.
-*   **Ghi log cô lập (Isolated Logging)**: Mỗi dự án cài đặt sẽ tự lưu trữ log và số liệu vận hành riêng biệt trong thư mục cục bộ của mình.
+*   **Ghi log tập trung (Centralized Logging)**: Tất cả các dự án cài đặt sẽ tự động ghi dồn dữ liệu log về một vị trí tập trung duy nhất tại thư mục người dùng (`~/.hieund-ai-kit/backlog/logs/`).
 
 ---
 
@@ -84,26 +84,23 @@ Module `cli.py` sử dụng thư viện `argparse` chuẩn của Python để t�
 
 ---
 
-## 4. Hệ thống phân vùng log & Xoay vòng file (Logging & Metrics Architecture)
+## 4. Hệ thống log tập trung & Xoay vòng file (Logging & Metrics Architecture)
 
-Kiến trúc log được thiết kế chia làm 3 phân vùng độc lập nhằm đáp ứng các mục tiêu phân tích khác nhau:
+Tất cả dữ liệu log được ghi dồn về một thư mục toàn cục tại máy cục bộ: `~/.hieund-ai-kit/backlog/logs/`. Kiến trúc log bao gồm 3 tệp tin chính:
 
-### 4.1 Tầng Log sự kiện chung (`logs/backlog.log`)
+### 4.1 Tầng Log sự kiện chung (`backlog.log`)
 *   Được ghi tự động qua hàm `log_event()` trong `settings.py`.
 *   Lưu trữ các mốc thời gian chạy câu lệnh, tham số gọi, lỗi hệ thống.
-*   **Cơ chế bảo vệ**: Dữ liệu có độ dài lớn (ví dụ body phản hồi của API) tự động bị cắt ngắn ở mức tối đa 500 ký tự để tránh phình dung lượng.
+*   **Cơ chế bảo vệ**: Dữ liệu có độ dài lớn (ví dụ body phản hồi của API) tự động bị cắt ngắn ở mức tối đa 500 ký tự. Toàn bộ logic ghi được bọc trong khối `try-except` để tránh xảy ra lỗi phân quyền gây sập CLI.
 
-### 4.2 Tầng Thống kê hiệu năng và Token (`logs/metrics.log`)
+### 4.2 Tầng Thống kê hiệu năng và Token (`metrics.log`)
 *   Được ghi tự động sau mỗi lần kết thúc chạy lệnh CLI qua hàm `log_metric()`.
-*   **Phân tích chi phí**: Ghi nhận kích thước byte kết quả trả về (`outputBytes`) và tự động tính toán số lượng token ước tính (`estimatedTokens` = `outputBytes / 4`).
-*   Dữ liệu từ tệp này được sử dụng để lập báo cáo qua lệnh `metrics summary` giúp tối ưu hóa chi phí token trong quá trình AI làm việc.
+*   **Phân tích chi phí**: Ghi nhận kích thước byte kết quả trả về (`outputBytes`) và tính toán số lượng token ước tính (`estimatedTokens` = `outputBytes / 4`) để giúp theo dõi chi phí hoạt động chung trên tất cả các dự án.
 
-### 4.3 Tầng Nhật ký AI & CLI phân tách theo dự án (`logs/sessions/`)
+### 4.3 Tầng Nhật ký phiên làm việc (`sessions/`)
 *   Được quản lý bởi `journal.py` dưới định dạng JSON Lines (`.jsonl`).
-*   **Phân vùng theo dự án (Project-scoped Partitioning)**: Các tệp log phiên sẽ được ghi vào các thư mục con theo mã dự án:
-    `logs/sessions/<PROJECT_KEY>/<YYYY-MM-DD>_<command>.jsonl`
-*   Nếu không có mã dự án chỉ định, log sẽ được lưu tại gốc thư mục sessions hoặc tự động suy luận từ tiền tố mã issue (ví dụ `AQM-123` $\rightarrow$ `AQM`).
-*   Hàm `list_sessions()` hỗ trợ quét đệ quy các thư mục dự án này để cung cấp lịch sử đầy đủ.
+*   Các tệp log phiên sẽ được ghi phẳng trực tiếp dưới thư mục `sessions/` theo định dạng `<YYYY-MM-DD>_<command>.jsonl`.
+*   Mỗi bản ghi log vẫn lưu trường thông tin `"project"` để nhà phát triển có thể lọc hoặc truy vết theo dự án đích khi cần thiết.
 
 ### 4.4 Cơ chế xoay vòng file log tự động (Log Rotation)
 Cả hai file log tích lũy vô hạn là `backlog.log` và `metrics.log` đều được bảo vệ bởi cơ chế xoay vòng `rotate_file_if_needed`:
