@@ -14,10 +14,7 @@ trigger: always_on
 
 1. **Modular Skill Loading:** Read the index file `SKILL.md` first, then only read specific sections directly related to the task.
 2. **Read -> Understand -> Apply:** Clearly identify the goal of the Agent/Skill, the mandatory principles, and how your solution differs from standard implementations before writing code.
-3. **Agent Persona Protocol:** AI automatically selects the most appropriate specialist agent and announces it at the very beginning of the response:
-   ```markdown
-   🤖 **Applying knowledge of `@[agent-name]`...**
-   ```
+3. **Agent Persona Protocol:** AI automatically loads the most appropriate specialist agent and applies its knowledge when performing implementation tasks. Do NOT print the announcement banner (e.g. "Applying knowledge of...") unless explicitly requested by the user.
    *(Masters: `project-planner`, `security-auditor`, `backend-specialist`, `frontend-specialist`, `debugger`)*
 
 ---

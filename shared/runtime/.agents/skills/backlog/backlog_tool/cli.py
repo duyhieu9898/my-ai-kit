@@ -68,6 +68,8 @@ def add_issue_fields(parser):
 def build_parser():
     parser = argparse.ArgumentParser(prog="backlog", description="Unified Backlog skill CLI.")
     add_json_full(parser)
+    parser.add_argument("--table", action="store_true",
+                        help="Format list outputs as a Markdown table. Works in any position.")
     groups = parser.add_subparsers(dest="group", required=True)
 
     # issue ----------------------------------------------------------------
@@ -336,14 +338,18 @@ def main(argv=None):
     load_env_file()
     if argv is None:
         argv = sys.argv[1:]
-    # Let --json-full appear in any position (root or after the action).
+    # Let --json-full and --table appear in any position (root or after the action).
     json_full = "--json-full" in argv
     argv = [token for token in argv if token != "--json-full"]
+    table = "--table" in argv
+    argv = [token for token in argv if token != "--table"]
 
     parser = build_parser()
     args = parser.parse_args(argv)
     if json_full:
         args.json_full = True
+    if table:
+        args.table = True
 
     name = command_name(args)
     dry_run = is_dry_run(args)
@@ -357,7 +363,15 @@ def main(argv=None):
     started = time.monotonic()
     try:
         result = run_handler(config, args)
-        text = json.dumps(present(result, args), indent=2, ensure_ascii=False)
+        presented_data = present(result, args)
+
+        # If --table is specified and the output is a list, format it as a table
+        if getattr(args, "table", False) and isinstance(presented_data, list):
+            is_story = (args.group == "story" or getattr(args, "view", None) == "story")
+            text = presenter.format_issues_as_table(presented_data, is_story_view=is_story)
+        else:
+            text = json.dumps(presented_data, indent=2, ensure_ascii=False)
+
         duration_ms = round((time.monotonic() - started) * 1000)
         log_event("info", "command_end", command=name)
         log_metric(name, len(text.encode("utf-8")), duration_ms, "ok", dry_run=dry_run, project=project)

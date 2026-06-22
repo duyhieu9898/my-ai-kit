@@ -116,3 +116,68 @@ def compact_issue(issue):
     if custom:
         result["customFields"] = custom
     return result
+
+
+def format_issues_as_table(issues, is_story_view=False):
+    if not issues:
+        return "No issues found."
+
+    # Ensure all elements are dicts
+    issues = [item for item in issues if isinstance(item, dict)]
+    if not issues:
+        return "No issues found."
+
+    if is_story_view:
+        headers = ["Key", "Summary", "Status", "Due Date", "Days Left", "Alert"]
+        rows = []
+        for issue in issues:
+            due_date = issue.get("dueDate", "") or ""
+            if due_date and "T" in due_date:
+                due_date = due_date.split("T")[0]
+
+            alert = ""
+            alert_level = issue.get("dueAlertLevel")
+            if alert_level == 1:
+                alert = "⚠️ Overdue"
+            elif alert_level == 2:
+                alert = "🕒 Due Soon"
+
+            rows.append([
+                issue.get("issueKey") or "",
+                issue.get("summary") or "",
+                issue.get("status") or "",
+                due_date,
+                str(issue.get("daysUntilDue")) if issue.get("daysUntilDue") is not None else "",
+                alert
+            ])
+    else:
+        headers = ["Key", "Summary", "Type", "Status", "Assignee", "Priority", "Due Date"]
+        rows = []
+        for issue in issues:
+            due_date = issue.get("dueDate", "") or ""
+            if due_date and "T" in due_date:
+                due_date = due_date.split("T")[0]
+            rows.append([
+                issue.get("issueKey") or "",
+                issue.get("summary") or "",
+                issue.get("issueType") or "",
+                issue.get("status") or "",
+                issue.get("assignee") or "",
+                issue.get("priority") or "",
+                due_date
+            ])
+
+    # Calculate column widths
+    widths = [len(h) for h in headers]
+    for row in rows:
+        for i, val in enumerate(row):
+            widths[i] = max(widths[i], len(str(val)))
+
+    # Build the markdown table
+    lines = []
+    lines.append("| " + " | ".join(str(val).ljust(widths[i]) for i, val in enumerate(headers)) + " |")
+    lines.append("|-" + "-|-".join("-" * widths[i] for i in range(len(headers))) + "-|")
+    for row in rows:
+        lines.append("| " + " | ".join(str(val).ljust(widths[i]) for i, val in enumerate(row)) + " |")
+
+    return "\n".join(lines)
