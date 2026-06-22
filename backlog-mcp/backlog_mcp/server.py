@@ -290,21 +290,6 @@ def audit_config_workflows() -> Any:
     return _invoke(["config", "audit-workflows"])
 
 
-@mcp.tool()
-def set_config_default_project(project_key: str, apply: bool = False) -> Any:
-    """Preview or apply a change to the workstation-wide default project."""
-    config = load_config()
-    if project_key not in project_keys(config):
-        available = ", ".join(sorted(project_keys(config)))
-        raise ValueError(f"Unknown project '{project_key}'. Available: {available}")
-    if not apply:
-        return {
-            "dryRun": True,
-            "currentDefaultProjectKey": config.get("default_project_key", ""),
-            "proposedDefaultProjectKey": project_key,
-        }
-    return _invoke(["config", "set-default", project_key])
-
 
 @mcp.tool()
 def inspect_project(project_key: str, write: bool = False) -> Any:

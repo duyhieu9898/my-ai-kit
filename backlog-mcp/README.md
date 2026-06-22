@@ -64,7 +64,6 @@ daemon or remote server is required.
 
 - `add_issue`, `update_issue`, `add_ut_bug`, and `resolve_bug` are dry
   runs unless `apply=true`.
-- `set_config_default_project` is a dry run unless `apply=true`.
 - `inspect_project` only prints fetched metadata unless `write=true`.
 - Generic queries use only `config.default_project_key`; tools never loop over
   all projects implicitly.

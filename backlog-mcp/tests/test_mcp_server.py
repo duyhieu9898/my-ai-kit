@@ -36,16 +36,3 @@ def test_inspect_project_does_not_write_by_default():
     assert invoke.call_args.args[0] == ["project", "inspect", "AQM", "--stdout"]
 
 
-def test_set_config_default_project_is_dry_run_by_default():
-    config = {"projects": ["AQM", "OOP"], "default_project_key": "AQM"}
-    with mock.patch.object(server, "load_config", return_value=config), mock.patch.object(
-        server, "_invoke"
-    ) as invoke:
-        result = server.set_config_default_project("OOP")
-
-    assert result == {
-        "dryRun": True,
-        "currentDefaultProjectKey": "AQM",
-        "proposedDefaultProjectKey": "OOP",
-    }
-    invoke.assert_not_called()
