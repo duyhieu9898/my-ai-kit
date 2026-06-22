@@ -1,3 +1,0 @@
-backlog_mcp
-backlog_tool
-workflows
