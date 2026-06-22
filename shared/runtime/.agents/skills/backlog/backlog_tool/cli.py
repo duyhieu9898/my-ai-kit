@@ -338,9 +338,9 @@ def main(argv=None):
     load_env_file()
     if argv is None:
         argv = sys.argv[1:]
-    # Let --json-full and --table appear in any position (root or after the action).
-    json_full = "--json-full" in argv
-    argv = [token for token in argv if token != "--json-full"]
+    # Let --json-full, --raw, --full and --table appear in any position (root or after the action).
+    json_full = any(t in argv for t in ("--json-full", "--raw", "--full"))
+    argv = [token for token in argv if token not in ("--json-full", "--raw", "--full")]
     table = "--table" in argv
     argv = [token for token in argv if token != "--table"]
 
@@ -348,8 +348,8 @@ def main(argv=None):
     args = parser.parse_args(argv)
     if json_full:
         args.json_full = True
-    if table:
-        args.table = True
+    # Default to table format unless JSON output is requested
+    args.table = table or not json_full
 
     name = command_name(args)
     dry_run = is_dry_run(args)
@@ -365,8 +365,8 @@ def main(argv=None):
         result = run_handler(config, args)
         presented_data = present(result, args)
 
-        # If --table is specified and the output is a list, format it as a table
-        if getattr(args, "table", False) and isinstance(presented_data, list):
+        # If --table is specified and the output is a list of issues/stories, format it as a table
+        if getattr(args, "table", False) and isinstance(presented_data, list) and args.group in ("issue", "bug", "story"):
             is_story = (args.group == "story" or getattr(args, "view", None) == "story")
             text = presenter.format_issues_as_table(presented_data, is_story_view=is_story)
         else:
