@@ -6,6 +6,7 @@ __pycache__/
 *.pyc
 /.agent
 /.agents
+.codex
 
 # Harness durable layer
 harness.db

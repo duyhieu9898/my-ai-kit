@@ -69,6 +69,34 @@ class BacklogSettingsTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Pass --project KEY"):
             backlog_settings.resolve_project_key(config)
 
+    def test_resolve_project_key_for_issue_prefers_issue_prefix_over_default(self):
+        config = {
+            "base_url": "https://example.backlog.com",
+            "default_project_key": "OOP",
+            "projects": ["AQM", "OOP"],
+        }
+
+        self.assertEqual("AQM", backlog_settings.resolve_project_key_for_issue(config, "AQM-123"))
+
+    def test_resolve_project_key_for_issue_rejects_project_mismatch(self):
+        config = {
+            "base_url": "https://example.backlog.com",
+            "default_project_key": "AQM",
+            "projects": ["AQM", "OOP"],
+        }
+
+        with self.assertRaisesRegex(ValueError, "does not match --project"):
+            backlog_settings.resolve_project_key_for_issue(config, "AQM-123", "OOP")
+
+    def test_resolve_project_key_for_issue_uses_default_for_numeric_issue_id(self):
+        config = {
+            "base_url": "https://example.backlog.com",
+            "default_project_key": "AQM",
+            "projects": ["AQM", "OOP"],
+        }
+
+        self.assertEqual("AQM", backlog_settings.resolve_project_key_for_issue(config, "12345"))
+
     def test_log_event_writes_timestamped_redacted_shape_without_newline_leak(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
             old_log_dir = backlog_settings.LOG_DIR

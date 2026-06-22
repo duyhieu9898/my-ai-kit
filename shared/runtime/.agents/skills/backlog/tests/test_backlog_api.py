@@ -102,6 +102,11 @@ def update_args(**overrides):
 class BacklogApiPayloadTest(unittest.TestCase):
     def setUp(self):
         self.resolve_project = mock.patch.object(backlog_issue_service, "resolve_project", return_value=PROJECT).start()
+        self.resolve_project_for_issue = mock.patch.object(
+            backlog_issue_service,
+            "resolve_project_for_issue",
+            return_value=PROJECT,
+        ).start()
         mock.patch.object(backlog_issue_service, "log_event").start()
         self.addCleanup(mock.patch.stopall)
 
@@ -153,6 +158,8 @@ class BacklogApiPayloadTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "No update fields provided"):
             backlog_issue_service.build_update_payload(CONFIG, update_args())
 
+        self.resolve_project_for_issue.assert_called_once_with(CONFIG, "OOP-123", "OOP")
+
     def test_update_payload_resolves_status_priority_assignee_and_category(self):
         args = update_args(
             status="In Progress",
@@ -177,6 +184,15 @@ class BacklogApiPayloadTest(unittest.TestCase):
         self.assertEqual(1001, payload["assigneeId"])
         self.assertEqual([165807], payload["categoryId[]"])
         self.assertEqual("updated by test", payload["comment"])
+        self.resolve_project_for_issue.assert_called_with(CONFIG, "OOP-123", "OOP")
+
+    def test_update_payload_uses_issue_key_to_resolve_project_when_default_differs(self):
+        args = update_args(project=None, issue_id="OOP-123", comment="updated by test")
+
+        payload = backlog_issue_service.build_update_payload(CONFIG, args)
+
+        self.assertEqual("updated by test", payload["comment"])
+        self.resolve_project_for_issue.assert_called_once_with(CONFIG, "OOP-123", None)
 
     def test_create_issue_dry_run_does_not_post(self):
         args = create_args()

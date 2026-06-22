@@ -1,22 +1,3 @@
-<!-- HARNESS:BEGIN -->
-## Harness
-
-This repo uses Harness. Before work, read:
-
-- `README.md`
-- `docs/HARNESS.md`
-- `docs/FEATURE_INTAKE.md`
-- `docs/ARCHITECTURE.md`
-- `docs/CONTEXT_RULES.md`
-- `scripts/bin/harness-cli query matrix`
-
-Use the Rust Harness CLI at `scripts/bin/harness-cli` as the main operational
-tool.
-<!-- HARNESS:END -->
-
-Follow `docs/CONTEXT_RULES.md` to limit additional reading by task phase and
-risk lane. Use the Harness proof matrix when selecting validation evidence.
-
 # AGENTS.md - Workspace Rules
 
 Keep repository-wide rules here. Put domain procedures, examples, and tool-specific guidance in skills.
@@ -103,3 +84,19 @@ python3 .agents/scripts/checklist.py .
 ```
 
 Use narrower skill scripts when they better match the changed surface.
+
+<!-- HARNESS:BEGIN -->
+## Harness
+
+This repo uses Harness. Before work, read:
+
+- `README.md`
+- `docs/HARNESS.md`
+- `docs/FEATURE_INTAKE.md`
+- `docs/ARCHITECTURE.md`
+- `docs/CONTEXT_RULES.md`
+- `scripts/bin/harness-cli query matrix`
+
+Use the Rust Harness CLI at `scripts/bin/harness-cli` as the main operational
+tool.
+<!-- HARNESS:END -->

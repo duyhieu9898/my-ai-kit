@@ -7,7 +7,7 @@ from .resolver import (
     resolve_custom_fields,
     resolve_issue_type,
 )
-from .settings import log_event, resolve_project
+from .settings import log_event, resolve_project, resolve_project_for_issue
 
 
 def request_json(config, method, path, data=None):
@@ -127,7 +127,7 @@ def create_issue(config, args):
 
 
 def build_update_payload(config, args):
-    project = resolve_project(config, args.project)
+    project = resolve_project_for_issue(config, args.issue_id, args.project)
     data = {}
     optional_values = {
         "summary": args.summary,

@@ -6,7 +6,7 @@ from datetime import date
 from .bug_template import bug_context
 from backlog_tool.client import BacklogClient
 from backlog_tool.resolver import resolve_custom_field_defaults, resolve_status
-from backlog_tool.settings import load_workflow_config, log_event, resolve_project, resolve_user_id
+from backlog_tool.settings import load_workflow_config, log_event, resolve_project, resolve_project_key, resolve_user_id
 from .config import require_int, require_list, require_value, require_mapping
 from .resolve_policy import (
     ALWAYS_OVERWRITE_FIELDS,
@@ -60,7 +60,7 @@ def merge_resolve_defaults(config, project_key):
 
 
 def my_open_bugs(config, project_key=None, query=None):
-    project_key = project_key or config.get("default_project_key")
+    project_key = resolve_project_key(config, project_key)
     workflow = merge_resolve_defaults(config, project_key)
     project = resolve_project(config, project_key)
     assignee_id = resolve_user_id(config, require_value(workflow, "assignee", "resolve_bug"))
@@ -77,7 +77,7 @@ def my_open_bugs(config, project_key=None, query=None):
 
 def my_open_bugs_raw(config, project_key=None, query=None):
     """Like my_open_bugs but returns raw API issues (for compact_issue presenter)."""
-    project_key = project_key or config.get("default_project_key")
+    project_key = resolve_project_key(config, project_key)
     workflow = merge_resolve_defaults(config, project_key)
     project = resolve_project(config, project_key)
     assignee_id = resolve_user_id(config, require_value(workflow, "assignee", "resolve_bug"))

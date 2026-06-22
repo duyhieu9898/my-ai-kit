@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import json
 import os
+import re
 import tempfile
 from copy import deepcopy
 from datetime import datetime, timezone
@@ -100,6 +101,14 @@ def project_keys(config):
     return list(config["projects"])
 
 
+ISSUE_KEY_PATTERN = re.compile(r"^([A-Z][A-Z0-9_]*)-\d+$")
+
+
+def project_key_from_issue_id(issue_id):
+    match = ISSUE_KEY_PATTERN.match(str(issue_id or ""))
+    return match.group(1) if match else None
+
+
 def resolve_project_key(config, project_key=None):
     key = project_key or config.get("default_project_key")
     if not key:
@@ -110,8 +119,22 @@ def resolve_project_key(config, project_key=None):
     return key
 
 
+def resolve_project_key_for_issue(config, issue_id, project_key=None):
+    issue_project_key = project_key_from_issue_id(issue_id)
+    if issue_project_key and project_key and issue_project_key != project_key:
+        raise ValueError(
+            f"Issue key project '{issue_project_key}' does not match --project '{project_key}'."
+        )
+    return resolve_project_key(config, issue_project_key or project_key)
+
+
 def resolve_project(config, project_key=None):
     key = resolve_project_key(config, project_key)
+    return deepcopy(load_project_catalog(key))
+
+
+def resolve_project_for_issue(config, issue_id, project_key=None):
+    key = resolve_project_key_for_issue(config, issue_id, project_key)
     return deepcopy(load_project_catalog(key))
 
 
