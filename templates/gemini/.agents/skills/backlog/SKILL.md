@@ -42,7 +42,13 @@ Never print the API key or a full request URL containing its query string.
 
 Use `config current` and `config list-projects` when project selection is unclear.
 Pass `--project KEY` for one-off project selection; do not change the default project for a single command.
-Always default to the project specified by `default_project_key` in `config/backlog.json` when the user does not specify a project. Do NOT query other projects in the `projects` list unless the user explicitly requests a multi-project query.
+Always default to the project specified by `default_project_key` in `config/backlog.json` when the user does not specify a project.
+
+> [!IMPORTANT]
+> **STRICT PROJECT SCOPING FOR AI AGENTS:**
+> - You MUST ONLY query the project specified by `default_project_key` in `config/backlog.json` when the user's prompt is generic (e.g. "lấy task", "show issues").
+> - You are strictly FORBIDDEN from loop-querying or querying other projects listed in the `projects` array unless the user explicitly mentions the key or name of the other project in their prompt (e.g. "lấy task dự án VTO").
+
 
 ## Execute Safely
 
