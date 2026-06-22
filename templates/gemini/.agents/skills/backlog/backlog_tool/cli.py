@@ -162,24 +162,6 @@ def build_parser():
     add_project(g)
     g.add_argument("--query")
 
-    # metrics --------------------------------------------------------------
-    metrics_group = groups.add_parser("metrics", help="CLI usage metrics").add_subparsers(dest="action", required=True)
-    metrics_group.add_parser("summary", help="Aggregate output size/latency per command")
-
-    # journal --------------------------------------------------------------
-    journal_group = groups.add_parser("journal", help="Session trace log").add_subparsers(dest="action", required=True)
-    journal_group.add_parser("list", help="List session files")
-    g = journal_group.add_parser("read", help="Read a session file")
-    g.add_argument("filename", help="Session filename, e.g. 2026-06-11_bug_my-open.jsonl")
-    g = journal_group.add_parser("log-ai", help="Log an AI interaction entry")
-    g.add_argument("--command", required=True, help="Command name, e.g. bug:my-open")
-    g.add_argument("--user-request", help="User's original message (or pass via stdin JSON)")
-    g.add_argument("--ai-response", help="AI's full response (or pass via stdin JSON)")
-    g.add_argument("--issue-key", help="Related issue key")
-    g.add_argument("--stdin", action="store_true",
-                   help="Read JSON from stdin: {\"userRequest\": \"...\", \"aiResponse\": \"...\"}. "
-                        "Overrides --user-request and --ai-response.")
-
     return parser
 
 
@@ -265,10 +247,6 @@ def run_handler(config, args):
         return run_project(config, args)
     if group == "story":
         return my_story_task_overview(config, project_key=args.project, query=args.query)
-    if group == "metrics":
-        return summarize_metrics()
-    if group == "journal":
-        return run_journal(args)
     return None
 
 
@@ -311,26 +289,6 @@ def run_project(config, args):
         return project_config
     path = write_catalog(project_config)
     return {"wrote": path, "key": project_config["key"]}
-
-
-def run_journal(args):
-    if args.action == "list":
-        return journal.list_sessions()
-    if args.action == "read":
-        return journal.read_session(args.filename)
-    if args.action == "log-ai":
-        user_request = args.user_request
-        ai_response = args.ai_response
-        if getattr(args, "stdin", False):
-            import json as _json
-            data = _json.loads(sys.stdin.read())
-            user_request = data.get("userRequest", user_request)
-            ai_response = data.get("aiResponse", ai_response)
-        if not user_request or not ai_response:
-            raise ValueError("Both userRequest and aiResponse are required (via args or --stdin JSON).")
-        journal.log_ai(args.command, user_request, ai_response, issue_key=args.issue_key)
-        return {"logged": True, "command": args.command}
-    return None
 
 
 def present(result, args):
@@ -389,10 +347,10 @@ def main(argv=None):
 
     name = command_name(args)
     dry_run = is_dry_run(args)
-    config = None if args.group in ("metrics", "journal") else load_config()
+    config = load_config()
 
     project = getattr(args, "project", None)
-    if config is not None and args.group in ("issue", "bug", "story") and not project:
+    if args.group in ("issue", "bug", "story") and not project:
         project = config.get("default_project_key")
 
     log_event("info", "command_start", command=name, project=project, dry_run=dry_run)

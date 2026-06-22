@@ -97,15 +97,8 @@ assignee names/IDs, assignment source, and status transition before applying.
 and `cause_category`. Workflow-managed values such as `impacted`,
 `corrective_action`, and `resolution` are shown in the resolve dry-run.
 
-## Story, Metrics, And Journal
+## Story
 
 ```bash
 python3 scripts/backlog.py story overview --project AQM
-python3 scripts/backlog.py metrics summary
-python3 scripts/backlog.py journal list
-python3 scripts/backlog.py journal read <filename>
-python3 scripts/backlog.py journal log-ai \
-  --command "bug:my-open" \
-  --stdin \
-  [--issue-key "AQM-123"]
 ```

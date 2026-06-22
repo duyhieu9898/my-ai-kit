@@ -70,7 +70,7 @@ request that grows beyond reporting the CLI result.
 
 - Read [references/cli.md](references/cli.md) for complete command syntax.
 - Read [references/workflows.md](references/workflows.md) before creating UT bugs or resolving bugs.
-- Read [references/session-trace.md](references/session-trace.md) only when recording or reading AI session traces.
+- Read [references/logs.md](references/logs.md) to understand how to locate, read, and analyze execution logs and session traces.
 
 Prefer `bug rules` and `bug fields` over static prose when current workflow defaults or field options are needed.
 Run `config audit-workflows` after changing workflow JSON, policy constants,

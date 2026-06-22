@@ -154,8 +154,30 @@ def require_api_key():
     return api_key
 
 
+def rotate_file_if_needed(path, max_bytes=5 * 1024 * 1024, backup_count=3):
+    """Rotate a file if it exceeds max_bytes."""
+    if not os.path.exists(path):
+        return
+    try:
+        if os.path.getsize(path) < max_bytes:
+            return
+        
+        # Rotate existing backups
+        for i in range(backup_count - 1, 0, -1):
+            s = f"{path}.{i}"
+            d = f"{path}.{i+1}"
+            if os.path.exists(s):
+                os.replace(s, d)
+        
+        # Rename current to .1
+        os.replace(path, f"{path}.1")
+    except Exception:
+        pass
+
+
 def log_event(level, event, **fields):
     os.makedirs(LOG_DIR, exist_ok=True)
+    rotate_file_if_needed(LOG_PATH)
     timestamp = datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds")
     parts = [timestamp, level.upper(), f"event={event}"]
     for key, value in fields.items():
@@ -180,11 +202,14 @@ def log_metric(command, output_bytes, duration_ms, status, dry_run=None, project
     output_bytes is a proxy for token cost; comparing compact vs --json-full
     runs over time shows the real saving during live testing."""
     os.makedirs(LOG_DIR, exist_ok=True)
+    rotate_file_if_needed(METRICS_PATH)
+    estimated_tokens = round(output_bytes / 4)
     record = {
         "ts": datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds"),
         "command": command,
         "status": status,
         "outputBytes": output_bytes,
+        "estimatedTokens": estimated_tokens,
         "durationMs": duration_ms,
         "dryRun": dry_run,
         "project": project,
@@ -215,10 +240,18 @@ def summarize_metrics():
     for record in records:
         command = record.get("command", "unknown")
         bucket = by_command.setdefault(
-            command, {"command": command, "runs": 0, "totalOutputBytes": 0, "errors": 0, "_durations": []}
+            command, {
+                "command": command,
+                "runs": 0,
+                "totalOutputBytes": 0,
+                "totalEstimatedTokens": 0,
+                "errors": 0,
+                "_durations": []
+            }
         )
         bucket["runs"] += 1
         bucket["totalOutputBytes"] += record.get("outputBytes") or 0
+        bucket["totalEstimatedTokens"] += record.get("estimatedTokens") or round((record.get("outputBytes") or 0) / 4)
         if record.get("status") == "error":
             bucket["errors"] += 1
         duration = record.get("durationMs")
@@ -230,6 +263,7 @@ def summarize_metrics():
         runs = bucket["runs"]
         durations = sorted(bucket.pop("_durations"))
         bucket["avgOutputBytes"] = round(bucket["totalOutputBytes"] / runs) if runs else 0
+        bucket["avgEstimatedTokens"] = round(bucket["totalEstimatedTokens"] / runs) if runs else 0
         bucket["p95DurationMs"] = durations[max(0, int(len(durations) * 0.95) - 1)] if durations else None
         summary.append(bucket)
     summary.sort(key=lambda item: item["totalOutputBytes"], reverse=True)
