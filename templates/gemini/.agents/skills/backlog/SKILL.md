@@ -42,6 +42,7 @@ Never print the API key or a full request URL containing its query string.
 
 Use `config current` and `config list-projects` when project selection is unclear.
 Pass `--project KEY` for one-off project selection; do not change the default project for a single command.
+Always default to the project specified by `default_project_key` in `config/backlog.json` when the user does not specify a project. Do NOT query other projects in the `projects` list unless the user explicitly requests a multi-project query.
 
 ## Execute Safely
 
