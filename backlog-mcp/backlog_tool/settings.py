@@ -59,10 +59,8 @@ def validate_config(config):
         raise ValueError("Missing config.base_url")
     if not isinstance(config.get("projects"), list) or not config["projects"]:
         raise ValueError("Missing config.projects list")
-    project_keys = set(config["projects"])
-    default_project_key = config.get("default_project_key")
-    if default_project_key and default_project_key not in project_keys:
-        raise ValueError("default_project_key must exist in projects")
+    if "default_project_key" in config:
+        raise ValueError("default_project_key is no longer supported in global configuration. Please use workspace settings or specify explicitly.")
 
 
 def api_base_url(config):
@@ -111,7 +109,35 @@ def project_key_from_issue_id(issue_id):
     return match.group(1) if match else None
 
 
-def resolve_project_key(config, project_key=None):
+def find_workspace_project_key(start_path=None):
+    curr = os.path.abspath(start_path or os.getcwd())
+    while True:
+        # Check .backlog-project.json
+        local_config = os.path.join(curr, ".backlog-project.json")
+        if os.path.exists(local_config):
+            try:
+                with open(local_config, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    val = data.get("project_key")
+                    if val:
+                        return str(val)
+            except Exception:
+                pass
+
+        # Stop traversing if we hit .git directory
+        if os.path.exists(os.path.join(curr, ".git")):
+            break
+
+        # Move to parent directory
+        parent = os.path.dirname(curr)
+        if parent == curr:  # Root reached
+            break
+        curr = parent
+    return None
+
+
+def resolve_project_key(config, project_key=None, start_path=None):
+    # 1. Parameter project_key
     if project_key:
         key = project_key
         if key not in project_keys(config):
@@ -119,37 +145,72 @@ def resolve_project_key(config, project_key=None):
             raise ValueError(f"Unknown Backlog project '{key}'. Available projects: {keys}")
         return key
 
-    default_key = config.get("default_project_key")
-    if not default_key:
-        raise ValueError(
-            "default_project_key is not configured or is empty in config/backlog.json. "
-            "Please configure it or Pass --project KEY."
-        )
-    if default_key not in project_keys(config):
-        keys = ", ".join(sorted(project_keys(config)))
-        raise ValueError(
-            f"default_project_key '{default_key}' configured in config/backlog.json is invalid. "
-            f"Available projects: {keys}. Please update your configuration."
-        )
-    return default_key
+    # 2. Environment variable
+    env_key = os.environ.get("BACKLOG_PROJECT_KEY")
+    if env_key:
+        if env_key not in project_keys(config):
+            keys = ", ".join(sorted(project_keys(config)))
+            raise ValueError(
+                f"Env BACKLOG_PROJECT_KEY '{env_key}' is invalid. "
+                f"Available projects: {keys}."
+            )
+        return env_key
+
+    # 3. Local workspace config
+    workspace_key = find_workspace_project_key(start_path)
+    if workspace_key:
+        if workspace_key not in project_keys(config):
+            keys = ", ".join(sorted(project_keys(config)))
+            raise ValueError(
+                f"Workspace project_key '{workspace_key}' was found, but it is not configured in global backlog.json. "
+                f"Please add it to the 'projects' list in config/backlog.json."
+            )
+        return workspace_key
+
+    # 4. Workspace path convention
+    curr_path = os.path.abspath(start_path or os.getcwd())
+    p_keys = project_keys(config)
+    segments = curr_path.split(os.sep)
+    for segment in reversed(segments):
+        if not segment:
+            continue
+        # Exact match first
+        for pk in p_keys:
+            if segment == pk:
+                return pk
+        # Case-insensitive match next
+        for pk in p_keys:
+            if segment.upper() == pk.upper():
+                return pk
+
+    # 5. Fail Fast
+    p_keys_list = sorted(p_keys)
+    projects_str = "\n".join(f"- {pk}" for pk in p_keys_list)
+    raise ValueError(
+        f"Cannot determine Backlog project.\n\n"
+        f"Available projects:\n"
+        f"{projects_str}\n\n"
+        f"Please specify project_key explicitly\n"
+        f"or run inside a valid workspace."
+    )
 
 
-def resolve_project_key_for_issue(config, issue_id, project_key=None):
+def resolve_project_key_for_issue(config, issue_id, project_key=None, start_path=None):
     issue_project_key = project_key_from_issue_id(issue_id)
     if issue_project_key and project_key and issue_project_key != project_key:
         raise ValueError(
             f"Issue key project '{issue_project_key}' does not match --project '{project_key}'."
         )
-    return resolve_project_key(config, issue_project_key or project_key)
+    return resolve_project_key(config, issue_project_key or project_key, start_path=start_path)
 
 
-def resolve_project(config, project_key=None):
-    key = resolve_project_key(config, project_key)
+def resolve_project(config, project_key=None, start_path=None):
+    key = resolve_project_key(config, project_key, start_path=start_path)
     return deepcopy(load_project_catalog(key))
 
 
-def resolve_project_for_issue(config, issue_id, project_key=None):
-    key = resolve_project_key_for_issue(config, issue_id, project_key)
+def resolve_project_for_issue(config, issue_id, project_key=None, start_path=None):
+    key = resolve_project_key_for_issue(config, issue_id, project_key, start_path=start_path)
     return deepcopy(load_project_catalog(key))
 
 

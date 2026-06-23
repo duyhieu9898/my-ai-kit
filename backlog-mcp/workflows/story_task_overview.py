@@ -74,9 +74,10 @@ def my_story_task_overview(
     offset=0,
     sort=None,
     order=None,
+    start_path=None,
 ):
     workflow = load_workflow_config("story_task_overview")
-    project = resolve_project(config, project_key)
+    project = resolve_project(config, project_key, start_path=start_path)
     assignee_id = resolve_user_id(config, require_value(workflow, "assignee", "story_task_overview"))
     issue_types = set(require_list(workflow, "issue_types", "story_task_overview"))
     excluded_statuses = set(require_list(workflow, "excluded_statuses", "story_task_overview"))

@@ -119,7 +119,7 @@ class BacklogApiPayloadTest(unittest.TestCase):
 
         payload = backlog_issue_service.build_create_payload(CONFIG, args)
 
-        self.resolve_project.assert_called_once_with(CONFIG, "OOP")
+        self.resolve_project.assert_called_once_with(CONFIG, "OOP", start_path=None)
         self.assertEqual(82531, payload["projectId"])
         self.assertEqual("Smoke summary", payload["summary"])
         self.assertEqual(351795, payload["issueTypeId"])
@@ -158,7 +158,7 @@ class BacklogApiPayloadTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "No update fields provided"):
             backlog_issue_service.build_update_payload(CONFIG, update_args())
 
-        self.resolve_project_for_issue.assert_called_once_with(CONFIG, "OOP-123", "OOP")
+        self.resolve_project_for_issue.assert_called_once_with(CONFIG, "OOP-123", "OOP", start_path=None)
 
     def test_update_payload_resolves_status_priority_assignee_and_category(self):
         args = update_args(
@@ -184,7 +184,7 @@ class BacklogApiPayloadTest(unittest.TestCase):
         self.assertEqual(1001, payload["assigneeId"])
         self.assertEqual([165807], payload["categoryId[]"])
         self.assertEqual("updated by test", payload["comment"])
-        self.resolve_project_for_issue.assert_called_with(CONFIG, "OOP-123", "OOP")
+        self.resolve_project_for_issue.assert_called_with(CONFIG, "OOP-123", "OOP", start_path=None)
 
     def test_update_payload_uses_issue_key_to_resolve_project_when_default_differs(self):
         args = update_args(project=None, issue_id="OOP-123", comment="updated by test")
@@ -192,7 +192,7 @@ class BacklogApiPayloadTest(unittest.TestCase):
         payload = backlog_issue_service.build_update_payload(CONFIG, args)
 
         self.assertEqual("updated by test", payload["comment"])
-        self.resolve_project_for_issue.assert_called_once_with(CONFIG, "OOP-123", None)
+        self.resolve_project_for_issue.assert_called_once_with(CONFIG, "OOP-123", None, start_path=None)
 
     def test_create_issue_dry_run_does_not_post(self):
         args = create_args()

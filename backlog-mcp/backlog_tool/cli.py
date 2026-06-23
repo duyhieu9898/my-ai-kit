@@ -24,6 +24,8 @@ from backlog_tool.settings import (
     log_event,
     log_metric,
     project_keys,
+    resolve_project_key,
+    resolve_project_key_for_issue,
     resolve_user_id,
     save_config,
     summarize_metrics,
@@ -41,7 +43,7 @@ from workflows.ut_bug import create_subtask_bug
 # ---------------------------------------------------------------------------
 
 def add_project(parser):
-    parser.add_argument("--project", help="Project key. Uses default_project_key when omitted.")
+    parser.add_argument("--project", help="Project key. Resolved from workspace if omitted.")
 
 
 def add_list_controls(parser):
@@ -157,8 +159,6 @@ def build_parser():
     config_group = groups.add_parser("config", help="Skill config").add_subparsers(dest="action", required=True)
     config_group.add_parser("list-projects", help="List configured projects")
     config_group.add_parser("audit-workflows", help="Validate workflow config, policy, and project catalogs")
-    g = config_group.add_parser("set-default", help="Set default project")
-    g.add_argument("project_key")
     config_group.add_parser("show", help="Print full config JSON")
 
     # project --------------------------------------------------------------
@@ -223,6 +223,7 @@ def run_handler(config, args):
                 config, args.project, args.query, assignee_id,
                 open_only=open_only, issue_types=args.types,
                 limit=args.limit, offset=args.offset, sort=args.sort, order=args.order,
+                start_path=getattr(args, "workspace_path", None),
             )
         if action == "create":
             args.dry_run = not args.apply
@@ -242,13 +243,14 @@ def run_handler(config, args):
                 offset=args.offset,
                 sort=args.sort,
                 order=args.order,
+                start_path=getattr(args, "workspace_path", None),
             )
         if action == "context":
             return get_bug_context(config, args.issue_key)
         if action == "rules":
-            return resolve_rules(config, args.project)
+            return resolve_rules(config, args.project, start_path=getattr(args, "workspace_path", None))
         if action == "fields":
-            return field_guidance(args.field, config, args.project)
+            return field_guidance(args.field, config, args.project, start_path=getattr(args, "workspace_path", None))
         if action == "resolve":
             return resolve_bug(
                 config, args.issue_key, dry_run=not args.apply,
@@ -256,10 +258,12 @@ def run_handler(config, args):
                 qc_activity=args.qc_activity, cause_category=args.cause_category, bug_origin=args.bug_origin,
                 impacted=args.impacted, resolution=args.resolution, comment=args.comment,
                 commit=args.commit, fix_description=args.fix_description,
+                start_path=getattr(args, "workspace_path", None),
             )
         if action == "create-ut":
             return create_subtask_bug(
-                config, args.project, args.parent_key, args.module, args.description, dry_run=not args.apply
+                config, args.project, args.parent_key, args.module, args.description, dry_run=not args.apply,
+                start_path=getattr(args, "workspace_path", None),
             )
 
     if group == "config":
@@ -275,6 +279,7 @@ def run_handler(config, args):
             offset=args.offset,
             sort=args.sort,
             order=args.order,
+            start_path=getattr(args, "workspace_path", None),
         )
     return None
 
@@ -286,26 +291,17 @@ def run_config(config, args):
         return config
     if args.action == "audit-workflows":
         return audit_workflows(config)
-    if args.action == "set-default":
-        if args.project_key not in project_keys(config):
-            keys = ", ".join(sorted(project_keys(config)))
-            raise ValueError(f"Unknown project '{args.project_key}'. Available: {keys}")
-        config["default_project_key"] = args.project_key
-        save_config(config)
-        log_event("info", "config_update", key="default_project_key", value=args.project_key)
-        return {"defaultProjectKey": args.project_key, "updated": True}
     return None
 
 
 def config_projects(config):
-    default_key = config.get("default_project_key")
     rows = []
     for key in project_keys(config):
         try:
             catalog = load_project_catalog(key)
-            rows.append({"key": key, "id": catalog.get("id"), "name": catalog.get("name"), "default": key == default_key})
+            rows.append({"key": key, "id": catalog.get("id"), "name": catalog.get("name")})
         except Exception:
-            rows.append({"key": key, "id": None, "name": "(missing catalog)", "default": key == default_key})
+            rows.append({"key": key, "id": None, "name": "(missing catalog)"})
     return rows
 
 
@@ -365,7 +361,7 @@ class CommandResult:
     text: str
 
 
-def execute(argv):
+def execute(argv, workspace_path=None):
     """Execute one Backlog command and return both structured and rendered output."""
     load_env_file()
     # Let --json-full, --raw, --full and --table appear in any position (root or after the action).
@@ -380,20 +376,39 @@ def execute(argv):
         args.json_full = True
     # Default to table format unless JSON output is requested
     args.table = table or not json_full
+    args.workspace_path = workspace_path
 
     name = command_name(args)
     dry_run = is_dry_run(args)
     config = load_config()
 
-    project = getattr(args, "project", None)
-    if args.group in ("issue", "bug", "story") and not project:
-        project = config.get("default_project_key")
+    pre_project = getattr(args, "project", None)
+    if args.group in ("issue", "bug", "story"):
+        issue_id = getattr(args, "issue_id", None) or getattr(args, "issue_key", None) or getattr(args, "parent_key", None)
+        try:
+            if issue_id:
+                pre_project = resolve_project_key_for_issue(config, issue_id, pre_project, start_path=workspace_path)
+            else:
+                pre_project = resolve_project_key(config, pre_project, start_path=workspace_path)
+        except Exception:
+            pre_project = None
 
-    log_event("info", "command_start", command=name, project=project, dry_run=dry_run)
+    log_event("info", "command_start", command=name, project=pre_project, dry_run=dry_run)
     started = time.monotonic()
     try:
         result = run_handler(config, args)
         presented_data = present(result, args)
+
+        project = getattr(args, "project", None)
+        if args.group in ("issue", "bug", "story"):
+            issue_key = _extract_issue_key(result, args)
+            try:
+                if issue_key:
+                    project = resolve_project_key_for_issue(config, issue_key, project, start_path=workspace_path)
+                else:
+                    project = resolve_project_key(config, project, start_path=workspace_path)
+            except Exception:
+                project = pre_project
 
         # If --table is specified and the output is a list of issues/stories, format it as a table
         if getattr(args, "table", False) and isinstance(presented_data, list) and args.group in ("issue", "bug", "story"):
@@ -407,7 +422,6 @@ def execute(argv):
         log_metric(name, len(text.encode("utf-8")), duration_ms, "ok", dry_run=dry_run, project=project)
         # Journal: record CLI output for durable cross-session memory.
         if args.group in ("issue", "bug", "story"):
-            issue_key = _extract_issue_key(result, args)
             journal.log_cli(name, text, project=project, issue_key=issue_key)
         # create-ut --apply: surface a friendly link too.
         if args.group == "bug" and getattr(args, "action", None) == "create-ut" and not dry_run and isinstance(result, dict):
@@ -418,6 +432,18 @@ def execute(argv):
     except Exception as error:
         duration_ms = round((time.monotonic() - started) * 1000)
         log_event("error", "command_error", command=name, error=error)
+        
+        project = getattr(args, "project", None)
+        if args.group in ("issue", "bug", "story"):
+            issue_id = getattr(args, "issue_id", None) or getattr(args, "issue_key", None) or getattr(args, "parent_key", None)
+            try:
+                if issue_id:
+                    project = resolve_project_key_for_issue(config, issue_id, project, start_path=workspace_path)
+                else:
+                    project = resolve_project_key(config, project, start_path=workspace_path)
+            except Exception:
+                project = pre_project
+
         log_metric(name, 0, duration_ms, "error", dry_run=dry_run, project=project)
         raise
 

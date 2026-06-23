@@ -59,10 +59,10 @@ def merge_resolve_defaults(config, project_key):
     return merged
 
 
-def my_open_bugs(config, project_key=None, query=None, limit=100, offset=0, sort=None, order=None):
-    project_key = resolve_project_key(config, project_key)
+def my_open_bugs(config, project_key=None, query=None, limit=100, offset=0, sort=None, order=None, start_path=None):
+    project_key = resolve_project_key(config, project_key, start_path=start_path)
     workflow = merge_resolve_defaults(config, project_key)
-    project = resolve_project(config, project_key)
+    project = resolve_project(config, project_key, start_path=start_path)
     assignee_id = resolve_user_id(config, require_value(workflow, "assignee", "resolve_bug"))
     issue_type = require_value(workflow, "issue_type", "resolve_bug")
     excluded_statuses = set(require_list(workflow, "excluded_statuses", "resolve_bug"))
@@ -83,11 +83,11 @@ def my_open_bugs(config, project_key=None, query=None, limit=100, offset=0, sort
     ]
 
 
-def my_open_bugs_raw(config, project_key=None, query=None, limit=100, offset=0, sort=None, order=None):
+def my_open_bugs_raw(config, project_key=None, query=None, limit=100, offset=0, sort=None, order=None, start_path=None):
     """Like my_open_bugs but returns raw API issues (for compact_issue presenter)."""
-    project_key = resolve_project_key(config, project_key)
+    project_key = resolve_project_key(config, project_key, start_path=start_path)
     workflow = merge_resolve_defaults(config, project_key)
-    project = resolve_project(config, project_key)
+    project = resolve_project(config, project_key, start_path=start_path)
     assignee_id = resolve_user_id(config, require_value(workflow, "assignee", "resolve_bug"))
     issue_type = require_value(workflow, "issue_type", "resolve_bug")
     excluded_statuses = set(require_list(workflow, "excluded_statuses", "resolve_bug"))
@@ -234,12 +234,13 @@ def build_resolve_bug_payload(
     commit=None,
     fix_description=None,
     today=None,
+    start_path=None,
 ):
     project_key = issue_key.split("-")[0]
     workflow = merge_resolve_defaults(config, project_key)
     client = BacklogClient(config)
     issue = client.get_issue(issue_key)
-    project = resolve_project(config, project_key)
+    project = resolve_project(config, project_key, start_path=start_path)
     start_date = today or date.today()
     today_text = start_date.strftime("%Y-%m-%d")
     due_in_days = require_int(workflow, "due_in_days", WORKFLOW_NAME)
@@ -423,8 +424,8 @@ def summarize_changes(issue, project, payload, target_status):
     return changes
 
 
-def resolve_bug(config, issue_key, dry_run=True, **kwargs):
-    built = build_resolve_bug_payload(config, issue_key, **kwargs)
+def resolve_bug(config, issue_key, dry_run=True, start_path=None, **kwargs):
+    built = build_resolve_bug_payload(config, issue_key, start_path=start_path, **kwargs)
     if dry_run:
         log_event(
             "info",

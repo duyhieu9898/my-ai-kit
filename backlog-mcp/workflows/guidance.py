@@ -15,10 +15,10 @@ from .resolve_policy import (
 )
 
 
-def guidance_workflow(config=None, project_key=None):
+def guidance_workflow(config=None, project_key=None, start_path=None):
     if not config:
         return load_workflow_config("resolve_bug")
-    return merge_resolve_defaults(config, resolve_project_key(config, project_key))
+    return merge_resolve_defaults(config, resolve_project_key(config, project_key, start_path=start_path))
 
 
 def custom_default(custom_fields, field_key):
@@ -27,9 +27,9 @@ def custom_default(custom_fields, field_key):
     return custom_fields.get(field_key)
 
 
-def resolve_rules(config=None, project_key=None):
+def resolve_rules(config=None, project_key=None, start_path=None):
     """Return the same policy consumed by the resolve execution workflow."""
-    workflow = guidance_workflow(config, project_key)
+    workflow = guidance_workflow(config, project_key, start_path=start_path)
     rules = resolve_rules_from_config(workflow)
     rules["fieldGuidance"] = {
         "supported": list(GUIDED_FIELDS),
@@ -97,8 +97,8 @@ FIELD_GUIDANCE = {
 }
 
 
-def field_guidance(field=None, config=None, project_key=None):
-    workflow = guidance_workflow(config, project_key)
+def field_guidance(field=None, config=None, project_key=None, start_path=None):
+    workflow = guidance_workflow(config, project_key, start_path=start_path)
     custom_fields = workflow.get("custom_fields", {})
 
     def get_val(key):

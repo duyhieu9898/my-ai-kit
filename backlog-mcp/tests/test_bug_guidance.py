@@ -74,7 +74,7 @@ class GuidanceTest(unittest.TestCase):
                 },
             },
         }
-        config = {"default_project_key": "", "projects": ["VTO"]}
+        config = {"projects": ["VTO"]}
 
         with mock.patch.object(guidance, "load_workflow_config", return_value=workflow):
             result = guidance.field_guidance("bug_origin", config, "VTO")
@@ -84,9 +84,9 @@ class GuidanceTest(unittest.TestCase):
         self.assertEqual("Not Applicable", cause["default"])
 
     def test_field_guidance_requires_project_when_config_has_no_default(self):
-        config = {"default_project_key": "", "projects": ["VTO"]}
+        config = {"projects": ["VTO"]}
 
-        with self.assertRaisesRegex(ValueError, "Pass --project KEY"):
+        with self.assertRaisesRegex(ValueError, "Cannot determine Backlog project"):
             guidance.field_guidance("bug_origin", config)
 
     def test_field_guidance_rejects_unknown_field(self):

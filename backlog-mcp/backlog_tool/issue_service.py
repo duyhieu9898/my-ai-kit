@@ -54,13 +54,14 @@ def get_issues(
     offset=0,
     sort=None,
     order=None,
+    start_path=None,
 ):
     """List issues with optional filters.
 
     open_only: exclude Closed status via API filter.
     issue_types: list of type names (e.g. ["Bug", "Story"]) to filter.
     """
-    project = resolve_project(config, project_key)
+    project = resolve_project(config, project_key, start_path=start_path)
     client = BacklogClient(config)
     project_id = client.get_project_id(project)
 
@@ -97,7 +98,7 @@ def _resolve_issue_type_ids(project, type_names):
 
 
 def build_create_payload(config, args):
-    project = resolve_project(config, args.project)
+    project = resolve_project(config, args.project, start_path=getattr(args, "workspace_path", None))
     defaults = config.get("defaults", {})
     issue_type = args.issue_type
     if issue_type is None:
@@ -139,7 +140,7 @@ def create_issue(config, args):
 
 
 def build_update_payload(config, args):
-    project = resolve_project_for_issue(config, args.issue_id, args.project)
+    project = resolve_project_for_issue(config, args.issue_id, args.project, start_path=getattr(args, "workspace_path", None))
     data = {}
     optional_values = {
         "summary": args.summary,

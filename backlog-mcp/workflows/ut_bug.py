@@ -44,8 +44,8 @@ def merge_bug_defaults(config, project_key):
     return merged
 
 
-def build_subtask_bug_payload(config, project_key, parent_key, module, description):
-    project = resolve_project(config, project_key)
+def build_subtask_bug_payload(config, project_key, parent_key, module, description, start_path=None):
+    project = resolve_project(config, project_key, start_path=start_path)
     project_key = project["key"]
     bug = require_bug_config(project)
     bug_defaults = merge_bug_defaults(config, project_key)
@@ -128,8 +128,8 @@ def created_user_id(response):
     return int(user_id) if user_id else None
 
 
-def create_subtask_bug(config, project_key, parent_key, module, description, dry_run=False):
-    built = build_subtask_bug_payload(config, project_key, parent_key, module, description)
+def create_subtask_bug(config, project_key, parent_key, module, description, dry_run=False, start_path=None):
+    built = build_subtask_bug_payload(config, project_key, parent_key, module, description, start_path=start_path)
     if dry_run:
         log_event(
             "info",

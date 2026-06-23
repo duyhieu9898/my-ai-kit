@@ -50,38 +50,24 @@ class BacklogSettingsTest(unittest.TestCase):
     def test_resolve_project_key_rejects_unknown_project(self):
         config = {
             "base_url": "https://example.backlog.com",
-            "default_project_key": "AQM",
             "projects": ["AQM", "OOP"],
         }
 
         with self.assertRaisesRegex(ValueError, "Unknown Backlog project"):
             backlog_settings.resolve_project_key(config, "NOPE")
 
-    def test_empty_default_project_is_allowed_but_requires_explicit_project(self):
+    def test_default_project_key_is_disallowed_in_config(self):
         config = {
             "base_url": "https://example.backlog.com",
-            "default_project_key": "",
+            "default_project_key": "AQM",
             "projects": ["AQM", "OOP"],
         }
+        with self.assertRaisesRegex(ValueError, "default_project_key is no longer supported"):
+            backlog_settings.validate_config(config)
 
-        backlog_settings.validate_config(config)
-        self.assertEqual("OOP", backlog_settings.resolve_project_key(config, "OOP"))
-        with self.assertRaisesRegex(ValueError, "Pass --project KEY"):
-            backlog_settings.resolve_project_key(config)
-
-    def test_invalid_default_project_key_raises_error(self):
+    def test_resolve_project_key_for_issue_prefers_issue_prefix_if_present(self):
         config = {
             "base_url": "https://example.backlog.com",
-            "default_project_key": "INVALID",
-            "projects": ["AQM", "OOP"],
-        }
-        with self.assertRaisesRegex(ValueError, "default_project_key 'INVALID' configured in config/backlog.json is invalid"):
-            backlog_settings.resolve_project_key(config)
-
-    def test_resolve_project_key_for_issue_prefers_issue_prefix_over_default(self):
-        config = {
-            "base_url": "https://example.backlog.com",
-            "default_project_key": "OOP",
             "projects": ["AQM", "OOP"],
         }
 
@@ -90,21 +76,20 @@ class BacklogSettingsTest(unittest.TestCase):
     def test_resolve_project_key_for_issue_rejects_project_mismatch(self):
         config = {
             "base_url": "https://example.backlog.com",
-            "default_project_key": "AQM",
             "projects": ["AQM", "OOP"],
         }
 
         with self.assertRaisesRegex(ValueError, "does not match --project"):
             backlog_settings.resolve_project_key_for_issue(config, "AQM-123", "OOP")
 
-    def test_resolve_project_key_for_issue_uses_default_for_numeric_issue_id(self):
+    def test_resolve_project_key_for_issue_fails_for_numeric_issue_id_without_workspace(self):
         config = {
             "base_url": "https://example.backlog.com",
-            "default_project_key": "AQM",
             "projects": ["AQM", "OOP"],
         }
 
-        self.assertEqual("AQM", backlog_settings.resolve_project_key_for_issue(config, "12345"))
+        with self.assertRaisesRegex(ValueError, "Cannot determine Backlog project"):
+            backlog_settings.resolve_project_key_for_issue(config, "12345")
 
     def test_log_event_writes_timestamped_redacted_shape_without_newline_leak(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -136,6 +121,71 @@ class BacklogSettingsTest(unittest.TestCase):
         self.assertEqual("line one\nline two", data["body"])
         self.assertEqual(1, len(content.splitlines()))
 
+    def test_resolve_project_key_from_env_var(self):
+        config = {
+            "base_url": "https://example.backlog.com",
+            "projects": ["AQM", "OOP", "VTO"],
+        }
+        with mock.patch.dict(os.environ, {"BACKLOG_PROJECT_KEY": "VTO"}):
+            self.assertEqual("VTO", backlog_settings.resolve_project_key(config))
+
+        with mock.patch.dict(os.environ, {"BACKLOG_PROJECT_KEY": "INVALID"}):
+            with self.assertRaisesRegex(ValueError, "Env BACKLOG_PROJECT_KEY 'INVALID' is invalid"):
+                backlog_settings.resolve_project_key(config)
+
+    def test_resolve_project_key_from_local_config(self):
+        config = {
+            "base_url": "https://example.backlog.com",
+            "projects": ["AQM", "OOP", "VTO"],
+        }
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            local_config_file = os.path.join(tmp_dir, ".backlog-project.json")
+            with open(local_config_file, "w", encoding="utf-8") as f:
+                import json
+                json.dump({"project_key": "VTO"}, f)
+            
+            self.assertEqual("VTO", backlog_settings.resolve_project_key(config, start_path=tmp_dir))
+
+    def test_resolve_project_key_stops_at_git_root(self):
+        config = {
+            "base_url": "https://example.backlog.com",
+            "projects": ["AQM", "OOP", "VTO"],
+        }
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            parent_dir = os.path.join(tmp_dir, "parent")
+            os.makedirs(parent_dir, exist_ok=True)
+            with open(os.path.join(parent_dir, ".backlog-project.json"), "w", encoding="utf-8") as f:
+                import json
+                json.dump({"project_key": "AQM"}, f)
+            
+            child_dir = os.path.join(parent_dir, "child")
+            os.makedirs(os.path.join(child_dir, ".git"), exist_ok=True)
+            
+            with self.assertRaisesRegex(ValueError, "Cannot determine Backlog project"):
+                backlog_settings.resolve_project_key(config, start_path=child_dir)
+
+    def test_resolve_project_key_invalid_workspace_raises_validation_error(self):
+        config = {
+            "base_url": "https://example.backlog.com",
+            "projects": ["AQM", "OOP"],
+        }
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            local_config_file = os.path.join(tmp_dir, ".backlog-project.json")
+            with open(local_config_file, "w", encoding="utf-8") as f:
+                import json
+                json.dump({"project_key": "VTO"}, f)
+            
+            with self.assertRaisesRegex(ValueError, "Workspace project_key 'VTO' was found, but it is not configured in global backlog.json"):
+                backlog_settings.resolve_project_key(config, start_path=tmp_dir)
+
+    def test_resolve_project_key_from_path_convention(self):
+        config = {
+            "base_url": "https://example.backlog.com",
+            "projects": ["AQM", "OOP", "VTO"],
+        }
+        self.assertEqual("VTO", backlog_settings.resolve_project_key(config, start_path="/home/user/work/VTO/my-app"))
+        self.assertEqual("AQM", backlog_settings.resolve_project_key(config, start_path="/home/user/work/aqm/mobile-app"))
+        self.assertEqual("OOP", backlog_settings.resolve_project_key(config, start_path="/home/user/work/OOP"))
 
 
 if __name__ == "__main__":

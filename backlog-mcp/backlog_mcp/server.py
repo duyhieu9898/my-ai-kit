@@ -15,9 +15,8 @@ from backlog_tool.settings import load_config, project_keys, summarize_metrics
 SERVER_INSTRUCTIONS = (
     "Use this server for configured Backlog projects. Read before mutating. "
     "Issue creation/update and bug create/resolve are dry runs unless mode='apply'. "
-    "When a project is omitted, use only the configured default project; never enumerate "
-    "other projects unless the user explicitly requests one. Never expose API keys or full "
-    "request URLs containing query strings."
+    "When a project is omitted, it will be automatically resolved from the workspace configuration or workspace path. "
+    "Never expose API keys or full request URLs containing query strings."
 )
 
 IssueView = Literal["compact", "story"]
@@ -253,12 +252,13 @@ def _invoke(
     limit: int = 0,
     offset: int = 0,
     paginated: bool = False,
+    workspace_path: str = "",
 ) -> CallToolResult:
     if full:
         if "--json-full" not in args:
             args.append("--json-full")
     try:
-        res = execute(args)
+        res = execute(args, workspace_path=workspace_path or None)
     except Exception as error:
         return _error_result(args, error)
     data = res.data
@@ -291,18 +291,19 @@ def get_issue(
     issue_id: Annotated[str, Field(description="Issue key (e.g., 'PROJ-123') or numeric ID")],
     fields: Annotated[tuple[str, ...], Field(description="Optional response fields to include in structured data. Omit for the default compact issue fields.")] = (),
     full: Annotated[bool, Field(description="Set true only when the compact issue fields are insufficient and raw Backlog fields are needed.")] = False,
+    workspace_path: Annotated[str, Field(description="Local workspace path of the project. Omit or pass empty to resolve from the current directory context.")] = "",
 ) -> CallToolResult:
     """Get one Backlog issue by key or numeric ID.
 
     Use when the user names a specific Backlog issue and you need its current details.
     Do not use when you need to discover multiple issues; use get_issues instead.
     """
-    return _invoke(["issue", "get", issue_id], full=full, fields=fields)
+    return _invoke(["issue", "get", issue_id], full=full, fields=fields, workspace_path=workspace_path)
 
 
 @mcp.tool()
 def get_issues(
-    project: Annotated[str, Field(description="Project key (e.g., 'PRJ'). Omit or pass an empty string to use the configured default project.")] = "",
+    project: Annotated[str, Field(description="Project key (e.g., 'PRJ'). Omit or pass an empty string to resolve from the active workspace path or configuration.")] = "",
     query: Annotated[str, Field(description="Search keyword for issue summary or description. Omit or pass an empty string for no keyword filter.")] = "",
     issue_types: Annotated[tuple[str, ...], Field(description="Issue type names to include, e.g. ('Bug', 'Story'). Omit for all issue types.")] = (),
     include_closed: Annotated[bool, Field(description="Set true to include Closed issues; false returns open issues only.")] = False,
@@ -323,6 +324,7 @@ def get_issues(
 ] = None,
     fields: Annotated[tuple[str, ...], Field(description="Optional response fields for each issue in structured data. Omit for the default compact fields.")] = (),
     full: Annotated[bool, Field(description="Set true only when compact issue fields are insufficient and raw Backlog fields are needed.")] = False,
+    workspace_path: Annotated[str, Field(description="Local workspace path of the project. Omit or pass empty to resolve from the current directory context.")] = "",
 ) -> CallToolResult:
     """List issues assigned to the configured user in one project.
 
@@ -342,7 +344,7 @@ def get_issues(
     _append(args, "--view", view)
     if include_closed:
         args.append("--all")
-    return _invoke(args, list_key="issues", full=full, fields=fields, limit=limit, offset=offset, paginated=True)
+    return _invoke(args, list_key="issues", full=full, fields=fields, limit=limit, offset=offset, paginated=True, workspace_path=workspace_path)
 
 
 def _append_issue_fields(
@@ -407,7 +409,7 @@ def _build_issue_update_args(
 @mcp.tool()
 def create_issue(
     summary: Annotated[str, Field(description="Issue summary title")],
-    project: Annotated[str, Field(description="Project key (e.g., 'PRJ'). Omit or pass an empty string to use the configured default project.")] = "",
+    project: Annotated[str, Field(description="Project key (e.g., 'PRJ'). Omit or pass an empty string to resolve from the active workspace path or configuration.")] = "",
     issue_type: Annotated[str, Field(description="Issue type name or ID (e.g., 'Bug', 'Task', 'Story'). Required by Backlog for creation.")] = "",
     parent: Annotated[str, Field(description="Parent issue key (e.g., 'PRJ-123'). Omit or pass an empty string for no parent.")] = "",
     description: Annotated[str, Field(description="Issue description detail text. Omit or pass an empty string for no description.")] = "",
@@ -420,6 +422,7 @@ def create_issue(
     actual_hours: Annotated[float | None, Field(description="Actual hours. Omit when unknown.")] = None,
     custom_fields: Annotated[dict[str, str], Field(description="Custom field values keyed by configured custom field key, e.g. {'qc_activity':'Unit Test'}.")] = {},
     mode: Annotated[MutationMode, Field(description="preview returns a dry-run payload; apply writes the issue to Backlog.")] = "preview",
+    workspace_path: Annotated[str, Field(description="Local workspace path of the project. Omit or pass empty to resolve from the current directory context.")] = "",
 ) -> CallToolResult:
     """Create or preview creation of a Backlog issue.
 
@@ -444,13 +447,13 @@ def create_issue(
     )
     if mode == "apply":
         args.append("--apply")
-    return _invoke(args)
+    return _invoke(args, workspace_path=workspace_path)
 
 
 @mcp.tool()
 def update_issue(
     issue_id: Annotated[str, Field(description="Issue key (e.g., 'PROJ-123') or numeric ID")],
-    project: Annotated[str, Field(description="Project key (e.g., 'PRJ'). Omit or pass an empty string to infer from issue key/default project.")] = "",
+    project: Annotated[str, Field(description="Project key (e.g., 'PRJ'). Omit or pass an empty string to infer from issue key or active workspace context.")] = "",
     summary: Annotated[str, Field(description="New issue summary title. Omit or pass an empty string to keep current summary.")] = "",
     status: Annotated[str, Field(description="Status name or ID to transition to. Omit to keep current status.")] = "",
     comment: Annotated[str, Field(description="Comment text to add to the update. Omit for no comment.")] = "",
@@ -464,6 +467,7 @@ def update_issue(
     actual_hours: Annotated[float | None, Field(description="New actual hours. Omit to keep current value.")] = None,
     custom_fields: Annotated[dict[str, str], Field(description="Custom field updates keyed by configured custom field key.")] = {},
     mode: Annotated[MutationMode, Field(description="preview returns a dry-run payload; apply writes the update to Backlog.")] = "preview",
+    workspace_path: Annotated[str, Field(description="Local workspace path of the project. Omit or pass empty to resolve from the current directory context.")] = "",
 ) -> CallToolResult:
     """Update or preview update of a Backlog issue.
 
@@ -489,12 +493,12 @@ def update_issue(
     _append(args, "--comment", comment)
     if mode == "apply":
         args.append("--apply")
-    return _invoke(args)
+    return _invoke(args, workspace_path=workspace_path)
 
 
 @mcp.tool()
 def get_my_open_bugs(
-    project: Annotated[str, Field(description="Project key (e.g., 'PRJ'). Omit or pass an empty string to use the configured default project.")] = "",
+    project: Annotated[str, Field(description="Project key (e.g., 'PRJ'). Omit or pass an empty string to resolve from the active workspace path or configuration.")] = "",
     query: Annotated[str, Field(description="Search keyword for bug summary or description. Omit or pass an empty string for no keyword filter.")] = "",
     limit: Annotated[int, Field(description="Maximum bugs to return, from 1 to 100.", ge=1, le=100)] = 50,
     offset: Annotated[int, Field(description="Zero-based issue offset for pagination.", ge=0)] = 0,
@@ -512,6 +516,7 @@ def get_my_open_bugs(
 ] = None,
     fields: Annotated[tuple[str, ...], Field(description="Optional response fields for each bug in structured data. Omit for the default compact fields.")] = (),
     full: Annotated[bool, Field(description="Set true only when compact bug fields are insufficient and raw Backlog fields are needed.")] = False,
+    workspace_path: Annotated[str, Field(description="Local workspace path of the project. Omit or pass empty to resolve from the current directory context.")] = "",
 ) -> CallToolResult:
     """List open bugs assigned to the configured user in one project.
 
@@ -527,19 +532,20 @@ def get_my_open_bugs(
         sort=sort,
         order=order,
     )
-    return _invoke(args, list_key="bugs", full=full, fields=fields, limit=limit, offset=offset, paginated=True)
+    return _invoke(args, list_key="bugs", full=full, fields=fields, limit=limit, offset=offset, paginated=True, workspace_path=workspace_path)
 
 
 @mcp.tool()
 def get_bug_context(
-    issue_key: Annotated[str, Field(description="Bug issue key (e.g., 'PRJ-123') to analyze")]
+    issue_key: Annotated[str, Field(description="Bug issue key (e.g., 'PRJ-123') to analyze")],
+    workspace_path: Annotated[str, Field(description="Local workspace path of the project. Omit or pass empty to resolve from the current directory context.")] = "",
 ) -> CallToolResult:
     """Get structured bug context, including current assignee and reporter.
 
     Use when preparing to resolve or discuss a specific bug.
     Do not use for listing bugs; use get_my_open_bugs.
     """
-    return _invoke(["bug", "context", issue_key])
+    return _invoke(["bug", "context", issue_key], workspace_path=workspace_path)
 
 
 @mcp.tool()
@@ -557,6 +563,7 @@ def resolve_bug(
     commit: Annotated[str, Field(description="Git commit hash/ref related to the fix.")] = "",
     fix_description: Annotated[str, Field(description="Corrective action or fix description text.")] = "",
     mode: Annotated[MutationMode, Field(description="preview returns a dry-run payload; apply transitions the bug in Backlog.")] = "preview",
+    workspace_path: Annotated[str, Field(description="Local workspace path of the project. Omit or pass empty to resolve from the current directory context.")] = "",
 ) -> CallToolResult:
     """Resolve or preview resolution of a bug with workflow defaults.
 
@@ -580,7 +587,7 @@ def resolve_bug(
         _append(args, flag, value)
     if mode == "apply":
         args.append("--apply")
-    return _invoke(args)
+    return _invoke(args, workspace_path=workspace_path)
 
 
 @mcp.tool()
@@ -588,8 +595,9 @@ def create_ut_bug(
     parent_key: Annotated[str, Field(description="Parent issue key (e.g., 'PRJ-123') to attach the UT bug to")],
     module: Annotated[str, Field(description="Name of the module or file with the failing unit test")],
     description: Annotated[str, Field(description="Unit test failure description details")],
-    project: Annotated[str, Field(description="Project key (e.g., 'PRJ'). Omit or pass an empty string to use the configured default project.")] = "",
+    project: Annotated[str, Field(description="Project key (e.g., 'PRJ'). Omit or pass an empty string to resolve from the active workspace path or configuration.")] = "",
     mode: Annotated[MutationMode, Field(description="preview returns a dry-run payload; apply creates the Unit Test bug in Backlog.")] = "preview",
+    workspace_path: Annotated[str, Field(description="Local workspace path of the project. Omit or pass empty to resolve from the current directory context.")] = "",
 ) -> CallToolResult:
     """Create or preview a Unit Test sub-task bug under a parent issue.
 
@@ -600,12 +608,13 @@ def create_ut_bug(
     _append(args, "--project", project)
     if mode == "apply":
         args.append("--apply")
-    return _invoke(args)
+    return _invoke(args, workspace_path=workspace_path)
 
 
 @mcp.tool()
 def get_bug_rules(
-    project: Annotated[str, Field(description="Project key (e.g., 'PRJ'). Omit or pass an empty string to use the configured default project.")] = ""
+    project: Annotated[str, Field(description="Project key (e.g., 'PRJ'). Omit or pass an empty string to resolve from the active workspace path or configuration.")] = "",
+    workspace_path: Annotated[str, Field(description="Local workspace path of the project. Omit or pass empty to resolve from the current directory context.")] = "",
 ) -> CallToolResult:
     """Get current resolve-bug workflow rules for one project.
 
@@ -614,13 +623,14 @@ def get_bug_rules(
     """
     args = ["bug", "rules"]
     _append(args, "--project", project)
-    return _invoke(args)
+    return _invoke(args, workspace_path=workspace_path)
 
 
 @mcp.tool()
 def get_bug_fields(
     field: Annotated[str, Field(description="Field name to get guidance for, e.g. qc_activity, bug_origin, cause_category. Omit for all fields.")] = "",
-    project: Annotated[str, Field(description="Project key (e.g., 'PRJ'). Omit or pass an empty string to use the configured default project.")] = "",
+    project: Annotated[str, Field(description="Project key (e.g., 'PRJ'). Omit or pass an empty string to resolve from the active workspace path or configuration.")] = "",
+    workspace_path: Annotated[str, Field(description="Local workspace path of the project. Omit or pass empty to resolve from the current directory context.")] = "",
 ) -> CallToolResult:
     """Get configured guidance for bug workflow fields.
 
@@ -631,12 +641,12 @@ def get_bug_fields(
     if field:
         args.append(field)
     _append(args, "--project", project)
-    return _invoke(args)
+    return _invoke(args, workspace_path=workspace_path)
 
 
 @mcp.tool()
 def get_story_overview(
-    project: Annotated[str, Field(description="Project key (e.g., 'PRJ'). Omit or pass an empty string to use the configured default project.")] = "",
+    project: Annotated[str, Field(description="Project key (e.g., 'PRJ'). Omit or pass an empty string to resolve from the active workspace path or configuration.")] = "",
     query: Annotated[str, Field(description="Search keyword for story/task summary or description. Omit or pass an empty string for no keyword filter.")] = "",
     limit: Annotated[int, Field(description="Maximum stories/tasks to return, from 1 to 100.", ge=1, le=100)] = 50,
     offset: Annotated[int, Field(description="Zero-based issue offset for pagination.", ge=0)] = 0,
@@ -653,6 +663,7 @@ def get_story_overview(
     ),
 ] = None,
     fields: Annotated[tuple[str, ...], Field(description="Optional response fields for each story/task in structured data. Omit for workflow default fields.")] = (),
+    workspace_path: Annotated[str, Field(description="Local workspace path of the project. Omit or pass empty to resolve from the current directory context.")] = "",
 ) -> CallToolResult:
     """Get Story and Task deadlines assigned to the configured user.
 
@@ -668,7 +679,7 @@ def get_story_overview(
         sort=sort,
         order=order,
     )
-    return _invoke(args, list_key="stories", fields=fields, limit=limit, offset=offset, paginated=True)
+    return _invoke(args, list_key="stories", fields=fields, limit=limit, offset=offset, paginated=True, workspace_path=workspace_path)
 
 
 @mcp.tool()
@@ -750,10 +761,10 @@ def create_ut_bugs_prompt(
 
 @mcp.prompt()
 def project_status_prompt(
-    project: Annotated[str, Field(description="Project key. Omit or pass an empty string to use the configured default project.")] = ""
+    project: Annotated[str, Field(description="Project key. Omit or pass an empty string to resolve from the active workspace path or configuration.")] = ""
 ) -> str:
     """Guide the agent to check the current project status overview."""
-    proj_desc = f"project '{project}'" if project else "the default project"
+    proj_desc = f"project '{project}'" if project else "the active workspace"
     return (
         f"Please check and summarize the current status of {proj_desc}.\n\n"
         f"Steps to take:\n"
