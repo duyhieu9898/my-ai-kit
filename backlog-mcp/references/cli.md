@@ -8,13 +8,12 @@ Run all commands from the skill directory with `python3 scripts/backlog.py`.
 - Add `--json-full` anywhere in the command for raw JSON.
 - Treat write commands as dry runs until `--apply` is supplied.
 - Read errors from stderr.
-- Use `--project KEY` to override `default_project_key` for one command.
+- Use `--project KEY` to override workspace project key resolution for one command.
 
 ## Config And Project Metadata
 
 ```bash
 python3 scripts/backlog.py config list-projects
-python3 scripts/backlog.py config set-default AQM
 python3 scripts/backlog.py config show
 python3 scripts/backlog.py project inspect AQM
 python3 scripts/backlog.py project inspect OOP --stdout

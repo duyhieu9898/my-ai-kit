@@ -65,7 +65,7 @@ daemon or remote server is required.
 - `create_issue`, `update_issue`, `create_ut_bug`, and `resolve_bug` are dry
   runs unless `mode="apply"`.
 - `inspect_project` only prints fetched metadata unless `mode="refresh_catalog"`.
-- Generic queries use only `config.default_project_key`; tools never loop over
+- Generic queries resolve the project key from the active workspace path or configuration; tools never loop over
   all projects implicitly.
 - API keys and full request URLs containing query strings are never logged.
 
