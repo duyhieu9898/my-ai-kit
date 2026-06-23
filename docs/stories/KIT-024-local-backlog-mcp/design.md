@@ -10,7 +10,7 @@ An MCP client starts the server over stdio, invokes a typed tool, and receives s
 
 ## Interface Contract
 
-The MCP exposes typed equivalents of the existing issue, bug, story, project, and configuration commands. Mutation tools accept `apply: bool = false`; omission always produces a dry run.
+The MCP exposes typed equivalents of the existing issue, bug, story, project, and configuration commands. Mutation tools accept `mode: "preview" | "apply"`; omission always previews and never writes to Backlog.
 
 ## Data Model
 

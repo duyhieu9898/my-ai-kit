@@ -62,9 +62,9 @@ daemon or remote server is required.
 
 ## Safety
 
-- `add_issue`, `update_issue`, `add_ut_bug`, and `resolve_bug` are dry
-  runs unless `apply=true`.
-- `inspect_project` only prints fetched metadata unless `write=true`.
+- `create_issue`, `update_issue`, `create_ut_bug`, and `resolve_bug` are dry
+  runs unless `mode="apply"`.
+- `inspect_project` only prints fetched metadata unless `mode="refresh_catalog"`.
 - Generic queries use only `config.default_project_key`; tools never loop over
   all projects implicitly.
 - API keys and full request URLs containing query strings are never logged.

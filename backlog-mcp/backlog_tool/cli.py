@@ -44,6 +44,13 @@ def add_project(parser):
     parser.add_argument("--project", help="Project key. Uses default_project_key when omitted.")
 
 
+def add_list_controls(parser):
+    parser.add_argument("--limit", type=int, default=100, help="Maximum number of issues to fetch.")
+    parser.add_argument("--offset", type=int, default=0, help="Zero-based issue offset.")
+    parser.add_argument("--sort", help="Backlog issue sort field, e.g. updated, dueDate, priority.")
+    parser.add_argument("--order", choices=["asc", "desc"], help="Sort order.")
+
+
 def add_json_full(parser):
     parser.add_argument("--json-full", dest="json_full", action="store_true",
                         help="Print raw JSON instead of compact output. Works in any position.")
@@ -81,6 +88,7 @@ def build_parser():
 
     g = issue.add_parser("list", help="List/search issues")
     add_project(g)
+    add_list_controls(g)
     g.add_argument("--query", help="Search keyword")
     g.add_argument("--all", action="store_true", help="Include Closed issues (default excludes Closed)")
     g.add_argument("--type", action="append", dest="types", metavar="TYPE",
@@ -110,6 +118,7 @@ def build_parser():
 
     g = bug.add_parser("list", help="List open bugs assigned to me")
     add_project(g)
+    add_list_controls(g)
     g.add_argument("--query")
 
     g = bug.add_parser("context", help="Structured bug context from description")
@@ -162,6 +171,7 @@ def build_parser():
     story_group = groups.add_parser("story", help="Story/Task overview").add_subparsers(dest="action", required=True)
     g = story_group.add_parser("overview", help="Story/Task overview assigned to me")
     add_project(g)
+    add_list_controls(g)
     g.add_argument("--query")
 
     return parser
@@ -212,6 +222,7 @@ def run_handler(config, args):
             return get_issues(
                 config, args.project, args.query, assignee_id,
                 open_only=open_only, issue_types=args.types,
+                limit=args.limit, offset=args.offset, sort=args.sort, order=args.order,
             )
         if action == "create":
             args.dry_run = not args.apply
@@ -223,7 +234,15 @@ def run_handler(config, args):
     if group == "bug":
         if action == "list":
             from workflows.resolve_bug import my_open_bugs_raw
-            return my_open_bugs_raw(config, project_key=args.project, query=args.query)
+            return my_open_bugs_raw(
+                config,
+                project_key=args.project,
+                query=args.query,
+                limit=args.limit,
+                offset=args.offset,
+                sort=args.sort,
+                order=args.order,
+            )
         if action == "context":
             return get_bug_context(config, args.issue_key)
         if action == "rules":
@@ -248,7 +267,15 @@ def run_handler(config, args):
     if group == "project":
         return run_project(config, args)
     if group == "story":
-        return my_story_task_overview(config, project_key=args.project, query=args.query)
+        return my_story_task_overview(
+            config,
+            project_key=args.project,
+            query=args.query,
+            limit=args.limit,
+            offset=args.offset,
+            sort=args.sort,
+            order=args.order,
+        )
     return None
 
 

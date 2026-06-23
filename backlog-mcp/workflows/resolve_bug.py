@@ -59,7 +59,7 @@ def merge_resolve_defaults(config, project_key):
     return merged
 
 
-def my_open_bugs(config, project_key=None, query=None):
+def my_open_bugs(config, project_key=None, query=None, limit=100, offset=0, sort=None, order=None):
     project_key = resolve_project_key(config, project_key)
     workflow = merge_resolve_defaults(config, project_key)
     project = resolve_project(config, project_key)
@@ -67,7 +67,15 @@ def my_open_bugs(config, project_key=None, query=None):
     issue_type = require_value(workflow, "issue_type", "resolve_bug")
     excluded_statuses = set(require_list(workflow, "excluded_statuses", "resolve_bug"))
     client = BacklogClient(config)
-    issues = client.get_issues(client.get_project_id(project), query=query, assignee_id=assignee_id)
+    issues = client.get_issues(
+        client.get_project_id(project),
+        query=query,
+        assignee_id=assignee_id,
+        count=limit,
+        offset=offset,
+        sort=sort,
+        order=order,
+    )
     return [
         bug_context(issue)
         for issue in issues
@@ -75,7 +83,7 @@ def my_open_bugs(config, project_key=None, query=None):
     ]
 
 
-def my_open_bugs_raw(config, project_key=None, query=None):
+def my_open_bugs_raw(config, project_key=None, query=None, limit=100, offset=0, sort=None, order=None):
     """Like my_open_bugs but returns raw API issues (for compact_issue presenter)."""
     project_key = resolve_project_key(config, project_key)
     workflow = merge_resolve_defaults(config, project_key)
@@ -84,7 +92,15 @@ def my_open_bugs_raw(config, project_key=None, query=None):
     issue_type = require_value(workflow, "issue_type", "resolve_bug")
     excluded_statuses = set(require_list(workflow, "excluded_statuses", "resolve_bug"))
     client = BacklogClient(config)
-    issues = client.get_issues(client.get_project_id(project), query=query, assignee_id=assignee_id)
+    issues = client.get_issues(
+        client.get_project_id(project),
+        query=query,
+        assignee_id=assignee_id,
+        count=limit,
+        offset=offset,
+        sort=sort,
+        order=order,
+    )
     return [
         issue
         for issue in issues

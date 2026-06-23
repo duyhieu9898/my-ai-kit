@@ -75,6 +75,7 @@ class BacklogClientTest(unittest.TestCase):
             params={
                 "projectId[]": [82531],
                 "count": 100,
+                "offset": 0,
                 "keyword": "bug",
                 "assigneeId[]": [778617],
             },

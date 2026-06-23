@@ -65,7 +65,16 @@ def summarize_story_task(issue, today):
     }
 
 
-def my_story_task_overview(config, project_key=None, query=None, today=None):
+def my_story_task_overview(
+    config,
+    project_key=None,
+    query=None,
+    today=None,
+    limit=100,
+    offset=0,
+    sort=None,
+    order=None,
+):
     workflow = load_workflow_config("story_task_overview")
     project = resolve_project(config, project_key)
     assignee_id = resolve_user_id(config, require_value(workflow, "assignee", "story_task_overview"))
@@ -75,7 +84,15 @@ def my_story_task_overview(config, project_key=None, query=None, today=None):
     today = today or date.today()
 
     client = BacklogClient(config)
-    issues = client.get_issues(client.get_project_id(project), query=query, assignee_id=assignee_id)
+    issues = client.get_issues(
+        client.get_project_id(project),
+        query=query,
+        assignee_id=assignee_id,
+        count=limit,
+        offset=offset,
+        sort=sort,
+        order=order,
+    )
     return [
         {
             field: summary.get(field)

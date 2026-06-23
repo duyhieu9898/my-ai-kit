@@ -43,7 +43,18 @@ def get_issue(config, issue_id):
     return BacklogClient(config).get_issue(issue_id)
 
 
-def get_issues(config, project_key=None, query=None, assignee_id=None, open_only=False, issue_types=None):
+def get_issues(
+    config,
+    project_key=None,
+    query=None,
+    assignee_id=None,
+    open_only=False,
+    issue_types=None,
+    limit=100,
+    offset=0,
+    sort=None,
+    order=None,
+):
     """List issues with optional filters.
 
     open_only: exclude Closed status via API filter.
@@ -64,6 +75,7 @@ def get_issues(config, project_key=None, query=None, assignee_id=None, open_only
     return client.get_issues(
         project_id, query=query, assignee_id=assignee_id,
         status_ids=status_ids, issue_type_ids=issue_type_ids,
+        count=limit, offset=offset, sort=sort, order=order,
     )
 
 

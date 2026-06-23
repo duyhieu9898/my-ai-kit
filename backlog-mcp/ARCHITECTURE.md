@@ -77,7 +77,7 @@ Because this server operates locally on a developer's workstation with mutation 
 
 > [!IMPORTANT]
 > **Dry Run Heuristic**
-> All tools modifying state (`add_issue`, `update_issue`, `resolve_bug`, `add_ut_bug`) run in **dry-run mode by default**. They build and return the payload that would be sent. Mutations are only submitted to the Backlog API if `apply=true` is explicitly passed.
+> All tools modifying state (`create_issue`, `update_issue`, `resolve_bug`, `create_ut_bug`) run in **preview mode by default**. They build and return the payload that would be sent. Mutations are only submitted to the Backlog API if `mode="apply"` is explicitly passed.
 
 > [!WARNING]
 > **Credential Protection**
