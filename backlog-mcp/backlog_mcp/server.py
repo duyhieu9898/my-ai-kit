@@ -23,30 +23,7 @@ SERVER_INSTRUCTIONS = (
 IssueView = Literal["compact", "story"]
 MutationMode = Literal["preview", "apply"]
 SortOrder = Literal["asc", "desc"]
-SortOrderOrDefault = Literal["asc", "desc", ""]
 IssueSort = Literal[
-    "issueType",
-    "category",
-    "version",
-    "milestone",
-    "summary",
-    "status",
-    "priority",
-    "attachment",
-    "sharedFile",
-    "created",
-    "createdUser",
-    "updated",
-    "updatedUser",
-    "assignee",
-    "startDate",
-    "dueDate",
-    "estimatedHours",
-    "actualHours",
-    "childIssue",
-]
-IssueSortOrDefault = Literal[
-    "",
     "issueType",
     "category",
     "version",
@@ -306,8 +283,18 @@ def get_issues(
     view: Annotated[IssueView, Field(description="Structured presentation: compact for general triage, story for deadline fields.")] = "compact",
     limit: Annotated[int, Field(description="Maximum issues to return, from 1 to 100.", ge=1, le=100)] = 50,
     offset: Annotated[int, Field(description="Zero-based issue offset for pagination.", ge=0)] = 0,
-    sort: Annotated[IssueSortOrDefault, Field(description="Backlog issue sort field, e.g. updated, dueDate, priority. Omit for Backlog default ordering.")] = "",
-    order: Annotated[SortOrderOrDefault, Field(description="Sort order: asc or desc. Omit for Backlog default ordering.")] = "",
+    sort: Annotated[
+    IssueSort | None,
+    Field(
+        description="Backlog issue sort field, e.g. updated, dueDate, priority. Omit for Backlog default ordering."
+    ),
+] = None,
+    order: Annotated[
+    SortOrder | None,
+    Field(
+        description="Sort order: asc or desc. Omit for Backlog default ordering."
+    ),
+] = None,
     fields: Annotated[tuple[str, ...], Field(description="Optional response fields for each issue in structured data. Omit for the default compact fields.")] = (),
     full: Annotated[bool, Field(description="Set true only when compact issue fields are insufficient and raw Backlog fields are needed.")] = False,
 ) -> CallToolResult:
@@ -445,8 +432,18 @@ def get_my_open_bugs(
     query: Annotated[str, Field(description="Search keyword for bug summary or description. Omit or pass an empty string for no keyword filter.")] = "",
     limit: Annotated[int, Field(description="Maximum bugs to return, from 1 to 100.", ge=1, le=100)] = 50,
     offset: Annotated[int, Field(description="Zero-based issue offset for pagination.", ge=0)] = 0,
-    sort: Annotated[IssueSortOrDefault, Field(description="Backlog issue sort field, e.g. updated, dueDate, priority. Omit for Backlog default ordering.")] = "",
-    order: Annotated[SortOrderOrDefault, Field(description="Sort order: asc or desc. Omit for Backlog default ordering.")] = "",
+    sort: Annotated[
+    IssueSort | None,
+    Field(
+        description="Backlog issue sort field, e.g. updated, dueDate, priority. Omit for Backlog default ordering."
+    ),
+] = None,
+    order: Annotated[
+    SortOrder | None,
+    Field(
+        description="Sort order: asc or desc. Omit for Backlog default ordering."
+    ),
+] = None,
     fields: Annotated[tuple[str, ...], Field(description="Optional response fields for each bug in structured data. Omit for the default compact fields.")] = (),
     full: Annotated[bool, Field(description="Set true only when compact bug fields are insufficient and raw Backlog fields are needed.")] = False,
 ) -> CallToolResult:
@@ -572,8 +569,18 @@ def get_story_overview(
     query: Annotated[str, Field(description="Search keyword for story/task summary or description. Omit or pass an empty string for no keyword filter.")] = "",
     limit: Annotated[int, Field(description="Maximum stories/tasks to return, from 1 to 100.", ge=1, le=100)] = 50,
     offset: Annotated[int, Field(description="Zero-based issue offset for pagination.", ge=0)] = 0,
-    sort: Annotated[IssueSortOrDefault, Field(description="Backlog issue sort field, e.g. dueDate, updated, priority. Omit for Backlog default ordering.")] = "",
-    order: Annotated[SortOrderOrDefault, Field(description="Sort order: asc or desc. Omit for Backlog default ordering.")] = "",
+    sort: Annotated[
+    IssueSort | None,
+    Field(
+        description="Backlog issue sort field, e.g. updated, dueDate, priority. Omit for Backlog default ordering."
+    ),
+] = None,
+    order: Annotated[
+    SortOrder | None,
+    Field(
+        description="Sort order: asc or desc. Omit for Backlog default ordering."
+    ),
+] = None,
     fields: Annotated[tuple[str, ...], Field(description="Optional response fields for each story/task in structured data. Omit for workflow default fields.")] = (),
 ) -> CallToolResult:
     """Get Story and Task deadlines assigned to the configured user.
