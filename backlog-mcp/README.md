@@ -80,6 +80,17 @@ backlog-mcp/
 
 Historical logs from removed skill copies are retained under `logs/legacy/`.
 
+## Running from other directories
+
+To run the CLI when standing in another workspace directory (to keep the path context for project resolution):
+```bash
+# Correct (preserves CWD):
+uv --project /path/to/backlog-mcp run backlog-cli bug list
+
+# Incorrect (loses CWD context):
+uv --directory /path/to/backlog-mcp run backlog-cli bug list
+```
+
 ## Development
 
 ```bash

@@ -9,6 +9,7 @@ Run all commands from the skill directory with `python3 scripts/backlog.py`.
 - Treat write commands as dry runs until `--apply` is supplied.
 - Read errors from stderr.
 - Use `--project KEY` to override workspace project key resolution for one command.
+- When executing the CLI from a different workspace directory, use `uv --project /path/to/backlog-mcp run backlog-cli` instead of `--directory` to preserve the active working directory (CWD) context for path-based project resolution.
 
 ## Config And Project Metadata
 
