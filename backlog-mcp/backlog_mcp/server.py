@@ -74,12 +74,38 @@ def _append_list_controls(
     *,
     limit: int,
     offset: int,
-    sort: str,
-    order: str,
+    sort: str | None,
+    order: str | None,
 ) -> None:
     args.extend(("--limit", str(limit), "--offset", str(offset)))
     _append(args, "--sort", sort)
     _append(args, "--order", order)
+
+
+def _build_issue_list_args(
+    *,
+    command: list[str],
+    project: str,
+    query: str,
+    limit: int,
+    offset: int,
+    sort: IssueSort | None,
+    order: SortOrder | None,
+) -> list[str]:
+    args = command.copy()
+
+    _append_list_controls(
+        args,
+        limit=limit,
+        offset=offset,
+        sort=sort,
+        order=order,
+    )
+
+    _append(args, "--project", project)
+    _append(args, "--query", query)
+
+    return args
 
 
 def _to_markdown(data: Any) -> str:
@@ -303,10 +329,15 @@ def get_issues(
     Use when you need a paginated, filterable issue search across types.
     Do not use when the user asks specifically for open personal bugs; use get_my_open_bugs.
     """
-    args = ["issue", "list"]
-    _append_list_controls(args, limit=limit, offset=offset, sort=sort, order=order)
-    _append(args, "--project", project)
-    _append(args, "--query", query)
+    args = _build_issue_list_args(
+        command=["issue", "list"],
+        project=project,
+        query=query,
+        limit=limit,
+        offset=offset,
+        sort=sort,
+        order=order,
+    )
     _append_many(args, "--type", issue_types)
     _append(args, "--view", view)
     if include_closed:
@@ -336,6 +367,41 @@ def _append_issue_fields(
     _append(args, "--estimated-hours", estimated_hours)
     _append(args, "--actual-hours", actual_hours)
     _append_custom_fields(args, custom_fields)
+
+
+def _build_issue_update_args(
+    command: list[str],
+    issue_id: str,
+    *,
+    project: str = "",
+    description: str = "",
+    priority: str = "",
+    assignee: str = "",
+    category: str = "",
+    start_date: str = "",
+    due_date: str = "",
+    estimated_hours: float | None = None,
+    actual_hours: float | None = None,
+    custom_fields: dict[str, str] | None = None,
+) -> list[str]:
+    args = command + [issue_id]
+
+    _append(args, "--project", project)
+
+    _append_issue_fields(
+        args,
+        description=description,
+        priority=priority,
+        assignee=assignee,
+        category=category,
+        start_date=start_date,
+        due_date=due_date,
+        estimated_hours=estimated_hours,
+        actual_hours=actual_hours,
+        custom_fields=custom_fields,
+    )
+
+    return args
 
 
 @mcp.tool()
@@ -404,13 +470,10 @@ def update_issue(
     Use when the user asks to change fields on an existing issue.
     Do not use when the user asks to complete the bug resolution workflow; use resolve_bug.
     """
-    args = ["issue", "update", issue_id]
-    _append(args, "--project", project)
-    _append(args, "--summary", summary)
-    _append(args, "--status", status)
-    _append(args, "--comment", comment)
-    _append_issue_fields(
-        args,
+    args = _build_issue_update_args(
+        ["issue", "update"],
+        issue_id,
+        project=project,
         description=description,
         priority=priority,
         assignee=assignee,
@@ -421,6 +484,9 @@ def update_issue(
         actual_hours=actual_hours,
         custom_fields=custom_fields,
     )
+    _append(args, "--summary", summary)
+    _append(args, "--status", status)
+    _append(args, "--comment", comment)
     if mode == "apply":
         args.append("--apply")
     return _invoke(args)
@@ -452,10 +518,15 @@ def get_my_open_bugs(
     Use when the user asks for their current open bugs or bug triage queue.
     Do not use for generic issue search across issue types; use get_issues.
     """
-    args = ["bug", "list"]
-    _append_list_controls(args, limit=limit, offset=offset, sort=sort, order=order)
-    _append(args, "--project", project)
-    _append(args, "--query", query)
+    args = _build_issue_list_args(
+        command=["bug", "list"],
+        project=project,
+        query=query,
+        limit=limit,
+        offset=offset,
+        sort=sort,
+        order=order,
+    )
     return _invoke(args, list_key="bugs", full=full, fields=fields, limit=limit, offset=offset, paginated=True)
 
 
@@ -588,10 +659,15 @@ def get_story_overview(
     Use when the user asks for assigned stories/tasks, due dates, or project status.
     Do not use for generic issue search or bug triage; use get_issues or get_my_open_bugs.
     """
-    args = ["story", "overview"]
-    _append_list_controls(args, limit=limit, offset=offset, sort=sort, order=order)
-    _append(args, "--project", project)
-    _append(args, "--query", query)
+    args = _build_issue_list_args(
+        command=["story", "overview"],
+        project=project,
+        query=query,
+        limit=limit,
+        offset=offset,
+        sort=sort,
+        order=order,
+    )
     return _invoke(args, list_key="stories", fields=fields, limit=limit, offset=offset, paginated=True)
 
 
