@@ -814,13 +814,14 @@ def create_ut_bug_prompt(
 
 @mcp.prompt()
 def project_status_prompt(
-    project: Annotated[str, Field(description="Project key. Omit or pass an empty string to resolve from the active workspace path or configuration.")] = ""
+    project: Annotated[str, Field(description="Project key. Omit only when the active workspace can resolve the project unambiguously; otherwise the tool should return an error.")] = ""
 ) -> str:
     """Guide the agent to check the current project status overview."""
     proj_desc = f"project '{project}'" if project else "the active workspace"
     return (
         f"Please check and summarize the current status of {proj_desc}.\n\n"
         f"Steps to take:\n"
+        f"0. If the project is omitted and cannot be resolved unambiguously, stop and report the ambiguity instead of guessing.\n"
         f"1. Retrieve story and task deadlines using `get_my_work_overview`.\n"
         f"2. List open bugs assigned to me using `get_my_open_bugs`.\n"
         f"3. Present a clear, consolidated status report highlighting any overdue deadlines or critical bugs."
