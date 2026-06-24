@@ -149,6 +149,8 @@ def test_tool_schema_exposes_enums_and_use_when_descriptions():
     assert get_issues.inputSchema["properties"]["cursor"]["type"] == "string"
     assert "mode" not in create_issue.inputSchema["properties"]
     assert "workspace_path" not in create_issue.inputSchema["properties"]
+    assert "parent" not in create_issue.inputSchema["properties"]
+    assert "parent_key" in create_issue.inputSchema["properties"]
     assert create_issue.inputSchema["properties"]["project_key"]["default"] == ""
     assert "issue_type" in create_issue.inputSchema.get("required", [])
 

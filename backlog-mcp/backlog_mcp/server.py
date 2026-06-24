@@ -471,7 +471,7 @@ def create_issue(
     summary: Annotated[str, Field(description="Issue summary title")],
     issue_type: Annotated[str, Field(description="Issue type name or ID (e.g., 'Bug', 'Task', 'Story'). Required by Backlog for creation.")],
     project_key: Annotated[str, Field(description="Project key (e.g., 'PRJ'). Omit or pass an empty string to resolve from the active workspace path or configuration.")] = "",
-    parent: Annotated[str, Field(description="Parent issue key (e.g., 'PRJ-123'). Omit or pass an empty string for no parent.")] = "",
+    parent_key: Annotated[str, Field(description="Parent issue key (e.g., 'PRJ-123'). Omit or pass an empty string for no parent.")] = "",
     description: Annotated[str, Field(description="Issue description detail text. Omit or pass an empty string for no description.")] = "",
     priority: Annotated[str, Field(description="Priority name or ID (e.g., 'High', 'Normal', 'Low'). Omit for project default.")] = "",
     assignee: Annotated[str, Field(description="Assignee user reference from config.users or raw user ID. Omit for project default.")] = "",
@@ -490,7 +490,7 @@ def create_issue(
     args = ["issue", "create", summary]
     _append(args, "--project", project_key)
     _append(args, "--issue-type", issue_type)
-    _append(args, "--parent", parent)
+    _append(args, "--parent", parent_key)
     _append_issue_fields(
         args,
         description=description,
