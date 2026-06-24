@@ -789,7 +789,8 @@ def resolve_bug_prompt(
         f"1. Fetch the bug context using `get_bug_context` for {issue_key}.\n"
         f"2. Fetch the resolve-bug rules using `get_bug_rules` for the project.\n"
         f"3. Retrieve guidelines for any required guided fields using `get_bug_fields`.\n"
-        f"4. Once the details and required field values are confirmed, execute `resolve_bug` to transition the bug in Backlog."
+        f"4. Summarize the required values and ask for confirmation if any value is inferred or missing.\n"
+        f"5. Execute `resolve_bug` only after the user explicitly confirms the final values or has clearly requested resolution."
     )
 
 
