@@ -187,4 +187,32 @@ def test_to_markdown_formatting():
     assert "[Closed]" in res_single
 
 
+def test_issue_compact_model_validation_and_normalization():
+    # Test that _normalize_data correctly cleans and validates fields based on IssueCompact
+    raw_data = {
+        "issueKey": "PROJ-123",
+        "summary": "Fix validation error",
+        "description": "Details here",
+        "issueType": "Bug",
+        "status": "Open",
+        "assignee": "Test User",
+        "priority": "High",
+        "startDate": None, # Should be excluded since it is None and we model_dump(exclude_none=True)
+        "extraFieldToIgnore": "should_be_stripped", # Not in IssueCompact, should be ignored
+        "customFields": [{"name": "QC", "value": "Unit Test"}]
+    }
+
+    normalized = server._normalize_data(raw_data, ["issue", "get", "PROJ-123"])
+    assert normalized["issueKey"] == "PROJ-123"
+    assert normalized["summary"] == "Fix validation error"
+    assert normalized["description"] == "Details here"
+    assert normalized["issueType"] == "Bug"
+    assert normalized["status"] == "Open"
+    assert normalized["assignee"] == "Test User"
+    assert normalized["priority"] == "High"
+    assert "startDate" not in normalized
+    assert "extraFieldToIgnore" not in normalized
+    assert normalized["customFields"] == [{"name": "QC", "value": "Unit Test"}]
+
+
 

@@ -27,6 +27,9 @@ class IssueCompact(BaseModel):
     actualHours: float | None = None
     resourceUri: str | None = None
     url: str | None = None
+    daysUntilDue: int | None = None
+    dueAlertLevel: int | None = None
+    customFields: list[dict[str, Any]] | None = None
 
 
 class PaginationInfo(BaseModel):
@@ -229,6 +232,36 @@ def _parse_cursor(cursor: str) -> int:
         raise ValueError(f"Invalid cursor format: '{cursor}'. Cursor must be a non-negative integer string representing the offset (e.g., '50').")
 
 
+def _normalize_data(data: Any, args: list[str]) -> Any:
+    if not data:
+        return data
+    group = args[0] if len(args) > 0 else ""
+    action = args[1] if len(args) > 1 else ""
+    
+    if group in ("issue", "bug", "story"):
+        # Skip bug sub-commands that return rule configs or context
+        if group == "bug" and action in ("context", "rules", "fields"):
+            return data
+            
+        if isinstance(data, list):
+            normalized = []
+            for item in data:
+                if isinstance(item, dict):
+                    try:
+                        normalized.append(IssueCompact.model_validate(item).model_dump(exclude_none=True))
+                    except Exception:
+                        normalized.append(item)
+                else:
+                    normalized.append(item)
+            return normalized
+        elif isinstance(data, dict):
+            try:
+                return IssueCompact.model_validate(data).model_dump(exclude_none=True)
+            except Exception:
+                return data
+    return data
+
+
 def _resource_uris(data: Any) -> list[str]:
     items = data if isinstance(data, list) else [data]
     uris = []
@@ -287,6 +320,10 @@ def _invoke(
     except Exception as error:
         return _error_result(args, error)
     data = res.data
+    
+    if not full:
+        data = _normalize_data(data, args)
+        
     text = _to_markdown(data, args)
 
     structured = _envelope(
