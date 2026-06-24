@@ -335,7 +335,6 @@ def get_issues(
     query: Annotated[str, Field(description="Search keyword for issue summary or description. Omit or pass an empty string for no keyword filter.")] = "",
     issue_types: Annotated[tuple[str, ...], Field(description="Issue type names to include, e.g. ('Bug', 'Story'). Omit for all issue types.")] = (),
     include_closed: Annotated[bool, Field(description="Set true to include Closed issues; false returns open issues only.")] = False,
-    view: Annotated[IssueView, Field(description="Detail level of returned issues: compact or full.")] = "compact",
     limit: Annotated[int, Field(description="Maximum issues to return, from 1 to 100.", ge=1, le=100)] = 50,
     cursor: Annotated[str, Field(description="Opaque cursor for pagination. Omit or pass an empty string to start from the beginning.")] = "",
     sort: Annotated[
@@ -367,8 +366,6 @@ def get_issues(
         except ValueError:
             offset = 0
 
-    full = (view == "full")
-    cli_view = "compact" if view == "full" else view
     args = _build_issue_list_args(
         command=["issue", "list"],
         project=project_key,
@@ -379,10 +376,10 @@ def get_issues(
         order=order,
     )
     _append_many(args, "--type", issue_types)
-    _append(args, "--view", cli_view)
+    _append(args, "--view", "compact")
     if include_closed:
         args.append("--all")
-    return _invoke(args, list_key="issues", full=full, fields=fields, limit=limit, offset=offset, paginated=True, workspace_path=workspace_path)
+    return _invoke(args, list_key="issues", full=False, fields=fields, limit=limit, offset=offset, paginated=True, workspace_path=workspace_path)
 
 
 def _append_issue_fields(
@@ -553,7 +550,6 @@ def get_my_open_bugs(
     ),
 ] = None,
     fields: Annotated[tuple[str, ...], Field(description="Optional response fields for each bug in structured data. Omit for the default compact fields.")] = (),
-    view: Annotated[Literal["compact", "full"], Field(description="Detail level: compact for general triage, full for raw Backlog fields.")] = "compact",
     workspace_path: Annotated[str, Field(description="Local workspace path of the project. Omit or pass empty to resolve from the current directory context.")] = "",
 ) -> CallToolResult:
     """List open bugs assigned to the configured user in one project.
@@ -570,7 +566,6 @@ def get_my_open_bugs(
         except ValueError:
             offset = 0
 
-    full = (view == "full")
     args = _build_issue_list_args(
         command=["bug", "list"],
         project=project_key,
@@ -580,7 +575,7 @@ def get_my_open_bugs(
         sort=sort,
         order=order,
     )
-    return _invoke(args, list_key="bugs", full=full, fields=fields, limit=limit, offset=offset, paginated=True, workspace_path=workspace_path)
+    return _invoke(args, list_key="bugs", full=False, fields=fields, limit=limit, offset=offset, paginated=True, workspace_path=workspace_path)
 
 
 @mcp.tool()
