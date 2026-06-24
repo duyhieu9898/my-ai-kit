@@ -66,7 +66,6 @@ def test_get_issues_maps_pagination_sort_and_field_selection():
             cursor="50",
             sort="updated",
             order="desc",
-            fields=("issueKey", "summary"),
         )
 
     assert result == expected_result
@@ -83,7 +82,6 @@ def test_get_issues_maps_pagination_sort_and_field_selection():
         "--type", "Bug",
         "--view", "compact",
     ]
-    assert kwargs["fields"] == ("issueKey", "summary")
     assert kwargs["paginated"] is True
 
 
@@ -96,7 +94,6 @@ def test_invoke_returns_stable_success_envelope_with_pagination():
         result = server._invoke(
             ["issue", "list", "--limit", "1", "--offset", "0"],
             list_key="issues",
-            fields=("issueKey", "summary"),
             limit=1,
             offset=0,
             paginated=True,
@@ -105,7 +102,7 @@ def test_invoke_returns_stable_success_envelope_with_pagination():
     assert result.isError is False
     assert result.structuredContent == {
         "ok": True,
-        "data": {"issues": [{"issueKey": "AQM-1", "summary": "Fix it"}]},
+        "data": {"issues": [{"issueKey": "AQM-1", "summary": "Fix it", "status": "Open"}]},
         "pagination": {
             "limit": 1,
             "nextCursor": "1",

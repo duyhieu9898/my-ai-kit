@@ -200,16 +200,6 @@ def _to_markdown(data: Any, args: Sequence[str]) -> str:
     return str(data)
 
 
-def _select_fields(data: Any, fields: Sequence[str]) -> Any:
-    if not fields:
-        return data
-    if isinstance(data, list):
-        return [_select_fields(item, fields) for item in data]
-    if isinstance(data, dict):
-        return {field: data.get(field) for field in fields}
-    return data
-
-
 def _item_count(data: Any) -> int:
     if isinstance(data, list):
         return len(data)
@@ -244,14 +234,12 @@ def _envelope(
     ok: bool,
     data: Any,
     list_key: str | None,
-    fields: Sequence[str],
     limit: int,
     offset: int,
     paginated: bool,
 ) -> dict[str, Any]:
-    selected_data = _select_fields(data, fields)
-    result_data = {list_key or "items": selected_data} if isinstance(selected_data, list) else selected_data
-    returned = _item_count(selected_data)
+    result_data = {list_key or "items": data} if isinstance(data, list) else data
+    returned = _item_count(data)
     
     envelope_data = {
         "ok": ok,
@@ -275,7 +263,6 @@ def _invoke(
     args: list[str],
     list_key: str | None = None,
     full: bool = False,
-    fields: Sequence[str] = (),
     limit: int = 0,
     offset: int = 0,
     paginated: bool = False,
@@ -291,18 +278,16 @@ def _invoke(
     data = res.data
     text = _to_markdown(data, args)
 
-    selected_data = _select_fields(data, fields)
     structured = _envelope(
         ok=True,
         data=data,
         list_key=list_key,
-        fields=fields,
         limit=limit,
         offset=offset,
         paginated=paginated,
     )
     
-    uris = _resource_uris(selected_data)
+    uris = _resource_uris(data)
 
     return CallToolResult(
         content=[TextContent(type="text", text=text)],
@@ -316,7 +301,6 @@ def _invoke(
 @mcp.tool()
 def get_issue(
     issue_id: Annotated[str, Field(description="Issue key (e.g., 'PROJ-123') or numeric ID")],
-    fields: Annotated[tuple[str, ...], Field(description="Optional response fields to include in structured data. Omit for the default compact issue fields.")] = (),
     view: Annotated[Literal["compact", "full"], Field(description="Detail level: compact for general triage, full for raw Backlog fields.")] = "compact",
     workspace_path: Annotated[str, Field(description="Local workspace path of the project. Omit or pass empty to resolve from the current directory context.")] = "",
 ) -> CallToolResult:
@@ -326,7 +310,7 @@ def get_issue(
     Do not use when you need to discover multiple issues; use get_issues instead.
     """
     full = (view == "full")
-    return _invoke(["issue", "get", issue_id], full=full, fields=fields, workspace_path=workspace_path)
+    return _invoke(["issue", "get", issue_id], full=full, workspace_path=workspace_path)
 
 
 @mcp.tool()
@@ -349,7 +333,6 @@ def get_issues(
         description="Sort order: asc or desc. Omit for Backlog default ordering."
     ),
 ] = None,
-    fields: Annotated[tuple[str, ...], Field(description="Optional response fields for each issue in structured data. Omit for the default compact fields.")] = (),
     workspace_path: Annotated[str, Field(description="Local workspace path of the project. Omit or pass empty to resolve from the current directory context.")] = "",
 ) -> CallToolResult:
     """List issues assigned to the configured user in one project.
@@ -379,7 +362,7 @@ def get_issues(
     _append(args, "--view", "compact")
     if include_closed:
         args.append("--all")
-    return _invoke(args, list_key="issues", full=False, fields=fields, limit=limit, offset=offset, paginated=True, workspace_path=workspace_path)
+    return _invoke(args, list_key="issues", full=False, limit=limit, offset=offset, paginated=True, workspace_path=workspace_path)
 
 
 def _append_issue_fields(
@@ -549,7 +532,6 @@ def get_my_open_bugs(
         description="Sort order: asc or desc. Omit for Backlog default ordering."
     ),
 ] = None,
-    fields: Annotated[tuple[str, ...], Field(description="Optional response fields for each bug in structured data. Omit for the default compact fields.")] = (),
     workspace_path: Annotated[str, Field(description="Local workspace path of the project. Omit or pass empty to resolve from the current directory context.")] = "",
 ) -> CallToolResult:
     """List open bugs assigned to the configured user in one project.
@@ -575,7 +557,7 @@ def get_my_open_bugs(
         sort=sort,
         order=order,
     )
-    return _invoke(args, list_key="bugs", full=False, fields=fields, limit=limit, offset=offset, paginated=True, workspace_path=workspace_path)
+    return _invoke(args, list_key="bugs", full=False, limit=limit, offset=offset, paginated=True, workspace_path=workspace_path)
 
 
 @mcp.tool()
@@ -705,7 +687,6 @@ def get_story_overview(
         description="Sort order: asc or desc. Omit for Backlog default ordering."
     ),
 ] = None,
-    fields: Annotated[tuple[str, ...], Field(description="Optional response fields for each story/task in structured data. Omit for workflow default fields.")] = (),
     workspace_path: Annotated[str, Field(description="Local workspace path of the project. Omit or pass empty to resolve from the current directory context.")] = "",
 ) -> CallToolResult:
     """Get Story and Task deadlines assigned to the configured user.
@@ -731,7 +712,7 @@ def get_story_overview(
         sort=sort,
         order=order,
     )
-    return _invoke(args, list_key="stories", fields=fields, limit=limit, offset=offset, paginated=True, workspace_path=workspace_path)
+    return _invoke(args, list_key="stories", limit=limit, offset=offset, paginated=True, workspace_path=workspace_path)
 
 
 @mcp.tool()
