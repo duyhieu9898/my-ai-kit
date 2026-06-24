@@ -69,7 +69,7 @@ class GetStoriesResponse(BaseModel):
     pagination: PaginationInfo
 
 
-IssueView = Literal["compact", "story", "full"]
+IssueView = Literal["compact", "full"]
 MutationMode = Literal["preview", "apply"]
 SortOrder = Literal["asc", "desc"]
 IssueSort = Literal[
@@ -319,7 +319,7 @@ def get_issue(
     fields: Annotated[tuple[str, ...], Field(description="Optional response fields to include in structured data. Omit for the default compact issue fields.")] = (),
     view: Annotated[Literal["compact", "full"], Field(description="Detail level: compact for general triage, full for raw Backlog fields.")] = "compact",
     workspace_path: Annotated[str, Field(description="Local workspace path of the project. Omit or pass empty to resolve from the current directory context.")] = "",
-) -> Annotated[CallToolResult, GetIssueResponse]:
+) -> CallToolResult:
     """Get one Backlog issue by key or numeric ID.
 
     Use when the user names a specific Backlog issue and you need its current details.
@@ -335,7 +335,7 @@ def get_issues(
     query: Annotated[str, Field(description="Search keyword for issue summary or description. Omit or pass an empty string for no keyword filter.")] = "",
     issue_types: Annotated[tuple[str, ...], Field(description="Issue type names to include, e.g. ('Bug', 'Story'). Omit for all issue types.")] = (),
     include_closed: Annotated[bool, Field(description="Set true to include Closed issues; false returns open issues only.")] = False,
-    view: Annotated[IssueView, Field(description="Detail level of returned issues: compact, story, or full.")] = "compact",
+    view: Annotated[IssueView, Field(description="Detail level of returned issues: compact or full.")] = "compact",
     limit: Annotated[int, Field(description="Maximum issues to return, from 1 to 100.", ge=1, le=100)] = 50,
     cursor: Annotated[str, Field(description="Opaque cursor for pagination. Omit or pass an empty string to start from the beginning.")] = "",
     sort: Annotated[
@@ -352,7 +352,7 @@ def get_issues(
 ] = None,
     fields: Annotated[tuple[str, ...], Field(description="Optional response fields for each issue in structured data. Omit for the default compact fields.")] = (),
     workspace_path: Annotated[str, Field(description="Local workspace path of the project. Omit or pass empty to resolve from the current directory context.")] = "",
-) -> Annotated[CallToolResult, GetIssuesResponse]:
+) -> CallToolResult:
     """List issues assigned to the configured user in one project.
 
     Use when you need a paginated, filterable issue search across types.
@@ -461,7 +461,7 @@ def create_issue(
     custom_fields: Annotated[dict[str, str], Field(description="Custom field values keyed by configured custom field key, e.g. {'qc_activity':'Unit Test'}.")] = {},
     mode: Annotated[MutationMode, Field(description="preview returns a dry-run payload; apply writes the issue to Backlog.")] = "preview",
     workspace_path: Annotated[str, Field(description="Local workspace path of the project. Omit or pass empty to resolve from the current directory context.")] = "",
-) -> Annotated[CallToolResult, GetIssueResponse]:
+) -> CallToolResult:
     """Create or preview creation of a Backlog issue.
 
     Use when the user asks to create a generic Backlog issue and has supplied the issue type.
@@ -506,7 +506,7 @@ def update_issue(
     custom_fields: Annotated[dict[str, str], Field(description="Custom field updates keyed by configured custom field key.")] = {},
     mode: Annotated[MutationMode, Field(description="preview returns a dry-run payload; apply writes the update to Backlog.")] = "preview",
     workspace_path: Annotated[str, Field(description="Local workspace path of the project. Omit or pass empty to resolve from the current directory context.")] = "",
-) -> Annotated[CallToolResult, GetIssueResponse]:
+) -> CallToolResult:
     """Update or preview update of a Backlog issue.
 
     Use when the user asks to change fields on an existing issue.
@@ -555,7 +555,7 @@ def get_my_open_bugs(
     fields: Annotated[tuple[str, ...], Field(description="Optional response fields for each bug in structured data. Omit for the default compact fields.")] = (),
     view: Annotated[Literal["compact", "full"], Field(description="Detail level: compact for general triage, full for raw Backlog fields.")] = "compact",
     workspace_path: Annotated[str, Field(description="Local workspace path of the project. Omit or pass empty to resolve from the current directory context.")] = "",
-) -> Annotated[CallToolResult, GetBugsResponse]:
+) -> CallToolResult:
     """List open bugs assigned to the configured user in one project.
 
     Use when the user asks for their current open bugs or bug triage queue.
@@ -612,7 +612,7 @@ def resolve_bug(
     fix_description: Annotated[str, Field(description="Corrective action or fix description text.")] = "",
     mode: Annotated[MutationMode, Field(description="preview returns a dry-run payload; apply transitions the bug in Backlog.")] = "preview",
     workspace_path: Annotated[str, Field(description="Local workspace path of the project. Omit or pass empty to resolve from the current directory context.")] = "",
-) -> Annotated[CallToolResult, GetIssueResponse]:
+) -> CallToolResult:
     """Resolve or preview resolution of a bug with workflow defaults.
 
     Use when the user asks to resolve/close a bug and wants project workflow fields filled.
@@ -646,7 +646,7 @@ def create_ut_bug(
     project_key: Annotated[str, Field(description="Project key (e.g., 'PRJ'). Omit or pass an empty string to resolve from the active workspace path or configuration.")] = "",
     mode: Annotated[MutationMode, Field(description="preview returns a dry-run payload; apply creates the Unit Test bug in Backlog.")] = "preview",
     workspace_path: Annotated[str, Field(description="Local workspace path of the project. Omit or pass empty to resolve from the current directory context.")] = "",
-) -> Annotated[CallToolResult, GetIssueResponse]:
+) -> CallToolResult:
     """Create or preview a Unit Test sub-task bug under a parent issue.
 
     Use when the user asks to create a UT bug with the configured workflow defaults.
@@ -712,7 +712,7 @@ def get_story_overview(
 ] = None,
     fields: Annotated[tuple[str, ...], Field(description="Optional response fields for each story/task in structured data. Omit for workflow default fields.")] = (),
     workspace_path: Annotated[str, Field(description="Local workspace path of the project. Omit or pass empty to resolve from the current directory context.")] = "",
-) -> Annotated[CallToolResult, GetStoriesResponse]:
+) -> CallToolResult:
     """Get Story and Task deadlines assigned to the configured user.
 
     Use when the user asks for assigned stories/tasks, due dates, or project status.

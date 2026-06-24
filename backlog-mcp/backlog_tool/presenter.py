@@ -161,10 +161,6 @@ def compact_issue(issue, view="compact"):
         "url": f"{base_url}/view/{issue_key}" if (base_url and issue_key) else None,
     }
     
-    if view == "story":
-        due_date = parse_due_date(fields["dueDate"])
-        fields.update(due_status(due_date))
-
     custom = compact_custom_fields(issue.get("customFields"))
     # Drop fields with no value to reduce noise
     result = {k: v for k, v in fields.items() if v is not None}

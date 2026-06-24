@@ -95,8 +95,8 @@ def build_parser():
     g.add_argument("--all", action="store_true", help="Include Closed issues (default excludes Closed)")
     g.add_argument("--type", action="append", dest="types", metavar="TYPE",
                    help="Filter by issue type name (Bug, Story, Task...). Repeatable.")
-    g.add_argument("--view", choices=["compact", "bug", "story"], default="compact",
-                   help="Presenter: compact (default), bug (parse description), story (dueAlertLevel).")
+    g.add_argument("--view", choices=["compact", "bug"], default="compact",
+                   help="Presenter: compact (default), bug (parse description).")
 
     g = issue.add_parser("create", help="Create an issue (dry-run unless --apply)")
     add_project(g)

@@ -77,19 +77,6 @@ class PresenterRoutingTest(unittest.TestCase):
         self.assertEqual("AQM-1", out["issueKey"])
         self.assertNotIn("nulabAccount", out.get("assignee", ""))
 
-    def test_present_story_view_adds_deadline_fields(self):
-        from datetime import date
-        issue_with_due = RAW_ISSUE.copy()
-        issue_with_due["dueDate"] = date.today().isoformat()
-        res = presenter.compact_issue(issue_with_due, view="story")
-        self.assertIn("daysUntilDue", res)
-        self.assertIn("dueAlertLevel", res)
-        
-        args = self.parser.parse_args(["issue", "list", "--view", "story"])
-        out = cli.present([issue_with_due], args)
-        self.assertIn("daysUntilDue", out[0])
-        self.assertIn("dueAlertLevel", out[0])
-
     def test_present_json_full_passes_through(self):
         args = self.parser.parse_args(["--json-full", "issue", "get", "AQM-1"])
         out = cli.present(RAW_ISSUE, args)

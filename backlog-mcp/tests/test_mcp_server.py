@@ -138,7 +138,7 @@ def test_tool_schema_exposes_enums_and_use_when_descriptions():
 
     assert "Use when" in get_issues.description
     assert "Do not use" in get_issues.description
-    assert get_issues.inputSchema["properties"]["view"]["enum"] == ["compact", "story", "full"]
+    assert get_issues.inputSchema["properties"]["view"]["enum"] == ["compact", "full"]
     assert "cursor" in get_issues.inputSchema["properties"]
     assert "offset" not in get_issues.inputSchema["properties"]
     assert get_issues.inputSchema["properties"]["cursor"]["type"] == "string"
