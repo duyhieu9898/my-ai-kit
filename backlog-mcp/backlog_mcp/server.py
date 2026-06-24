@@ -805,15 +805,8 @@ def metrics_resource() -> str:
     return json.dumps(summarize_metrics(), indent=2, ensure_ascii=False)
 
 
-try:
-    _config = load_config()
-    _base_url = _config.get("base_url", "https://bapjp.backlog.com").rstrip("/")
-except Exception:
-    _base_url = "https://bapjp.backlog.com"
-
-
 @mcp.resource(
-    f"{_base_url}/view/{{issue_key}}",
+    "backlog://issue/{issue_key}",
     mime_type="application/json",
     meta={"kind": "issue", "scope": "project"},
 )

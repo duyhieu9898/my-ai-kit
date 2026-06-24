@@ -156,8 +156,8 @@ def test_resources_have_json_mime_type_and_issue_template():
 
     assert resource_by_uri["backlog://config"].mimeType == "application/json"
     assert resource_by_uri["backlog://config"].meta == {"kind": "config", "scope": "workstation"}
-    assert template_by_uri["https://bapjp.backlog.com/view/{issue_key}"].mimeType == "application/json"
-    assert template_by_uri["https://bapjp.backlog.com/view/{issue_key}"].meta == {"kind": "issue", "scope": "project"}
+    assert template_by_uri["backlog://issue/{issue_key}"].mimeType == "application/json"
+    assert template_by_uri["backlog://issue/{issue_key}"].meta == {"kind": "issue", "scope": "project"}
 
 
 def test_to_markdown_formatting():
