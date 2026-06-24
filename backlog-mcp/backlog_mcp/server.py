@@ -10,7 +10,7 @@ from mcp.server.fastmcp import FastMCP
 from mcp.types import CallToolResult, TextContent
 
 from backlog_tool.cli import execute
-from backlog_tool.settings import load_config, project_keys, summarize_metrics
+from backlog_tool.settings import load_config, summarize_metrics
 
 
 class IssueCompact(BaseModel):
@@ -826,12 +826,18 @@ def redact_config(config: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(config, dict):
         return config
     redacted = {}
-    sensitive_keys = {
-        "api_key", "token", "authorization", "password", "secret", "cookie", "apikey",
-        "api-key", "bearer", "auth"
+    sensitive_substrings = {
+        "token", "secret", "password", "api_key", "apikey", "api-key",
+        "private_key", "authorization", "cookie", "passwd"
     }
     for k, v in config.items():
-        if k.lower() in sensitive_keys:
+        k_lower = k.lower()
+        is_sensitive = (
+            any(sub in k_lower for sub in sensitive_substrings)
+            or k_lower == "auth"
+            or k_lower.startswith("auth_")
+        )
+        if is_sensitive:
             continue
         if isinstance(v, dict):
             redacted[k] = redact_config(v)

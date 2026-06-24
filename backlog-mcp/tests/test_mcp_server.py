@@ -222,6 +222,14 @@ def test_config_resource_excludes_sensitive_keys():
         "api_key": "sensitive_api_key_123",
         "token": "sensitive_token",
         "projects": ["AQM"],
+        "access_token": "abc",
+        "refresh_token": "def",
+        "client_secret": "secret123",
+        "private_key": "private123",
+        "backlog_api_key": "key123",
+        "authToken": "token123",
+        "author": "john_doe",
+        "projectKey": "AQM",
         "nested": {
             "password": "my_password",
             "safe_field": "hello"
@@ -232,7 +240,15 @@ def test_config_resource_excludes_sensitive_keys():
         res = json.loads(res_json)
         assert "api_key" not in res
         assert "token" not in res
+        assert "access_token" not in res
+        assert "refresh_token" not in res
+        assert "client_secret" not in res
+        assert "private_key" not in res
+        assert "backlog_api_key" not in res
+        assert "authToken" not in res
         assert "password" not in res["nested"]
+        assert res["author"] == "john_doe"
+        assert res["projectKey"] == "AQM"
         assert res["nested"]["safe_field"] == "hello"
         assert res["base_url"] == "https://bapjp.backlog.com"
 
