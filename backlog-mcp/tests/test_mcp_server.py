@@ -253,4 +253,32 @@ def test_config_resource_excludes_sensitive_keys():
         assert res["base_url"] == "https://bapjp.backlog.com"
 
 
+def test_issue_resource_success_and_error():
+    import json
+    
+    # Test success scenario
+    success_result = CallToolResult(
+        content=[TextContent(type="text", text="issue details")],
+        structuredContent={"issueKey": "AQM-1", "summary": "Fix issue"},
+        isError=False
+    )
+    with mock.patch("backlog_mcp.server._invoke", return_value=success_result):
+        res_json = server.issue_resource("AQM-1")
+        res = json.loads(res_json)
+        assert res["issueKey"] == "AQM-1"
+        assert res["summary"] == "Fix issue"
+
+    # Test error scenario
+    error_result = CallToolResult(
+        content=[TextContent(type="text", text="Error: Issue not found")],
+        structuredContent=None,
+        isError=True
+    )
+    with mock.patch("backlog_mcp.server._invoke", return_value=error_result):
+        res_json = server.issue_resource("AQM-999")
+        res = json.loads(res_json)
+        assert res["ok"] is False
+        assert res["error"] == "Issue not found"
+
+
 

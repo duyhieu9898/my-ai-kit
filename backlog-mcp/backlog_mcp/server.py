@@ -876,6 +876,11 @@ def metrics_resource() -> str:
 def issue_resource(issue_key: str) -> str:
     """Read one Backlog issue as JSON by issue key."""
     result = _invoke(["issue", "get", issue_key], full=True)
+    if result.isError or result.structuredContent is None:
+        err_msg = result.content[0].text if (result.content and len(result.content) > 0) else "Unknown error"
+        if err_msg.startswith("Error: "):
+            err_msg = err_msg[7:]
+        return json.dumps({"ok": False, "error": err_msg}, indent=2, ensure_ascii=False)
     return json.dumps(result.structuredContent, indent=2, ensure_ascii=False)
 
 
