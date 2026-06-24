@@ -99,7 +99,7 @@ IssueSort = Literal[
 
 SERVER_INSTRUCTIONS = (
     "Use this server for configured Backlog projects. Read before mutating. "
-    "When a project is omitted, resolve it from workspace configuration or workspace path only if unambiguous. If the project cannot be resolved confidently, return an error instead of guessing."
+    "When a project is omitted, resolve it from workspace configuration or workspace path only if unambiguous. If the project cannot be resolved confidently, return an error instead of guessing. "
     "Never expose API keys or full request URLs containing query strings."
 )
 
@@ -794,7 +794,7 @@ def resolve_bug_prompt(
 
 
 @mcp.prompt()
-def create_ut_bugs_prompt(
+def create_ut_bug_prompt(
     parent_key: Annotated[str, Field(description="The parent issue key (e.g., 'PRJ-123')")],
     module: Annotated[str, Field(description="The name of the module or component under test")]
 ) -> str:
