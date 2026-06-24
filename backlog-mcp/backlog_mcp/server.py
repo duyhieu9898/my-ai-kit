@@ -217,6 +217,18 @@ def _pagination(limit: int, offset: int, returned: int, enabled: bool) -> dict[s
     }
 
 
+def _parse_cursor(cursor: str) -> int:
+    if not cursor:
+        return 0
+    try:
+        offset = int(cursor)
+        if offset < 0:
+            raise ValueError("Cursor (offset) must be a non-negative integer.")
+        return offset
+    except ValueError:
+        raise ValueError(f"Invalid cursor format: '{cursor}'. Cursor must be a non-negative integer string representing the offset (e.g., '50').")
+
+
 def _resource_uris(data: Any) -> list[str]:
     items = data if isinstance(data, list) else [data]
     uris = []
@@ -318,7 +330,7 @@ def get_issues(
     issue_types: Annotated[tuple[str, ...], Field(description="Issue type names to include, e.g. ('Bug', 'Story'). Omit for all issue types.")] = (),
     include_closed: Annotated[bool, Field(description="Set true to include Closed issues; false returns open issues only.")] = False,
     limit: Annotated[int, Field(description="Maximum issues to return, from 1 to 100.", ge=1, le=100)] = 50,
-    cursor: Annotated[str, Field(description="Opaque cursor for pagination. Omit or pass an empty string to start from the beginning.")] = "",
+    cursor: Annotated[str, Field(description="Offset cursor for pagination (e.g., '50' to start from the 50th item). Omit or pass an empty string to start from the beginning.")] = "",
     sort: Annotated[
     IssueSort | None,
     Field(
@@ -337,14 +349,10 @@ def get_issues(
     Use when you need a paginated, filterable issue search across types.
     Do not use when the user asks specifically for open personal bugs; use get_my_open_bugs.
     """
-    offset = 0
-    if cursor:
-        try:
-            offset = int(cursor)
-            if offset < 0:
-                offset = 0
-        except ValueError:
-            offset = 0
+    try:
+        offset = _parse_cursor(cursor)
+    except ValueError as e:
+        return _error_result(["issue", "list"], e)
 
     args = _build_issue_list_args(
         command=["issue", "list"],
@@ -435,7 +443,7 @@ def create_issue(
     due_date: Annotated[str, Field(description="Due date in YYYY-MM-DD format. Omit for no due date.")] = "",
     estimated_hours: Annotated[float | None, Field(description="Estimated hours. Omit when unknown.")] = None,
     actual_hours: Annotated[float | None, Field(description="Actual hours. Omit when unknown.")] = None,
-    custom_fields: Annotated[dict[str, str], Field(description="Custom field values keyed by configured custom field key, e.g. {'qc_activity':'Unit Test'}.")] = {},
+    custom_fields: Annotated[dict[str, str] | None, Field(description="Custom field values keyed by configured custom field key, e.g. {'qc_activity':'Unit Test'}.")] = None,
 ) -> CallToolResult:
     """Create a Backlog issue.
 
@@ -477,7 +485,7 @@ def update_issue(
     due_date: Annotated[str, Field(description="New due date in YYYY-MM-DD format. Omit to keep current due date.")] = "",
     estimated_hours: Annotated[float | None, Field(description="New estimated hours. Omit to keep current value.")] = None,
     actual_hours: Annotated[float | None, Field(description="New actual hours. Omit to keep current value.")] = None,
-    custom_fields: Annotated[dict[str, str], Field(description="Custom field updates keyed by configured custom field key.")] = {},
+    custom_fields: Annotated[dict[str, str] | None, Field(description="Custom field updates keyed by configured custom field key.")] = None,
 ) -> CallToolResult:
     """Update a Backlog issue.
 
@@ -510,7 +518,7 @@ def get_my_open_bugs(
     project_key: Annotated[str, Field(description="Project key (e.g., 'PRJ'). Omit or pass an empty string to resolve from the active workspace path or configuration.")] = "",
     query: Annotated[str, Field(description="Search keyword for bug summary or description. Omit or pass an empty string for no keyword filter.")] = "",
     limit: Annotated[int, Field(description="Maximum bugs to return, from 1 to 100.", ge=1, le=100)] = 50,
-    cursor: Annotated[str, Field(description="Opaque cursor for pagination. Omit or pass an empty string to start from the beginning.")] = "",
+    cursor: Annotated[str, Field(description="Offset cursor for pagination (e.g., '50' to start from the 50th item). Omit or pass an empty string to start from the beginning.")] = "",
     sort: Annotated[
     IssueSort | None,
     Field(
@@ -529,14 +537,10 @@ def get_my_open_bugs(
     Use when the user asks for their current open bugs or bug triage queue.
     Do not use for generic issue search across issue types; use get_issues.
     """
-    offset = 0
-    if cursor:
-        try:
-            offset = int(cursor)
-            if offset < 0:
-                offset = 0
-        except ValueError:
-            offset = 0
+    try:
+        offset = _parse_cursor(cursor)
+    except ValueError as e:
+        return _error_result(["bug", "list"], e)
 
     args = _build_issue_list_args(
         command=["bug", "list"],
@@ -655,7 +659,7 @@ def get_story_overview(
     project_key: Annotated[str, Field(description="Project key (e.g., 'PRJ'). Omit or pass an empty string to resolve from the active workspace path or configuration.")] = "",
     query: Annotated[str, Field(description="Search keyword for story/task summary or description. Omit or pass an empty string for no keyword filter.")] = "",
     limit: Annotated[int, Field(description="Maximum stories/tasks to return, from 1 to 100.", ge=1, le=100)] = 50,
-    cursor: Annotated[str, Field(description="Opaque cursor for pagination. Omit or pass an empty string to start from the beginning.")] = "",
+    cursor: Annotated[str, Field(description="Offset cursor for pagination (e.g., '50' to start from the 50th item). Omit or pass an empty string to start from the beginning.")] = "",
     sort: Annotated[
     IssueSort | None,
     Field(
@@ -674,14 +678,10 @@ def get_story_overview(
     Use when the user asks for assigned stories/tasks, due dates, or project status.
     Do not use for generic issue search or bug triage; use get_issues or get_my_open_bugs.
     """
-    offset = 0
-    if cursor:
-        try:
-            offset = int(cursor)
-            if offset < 0:
-                offset = 0
-        except ValueError:
-            offset = 0
+    try:
+        offset = _parse_cursor(cursor)
+    except ValueError as e:
+        return _error_result(["story", "overview"], e)
 
     args = _build_issue_list_args(
         command=["story", "overview"],

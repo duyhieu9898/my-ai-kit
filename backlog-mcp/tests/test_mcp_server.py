@@ -85,6 +85,12 @@ def test_get_issues_maps_pagination_sort_and_field_selection():
     assert kwargs["paginated"] is True
 
 
+def test_get_issues_with_invalid_cursor_returns_error():
+    result = server.get_issues(cursor="invalid")
+    assert result.isError is True
+    assert "Invalid cursor format" in result.content[0].text
+
+
 def test_invoke_returns_stable_success_envelope_with_pagination():
     command_result = SimpleNamespace(
         data=[{"issueKey": "AQM-1", "summary": "Fix it", "status": "Open"}],
