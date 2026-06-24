@@ -121,7 +121,7 @@ def _append_many(args: list[str], flag: str, values: Sequence[str] | None) -> No
             args.extend((flag, value))
 
 
-def _append_custom_fields(args: list[str], custom_fields: dict[str, str] | None) -> None:
+def _append_custom_fields(args: list[str], custom_fields: dict[str, Any] | None) -> None:
     for key, value in (custom_fields or {}).items():
         if value not in (None, ""):
             args.extend(("--custom", f"{key}={value}"))
@@ -418,7 +418,7 @@ def _append_issue_fields(
     due_date: str | None,
     estimated_hours: float | None,
     actual_hours: float | None,
-    custom_fields: dict[str, str] | None,
+    custom_fields: dict[str, Any] | None,
 ) -> None:
     _append(args, "--desc", description)
     _append(args, "--priority", priority)
@@ -444,7 +444,7 @@ def _build_issue_update_args(
     due_date: str = "",
     estimated_hours: float | None = None,
     actual_hours: float | None = None,
-    custom_fields: dict[str, str] | None = None,
+    custom_fields: dict[str, Any] | None = None,
 ) -> list[str]:
     args = command + [issue_id]
 
@@ -480,7 +480,7 @@ def create_issue(
     due_date: Annotated[str, Field(description="Due date in YYYY-MM-DD format. Omit for no due date.")] = "",
     estimated_hours: Annotated[float | None, Field(description="Estimated hours. Omit when unknown.")] = None,
     actual_hours: Annotated[float | None, Field(description="Actual hours. Omit when unknown.")] = None,
-    custom_fields: Annotated[dict[str, str] | None, Field(description="Custom field values keyed by configured custom field key, e.g. {'qc_activity':'Unit Test'}.")] = None,
+    custom_fields: Annotated[dict[str, Any] | None, Field(description="Custom field values keyed by configured custom field key, e.g. {'qc_activity':'Unit Test'}.")] = None,
 ) -> CallToolResult:
     """Create a Backlog issue.
 
@@ -522,7 +522,7 @@ def update_issue(
     due_date: Annotated[str, Field(description="New due date in YYYY-MM-DD format. Omit to keep current due date.")] = "",
     estimated_hours: Annotated[float | None, Field(description="New estimated hours. Omit to keep current value.")] = None,
     actual_hours: Annotated[float | None, Field(description="New actual hours. Omit to keep current value.")] = None,
-    custom_fields: Annotated[dict[str, str] | None, Field(description="Custom field updates keyed by configured custom field key.")] = None,
+    custom_fields: Annotated[dict[str, Any] | None, Field(description="Custom field updates keyed by configured custom field key.")] = None,
 ) -> CallToolResult:
     """Update a Backlog issue.
 
