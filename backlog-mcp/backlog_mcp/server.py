@@ -99,7 +99,7 @@ IssueSort = Literal[
 
 SERVER_INSTRUCTIONS = (
     "Use this server for configured Backlog projects. Read before mutating. "
-    "When a project is omitted, it will be automatically resolved from the workspace configuration or workspace path. "
+    "When a project is omitted, resolve it from workspace configuration or workspace path only if unambiguous. If the project cannot be resolved confidently, return an error instead of guessing."
     "Never expose API keys or full request URLs containing query strings."
 )
 
@@ -351,7 +351,7 @@ def get_issue(
     issue_id: Annotated[str, Field(description="Issue key (e.g., 'PROJ-123') or numeric ID")],
     view: Annotated[Literal["compact", "full"], Field(description="Detail level: compact for general triage, full for raw Backlog fields.")] = "compact",
 ) -> CallToolResult:
-    """Get one Backlog issue by key or numeric ID.
+    """Get the current details of one Backlog issue by key or numeric ID.
 
     Use when the user names a specific Backlog issue and you need its current details.
     Do not use when you need to discover multiple issues; use get_issues instead.
@@ -595,9 +595,9 @@ def get_my_open_bugs(
 def get_bug_context(
     issue_key: Annotated[str, Field(description="Bug issue key (e.g., 'PRJ-123') to analyze")],
 ) -> CallToolResult:
-    """Get structured bug context, including current assignee and reporter.
+    """Get AI-ready context for a specific bug, including fields needed to understand, discuss, or resolve it.
 
-    Use when preparing to resolve or discuss a specific bug.
+    Use when preparing to understand, fix, discuss, or resolve a specific bug.
     Do not use for listing bugs; use get_my_open_bugs.
     """
     return _invoke(["bug", "context", issue_key])
@@ -692,7 +692,7 @@ def get_bug_fields(
 
 
 @mcp.tool()
-def get_story_overview(
+def get_my_work_overview(
     project_key: Annotated[str, Field(description="Project key (e.g., 'PRJ'). Omit or pass an empty string to resolve from the active workspace path or configuration.")] = "",
     query: Annotated[str, Field(description="Search keyword for story/task summary or description. Omit or pass an empty string for no keyword filter.")] = "",
     limit: Annotated[int, Field(description="Maximum stories/tasks to return, from 1 to 100.", ge=1, le=100)] = 50,
@@ -710,7 +710,7 @@ def get_story_overview(
     ),
 ] = None,
 ) -> CallToolResult:
-    """Get Story and Task deadlines assigned to the configured user.
+    """Get assigned Story and Task work items with deadline and status context.
 
     Use when the user asks for assigned stories/tasks, due dates, or project status.
     Do not use for generic issue search or bug triage; use get_issues or get_my_open_bugs.
@@ -816,7 +816,7 @@ def project_status_prompt(
     return (
         f"Please check and summarize the current status of {proj_desc}.\n\n"
         f"Steps to take:\n"
-        f"1. Retrieve story and task deadlines using `get_story_overview`.\n"
+        f"1. Retrieve story and task deadlines using `get_my_work_overview`.\n"
         f"2. List open bugs assigned to me using `get_my_open_bugs`.\n"
         f"3. Present a clear, consolidated status report highlighting any overdue deadlines or critical bugs."
     )
