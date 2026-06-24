@@ -318,23 +318,19 @@ def present(result, args):
     if getattr(args, "json_full", False):
         return result
     group, action = args.group, getattr(args, "action", None)
+    view = getattr(args, "view", "compact")
 
     if group == "issue" and action == "list":
-        view = getattr(args, "view", "compact")
-        if view == "bug":
-            return [presenter.compact_issue(item) for item in result]
-        if view == "story":
-            return [presenter.compact_issue(item) for item in result]
-        return [presenter.compact_issue(item) for item in result]
+        return [presenter.compact_issue(item, view=view) for item in result]
     if group == "issue" and action == "get":
-        return presenter.compact_issue(result)
+        return presenter.compact_issue(result, view=view)
     if group == "issue" and action in ("create", "update"):
         if isinstance(result, dict) and result.get("dryRun"):
             return result
-        return presenter.compact_issue(result)
+        return presenter.compact_issue(result, view=view)
 
     if group == "bug" and action == "list":
-        return [presenter.compact_issue(item) for item in result]
+        return [presenter.compact_issue(item, view=view) for item in result]
     if group == "bug" and action == "context":
         return result
     if group == "bug" and action == "resolve":
@@ -344,7 +340,7 @@ def present(result, args):
                 "assignment": result.get("assignment"),
                 "changes": result.get("changes", []), "warnings": result.get("warnings", []),
             }
-        return presenter.compact_issue(result)
+        return presenter.compact_issue(result, view=view)
     if group == "bug" and action == "create-ut":
         if isinstance(result, dict) and result.get("dryRun"):
             return result

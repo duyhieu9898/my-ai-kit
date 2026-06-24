@@ -173,21 +173,23 @@ def _to_markdown(data: Any, args: Sequence[str]) -> str:
         summary = f"Retrieved {count} items via '{command_name}'."
         if count > 0:
             lines = [summary, ""]
-            for item in data[:5]:
+            for item in data:
                 if isinstance(item, dict):
                     key = item.get("issueKey") or item.get("key") or ""
                     title = item.get("summary") or ""
-                    lines.append(f"- **{key}**: {title}")
-            if count > 5:
-                lines.append(f"- ... and {count - 5} more items.")
+                    status = item.get("status") or ""
+                    status_suffix = f" [{status}]" if status else ""
+                    lines.append(f"- **{key}**: {title}{status_suffix}")
             lines.append("\nFull details are available in the structured content.")
             return "\n".join(lines)
         return summary
     elif isinstance(data, dict):
         key = data.get("issueKey") or data.get("key")
         title = data.get("summary")
+        status = data.get("status")
         if key and title:
-            return f"Retrieved item **{key}**: {title}.\nFull details are available in the structured content."
+            status_suffix = f" [{status}]" if status else ""
+            return f"Retrieved item **{key}**: {title}{status_suffix}.\nFull details are available in the structured content."
         lines = [f"Result of '{command_name}':", ""]
         for k, v in data.items():
             if isinstance(v, (dict, list)):

@@ -89,10 +89,49 @@ def _has_value(value):
     return True
 
 
-def compact_issue(issue):
+from datetime import date, datetime
+
+
+def parse_due_date(value):
+    if not value:
+        return None
+    text = str(value)
+    if "T" in text:
+        text = text.split("T", 1)[0]
+    try:
+        return datetime.strptime(text, "%Y-%m-%d").date()
+    except Exception:
+        return None
+
+
+def due_status(due_date, today=None):
+    if today is None:
+        today = date.today()
+    if due_date is None:
+        return {
+            "daysUntilDue": None,
+            "dueAlertLevel": None,
+        }
+    days_until_due = (due_date - today).days
+    if days_until_due < 0:
+        alert_level = 1
+    elif days_until_due < 2:
+        alert_level = 2
+    else:
+        alert_level = None
+    return {
+        "daysUntilDue": days_until_due,
+        "dueAlertLevel": alert_level,
+    }
+
+
+def compact_issue(issue, view="compact"):
     """Trim a raw Backlog issue (get/create/update/apply response)."""
     if not isinstance(issue, dict):
         return issue
+    if view == "full":
+        return issue
+
     description = issue.get("description")
     attachments = issue.get("attachments")
     if description and attachments:
@@ -110,10 +149,10 @@ def compact_issue(issue):
         "issueKey": issue_key,
         "summary": issue.get("summary"),
         "description": description,
-        "issueType": (issue.get("issueType") or {}).get("name"),
-        "status": (issue.get("status") or {}).get("name"),
-        "assignee": user_name(issue.get("assignee")),
-        "priority": (issue.get("priority") or {}).get("name"),
+        "issueType": (issue.get("issueType") or {}).get("name") if isinstance(issue.get("issueType"), dict) else issue.get("issueType"),
+        "status": (issue.get("status") or {}).get("name") if isinstance(issue.get("status"), dict) else issue.get("status"),
+        "assignee": user_name(issue.get("assignee")) if isinstance(issue.get("assignee"), dict) else issue.get("assignee"),
+        "priority": (issue.get("priority") or {}).get("name") if isinstance(issue.get("priority"), dict) else issue.get("priority"),
         "startDate": issue.get("startDate"),
         "dueDate": issue.get("dueDate"),
         "estimatedHours": issue.get("estimatedHours"),
@@ -121,6 +160,11 @@ def compact_issue(issue):
         "resourceUri": f"backlog://issue/{issue_key}" if issue_key else None,
         "url": f"{base_url}/view/{issue_key}" if (base_url and issue_key) else None,
     }
+    
+    if view == "story":
+        due_date = parse_due_date(fields["dueDate"])
+        fields.update(due_status(due_date))
+
     custom = compact_custom_fields(issue.get("customFields"))
     # Drop fields with no value to reduce noise
     result = {k: v for k, v in fields.items() if v is not None}

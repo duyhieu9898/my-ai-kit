@@ -160,3 +160,25 @@ def test_resources_have_json_mime_type_and_issue_template():
     assert template_by_uri["https://bapjp.backlog.com/view/{issue_key}"].meta == {"kind": "issue", "scope": "project"}
 
 
+def test_to_markdown_formatting():
+    # Test formatting list of issues with status
+    data_list = [
+        {"issueKey": "PROJ-1", "summary": "Fix login issue", "status": "In Progress"},
+        {"issueKey": "PROJ-2", "summary": "Design landing page", "status": "Open"}
+    ]
+    res_list = server._to_markdown(data_list, ["issue", "list"])
+    assert "PROJ-1" in res_list
+    assert "Fix login issue" in res_list
+    assert "[In Progress]" in res_list
+    assert "PROJ-2" in res_list
+    assert "[Open]" in res_list
+
+    # Test formatting single issue with status
+    data_single = {"issueKey": "PROJ-123", "summary": "Database error", "status": "Closed"}
+    res_single = server._to_markdown(data_single, ["issue", "get", "PROJ-123"])
+    assert "PROJ-123" in res_single
+    assert "Database error" in res_single
+    assert "[Closed]" in res_single
+
+
+
