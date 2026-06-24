@@ -215,4 +215,26 @@ def test_issue_compact_model_validation_and_normalization():
     assert normalized["customFields"] == [{"name": "QC", "value": "Unit Test"}]
 
 
+def test_config_resource_excludes_sensitive_keys():
+    import json
+    raw_config = {
+        "base_url": "https://bapjp.backlog.com",
+        "api_key": "sensitive_api_key_123",
+        "token": "sensitive_token",
+        "projects": ["AQM"],
+        "nested": {
+            "password": "my_password",
+            "safe_field": "hello"
+        }
+    }
+    with mock.patch("backlog_mcp.server.load_config", return_value=raw_config):
+        res_json = server.config_resource()
+        res = json.loads(res_json)
+        assert "api_key" not in res
+        assert "token" not in res
+        assert "password" not in res["nested"]
+        assert res["nested"]["safe_field"] == "hello"
+        assert res["base_url"] == "https://bapjp.backlog.com"
+
+
 

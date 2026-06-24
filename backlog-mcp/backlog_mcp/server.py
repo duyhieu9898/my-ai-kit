@@ -822,6 +822,26 @@ def project_status_prompt(
     )
 
 
+def redact_config(config: dict[str, Any]) -> dict[str, Any]:
+    if not isinstance(config, dict):
+        return config
+    redacted = {}
+    sensitive_keys = {
+        "api_key", "token", "authorization", "password", "secret", "cookie", "apikey",
+        "api-key", "bearer", "auth"
+    }
+    for k, v in config.items():
+        if k.lower() in sensitive_keys:
+            continue
+        if isinstance(v, dict):
+            redacted[k] = redact_config(v)
+        elif isinstance(v, list):
+            redacted[k] = [redact_config(item) if isinstance(item, dict) else item for item in v]
+        else:
+            redacted[k] = v
+    return redacted
+
+
 @mcp.resource(
     "backlog://config",
     mime_type="application/json",
@@ -829,7 +849,7 @@ def project_status_prompt(
 )
 def config_resource() -> str:
     """Read the workstation-wide Backlog configuration as JSON."""
-    return json.dumps(load_config(), indent=2, ensure_ascii=False)
+    return json.dumps(redact_config(load_config()), indent=2, ensure_ascii=False)
 
 
 @mcp.resource(
