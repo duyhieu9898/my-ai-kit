@@ -150,6 +150,7 @@ def test_tool_schema_exposes_enums_and_use_when_descriptions():
     assert "mode" not in create_issue.inputSchema["properties"]
     assert "workspace_path" not in create_issue.inputSchema["properties"]
     assert create_issue.inputSchema["properties"]["project_key"]["default"] == ""
+    assert "issue_type" in create_issue.inputSchema.get("required", [])
 
 
 def test_resources_have_json_mime_type_and_issue_template():
