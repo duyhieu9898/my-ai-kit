@@ -15,10 +15,10 @@ def test_runtime_state_is_rooted_in_local_mcp_directory():
     assert settings.CONFIG_PATH == os.path.join(settings.MCP_ROOT, "config", "backlog.json")
 
 
-def test_create_issue_is_dry_run_by_default():
+def test_create_issue_applies_directly():
     expected_result = CallToolResult(
-        content=[TextContent(type="text", text="dryRun")],
-        structuredContent={"dryRun": True}
+        content=[TextContent(type="text", text="success")],
+        structuredContent={"ok": True}
     )
     with mock.patch.object(server, "_invoke", return_value=expected_result) as invoke:
         result = server.create_issue("Summary", issue_type="Bug")
@@ -27,16 +27,16 @@ def test_create_issue_is_dry_run_by_default():
     args = invoke.call_args.args[0]
     assert args[:3] == ["issue", "create", "Summary"]
     assert "--issue-type" in args
-    assert "--apply" not in args
+    assert "--apply" in args
 
 
-def test_resolve_bug_requires_explicit_apply():
+def test_resolve_bug_applies_directly():
     expected_result = CallToolResult(
         content=[TextContent(type="text", text="{}")],
         structuredContent={}
     )
     with mock.patch.object(server, "_invoke", return_value=expected_result) as invoke:
-        server.resolve_bug("AQM-1", mode="apply")
+        server.resolve_bug("AQM-1")
 
     assert invoke.call_args.args[0][-1] == "--apply"
 
@@ -141,7 +141,8 @@ def test_tool_schema_exposes_enums_and_use_when_descriptions():
     assert "cursor" in get_issues.inputSchema["properties"]
     assert "offset" not in get_issues.inputSchema["properties"]
     assert get_issues.inputSchema["properties"]["cursor"]["type"] == "string"
-    assert create_issue.inputSchema["properties"]["mode"]["enum"] == ["preview", "apply"]
+    assert "mode" not in create_issue.inputSchema["properties"]
+    assert "workspace_path" not in create_issue.inputSchema["properties"]
     assert create_issue.inputSchema["properties"]["project_key"]["default"] == ""
 
 

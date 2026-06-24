@@ -2,6 +2,7 @@
 """Stdio MCP server exposing the Backlog integration to every local project."""
 
 import json
+import os
 from typing import Annotated, Any, Literal, Sequence
 
 from pydantic import BaseModel, Field
@@ -70,7 +71,6 @@ class GetStoriesResponse(BaseModel):
 
 
 IssueView = Literal["compact", "full"]
-MutationMode = Literal["preview", "apply"]
 SortOrder = Literal["asc", "desc"]
 IssueSort = Literal[
     "issueType",
@@ -96,7 +96,6 @@ IssueSort = Literal[
 
 SERVER_INSTRUCTIONS = (
     "Use this server for configured Backlog projects. Read before mutating. "
-    "Issue creation/update and bug create/resolve are dry runs unless mode='apply'. "
     "When a project is omitted, it will be automatically resolved from the workspace configuration or workspace path. "
     "Never expose API keys or full request URLs containing query strings."
 )
@@ -266,13 +265,13 @@ def _invoke(
     limit: int = 0,
     offset: int = 0,
     paginated: bool = False,
-    workspace_path: str = "",
 ) -> CallToolResult:
     if full:
         if "--json-full" not in args:
             args.append("--json-full")
+    workspace_path = os.environ.get("BACKLOG_WORKSPACE_PATH") or None
     try:
-        res = execute(args, workspace_path=workspace_path or None)
+        res = execute(args, workspace_path=workspace_path)
     except Exception as error:
         return _error_result(args, error)
     data = res.data
@@ -302,7 +301,6 @@ def _invoke(
 def get_issue(
     issue_id: Annotated[str, Field(description="Issue key (e.g., 'PROJ-123') or numeric ID")],
     view: Annotated[Literal["compact", "full"], Field(description="Detail level: compact for general triage, full for raw Backlog fields.")] = "compact",
-    workspace_path: Annotated[str, Field(description="Local workspace path of the project. Omit or pass empty to resolve from the current directory context.")] = "",
 ) -> CallToolResult:
     """Get one Backlog issue by key or numeric ID.
 
@@ -310,7 +308,7 @@ def get_issue(
     Do not use when you need to discover multiple issues; use get_issues instead.
     """
     full = (view == "full")
-    return _invoke(["issue", "get", issue_id], full=full, workspace_path=workspace_path)
+    return _invoke(["issue", "get", issue_id], full=full)
 
 
 @mcp.tool()
@@ -333,7 +331,6 @@ def get_issues(
         description="Sort order: asc or desc. Omit for Backlog default ordering."
     ),
 ] = None,
-    workspace_path: Annotated[str, Field(description="Local workspace path of the project. Omit or pass empty to resolve from the current directory context.")] = "",
 ) -> CallToolResult:
     """List issues assigned to the configured user in one project.
 
@@ -362,7 +359,7 @@ def get_issues(
     _append(args, "--view", "compact")
     if include_closed:
         args.append("--all")
-    return _invoke(args, list_key="issues", full=False, limit=limit, offset=offset, paginated=True, workspace_path=workspace_path)
+    return _invoke(args, list_key="issues", full=False, limit=limit, offset=offset, paginated=True)
 
 
 def _append_issue_fields(
@@ -439,10 +436,8 @@ def create_issue(
     estimated_hours: Annotated[float | None, Field(description="Estimated hours. Omit when unknown.")] = None,
     actual_hours: Annotated[float | None, Field(description="Actual hours. Omit when unknown.")] = None,
     custom_fields: Annotated[dict[str, str], Field(description="Custom field values keyed by configured custom field key, e.g. {'qc_activity':'Unit Test'}.")] = {},
-    mode: Annotated[MutationMode, Field(description="preview returns a dry-run payload; apply writes the issue to Backlog.")] = "preview",
-    workspace_path: Annotated[str, Field(description="Local workspace path of the project. Omit or pass empty to resolve from the current directory context.")] = "",
 ) -> CallToolResult:
-    """Create or preview creation of a Backlog issue.
+    """Create a Backlog issue.
 
     Use when the user asks to create a generic Backlog issue and has supplied the issue type.
     Do not use when the user asks for the opinionated Unit Test bug workflow; use create_ut_bug.
@@ -463,9 +458,8 @@ def create_issue(
         actual_hours=actual_hours,
         custom_fields=custom_fields,
     )
-    if mode == "apply":
-        args.append("--apply")
-    return _invoke(args, workspace_path=workspace_path)
+    args.append("--apply")
+    return _invoke(args)
 
 
 @mcp.tool()
@@ -484,10 +478,8 @@ def update_issue(
     estimated_hours: Annotated[float | None, Field(description="New estimated hours. Omit to keep current value.")] = None,
     actual_hours: Annotated[float | None, Field(description="New actual hours. Omit to keep current value.")] = None,
     custom_fields: Annotated[dict[str, str], Field(description="Custom field updates keyed by configured custom field key.")] = {},
-    mode: Annotated[MutationMode, Field(description="preview returns a dry-run payload; apply writes the update to Backlog.")] = "preview",
-    workspace_path: Annotated[str, Field(description="Local workspace path of the project. Omit or pass empty to resolve from the current directory context.")] = "",
 ) -> CallToolResult:
-    """Update or preview update of a Backlog issue.
+    """Update a Backlog issue.
 
     Use when the user asks to change fields on an existing issue.
     Do not use when the user asks to complete the bug resolution workflow; use resolve_bug.
@@ -509,9 +501,8 @@ def update_issue(
     _append(args, "--summary", summary)
     _append(args, "--status", status)
     _append(args, "--comment", comment)
-    if mode == "apply":
-        args.append("--apply")
-    return _invoke(args, workspace_path=workspace_path)
+    args.append("--apply")
+    return _invoke(args)
 
 
 @mcp.tool()
@@ -532,7 +523,6 @@ def get_my_open_bugs(
         description="Sort order: asc or desc. Omit for Backlog default ordering."
     ),
 ] = None,
-    workspace_path: Annotated[str, Field(description="Local workspace path of the project. Omit or pass empty to resolve from the current directory context.")] = "",
 ) -> CallToolResult:
     """List open bugs assigned to the configured user in one project.
 
@@ -557,20 +547,19 @@ def get_my_open_bugs(
         sort=sort,
         order=order,
     )
-    return _invoke(args, list_key="bugs", full=False, limit=limit, offset=offset, paginated=True, workspace_path=workspace_path)
+    return _invoke(args, list_key="bugs", full=False, limit=limit, offset=offset, paginated=True)
 
 
 @mcp.tool()
 def get_bug_context(
     issue_key: Annotated[str, Field(description="Bug issue key (e.g., 'PRJ-123') to analyze")],
-    workspace_path: Annotated[str, Field(description="Local workspace path of the project. Omit or pass empty to resolve from the current directory context.")] = "",
 ) -> CallToolResult:
     """Get structured bug context, including current assignee and reporter.
 
     Use when preparing to resolve or discuss a specific bug.
     Do not use for listing bugs; use get_my_open_bugs.
     """
-    return _invoke(["bug", "context", issue_key], workspace_path=workspace_path)
+    return _invoke(["bug", "context", issue_key])
 
 
 @mcp.tool()
@@ -587,10 +576,8 @@ def resolve_bug(
     comment: Annotated[str, Field(description="Resolve comment text.")] = "",
     commit: Annotated[str, Field(description="Git commit hash/ref related to the fix.")] = "",
     fix_description: Annotated[str, Field(description="Corrective action or fix description text.")] = "",
-    mode: Annotated[MutationMode, Field(description="preview returns a dry-run payload; apply transitions the bug in Backlog.")] = "preview",
-    workspace_path: Annotated[str, Field(description="Local workspace path of the project. Omit or pass empty to resolve from the current directory context.")] = "",
 ) -> CallToolResult:
-    """Resolve or preview resolution of a bug with workflow defaults.
+    """Resolve a bug with workflow defaults.
 
     Use when the user asks to resolve/close a bug and wants project workflow fields filled.
     Do not use for generic issue updates unrelated to bug resolution; use update_issue.
@@ -610,9 +597,8 @@ def resolve_bug(
         ("--fix-description", fix_description),
     ):
         _append(args, flag, value)
-    if mode == "apply":
-        args.append("--apply")
-    return _invoke(args, workspace_path=workspace_path)
+    args.append("--apply")
+    return _invoke(args)
 
 
 @mcp.tool()
@@ -621,25 +607,21 @@ def create_ut_bug(
     module: Annotated[str, Field(description="Name of the module or file with the failing unit test")],
     description: Annotated[str, Field(description="Unit test failure description details")],
     project_key: Annotated[str, Field(description="Project key (e.g., 'PRJ'). Omit or pass an empty string to resolve from the active workspace path or configuration.")] = "",
-    mode: Annotated[MutationMode, Field(description="preview returns a dry-run payload; apply creates the Unit Test bug in Backlog.")] = "preview",
-    workspace_path: Annotated[str, Field(description="Local workspace path of the project. Omit or pass empty to resolve from the current directory context.")] = "",
 ) -> CallToolResult:
-    """Create or preview a Unit Test sub-task bug under a parent issue.
+    """Create a Unit Test sub-task bug under a parent issue.
 
     Use when the user asks to create a UT bug with the configured workflow defaults.
     Do not use for generic bugs or tasks; use create_issue.
     """
     args = ["bug", "create-ut", parent_key, module, description]
     _append(args, "--project", project_key)
-    if mode == "apply":
-        args.append("--apply")
-    return _invoke(args, workspace_path=workspace_path)
+    args.append("--apply")
+    return _invoke(args)
 
 
 @mcp.tool()
 def get_bug_rules(
     project_key: Annotated[str, Field(description="Project key (e.g., 'PRJ'). Omit or pass an empty string to resolve from the active workspace path or configuration.")] = "",
-    workspace_path: Annotated[str, Field(description="Local workspace path of the project. Omit or pass empty to resolve from the current directory context.")] = "",
 ) -> CallToolResult:
     """Get current resolve-bug workflow rules for one project.
 
@@ -648,14 +630,13 @@ def get_bug_rules(
     """
     args = ["bug", "rules"]
     _append(args, "--project", project_key)
-    return _invoke(args, workspace_path=workspace_path)
+    return _invoke(args)
 
 
 @mcp.tool()
 def get_bug_fields(
     field: Annotated[str, Field(description="Field name to get guidance for, e.g. qc_activity, bug_origin, cause_category. Omit for all fields.")] = "",
     project_key: Annotated[str, Field(description="Project key (e.g., 'PRJ'). Omit or pass an empty string to resolve from the active workspace path or configuration.")] = "",
-    workspace_path: Annotated[str, Field(description="Local workspace path of the project. Omit or pass empty to resolve from the current directory context.")] = "",
 ) -> CallToolResult:
     """Get configured guidance for bug workflow fields.
 
@@ -666,7 +647,7 @@ def get_bug_fields(
     if field:
         args.append(field)
     _append(args, "--project", project_key)
-    return _invoke(args, workspace_path=workspace_path)
+    return _invoke(args)
 
 
 @mcp.tool()
@@ -687,7 +668,6 @@ def get_story_overview(
         description="Sort order: asc or desc. Omit for Backlog default ordering."
     ),
 ] = None,
-    workspace_path: Annotated[str, Field(description="Local workspace path of the project. Omit or pass empty to resolve from the current directory context.")] = "",
 ) -> CallToolResult:
     """Get Story and Task deadlines assigned to the configured user.
 
@@ -712,7 +692,7 @@ def get_story_overview(
         sort=sort,
         order=order,
     )
-    return _invoke(args, list_key="stories", limit=limit, offset=offset, paginated=True, workspace_path=workspace_path)
+    return _invoke(args, list_key="stories", limit=limit, offset=offset, paginated=True)
 
 
 @mcp.tool()
@@ -772,8 +752,7 @@ def resolve_bug_prompt(
         f"1. Fetch the bug context using `get_bug_context` for {issue_key}.\n"
         f"2. Fetch the resolve-bug rules using `get_bug_rules` for the project.\n"
         f"3. Retrieve guidelines for any required guided fields using `get_bug_fields`.\n"
-        f"4. Propose a resolve action using `resolve_bug` with mode='preview'.\n"
-        f"5. Once I review the assignment changes and dry-run output, apply the resolution with mode='apply'."
+        f"4. Once the details and required field values are confirmed, execute `resolve_bug` to transition the bug in Backlog."
     )
 
 
@@ -787,8 +766,7 @@ def create_ut_bugs_prompt(
         f"I need to create a Unit Test (UT) child bug for the parent issue {parent_key} and module {module}.\n\n"
         f"Steps to take:\n"
         f"1. Inspect the parent issue context using `get_issue` for {parent_key}.\n"
-        f"2. Draft the UT bug details and use `create_ut_bug` with mode='preview' to dry-run and preview the payload.\n"
-        f"3. After I confirm, execute `create_ut_bug` with mode='apply' to create the task on Backlog."
+        f"2. Once details are confirmed, execute `create_ut_bug` to create the task on Backlog."
     )
 
 
