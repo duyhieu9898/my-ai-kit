@@ -796,14 +796,18 @@ def resolve_bug_prompt(
 @mcp.prompt()
 def create_ut_bug_prompt(
     parent_key: Annotated[str, Field(description="The parent issue key (e.g., 'PRJ-123')")],
-    module: Annotated[str, Field(description="The name of the module or component under test")]
+    module: Annotated[str, Field(description="The name of the module or component under test")],
+    description: Annotated[str, Field(description="Optional failure description or detail text for the UT bug")] = "",
 ) -> str:
     """Guide the agent to create a Unit Test sub-task bug under a parent issue."""
+    desc_val = f"'{description}'" if description else "(not specified yet)"
     return (
-        f"I need to create a Unit Test (UT) child bug for the parent issue {parent_key} and module {module}.\n\n"
+        f"I need to create a Unit Test (UT) child bug for the parent issue {parent_key} and module {module}.\n"
+        f"Current failure description: {desc_val}\n\n"
         f"Steps to take:\n"
         f"1. Inspect the parent issue context using `get_issue` for {parent_key}.\n"
-        f"2. Once details are confirmed, execute `create_ut_bug` to create the task on Backlog."
+        f"2. If the failure description is empty, inspect the parent issue and ask for or draft a concise UT failure description before calling `create_ut_bug`.\n"
+        f"3. Once parent, module, and description are confirmed, execute `create_ut_bug` to create the task on Backlog."
     )
 
 
