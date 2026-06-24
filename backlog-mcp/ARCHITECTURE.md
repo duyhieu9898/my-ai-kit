@@ -55,16 +55,16 @@ backlog-mcp/
 ```
 
 ### 1. MCP Server Interface (`backlog_mcp`)
-Defined in [server.py](file:///home/hieund/Documents/hieund-ai-kit-cli/backlog-mcp/backlog_mcp/server.py), this module uses the FastMCP SDK to bind Python functions to MCP tools. It handles:
+Defined in [server.py](file:///home/hieund/Documents/MY_PROJECT/DEVELOP_MAINTAIN/hieund-ai-kit-cli/backlog-mcp/backlog_mcp/server.py), this module uses the FastMCP SDK to bind Python functions to MCP tools. It handles:
 * Translating structured arguments from JSON payloads into CLI command arguments.
 * Routing tool execution back to the `backlog_tool.cli.execute` runner.
 * Serving resources like `backlog://config` and `backlog://metrics`.
 
 ### 2. Core Domain Runtime (`backlog_tool`)
 The underlying engine that executes command actions:
-* [client.py](file:///home/hieund/Documents/hieund-ai-kit-cli/backlog-mcp/backlog_tool/client.py): Sends HTTP requests to the Backlog API. It reads the `BACKLOG_API_KEY` from the local `.env` and intercepts requests to logs so that credentials and raw URLs are never leaked.
-* [settings.py](file:///home/hieund/Documents/hieund-ai-kit-cli/backlog-mcp/backlog_tool/settings.py): Resolves path configs (e.g., locating `.env`, `config/backlog.json`, and `logs/` relative to the MCP project root) and writes local execution metrics.
-* [cli.py](file:///home/hieund/Documents/hieund-ai-kit-cli/backlog-mcp/backlog_tool/cli.py): Leverages argparse to parse actions (`issue`, `bug`, `config`, `project`, `story`) and formats the outputs to JSON or Markdown tables.
+* [client.py](file:///home/hieund/Documents/MY_PROJECT/DEVELOP_MAINTAIN/hieund-ai-kit-cli/backlog-mcp/backlog_tool/client.py): Sends HTTP requests to the Backlog API. It reads the `BACKLOG_API_KEY` from the local `.env` and intercepts requests to logs so that credentials and raw URLs are never leaked.
+* [settings.py](file:///home/hieund/Documents/MY_PROJECT/DEVELOP_MAINTAIN/hieund-ai-kit-cli/backlog-mcp/backlog_tool/settings.py): Resolves path configs (e.g., locating `.env`, `config/backlog.json`, and `logs/` relative to the MCP project root) and writes local execution metrics.
+* [cli.py](file:///home/hieund/Documents/MY_PROJECT/DEVELOP_MAINTAIN/hieund-ai-kit-cli/backlog-mcp/backlog_tool/cli.py): Leverages argparse to parse actions (`issue`, `bug`, `config`, `project`, `story`) and formats the outputs to JSON or Markdown tables.
 
 ### 3. Workflows
 Defines the transition policies, rules, and field requirements for managing bugs and parent-child issues. It includes `config.py` and `audit.py` to check that the local project configuration catalogs remain consistent with the actual schemas configured in the Backlog space.

@@ -4,7 +4,7 @@
 import json
 from typing import Annotated, Any, Literal, Sequence
 
-from pydantic import Field
+from pydantic import BaseModel, Field
 from mcp.server.fastmcp import FastMCP
 from mcp.types import CallToolResult, TextContent
 
@@ -12,14 +12,64 @@ from backlog_tool.cli import execute
 from backlog_tool.settings import load_config, project_keys, summarize_metrics
 
 
-SERVER_INSTRUCTIONS = (
-    "Use this server for configured Backlog projects. Read before mutating. "
-    "Issue creation/update and bug create/resolve are dry runs unless mode='apply'. "
-    "When a project is omitted, it will be automatically resolved from the workspace configuration or workspace path. "
-    "Never expose API keys or full request URLs containing query strings."
-)
+class IssueCompact(BaseModel):
+    issueKey: str
+    summary: str
+    description: str | None = None
+    issueType: str | None = None
+    status: str | None = None
+    assignee: str | None = None
+    priority: str | None = None
+    startDate: str | None = None
+    dueDate: str | None = None
+    estimatedHours: float | None = None
+    actualHours: float | None = None
+    resourceUri: str | None = None
+    url: str | None = None
 
-IssueView = Literal["compact", "story"]
+
+class PaginationInfo(BaseModel):
+    limit: int
+    nextCursor: str | None = None
+    hasMore: bool
+
+
+class GetIssuesData(BaseModel):
+    issues: list[IssueCompact]
+
+
+class GetIssuesResponse(BaseModel):
+    ok: bool
+    data: GetIssuesData
+    pagination: PaginationInfo
+
+
+class GetBugsData(BaseModel):
+    bugs: list[IssueCompact]
+
+
+class GetBugsResponse(BaseModel):
+    ok: bool
+    data: GetBugsData
+    pagination: PaginationInfo
+
+
+class GetIssueResponse(BaseModel):
+    ok: bool
+    data: IssueCompact
+
+
+class GetStoriesData(BaseModel):
+    stories: list[IssueCompact]
+
+
+class GetStoriesResponse(BaseModel):
+    ok: bool
+    data: GetStoriesData
+    pagination: PaginationInfo
+
+
+IssueView = Literal["compact", "story", "full"]
 MutationMode = Literal["preview", "apply"]
 SortOrder = Literal["asc", "desc"]
 IssueSort = Literal[
@@ -43,6 +93,13 @@ IssueSort = Literal[
     "actualHours",
     "childIssue",
 ]
+
+SERVER_INSTRUCTIONS = (
+    "Use this server for configured Backlog projects. Read before mutating. "
+    "Issue creation/update and bug create/resolve are dry runs unless mode='apply'. "
+    "When a project is omitted, it will be automatically resolved from the workspace configuration or workspace path. "
+    "Never expose API keys or full request URLs containing query strings."
+)
 
 mcp = FastMCP(
     name="Backlog Local",
@@ -107,42 +164,34 @@ def _build_issue_list_args(
     return args
 
 
-def _to_markdown(data: Any) -> str:
+def _to_markdown(data: Any, args: Sequence[str]) -> str:
     if not data:
         return "No data."
+    command_name = ":".join(args[:2]) if len(args) >= 2 else ":".join(args)
     if isinstance(data, list):
-        if all(isinstance(x, dict) for x in data):
-            lines = []
-            for i, item in enumerate(data):
-                item_key = item.get("issueKey") or item.get("key") or f"Item {i+1}"
-                lines.append(f"### {item_key}:")
-                for k, v in item.items():
-                    if k in ("issueKey", "key"):
-                        continue
-                    if isinstance(v, dict):
-                        lines.append(f"  - **{k}**:")
-                        for nk, nv in v.items():
-                            lines.append(f"    - **{nk}**: {nv}")
-                    elif isinstance(v, list):
-                        lines.append(f"  - **{k}**:")
-                        for lv in v:
-                            lines.append(f"    - {lv}")
-                    else:
-                        lines.append(f"  - **{k}**: {v}")
+        count = len(data)
+        summary = f"Retrieved {count} items via '{command_name}'."
+        if count > 0:
+            lines = [summary, ""]
+            for item in data[:5]:
+                if isinstance(item, dict):
+                    key = item.get("issueKey") or item.get("key") or ""
+                    title = item.get("summary") or ""
+                    lines.append(f"- **{key}**: {title}")
+            if count > 5:
+                lines.append(f"- ... and {count - 5} more items.")
+            lines.append("\nFull details are available in the structured content.")
             return "\n".join(lines)
-        else:
-            return "\n".join(f"- {x}" for x in data)
+        return summary
     elif isinstance(data, dict):
-        lines = []
+        key = data.get("issueKey") or data.get("key")
+        title = data.get("summary")
+        if key and title:
+            return f"Retrieved item **{key}**: {title}.\nFull details are available in the structured content."
+        lines = [f"Result of '{command_name}':", ""]
         for k, v in data.items():
-            if isinstance(v, dict):
-                lines.append(f"- **{k}**:")
-                for nk, nv in v.items():
-                    lines.append(f"  - **{nk}**: {nv}")
-            elif isinstance(v, list):
-                lines.append(f"- **{k}**:")
-                for item in v:
-                    lines.append(f"  - {item}")
+            if isinstance(v, (dict, list)):
+                lines.append(f"- **{k}**: (structured data)")
             else:
                 lines.append(f"- **{k}**: {v}")
         return "\n".join(lines)
@@ -169,12 +218,11 @@ def _item_count(data: Any) -> int:
 
 def _pagination(limit: int, offset: int, returned: int, enabled: bool) -> dict[str, Any]:
     has_more = bool(enabled and limit > 0 and returned >= limit)
+    next_cursor = str(offset + returned) if has_more else None
     return {
         "limit": limit if enabled else 0,
-        "offset": offset if enabled else 0,
-        "returned": returned,
+        "nextCursor": next_cursor,
         "hasMore": has_more,
-        "nextOffset": offset + returned if has_more else 0,
     }
 
 
@@ -194,52 +242,29 @@ def _envelope(
     ok: bool,
     data: Any,
     list_key: str | None,
-    full: bool,
     fields: Sequence[str],
     limit: int,
     offset: int,
     paginated: bool,
-    args: Sequence[str],
-    error: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     selected_data = _select_fields(data, fields)
     result_data = {list_key or "items": selected_data} if isinstance(selected_data, list) else selected_data
     returned = _item_count(selected_data)
-    return {
+    
+    envelope_data = {
         "ok": ok,
         "data": result_data if result_data is not None else {},
-        "metadata": {
-            "command": ":".join(args[:2]) if len(args) >= 2 else ":".join(args),
-            "full": full,
-            "fields": list(fields),
-            "resourceUris": _resource_uris(selected_data),
-        },
-        "pagination": _pagination(limit, offset, returned, paginated),
-        "error": error or {"code": "", "message": "", "details": {}},
     }
+    if paginated:
+        envelope_data["pagination"] = _pagination(limit, offset, returned, paginated)
+    return envelope_data
 
 
 def _error_result(args: Sequence[str], error: Exception) -> CallToolResult:
-    error_payload = {
-        "code": type(error).__name__,
-        "message": str(error),
-        "details": {"command": ":".join(args[:2]) if len(args) >= 2 else ":".join(args)},
-    }
-    structured = _envelope(
-        ok=False,
-        data={},
-        list_key=None,
-        full=False,
-        fields=(),
-        limit=0,
-        offset=0,
-        paginated=False,
-        args=args,
-        error=error_payload,
-    )
+    message = str(error)
     return CallToolResult(
-        content=[TextContent(type="text", text=f"Error: {error_payload['message']}")],
-        structuredContent=structured,
+        content=[TextContent(type="text", text=f"Error: {message}")],
+        structuredContent=None,
         isError=True,
     )
 
@@ -262,54 +287,55 @@ def _invoke(
     except Exception as error:
         return _error_result(args, error)
     data = res.data
-    text = res.text
+    text = _to_markdown(data, args)
 
-    # Avoid JSON stringify inside text field of CallToolResult
-    if text.strip().startswith(("{", "[")):
-        text = _to_markdown(data)
-
+    selected_data = _select_fields(data, fields)
     structured = _envelope(
         ok=True,
         data=data,
         list_key=list_key,
-        full=full,
         fields=fields,
         limit=limit,
         offset=offset,
         paginated=paginated,
-        args=args,
     )
+    
+    uris = _resource_uris(selected_data)
 
     return CallToolResult(
         content=[TextContent(type="text", text=text)],
-        structuredContent=structured
+        structuredContent=structured,
+        _meta={
+            "command": ":".join(args[:2]) if len(args) >= 2 else ":".join(args),
+            "resourceUris": uris,
+        }
     )
-
 
 @mcp.tool()
 def get_issue(
     issue_id: Annotated[str, Field(description="Issue key (e.g., 'PROJ-123') or numeric ID")],
     fields: Annotated[tuple[str, ...], Field(description="Optional response fields to include in structured data. Omit for the default compact issue fields.")] = (),
-    full: Annotated[bool, Field(description="Set true only when the compact issue fields are insufficient and raw Backlog fields are needed.")] = False,
+    view: Annotated[Literal["compact", "full"], Field(description="Detail level: compact for general triage, full for raw Backlog fields.")] = "compact",
     workspace_path: Annotated[str, Field(description="Local workspace path of the project. Omit or pass empty to resolve from the current directory context.")] = "",
-) -> CallToolResult:
+) -> Annotated[CallToolResult, GetIssueResponse]:
     """Get one Backlog issue by key or numeric ID.
 
     Use when the user names a specific Backlog issue and you need its current details.
     Do not use when you need to discover multiple issues; use get_issues instead.
     """
+    full = (view == "full")
     return _invoke(["issue", "get", issue_id], full=full, fields=fields, workspace_path=workspace_path)
 
 
 @mcp.tool()
 def get_issues(
-    project: Annotated[str, Field(description="Project key (e.g., 'PRJ'). Omit or pass an empty string to resolve from the active workspace path or configuration.")] = "",
+    project_key: Annotated[str, Field(description="Project key (e.g., 'PRJ'). Omit or pass an empty string to resolve from the active workspace path or configuration.")] = "",
     query: Annotated[str, Field(description="Search keyword for issue summary or description. Omit or pass an empty string for no keyword filter.")] = "",
     issue_types: Annotated[tuple[str, ...], Field(description="Issue type names to include, e.g. ('Bug', 'Story'). Omit for all issue types.")] = (),
     include_closed: Annotated[bool, Field(description="Set true to include Closed issues; false returns open issues only.")] = False,
-    view: Annotated[IssueView, Field(description="Structured presentation: compact for general triage, story for deadline fields.")] = "compact",
+    view: Annotated[IssueView, Field(description="Detail level of returned issues: compact, story, or full.")] = "compact",
     limit: Annotated[int, Field(description="Maximum issues to return, from 1 to 100.", ge=1, le=100)] = 50,
-    offset: Annotated[int, Field(description="Zero-based issue offset for pagination.", ge=0)] = 0,
+    cursor: Annotated[str, Field(description="Opaque cursor for pagination. Omit or pass an empty string to start from the beginning.")] = "",
     sort: Annotated[
     IssueSort | None,
     Field(
@@ -323,17 +349,27 @@ def get_issues(
     ),
 ] = None,
     fields: Annotated[tuple[str, ...], Field(description="Optional response fields for each issue in structured data. Omit for the default compact fields.")] = (),
-    full: Annotated[bool, Field(description="Set true only when compact issue fields are insufficient and raw Backlog fields are needed.")] = False,
     workspace_path: Annotated[str, Field(description="Local workspace path of the project. Omit or pass empty to resolve from the current directory context.")] = "",
-) -> CallToolResult:
+) -> Annotated[CallToolResult, GetIssuesResponse]:
     """List issues assigned to the configured user in one project.
 
     Use when you need a paginated, filterable issue search across types.
     Do not use when the user asks specifically for open personal bugs; use get_my_open_bugs.
     """
+    offset = 0
+    if cursor:
+        try:
+            offset = int(cursor)
+            if offset < 0:
+                offset = 0
+        except ValueError:
+            offset = 0
+
+    full = (view == "full")
+    cli_view = "compact" if view == "full" else view
     args = _build_issue_list_args(
         command=["issue", "list"],
-        project=project,
+        project=project_key,
         query=query,
         limit=limit,
         offset=offset,
@@ -341,7 +377,7 @@ def get_issues(
         order=order,
     )
     _append_many(args, "--type", issue_types)
-    _append(args, "--view", view)
+    _append(args, "--view", cli_view)
     if include_closed:
         args.append("--all")
     return _invoke(args, list_key="issues", full=full, fields=fields, limit=limit, offset=offset, paginated=True, workspace_path=workspace_path)
@@ -409,7 +445,7 @@ def _build_issue_update_args(
 @mcp.tool()
 def create_issue(
     summary: Annotated[str, Field(description="Issue summary title")],
-    project: Annotated[str, Field(description="Project key (e.g., 'PRJ'). Omit or pass an empty string to resolve from the active workspace path or configuration.")] = "",
+    project_key: Annotated[str, Field(description="Project key (e.g., 'PRJ'). Omit or pass an empty string to resolve from the active workspace path or configuration.")] = "",
     issue_type: Annotated[str, Field(description="Issue type name or ID (e.g., 'Bug', 'Task', 'Story'). Required by Backlog for creation.")] = "",
     parent: Annotated[str, Field(description="Parent issue key (e.g., 'PRJ-123'). Omit or pass an empty string for no parent.")] = "",
     description: Annotated[str, Field(description="Issue description detail text. Omit or pass an empty string for no description.")] = "",
@@ -423,14 +459,14 @@ def create_issue(
     custom_fields: Annotated[dict[str, str], Field(description="Custom field values keyed by configured custom field key, e.g. {'qc_activity':'Unit Test'}.")] = {},
     mode: Annotated[MutationMode, Field(description="preview returns a dry-run payload; apply writes the issue to Backlog.")] = "preview",
     workspace_path: Annotated[str, Field(description="Local workspace path of the project. Omit or pass empty to resolve from the current directory context.")] = "",
-) -> CallToolResult:
+) -> Annotated[CallToolResult, GetIssueResponse]:
     """Create or preview creation of a Backlog issue.
 
     Use when the user asks to create a generic Backlog issue and has supplied the issue type.
     Do not use when the user asks for the opinionated Unit Test bug workflow; use create_ut_bug.
     """
     args = ["issue", "create", summary]
-    _append(args, "--project", project)
+    _append(args, "--project", project_key)
     _append(args, "--issue-type", issue_type)
     _append(args, "--parent", parent)
     _append_issue_fields(
@@ -453,7 +489,7 @@ def create_issue(
 @mcp.tool()
 def update_issue(
     issue_id: Annotated[str, Field(description="Issue key (e.g., 'PROJ-123') or numeric ID")],
-    project: Annotated[str, Field(description="Project key (e.g., 'PRJ'). Omit or pass an empty string to infer from issue key or active workspace context.")] = "",
+    project_key: Annotated[str, Field(description="Project key (e.g., 'PRJ'). Omit or pass an empty string to infer from issue key or active workspace context.")] = "",
     summary: Annotated[str, Field(description="New issue summary title. Omit or pass an empty string to keep current summary.")] = "",
     status: Annotated[str, Field(description="Status name or ID to transition to. Omit to keep current status.")] = "",
     comment: Annotated[str, Field(description="Comment text to add to the update. Omit for no comment.")] = "",
@@ -468,7 +504,7 @@ def update_issue(
     custom_fields: Annotated[dict[str, str], Field(description="Custom field updates keyed by configured custom field key.")] = {},
     mode: Annotated[MutationMode, Field(description="preview returns a dry-run payload; apply writes the update to Backlog.")] = "preview",
     workspace_path: Annotated[str, Field(description="Local workspace path of the project. Omit or pass empty to resolve from the current directory context.")] = "",
-) -> CallToolResult:
+) -> Annotated[CallToolResult, GetIssueResponse]:
     """Update or preview update of a Backlog issue.
 
     Use when the user asks to change fields on an existing issue.
@@ -477,7 +513,7 @@ def update_issue(
     args = _build_issue_update_args(
         ["issue", "update"],
         issue_id,
-        project=project,
+        project=project_key,
         description=description,
         priority=priority,
         assignee=assignee,
@@ -498,10 +534,10 @@ def update_issue(
 
 @mcp.tool()
 def get_my_open_bugs(
-    project: Annotated[str, Field(description="Project key (e.g., 'PRJ'). Omit or pass an empty string to resolve from the active workspace path or configuration.")] = "",
+    project_key: Annotated[str, Field(description="Project key (e.g., 'PRJ'). Omit or pass an empty string to resolve from the active workspace path or configuration.")] = "",
     query: Annotated[str, Field(description="Search keyword for bug summary or description. Omit or pass an empty string for no keyword filter.")] = "",
     limit: Annotated[int, Field(description="Maximum bugs to return, from 1 to 100.", ge=1, le=100)] = 50,
-    offset: Annotated[int, Field(description="Zero-based issue offset for pagination.", ge=0)] = 0,
+    cursor: Annotated[str, Field(description="Opaque cursor for pagination. Omit or pass an empty string to start from the beginning.")] = "",
     sort: Annotated[
     IssueSort | None,
     Field(
@@ -515,17 +551,27 @@ def get_my_open_bugs(
     ),
 ] = None,
     fields: Annotated[tuple[str, ...], Field(description="Optional response fields for each bug in structured data. Omit for the default compact fields.")] = (),
-    full: Annotated[bool, Field(description="Set true only when compact bug fields are insufficient and raw Backlog fields are needed.")] = False,
+    view: Annotated[Literal["compact", "full"], Field(description="Detail level: compact for general triage, full for raw Backlog fields.")] = "compact",
     workspace_path: Annotated[str, Field(description="Local workspace path of the project. Omit or pass empty to resolve from the current directory context.")] = "",
-) -> CallToolResult:
+) -> Annotated[CallToolResult, GetBugsResponse]:
     """List open bugs assigned to the configured user in one project.
 
     Use when the user asks for their current open bugs or bug triage queue.
     Do not use for generic issue search across issue types; use get_issues.
     """
+    offset = 0
+    if cursor:
+        try:
+            offset = int(cursor)
+            if offset < 0:
+                offset = 0
+        except ValueError:
+            offset = 0
+
+    full = (view == "full")
     args = _build_issue_list_args(
         command=["bug", "list"],
-        project=project,
+        project=project_key,
         query=query,
         limit=limit,
         offset=offset,
@@ -564,7 +610,7 @@ def resolve_bug(
     fix_description: Annotated[str, Field(description="Corrective action or fix description text.")] = "",
     mode: Annotated[MutationMode, Field(description="preview returns a dry-run payload; apply transitions the bug in Backlog.")] = "preview",
     workspace_path: Annotated[str, Field(description="Local workspace path of the project. Omit or pass empty to resolve from the current directory context.")] = "",
-) -> CallToolResult:
+) -> Annotated[CallToolResult, GetIssueResponse]:
     """Resolve or preview resolution of a bug with workflow defaults.
 
     Use when the user asks to resolve/close a bug and wants project workflow fields filled.
@@ -595,17 +641,17 @@ def create_ut_bug(
     parent_key: Annotated[str, Field(description="Parent issue key (e.g., 'PRJ-123') to attach the UT bug to")],
     module: Annotated[str, Field(description="Name of the module or file with the failing unit test")],
     description: Annotated[str, Field(description="Unit test failure description details")],
-    project: Annotated[str, Field(description="Project key (e.g., 'PRJ'). Omit or pass an empty string to resolve from the active workspace path or configuration.")] = "",
+    project_key: Annotated[str, Field(description="Project key (e.g., 'PRJ'). Omit or pass an empty string to resolve from the active workspace path or configuration.")] = "",
     mode: Annotated[MutationMode, Field(description="preview returns a dry-run payload; apply creates the Unit Test bug in Backlog.")] = "preview",
     workspace_path: Annotated[str, Field(description="Local workspace path of the project. Omit or pass empty to resolve from the current directory context.")] = "",
-) -> CallToolResult:
+) -> Annotated[CallToolResult, GetIssueResponse]:
     """Create or preview a Unit Test sub-task bug under a parent issue.
 
     Use when the user asks to create a UT bug with the configured workflow defaults.
     Do not use for generic bugs or tasks; use create_issue.
     """
     args = ["bug", "create-ut", parent_key, module, description]
-    _append(args, "--project", project)
+    _append(args, "--project", project_key)
     if mode == "apply":
         args.append("--apply")
     return _invoke(args, workspace_path=workspace_path)
@@ -613,7 +659,7 @@ def create_ut_bug(
 
 @mcp.tool()
 def get_bug_rules(
-    project: Annotated[str, Field(description="Project key (e.g., 'PRJ'). Omit or pass an empty string to resolve from the active workspace path or configuration.")] = "",
+    project_key: Annotated[str, Field(description="Project key (e.g., 'PRJ'). Omit or pass an empty string to resolve from the active workspace path or configuration.")] = "",
     workspace_path: Annotated[str, Field(description="Local workspace path of the project. Omit or pass empty to resolve from the current directory context.")] = "",
 ) -> CallToolResult:
     """Get current resolve-bug workflow rules for one project.
@@ -622,14 +668,14 @@ def get_bug_rules(
     Do not use for issue data; use get_bug_context or get_issue.
     """
     args = ["bug", "rules"]
-    _append(args, "--project", project)
+    _append(args, "--project", project_key)
     return _invoke(args, workspace_path=workspace_path)
 
 
 @mcp.tool()
 def get_bug_fields(
     field: Annotated[str, Field(description="Field name to get guidance for, e.g. qc_activity, bug_origin, cause_category. Omit for all fields.")] = "",
-    project: Annotated[str, Field(description="Project key (e.g., 'PRJ'). Omit or pass an empty string to resolve from the active workspace path or configuration.")] = "",
+    project_key: Annotated[str, Field(description="Project key (e.g., 'PRJ'). Omit or pass an empty string to resolve from the active workspace path or configuration.")] = "",
     workspace_path: Annotated[str, Field(description="Local workspace path of the project. Omit or pass empty to resolve from the current directory context.")] = "",
 ) -> CallToolResult:
     """Get configured guidance for bug workflow fields.
@@ -640,16 +686,16 @@ def get_bug_fields(
     args = ["bug", "fields"]
     if field:
         args.append(field)
-    _append(args, "--project", project)
+    _append(args, "--project", project_key)
     return _invoke(args, workspace_path=workspace_path)
 
 
 @mcp.tool()
 def get_story_overview(
-    project: Annotated[str, Field(description="Project key (e.g., 'PRJ'). Omit or pass an empty string to resolve from the active workspace path or configuration.")] = "",
+    project_key: Annotated[str, Field(description="Project key (e.g., 'PRJ'). Omit or pass an empty string to resolve from the active workspace path or configuration.")] = "",
     query: Annotated[str, Field(description="Search keyword for story/task summary or description. Omit or pass an empty string for no keyword filter.")] = "",
     limit: Annotated[int, Field(description="Maximum stories/tasks to return, from 1 to 100.", ge=1, le=100)] = 50,
-    offset: Annotated[int, Field(description="Zero-based issue offset for pagination.", ge=0)] = 0,
+    cursor: Annotated[str, Field(description="Opaque cursor for pagination. Omit or pass an empty string to start from the beginning.")] = "",
     sort: Annotated[
     IssueSort | None,
     Field(
@@ -664,15 +710,24 @@ def get_story_overview(
 ] = None,
     fields: Annotated[tuple[str, ...], Field(description="Optional response fields for each story/task in structured data. Omit for workflow default fields.")] = (),
     workspace_path: Annotated[str, Field(description="Local workspace path of the project. Omit or pass empty to resolve from the current directory context.")] = "",
-) -> CallToolResult:
+) -> Annotated[CallToolResult, GetStoriesResponse]:
     """Get Story and Task deadlines assigned to the configured user.
 
     Use when the user asks for assigned stories/tasks, due dates, or project status.
     Do not use for generic issue search or bug triage; use get_issues or get_my_open_bugs.
     """
+    offset = 0
+    if cursor:
+        try:
+            offset = int(cursor)
+            if offset < 0:
+                offset = 0
+        except ValueError:
+            offset = 0
+
     args = _build_issue_list_args(
         command=["story", "overview"],
-        project=project,
+        project=project_key,
         query=query,
         limit=limit,
         offset=offset,
@@ -794,8 +849,15 @@ def metrics_resource() -> str:
     return json.dumps(summarize_metrics(), indent=2, ensure_ascii=False)
 
 
+try:
+    _config = load_config()
+    _base_url = _config.get("base_url", "https://bapjp.backlog.com").rstrip("/")
+except Exception:
+    _base_url = "https://bapjp.backlog.com"
+
+
 @mcp.resource(
-    "backlog://issue/{issue_key}",
+    f"{_base_url}/view/{{issue_key}}",
     mime_type="application/json",
     meta={"kind": "issue", "scope": "project"},
 )

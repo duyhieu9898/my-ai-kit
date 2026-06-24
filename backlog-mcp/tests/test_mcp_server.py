@@ -59,11 +59,11 @@ def test_get_issues_maps_pagination_sort_and_field_selection():
     )
     with mock.patch.object(server, "_invoke", return_value=expected_result) as invoke:
         result = server.get_issues(
-            project="AQM",
+            project_key="AQM",
             query="payment",
             issue_types=("Bug",),
             limit=25,
-            offset=50,
+            cursor="50",
             sort="updated",
             order="desc",
             fields=("issueKey", "summary"),
@@ -106,21 +106,17 @@ def test_invoke_returns_stable_success_envelope_with_pagination():
     assert result.structuredContent == {
         "ok": True,
         "data": {"issues": [{"issueKey": "AQM-1", "summary": "Fix it"}]},
-        "metadata": {
-            "command": "issue:list",
-            "full": False,
-            "fields": ["issueKey", "summary"],
-            "resourceUris": ["backlog://issue/AQM-1"],
-        },
         "pagination": {
             "limit": 1,
-            "offset": 0,
-            "returned": 1,
+            "nextCursor": "1",
             "hasMore": True,
-            "nextOffset": 1,
         },
-        "error": {"code": "", "message": "", "details": {}},
     }
+    assert result.meta == {
+        "command": "issue:list",
+        "resourceUris": ["backlog://issue/AQM-1"],
+    }
+    assert "Retrieved 1 items via 'issue:list'." in result.content[0].text
 
 
 def test_invoke_returns_structured_error_without_raising():
@@ -128,9 +124,8 @@ def test_invoke_returns_structured_error_without_raising():
         result = server._invoke(["issue", "update", "AQM-1"])
 
     assert result.isError is True
-    assert result.structuredContent["ok"] is False
-    assert result.structuredContent["error"]["code"] == "ValueError"
-    assert result.structuredContent["error"]["message"] == "bad field"
+    assert result.structuredContent is None
+    assert "Error: bad field" in result.content[0].text
 
 
 def test_tool_schema_exposes_enums_and_use_when_descriptions():
@@ -143,9 +138,12 @@ def test_tool_schema_exposes_enums_and_use_when_descriptions():
 
     assert "Use when" in get_issues.description
     assert "Do not use" in get_issues.description
-    assert get_issues.inputSchema["properties"]["view"]["enum"] == ["compact", "story"]
+    assert get_issues.inputSchema["properties"]["view"]["enum"] == ["compact", "story", "full"]
+    assert "cursor" in get_issues.inputSchema["properties"]
+    assert "offset" not in get_issues.inputSchema["properties"]
+    assert get_issues.inputSchema["properties"]["cursor"]["type"] == "string"
     assert create_issue.inputSchema["properties"]["mode"]["enum"] == ["preview", "apply"]
-    assert create_issue.inputSchema["properties"]["project"]["default"] == ""
+    assert create_issue.inputSchema["properties"]["project_key"]["default"] == ""
 
 
 def test_resources_have_json_mime_type_and_issue_template():
@@ -158,7 +156,7 @@ def test_resources_have_json_mime_type_and_issue_template():
 
     assert resource_by_uri["backlog://config"].mimeType == "application/json"
     assert resource_by_uri["backlog://config"].meta == {"kind": "config", "scope": "workstation"}
-    assert template_by_uri["backlog://issue/{issue_key}"].mimeType == "application/json"
-    assert template_by_uri["backlog://issue/{issue_key}"].meta == {"kind": "issue", "scope": "project"}
+    assert template_by_uri["https://bapjp.backlog.com/view/{issue_key}"].mimeType == "application/json"
+    assert template_by_uri["https://bapjp.backlog.com/view/{issue_key}"].meta == {"kind": "issue", "scope": "project"}
 
 

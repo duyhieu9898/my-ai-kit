@@ -97,8 +97,17 @@ def compact_issue(issue):
     attachments = issue.get("attachments")
     if description and attachments:
         description = _replace_evidence_urls(description, attachments)
+    
+    try:
+        config = load_config()
+        base_url = config.get("base_url", "").rstrip("/")
+    except Exception:
+        base_url = ""
+        
+    issue_key = issue.get("issueKey")
+    
     fields = {
-        "issueKey": issue.get("issueKey"),
+        "issueKey": issue_key,
         "summary": issue.get("summary"),
         "description": description,
         "issueType": (issue.get("issueType") or {}).get("name"),
@@ -109,6 +118,8 @@ def compact_issue(issue):
         "dueDate": issue.get("dueDate"),
         "estimatedHours": issue.get("estimatedHours"),
         "actualHours": issue.get("actualHours"),
+        "resourceUri": f"backlog://issue/{issue_key}" if issue_key else None,
+        "url": f"{base_url}/view/{issue_key}" if (base_url and issue_key) else None,
     }
     custom = compact_custom_fields(issue.get("customFields"))
     # Drop fields with no value to reduce noise

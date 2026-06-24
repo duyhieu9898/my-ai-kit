@@ -25,7 +25,7 @@ Use the absolute path to this directory. Codex stores user-scoped MCP servers
 in `~/.codex/config.toml`, shared by its CLI and IDE extension:
 
 ```bash
-codex mcp add backlog -- uv --directory /absolute/path/to/hieund-ai-kit-cli/backlog-mcp run backlog-mcp-server
+codex mcp add backlog -- uv --project /absolute/path/to/hieund-ai-kit-cli/backlog-mcp run backlog-mcp-server
 ```
 
 Equivalent `config.toml`:
@@ -34,7 +34,7 @@ Equivalent `config.toml`:
 [mcp_servers.backlog]
 command = "uv"
 args = [
-  "--directory",
+  "--project",
   "/absolute/path/to/hieund-ai-kit-cli/backlog-mcp",
   "run",
   "backlog-mcp-server",
@@ -49,7 +49,7 @@ For Gemini or another MCP client, register the same stdio command globally:
 {
   "command": "uv",
   "args": [
-    "--directory",
+    "--project",
     "/absolute/path/to/hieund-ai-kit-cli/backlog-mcp",
     "run",
     "backlog-mcp-server"

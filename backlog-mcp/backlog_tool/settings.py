@@ -33,8 +33,12 @@ def load_env_file():
 
 
 def load_config():
+    load_env_file()
     with open(CONFIG_PATH, "r", encoding="utf-8") as config_file:
         config = json.load(config_file)
+    env_base_url = os.environ.get("BACKLOG_BASE_URL")
+    if env_base_url:
+        config["base_url"] = env_base_url
     validate_config(config)
     return config
 
