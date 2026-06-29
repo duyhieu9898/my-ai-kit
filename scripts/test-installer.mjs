@@ -85,12 +85,6 @@ ${harnessBlock}
     "status detection must read the Codex marker file",
   );
 
-  fs.rmSync(path.join(codexProjectDir, ".agents", ".kit-target"));
-  assert.equal(
-    detectInstalledTarget(codexProjectDir),
-    "codex",
-    "status detection must fall back to the Codex root instruction",
-  );
   fs.writeFileSync(path.join(codexProjectDir, "GEMINI.md"), "# Gemini\n");
   assert.equal(
     detectInstalledTarget(codexProjectDir),
@@ -98,7 +92,6 @@ ${harnessBlock}
     "status fallback must avoid guessing when root instructions are ambiguous",
   );
   fs.rmSync(path.join(codexProjectDir, "GEMINI.md"));
-  fs.writeFileSync(path.join(codexProjectDir, ".agents", ".kit-target"), "codex\n");
 
   fs.writeFileSync(path.join(codexProjectDir, "AGENTS.md"), "# Local Codex Instructions\n");
   mirrorCopy(codexTemplatePath, codexProjectDir, { overwriteRootInstruction: false });
@@ -122,7 +115,7 @@ ${harnessBlock}
     "Codex hook adapter must be installed",
   );
   assert.ok(
-    fs.existsSync(path.join(codexProjectDir, ".agents", ".kit-target")),
+    fs.existsSync(path.join(codexProjectDir, ".agents", "AGENTS.md")),
     "runtime folder must be installed",
   );
 
@@ -295,7 +288,7 @@ ${harnessBlock}
       "--path",
       testProjectDir,
     ]);
-    assert.ok(fs.existsSync(path.join(installDir, ".kit-target")), "repair must restore the install folder and marker file");
+    assert.ok(fs.existsSync(path.join(installDir, "AGENTS.md")), "repair must restore the install folder and its files");
     
     const repairedStatus = execFileSync(process.execPath, [
       binLinkPath,

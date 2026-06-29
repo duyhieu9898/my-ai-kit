@@ -18,7 +18,6 @@ const REPO = 'github:duyhieu9898/my-ai-kit';
 const TEMPLATES_FOLDER = 'templates';
 const TEMP_PREFIX = 'hieund-ai-kit-';
 const INSTALL_FOLDER = '.agents';
-const MARKER_FILE = '.kit-target';
 const DEFAULT_TARGET = 'codex';
 const CODEX_CONFIG_FOLDER = '.codex';
 const CONFIG_FILE = '.ai-kit.json';
@@ -108,36 +107,19 @@ const getRootInstructionFiles = (templatePath) => {
 const detectInstalledTarget = (projectDir) => {
     const configPath = path.join(projectDir, CONFIG_FILE);
     let configTarget = null;
-    let installDir = INSTALL_FOLDER;
     if (fs.existsSync(configPath)) {
         try {
             const config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
             if (config && config.target && TARGET_REGISTRY[config.target]) {
                 configTarget = config.target;
             }
-            if (config && config.paths && config.paths.installDir) {
-                installDir = config.paths.installDir;
-            }
         } catch {
-            // Ignore parsing errors for detection, fall back to marker
+            // Ignore parsing errors
         }
     }
 
-    const markerPath = path.join(projectDir, installDir, MARKER_FILE);
-    let markerTarget = null;
-    if (fs.existsSync(markerPath)) {
-        const target = fs.readFileSync(markerPath, 'utf-8').trim();
-        if (TARGET_REGISTRY[target]) {
-            markerTarget = target;
-        }
-    }
-
-    // Primary: configTarget. Secondary: markerTarget.
     if (configTarget) {
         return configTarget;
-    }
-    if (markerTarget) {
-        return markerTarget;
     }
 
     // Fallback: infer from signature root instruction files.
@@ -796,7 +778,6 @@ const statusCommand = (options) => {
     }
     const installDir = path.join(projectDir, installDirName);
     const installDirExists = fs.existsSync(installDir);
-    const markerExists = fs.existsSync(path.join(installDir, MARKER_FILE));
 
     console.log(chalk.blueBright('\n📊 Kit Installation Status\n'));
 
@@ -818,15 +799,6 @@ const statusCommand = (options) => {
     } else if (!configExists && installDirExists) {
         statusText = 'UNCONFIGURED (Config file missing)';
         isUnconfigured = true;
-    } else if (configExists && installDirExists && !markerExists) {
-        statusText = 'CORRUPTED (Marker file missing)';
-        isCorrupted = true;
-    } else if (config && markerExists) {
-        const markerTarget = fs.readFileSync(path.join(installDir, MARKER_FILE), 'utf-8').trim();
-        if (config.target !== markerTarget) {
-            statusText = 'CORRUPTED (Target mismatch)';
-            isCorrupted = true;
-        }
     }
 
     const activeTarget = installedTarget || (config && config.target) || 'unknown';
@@ -952,11 +924,6 @@ const repairCommand = async (options) => {
 
         // Restore target files (mirrorCopy with overwriteRootInstruction = false so we don't destroy user modifications in project root files)
         mirrorCopy(templatePath, projectDir, { overwriteRootInstruction: false });
-        
-        // Ensure .kit-target marker is in place in the installDir
-        const installDir = path.join(projectDir, installDirName);
-        fs.mkdirSync(installDir, { recursive: true });
-        fs.writeFileSync(path.join(installDir, MARKER_FILE), `${targetName}\n`);
         
         cleanup(templatePath);
 
