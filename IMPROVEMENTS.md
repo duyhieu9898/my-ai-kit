@@ -2,24 +2,29 @@
 
 This file tracks planned improvements for the AI kit installer and runtime layout.
 
-## Profile Switch For Multiple Agent Runtimes
+---
 
-### Problem
+## 🚀 Profile Switch For Multiple Agent Runtimes
 
-Codex and Gemini Antigravity can both use workspace skills, but their native discovery paths overlap around `.agents/skills/`.
+### Problem Statement
 
-If Codex-specific skills and Gemini Antigravity-specific skills are installed into the same `.agents/skills/` folder, agents may read or select skills intended for another runtime.
+Both Codex and Gemini Antigravity can use workspace skills, but their native discovery paths overlap around `.agents/skills/`.
 
-If skills are namespaced instead, for example `.agents/codex/skills/` and `.agents/gemini/skills/`, the layout is cleaner but native auto-discovery may no longer work for runtimes that only scan `.agents/skills/`.
+If Codex-specific skills and Gemini Antigravity-specific skills are installed simultaneously into the same `.agents/skills/` folder, agents may read or select skills intended for another runtime, causing context pollution and incorrect behaviors.
 
-### Proposed Mechanism
+If skills are stored in target-specific directories (e.g. `.agents/codex/skills/` and `.agents/gemini/skills/`), auto-discovery will fail for runtimes that only scan `.agents/skills/`.
 
-Use profile switch mode:
+### Resolution Design
+
+Use a profile-switch mechanism where both runtimes are installed under local profile storage, and only the active profile's skills are mirrored/copied into `.agents/skills/`.
+
+#### Folder Structure Layout
 
 ```text
 .agents/
-├── skills/              # Active profile copied or linked here
-├── profiles/
+├── skills/              # ACTIVE Profile's skills folder (copied from profiles/<active>)
+├── scripts/             # Shared runtime scripts
+├── profiles/            # Inactive profile storage
 │   ├── codex/
 │   │   ├── skills/
 │   │   ├── scripts/
@@ -33,36 +38,36 @@ Use profile switch mode:
 └── shared/
 ```
 
-Only one profile is active in `.agents/skills/` at a time. The inactive profiles remain stored under `.agents/profiles/`.
+### Design Decisions
 
-### CLI Commands
+1. **Active Target State:** 
+   - Centralized in the root `.ai-kit.json` via the `"target"` field (e.g. `"target": "codex"`). There is no need for a separate `.agents/profile.json`.
+2. **File Ownership Manifest Coexistence:**
+   - Both `AGENTS.md` and `GEMINI.md` root instruction files can coexist at the project root safely.
+   - When switching profiles, the CLI only refreshes or appends the `KIT` block in the corresponding instruction file (`AGENTS.md` for codex, `GEMINI.md` for gemini).
+3. **Portability (Copy vs Symlink):**
+   - Profile activation will **copy/mirror** files from `profiles/<target>/skills/` to `skills/`. This avoids permission and portability issues of symbolic links on Windows, Docker, and sandboxed runtimes.
+4. **Shared Scripts:**
+   - Common utilities and hooks will be located in the shared folders, while target-specific agent definitions and workflows remain in their respective profile folders.
 
-Potential commands:
+### CLI Profile Commands
 
 ```bash
-hieund-ai-kit init
-hieund-ai-kit init --gemini
 hieund-ai-kit profile list
-hieund-ai-kit profile use codex
-hieund-ai-kit profile use gemini
-hieund-ai-kit profile status
+# Lists available profiles (codex, gemini) and indicates which one is active.
+
+hieund-ai-kit profile use <target>
+# Activates the selected profile:
+# 1. Clears .agents/skills/
+# 2. Copies files from .agents/profiles/<target>/skills/ to .agents/skills/
+# 3. Updates the "target" field in the root .ai-kit.json
+# 4. Updates/appends the KIT block in the target's root instruction file
 ```
 
-### Expected Behavior
+---
 
-- `profile use codex` activates Codex skills into `.agents/skills/` and writes or refreshes `AGENTS.md`.
-- `profile use gemini` activates Gemini Antigravity skills into `.agents/skills/` and writes or refreshes `GEMINI.md`.
-- The active profile can be copied or symlinked. Copying is more portable; symlinking is faster and avoids duplication but may be less reliable across OSes.
-- The CLI should protect user changes before replacing `.agents/skills/`.
-- The CLI should show the active profile in `hieund-ai-kit status`.
+## 📅 Action Plan for Next Session
 
-### Tradeoff
-
-This does not allow simultaneous native auto-load for both runtimes from separate skill folders. Instead, it keeps native auto-discovery working by ensuring `.agents/skills/` always contains the currently active runtime profile.
-
-### Open Questions
-
-- Should profile activation copy files or create symlinks?
-- Should the active profile be stored in `.agents/profile.json`?
-- Should `AGENTS.md` and `GEMINI.md` both remain in the root, or should activation only install the selected root instruction?
-- Should shared scripts live in `.agents/shared/scripts/` or be copied into each active profile?
+- [ ] Implement `profile` subcommands in `bin/index.js` (`list` and `use`).
+- [ ] Update `init` and `update` logic to populate the `.agents/profiles/` directory instead of installing directly to `.agents/`.
+- [ ] Add unit/regression tests to verify profile switching, file mirroring, and root instruction block updates.
