@@ -67,7 +67,7 @@ Classify the user request before execution to select the correct operation mode:
 
 ### 2. Checklist Priority (Final verification request)
 Run the project audit command: `python3 .agents/scripts/checklist.py .` in the following priority order:
-$$\text{Security} \rightarrow \text{Lint} \rightarrow \text{Schema} \rightarrow \text{Tests} \rightarrow \text{UX} \rightarrow \text{Seo} \rightarrow \text{E2E}$$
+$\text{Security} \rightarrow \text{Lint} \rightarrow \text{Schema} \rightarrow \text{Tests} \rightarrow \text{UX} \rightarrow \text{Seo} \rightarrow \text{E2E}$
 
 ---
 
