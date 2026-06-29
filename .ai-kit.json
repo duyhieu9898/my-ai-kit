@@ -1,0 +1,18 @@
+{
+  "target": "codex",
+  "version": "2.0.0",
+  "ref": "main",
+  "installedAt": "2026-06-29T04:34:49.224Z",
+  "paths": {
+    "installDir": ".agents"
+  },
+  "harness": {
+    "enabled": true,
+    "source": "repository-harness"
+  },
+  "features": {
+    "backlog": true,
+    "guardHooks": true,
+    "toolRegistry": true
+  }
+}

@@ -240,6 +240,101 @@ ${harnessBlock}
     "Gemini hook adapter must be installed",
   );
 
+  // ============================================================================
+  // CONFIG & REPAIR TESTS
+  // ============================================================================
+
+  const testProjectDir = fs.mkdtempSync(path.join(os.tmpdir(), "hieund-ai-kit-test-"));
+  try {
+    // 1. Test init command creates .ai-kit.json
+    execFileSync(process.execPath, [
+      binLinkPath,
+      "init",
+      "--target",
+      "codex",
+      "--path",
+      testProjectDir,
+      "--force",
+    ]);
+
+    const configPath = path.join(testProjectDir, ".ai-kit.json");
+    assert.ok(fs.existsSync(configPath), "init must create .ai-kit.json");
+
+    const config = readJson(configPath);
+    assert.equal(config.target, "codex", "config target must be codex");
+    assert.equal(config.paths.installDir, ".agents", "config installDir must be .agents");
+    assert.equal(config.features.backlog, true, "config backlog feature must be true");
+    assert.equal(config.harness.enabled, false, "harness must be disabled when no harness files exist");
+
+    // 2. Test status command works
+    const statusOutput = execFileSync(process.execPath, [
+      binLinkPath,
+      "status",
+      "--path",
+      testProjectDir,
+    ], { encoding: "utf8" });
+    assert.ok(statusOutput.includes("OpenAI Codex Kit: INSTALLED"), "status must report INSTALLED");
+
+    // 3. Test corruption detection
+    // Remove install folder and check status
+    const installDir = path.join(testProjectDir, ".agents");
+    fs.rmSync(installDir, { recursive: true, force: true });
+    
+    const corruptedStatus = execFileSync(process.execPath, [
+      binLinkPath,
+      "status",
+      "--path",
+      testProjectDir,
+    ], { encoding: "utf8" });
+    assert.ok(corruptedStatus.includes("CORRUPTED (Install folder missing)"), "status must report CORRUPTED");
+
+    // 4. Test repair command
+    execFileSync(process.execPath, [
+      binLinkPath,
+      "repair",
+      "--path",
+      testProjectDir,
+    ]);
+    assert.ok(fs.existsSync(path.join(installDir, ".kit-target")), "repair must restore the install folder and marker file");
+    
+    const repairedStatus = execFileSync(process.execPath, [
+      binLinkPath,
+      "status",
+      "--path",
+      testProjectDir,
+    ], { encoding: "utf8" });
+    assert.ok(repairedStatus.includes("OpenAI Codex Kit: INSTALLED"), "status must report INSTALLED after repair");
+
+    // 5. Test update command (migrates / updates config)
+    // Delete .ai-kit.json and run update to trigger auto-migration
+    fs.rmSync(configPath);
+    execFileSync(process.execPath, [
+      binLinkPath,
+      "update",
+      "--path",
+      testProjectDir,
+    ]);
+    assert.ok(fs.existsSync(configPath), "update must auto-migrate/re-create .ai-kit.json if missing");
+    const migratedConfig = readJson(configPath);
+    assert.equal(migratedConfig.target, "codex", "migrated config target must be codex");
+
+    // 6. Test target switch updates config
+    execFileSync(process.execPath, [
+      binLinkPath,
+      "init",
+      "--target",
+      "gemini",
+      "--path",
+      testProjectDir,
+      "--force",
+    ]);
+    const switchedConfig = readJson(configPath);
+    assert.equal(switchedConfig.target, "gemini", "config target must update to gemini after switch");
+
+  } finally {
+    fs.rmSync(testProjectDir, { recursive: true, force: true });
+  }
+
   console.log("Installer regression tests passed.");
 } finally {
   fs.rmSync(codexProjectDir, { recursive: true, force: true });

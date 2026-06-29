@@ -21,6 +21,7 @@ const INSTALL_FOLDER = '.agents';
 const MARKER_FILE = '.kit-target';
 const DEFAULT_TARGET = 'codex';
 const CODEX_CONFIG_FOLDER = '.codex';
+const CONFIG_FILE = '.ai-kit.json';
 const CODEX_HOOK_COMMAND_MARKERS = [
     '.codex/hooks/codex_adapter.py',
     '.codex/hooks/harness_guard.py',
@@ -105,12 +106,38 @@ const getRootInstructionFiles = (templatePath) => {
  * @returns {string|null} target name or null when none is detected
  */
 const detectInstalledTarget = (projectDir) => {
-    const markerPath = path.join(projectDir, INSTALL_FOLDER, MARKER_FILE);
+    const configPath = path.join(projectDir, CONFIG_FILE);
+    let configTarget = null;
+    let installDir = INSTALL_FOLDER;
+    if (fs.existsSync(configPath)) {
+        try {
+            const config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+            if (config && config.target && TARGET_REGISTRY[config.target]) {
+                configTarget = config.target;
+            }
+            if (config && config.paths && config.paths.installDir) {
+                installDir = config.paths.installDir;
+            }
+        } catch {
+            // Ignore parsing errors for detection, fall back to marker
+        }
+    }
+
+    const markerPath = path.join(projectDir, installDir, MARKER_FILE);
+    let markerTarget = null;
     if (fs.existsSync(markerPath)) {
         const target = fs.readFileSync(markerPath, 'utf-8').trim();
         if (TARGET_REGISTRY[target]) {
-            return target;
+            markerTarget = target;
         }
+    }
+
+    // Primary: configTarget. Secondary: markerTarget.
+    if (configTarget) {
+        return configTarget;
+    }
+    if (markerTarget) {
+        return markerTarget;
     }
 
     // Fallback: infer from signature root instruction files.
@@ -597,6 +624,32 @@ const initCommand = async (options) => {
         cleanup(templatePath);
         cleanup(oldTemplatePath);
 
+        // Auto-detect harness
+        const harnessExists = fs.existsSync(path.join(projectDir, 'docs', 'HARNESS.md')) ||
+                              fs.existsSync(path.join(projectDir, 'scripts', 'bin', 'harness-cli'));
+
+        const configContent = {
+            target: targetName,
+            version: '2.0.0',
+            ref: ref || 'main',
+            installedAt: new Date().toISOString(),
+            paths: {
+                installDir: INSTALL_FOLDER,
+            },
+            harness: {
+                enabled: harnessExists,
+                source: harnessExists ? 'repository-harness' : 'standalone',
+            },
+            features: {
+                backlog: true,
+                guardHooks: true,
+                toolRegistry: true,
+            },
+        };
+
+        const configPath = path.join(projectDir, CONFIG_FILE);
+        fs.writeFileSync(configPath, `${JSON.stringify(configContent, null, 2)}\n`);
+
         // Success summary.
         console.log(chalk.green(`\n✅ Successfully installed ${config.displayName}!`));
         console.log(chalk.gray('\n──────────────────────────────────────────────────────'));
@@ -657,11 +710,46 @@ const updateCommand = async (options) => {
 
     let templatePath = null;
     try {
-        templatePath = await downloadTarget(config, resolveRef(options));
+        const ref = resolveRef(options);
+        templatePath = await downloadTarget(config, ref);
         spinner.stop();
 
         mirrorCopy(templatePath, projectDir, { overwriteRootInstruction: false });
         cleanup(templatePath);
+
+        // Write or update `.ai-kit.json`
+        const configPath = path.join(projectDir, CONFIG_FILE);
+        let existingConfig = {};
+        if (fs.existsSync(configPath)) {
+            try {
+                existingConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8')) || {};
+            } catch {
+                // Ignore parsing errors, overwrite
+            }
+        }
+
+        const harnessExists = fs.existsSync(path.join(projectDir, 'docs', 'HARNESS.md')) ||
+                              fs.existsSync(path.join(projectDir, 'scripts', 'bin', 'harness-cli'));
+
+        const updatedConfig = {
+            target: targetName,
+            version: '2.0.0',
+            ref: ref || existingConfig.ref || 'main',
+            installedAt: new Date().toISOString(),
+            paths: {
+                installDir: existingConfig.paths?.installDir || INSTALL_FOLDER,
+            },
+            harness: {
+                enabled: harnessExists,
+                source: harnessExists ? 'repository-harness' : 'standalone',
+            },
+            features: {
+                backlog: existingConfig.features?.backlog !== undefined ? existingConfig.features.backlog : true,
+                guardHooks: existingConfig.features?.guardHooks !== undefined ? existingConfig.features.guardHooks : true,
+                toolRegistry: existingConfig.features?.toolRegistry !== undefined ? existingConfig.features.toolRegistry : true,
+            },
+        };
+        fs.writeFileSync(configPath, `${JSON.stringify(updatedConfig, null, 2)}\n`);
 
         console.log(chalk.green(`\n✅ Updated ${config.displayName} (${INSTALL_FOLDER}/ refreshed, shared config merged, root instructions preserved).`));
     } catch (error) {
@@ -677,30 +765,212 @@ const updateCommand = async (options) => {
  */
 const statusCommand = (options) => {
     const projectDir = path.resolve(options.path || process.cwd());
+    const configPath = path.join(projectDir, CONFIG_FILE);
+    
+    // Check if configuration file exists
+    const configExists = fs.existsSync(configPath);
+    let config = null;
+    if (configExists) {
+        try {
+            config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+            
+            // Auto-sync harness state if mismatched
+            const harnessExists = fs.existsSync(path.join(projectDir, 'docs', 'HARNESS.md')) ||
+                                  fs.existsSync(path.join(projectDir, 'scripts', 'bin', 'harness-cli'));
+            if (config && config.harness && config.harness.enabled !== harnessExists) {
+                config.harness.enabled = harnessExists;
+                config.harness.source = harnessExists ? 'repository-harness' : 'standalone';
+                fs.writeFileSync(configPath, `${JSON.stringify(config, null, 2)}\n`);
+                console.log(chalk.gray('ℹ️ Automatically synchronized harness configuration state in .ai-kit.json.'));
+            }
+        } catch (e) {
+            // Ignore parse errors, config remains null
+        }
+    }
+
+    // Determine target and installDir
     const installedTarget = detectInstalledTarget(projectDir);
+    let installDirName = INSTALL_FOLDER;
+    if (config && config.paths && config.paths.installDir) {
+        installDirName = config.paths.installDir;
+    }
+    const installDir = path.join(projectDir, installDirName);
+    const installDirExists = fs.existsSync(installDir);
+    const markerExists = fs.existsSync(path.join(installDir, MARKER_FILE));
 
     console.log(chalk.blueBright('\n📊 Kit Installation Status\n'));
 
-    if (!installedTarget) {
+    if (!installedTarget && !configExists && !installDirExists) {
         console.log(chalk.red('❌ No target installed in this directory.'));
         const validTargets = Object.keys(TARGET_REGISTRY).join(', ');
         console.log(chalk.yellow(`💡 Run ${chalk.cyan('hieund-ai-kit init --target <name>')} (targets: ${validTargets}).\n`));
         return;
     }
 
-    const config = TARGET_REGISTRY[installedTarget];
-    const installDir = path.join(projectDir, INSTALL_FOLDER);
-    const stats = fs.statSync(installDir);
-    const files = fs.readdirSync(installDir, { recursive: true });
+    // Detect corruption/mismatches
+    let statusText = 'INSTALLED';
+    let isCorrupted = false;
+    let isUnconfigured = false;
 
-    console.log(config.bannerColor(`${config.displayName}: INSTALLED`));
+    if (configExists && !installDirExists) {
+        statusText = 'CORRUPTED (Install folder missing)';
+        isCorrupted = true;
+    } else if (!configExists && installDirExists) {
+        statusText = 'UNCONFIGURED (Config file missing)';
+        isUnconfigured = true;
+    } else if (configExists && installDirExists && !markerExists) {
+        statusText = 'CORRUPTED (Marker file missing)';
+        isCorrupted = true;
+    } else if (config && markerExists) {
+        const markerTarget = fs.readFileSync(path.join(installDir, MARKER_FILE), 'utf-8').trim();
+        if (config.target !== markerTarget) {
+            statusText = 'CORRUPTED (Target mismatch)';
+            isCorrupted = true;
+        }
+    }
+
+    const activeTarget = installedTarget || (config && config.target) || 'unknown';
+    const targetConfig = TARGET_REGISTRY[activeTarget] || {
+        displayName: 'Unknown Target',
+        description: 'No registry metadata for this target',
+        bannerColor: chalk.redBright,
+    };
+
+    console.log(targetConfig.bannerColor(`${targetConfig.displayName}: ${statusText}`));
     console.log(chalk.gray('──────────────────────────────────────────────────────'));
-    console.log(`🎯 Target:   ${chalk.cyan(installedTarget)}`);
-    console.log(`📝 About:    ${chalk.gray(config.description)}`);
-    console.log(`📁 Path:     ${chalk.cyan(installDir)}`);
-    console.log(`📅 Modified: ${chalk.gray(stats.mtime.toLocaleString('en-US'))}`);
-    console.log(`📄 Items:    ${chalk.yellow(files.length)} items`);
-    console.log(chalk.gray('──────────────────────────────────────────────────────\n'));
+    console.log(`🎯 Target:       ${chalk.cyan(activeTarget)}`);
+    console.log(`📝 About:        ${chalk.gray(targetConfig.description)}`);
+    console.log(`📁 Path:         ${chalk.cyan(installDir)}`);
+    
+    if (config) {
+        console.log(`📦 Version:      ${chalk.yellow(config.version || 'unknown')}`);
+        console.log(`📍 Ref:          ${chalk.cyan(config.ref || 'unknown')}`);
+        console.log(`📅 Installed At: ${chalk.gray(config.installedAt || 'unknown')}`);
+        console.log(`🛠️  Harness:      ${chalk.gray(JSON.stringify(config.harness))}`);
+        console.log(`✨ Features:     ${chalk.gray(JSON.stringify(config.features))}`);
+    }
+
+    if (installDirExists) {
+        try {
+            const stats = fs.statSync(installDir);
+            const files = fs.readdirSync(installDir, { recursive: true });
+            console.log(`📅 Modified:     ${chalk.gray(stats.mtime.toLocaleString('en-US'))}`);
+            console.log(`📄 Items:        ${chalk.yellow(files.length)} items`);
+        } catch (e) {
+            // Ignore stats errors
+        }
+    }
+    console.log(chalk.gray('──────────────────────────────────────────────────────'));
+
+    if (isCorrupted) {
+        console.log(chalk.red('\n❌ Error: The installation is corrupted.'));
+        console.log(chalk.yellow(`💡 Run ${chalk.cyan('hieund-ai-kit repair')} to fix the missing or mismatched files.\n`));
+    } else if (isUnconfigured) {
+        console.log(chalk.yellow('\n⚠️  Warning: The installation is unconfigured.'));
+        console.log(chalk.yellow(`💡 Run ${chalk.cyan('hieund-ai-kit update')} to automatically generate the configuration file.\n`));
+    } else {
+        console.log('');
+    }
+};
+
+/**
+ * Repair the installed target's `.agents/` folder and config.
+ */
+const repairCommand = async (options) => {
+    const projectDir = path.resolve(options.path || process.cwd());
+    const configPath = path.join(projectDir, CONFIG_FILE);
+
+    if (!fs.existsSync(configPath)) {
+        // Check if we can fall back to detectInstalledTarget
+        const detected = detectInstalledTarget(projectDir);
+        if (!detected) {
+            console.error(chalk.red('❌ No configuration file found and no installed target detected.'));
+            console.log(chalk.yellow(`💡 Run ${chalk.cyan('hieund-ai-kit init')} to install a new kit.`));
+            process.exit(1);
+        }
+        
+        console.log(chalk.yellow('⚠️  Configuration file missing. Re-creating config and repairing...'));
+        // Re-create the configuration file first
+        const harnessExists = fs.existsSync(path.join(projectDir, 'docs', 'HARNESS.md')) ||
+                              fs.existsSync(path.join(projectDir, 'scripts', 'bin', 'harness-cli'));
+        const configContent = {
+            target: detected,
+            version: '2.0.0',
+            ref: 'main',
+            installedAt: new Date().toISOString(),
+            paths: {
+                installDir: INSTALL_FOLDER,
+            },
+            harness: {
+                enabled: harnessExists,
+                source: harnessExists ? 'repository-harness' : 'standalone',
+            },
+            features: {
+                backlog: true,
+                guardHooks: true,
+                toolRegistry: true,
+            },
+        };
+        fs.writeFileSync(configPath, `${JSON.stringify(configContent, null, 2)}\n`);
+    }
+
+    let config;
+    try {
+        config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+        
+        // Auto-sync harness state
+        const harnessExists = fs.existsSync(path.join(projectDir, 'docs', 'HARNESS.md')) ||
+                              fs.existsSync(path.join(projectDir, 'scripts', 'bin', 'harness-cli'));
+        if (config && config.harness && config.harness.enabled !== harnessExists) {
+            config.harness.enabled = harnessExists;
+            config.harness.source = harnessExists ? 'repository-harness' : 'standalone';
+            fs.writeFileSync(configPath, `${JSON.stringify(config, null, 2)}\n`);
+        }
+    } catch (e) {
+        console.error(chalk.red(`❌ Failed to parse config file: ${e.message}`));
+        process.exit(1);
+    }
+
+    const targetName = config.target;
+    const installDirName = config.paths?.installDir || INSTALL_FOLDER;
+    const ref = config.ref || 'main';
+
+    if (!TARGET_REGISTRY[targetName]) {
+        console.error(chalk.red(`❌ Unknown target in configuration: "${targetName}"`));
+        process.exit(1);
+    }
+
+    const targetConfig = TARGET_REGISTRY[targetName];
+    showBanner(targetConfig);
+
+    const spinner = ora({ text: `Downloading clean template for ${targetName}@${ref}...`, color: 'cyan' }).start();
+
+    let templatePath = null;
+    try {
+        templatePath = await downloadTarget(targetConfig, ref);
+        spinner.stop();
+
+        // Restore target files (mirrorCopy with overwriteRootInstruction = false so we don't destroy user modifications in project root files)
+        mirrorCopy(templatePath, projectDir, { overwriteRootInstruction: false });
+        
+        // Ensure .kit-target marker is in place in the installDir
+        const installDir = path.join(projectDir, installDirName);
+        fs.mkdirSync(installDir, { recursive: true });
+        fs.writeFileSync(path.join(installDir, MARKER_FILE), `${targetName}\n`);
+        
+        cleanup(templatePath);
+
+        // Update installedAt timestamp in config
+        config.installedAt = new Date().toISOString();
+        fs.writeFileSync(configPath, `${JSON.stringify(config, null, 2)}\n`);
+
+        console.log(chalk.green(`\n✅ Successfully repaired ${targetConfig.displayName}!`));
+    } catch (error) {
+        spinner.stop();
+        console.error(chalk.red(`❌ Repair failed: ${error.message}`));
+        cleanup(templatePath);
+        process.exit(1);
+    }
 };
 
 // ============================================================================
@@ -740,6 +1010,12 @@ program
     .description('Check installation status')
     .option('-p, --path <dir>', 'Path to the project directory', process.cwd())
     .action(statusCommand);
+
+program
+    .command('repair')
+    .description('Restore missing or corrupted files of the installed target')
+    .option('-p, --path <dir>', 'Path to the project directory', process.cwd())
+    .action(repairCommand);
 
 if (isDirectCliInvocation()) {
     program.parse(process.argv);
