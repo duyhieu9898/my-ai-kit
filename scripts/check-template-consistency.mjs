@@ -162,44 +162,44 @@ function checkSkillReferenceLinks(targetName, skillsPath, markdownPaths) {
 }
 
 const toolkitDocs = readText("docs/product/toolkits.md");
-const codexArchitecture = readText("templates/codex/.agents/ARCHITECTURE.md");
-const geminiArchitecture = readText("templates/gemini/.agents/ARCHITECTURE.md");
+const codexArchitecture = readText("templates/.agents/ARCHITECTURE.md");
+const geminiArchitecture = readText("templates/.agents/gemini/ARCHITECTURE.md");
 const projectPlannerPath =
-  "templates/codex/.agents/skills/project-planner/SKILL.md";
-const planWritingPath = "templates/codex/.agents/skills/plan-writing/SKILL.md";
+  "templates/.agents/skills/project-planner/SKILL.md";
+const planWritingPath = "templates/.agents/skills/plan-writing/SKILL.md";
 const projectPlannerOpenAiPath =
-  "templates/codex/.agents/skills/project-planner/agents/openai.yaml";
+  "templates/.agents/skills/project-planner/agents/openai.yaml";
 const projectPlanner = readText(projectPlannerPath);
 const planWriting = readText(planWritingPath);
 const projectPlannerOpenAi = readText(projectPlannerOpenAiPath);
 const geminiProjectPlannerPath =
-  "templates/gemini/.agents/agents/project-planner.md";
+  "templates/.agents/gemini/agents/project-planner.md";
 const geminiPlanWritingPath =
-  "templates/gemini/.agents/skills/plan-writing/SKILL.md";
-const geminiPlanWorkflowPath = "templates/gemini/.agents/workflows/plan.md";
+  "templates/.agents/gemini/skills/plan-writing/SKILL.md";
+const geminiPlanWorkflowPath = "templates/.agents/gemini/workflows/plan.md";
 const geminiProjectPlanner = readText(geminiProjectPlannerPath);
 const geminiPlanWorkflow = readText(geminiPlanWorkflowPath);
 
-const codexSkillCount = immediateDirectories("templates/codex/.agents/skills").length;
-const codexOpenAiCount = immediateDirectories("templates/codex/.agents/skills").filter(
+const codexSkillCount = immediateDirectories("templates/.agents/skills").length;
+const codexOpenAiCount = immediateDirectories("templates/.agents/skills").filter(
   (skillName) =>
-    exists(`templates/codex/.agents/skills/${skillName}/agents/openai.yaml`),
+    exists(`templates/.agents/skills/${skillName}/agents/openai.yaml`),
 ).length;
-const geminiSkillCount = immediateDirectories("templates/gemini/.agents/skills").length;
-const geminiAgentCount = immediateFiles("templates/gemini/.agents/agents", ".md").length;
-const geminiWorkflowCount = immediateFiles("templates/gemini/.agents/workflows", ".md").length;
-const codexUxAuditConfigPath = "templates/codex/.agents/ux_audit.json";
-const geminiUxAuditConfigPath = "templates/gemini/.agents/ux_audit.json";
-const codexHooksConfigPath = "templates/codex/.codex/hooks.json";
-const codexHarnessGuardPath = "templates/codex/.codex/hooks/harness_guard.py";
-const codexHookAdapterPath = "templates/codex/.codex/hooks/codex_adapter.py";
-const geminiHooksConfigPath = "templates/gemini/.agents/hooks.json";
-const geminiHarnessGuardPath = "templates/gemini/.agents/hooks/harness_guard.py";
-const geminiHookAdapterPath = "templates/gemini/.agents/hooks/gemini_adapter.py";
-const codexSkillMarkdownPaths = recursiveFiles("templates/codex/.agents/skills", ".md");
-const geminiSkillMarkdownPaths = recursiveFiles("templates/gemini/.agents/skills", ".md");
-const geminiAgentMarkdownPaths = recursiveFiles("templates/gemini/.agents/agents", ".md");
-const geminiWorkflowMarkdownPaths = recursiveFiles("templates/gemini/.agents/workflows", ".md");
+const geminiSkillCount = immediateDirectories("templates/.agents/gemini/skills").length;
+const geminiAgentCount = immediateFiles("templates/.agents/gemini/agents", ".md").length;
+const geminiWorkflowCount = immediateFiles("templates/.agents/gemini/workflows", ".md").length;
+const codexUxAuditConfigPath = "templates/.agents/ux_audit.json";
+const geminiUxAuditConfigPath = "templates/.agents/ux_audit.json";
+const codexHooksConfigPath = "templates/.codex/hooks.json";
+const codexHarnessGuardPath = "templates/.codex/hooks/harness_guard.py";
+const codexHookAdapterPath = "templates/.codex/hooks/codex_adapter.py";
+const geminiHooksConfigPath = "templates/.agents/hooks.json";
+const geminiHarnessGuardPath = "templates/.agents/gemini/hooks/harness_guard.py";
+const geminiHookAdapterPath = "templates/.agents/gemini/hooks/gemini_adapter.py";
+const codexSkillMarkdownPaths = recursiveFiles("templates/.agents/skills", ".md");
+const geminiSkillMarkdownPaths = recursiveFiles("templates/.agents/gemini/skills", ".md");
+const geminiAgentMarkdownPaths = recursiveFiles("templates/.agents/gemini/agents", ".md");
+const geminiWorkflowMarkdownPaths = recursiveFiles("templates/.agents/gemini/workflows", ".md");
 const templateMarkdownPaths = [
   ...codexSkillMarkdownPaths,
   ...geminiSkillMarkdownPaths,
@@ -320,19 +320,19 @@ if (exists(codexUxAuditConfigPath) && exists(geminiUxAuditConfigPath)) {
 }
 
 
-checkSkillFrontmatter("codex", "templates/codex/.agents/skills", true);
-checkSkillFrontmatter("gemini", "templates/gemini/.agents/skills", false);
+checkSkillFrontmatter("codex", "templates/.agents/skills", true);
+checkSkillFrontmatter("gemini", "templates/.agents/gemini/skills", false);
 for (const markdownPath of templateMarkdownPaths) {
   checkRelativeLinks(markdownPath);
 }
 checkSkillReferenceLinks(
   "codex",
-  "templates/codex/.agents/skills",
+  "templates/.agents/skills",
   codexSkillMarkdownPaths,
 );
 checkSkillReferenceLinks(
   "gemini",
-  "templates/gemini/.agents/skills",
+  "templates/.agents/gemini/skills",
   [...geminiSkillMarkdownPaths, ...geminiAgentMarkdownPaths, ...geminiWorkflowMarkdownPaths],
 );
 

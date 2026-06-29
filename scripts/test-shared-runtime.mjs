@@ -65,16 +65,30 @@ function runSync(...args) {
 }
 
 try {
-  const codexRoot = path.join(repoRoot, "templates/codex/.agents");
-  const geminiRoot = path.join(repoRoot, "templates/gemini/.agents");
+  const codexRoot = path.join(repoRoot, "templates/.agents");
+  const geminiRoot = path.join(repoRoot, "templates/.agents");
   const sharedAgentsRoot = path.join(repoRoot, "shared/runtime/.agents");
   const codexScripts = listExecutableScripts(codexRoot);
   const geminiScripts = listExecutableScripts(geminiRoot);
   const sharedScripts = listExecutableScripts(sharedAgentsRoot);
   const sharedResourcePaths = listFiles(path.join(sharedAgentsRoot, ".shared"));
+  const filterToSubDirs = (rel) =>
+    rel.startsWith("skills/") ||
+    rel.startsWith("agents/") ||
+    rel.startsWith("workflows/") ||
+    rel.startsWith("hooks/");
 
-  assert.deepEqual(codexScripts, geminiScripts);
-  assert.deepEqual(sharedScripts, codexScripts);
+  const codexScriptsOnly = codexScripts.filter(filterToSubDirs).sort();
+  const geminiScriptsOnly = geminiScripts.filter(rel => rel.startsWith("gemini/")).sort();
+  const mappedGeminiScripts = geminiScriptsOnly
+    .map(rel => rel.slice("gemini/".length))
+    .filter(filterToSubDirs)
+    .sort();
+
+  const sharedScriptsOnly = sharedScripts.filter(filterToSubDirs).sort();
+
+  assert.deepEqual(codexScriptsOnly, mappedGeminiScripts);
+  assert.deepEqual(sharedScriptsOnly, codexScriptsOnly);
   assert.deepEqual(
     sharedResourcePaths,
     listFiles(path.join(codexRoot, ".shared")),
@@ -83,10 +97,13 @@ try {
     sharedResourcePaths,
     listFiles(path.join(geminiRoot, ".shared")),
   );
-  for (const relativePath of codexScripts) {
+  for (const relativePath of codexScriptsOnly) {
+    const geminiRelPath = relativePath.startsWith("skills/") || relativePath.startsWith("agents/") || relativePath.startsWith("workflows/") || relativePath.startsWith("hooks/")
+      ? "gemini/" + relativePath
+      : relativePath;
     assert.deepEqual(
       fs.readFileSync(path.join(codexRoot, relativePath)),
-      fs.readFileSync(path.join(geminiRoot, relativePath)),
+      fs.readFileSync(path.join(geminiRoot, geminiRelPath)),
     );
   }
 
@@ -96,25 +113,23 @@ try {
     { recursive: true },
   );
 
-  for (const target of ["codex", "gemini"]) {
-    fs.cpSync(
-      path.join(repoRoot, "templates", target),
-      path.join(tempRoot, "templates", target),
-      { recursive: true },
-    );
-  }
+  fs.cpSync(
+    path.join(repoRoot, "templates"),
+    path.join(tempRoot, "templates"),
+    { recursive: true },
+  );
 
   const driftedFile = path.join(
     tempRoot,
-    "templates/gemini/.agents/scripts/auto_preview.py",
+    "templates/.agents/scripts/auto_preview.py",
   );
   const geminiSkill = path.join(
     tempRoot,
-    "templates/gemini/.agents/skills/api-patterns/SKILL.md",
+    "templates/.agents/gemini/skills/api-patterns/SKILL.md",
   );
   const codexOpenAi = path.join(
     tempRoot,
-    "templates/codex/.agents/skills/api-patterns/scripts/api_validator.py",
+    "templates/.agents/skills/api-patterns/scripts/api_validator.py",
   );
   const originalSkill = fs.readFileSync(geminiSkill);
   const originalOpenAi = fs.readFileSync(codexOpenAi);
@@ -122,7 +137,7 @@ try {
 
   const failedCheck = runSync("--check");
   assert.notEqual(failedCheck.status, 0, "drift check should fail");
-  assert.match(failedCheck.stderr, /gemini:.agents\/scripts\/auto_preview.py/);
+  assert.match(failedCheck.stderr, /gemini:\.agents\/scripts\/auto_preview\.py/);
 
   const syncResult = runSync();
   assert.equal(syncResult.status, 0, syncResult.stderr);
@@ -133,7 +148,7 @@ try {
   assert.deepEqual(fs.readFileSync(codexOpenAi), originalOpenAi);
 
   console.log(
-    `Shared runtime coverage and drift repair test passed: ${sharedScripts.length} scripts.`,
+    `Shared runtime coverage and drift repair test passed: ${sharedScriptsOnly.length} scripts.`,
   );
 } finally {
   fs.rmSync(tempRoot, { recursive: true, force: true });

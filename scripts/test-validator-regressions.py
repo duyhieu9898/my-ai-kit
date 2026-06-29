@@ -17,11 +17,13 @@ TARGETS = ("codex", "gemini")
 
 
 def script_path(target: str, relative_path: str) -> Path:
-    return REPO_ROOT / "templates" / target / ".agents" / "skills" / relative_path
+    if target == "gemini":
+        return REPO_ROOT / "templates" / ".agents" / "gemini" / "skills" / relative_path
+    return REPO_ROOT / "templates" / ".agents" / "skills" / relative_path
 
 
 def agent_script_path(target: str, script_name: str) -> Path:
-    return REPO_ROOT / "templates" / target / ".agents" / "scripts" / script_name
+    return REPO_ROOT / "templates" / ".agents" / "scripts" / script_name
 
 
 def load_module(target: str, name: str, relative_path: str):

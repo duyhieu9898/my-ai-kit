@@ -6,28 +6,13 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import {
-  cleanupOldTarget,
-  detectInstalledTarget,
-  mirrorCopy,
-  removeKitCodexHooks,
-} from "../bin/index.js";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const codexTemplatePath = path.join(repoRoot, "templates", "codex");
-const geminiTemplatePath = path.join(repoRoot, "templates", "gemini");
-const codexProjectDir = fs.mkdtempSync(path.join(os.tmpdir(), "hieund-ai-kit-codex-"));
-const geminiProjectDir = fs.mkdtempSync(path.join(os.tmpdir(), "hieund-ai-kit-gemini-"));
 const binLinkPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "hieund-ai-kit-bin-")), "hieund-ai-kit");
-const harnessBlock = `<!-- HARNESS:BEGIN -->
-## Harness
 
-Project-specific Harness instructions stay here.
-<!-- HARNESS:END -->`;
-
-const customHook = {
-  matcher: "custom_tool",
-  hooks: [{ type: "command", command: "echo custom-hook" }],
+const testEnv = {
+  ...process.env,
+  HIEUND_AI_KIT_TEMPLATE_SOURCE: path.join(repoRoot, "templates")
 };
 
 function readJson(filePath) {
@@ -43,290 +28,271 @@ function writeJson(filePath, value) {
 }
 
 try {
+  // Create link to CLI binary
   fs.symlinkSync(path.join(repoRoot, "bin", "index.js"), binLinkPath);
   const symlinkHelp = execFileSync(process.execPath, [binLinkPath, "--help"], {
     encoding: "utf8",
+    env: testEnv
   });
   assert.ok(
     symlinkHelp.includes("Usage: hieund-ai-kit [options] [command]"),
-    "CLI must parse when invoked through an npm-style symlink",
+    "CLI must parse when invoked through an npm-style symlink"
   );
-
-  fs.mkdirSync(path.join(codexProjectDir, ".codex"), { recursive: true });
-  fs.writeFileSync(
-    path.join(codexProjectDir, ".codex", "config.toml"),
-    'model = "custom-model"\n',
-  );
-  writeJson(path.join(codexProjectDir, ".codex", "hooks.json"), {
-    hooks: { PreToolUse: [customHook] },
-  });
-  fs.writeFileSync(
-    path.join(codexProjectDir, "AGENTS.md"),
-    `# Project Instructions
-
-${harnessBlock}
-`,
-  );
-
-  mirrorCopy(codexTemplatePath, codexProjectDir);
-
-  const codexRootInstruction = readText(path.join(codexProjectDir, "AGENTS.md"));
-  assert.ok(
-    codexRootInstruction.includes("# AGENTS.md - Workspace Rules"),
-    "force-style Codex install must refresh the root instruction from the template",
-  );
-  assert.ok(
-    codexRootInstruction.includes(harnessBlock),
-    "force-style Codex install must preserve project-specific Harness blocks",
-  );
-  assert.ok(
-    codexRootInstruction.includes("# Project Instructions"),
-    "force-style Codex install must preserve project-owned custom text outside blocks",
-  );
-  assert.equal(
-    detectInstalledTarget(codexProjectDir),
-    "codex",
-    "status detection must detect installed target",
-  );
-
-  fs.writeFileSync(path.join(codexProjectDir, "GEMINI.md"), "# Gemini\n");
-  assert.equal(
-    detectInstalledTarget(codexProjectDir),
-    null,
-    "status fallback must avoid guessing when root instructions are ambiguous",
-  );
-  fs.rmSync(path.join(codexProjectDir, "GEMINI.md"));
-
-  fs.writeFileSync(path.join(codexProjectDir, "AGENTS.md"), "# Local Codex Instructions\n");
-  mirrorCopy(codexTemplatePath, codexProjectDir, { overwriteRootInstruction: false });
-  assert.equal(
-    readText(path.join(codexProjectDir, "AGENTS.md")),
-    "# Local Codex Instructions\n",
-    "update-style Codex install must preserve existing root instructions",
-  );
-
-  assert.equal(
-    readText(path.join(codexProjectDir, ".codex", "config.toml")),
-    'model = "custom-model"\n',
-    "custom Codex config must be preserved",
-  );
-  assert.ok(
-    fs.existsSync(path.join(codexProjectDir, ".codex", "hooks", "harness_guard.py")),
-    "shared Codex hook policy must be installed",
-  );
-  assert.ok(
-    fs.existsSync(path.join(codexProjectDir, ".codex", "hooks", "codex_adapter.py")),
-    "Codex hook adapter must be installed",
-  );
-  assert.ok(
-    fs.existsSync(path.join(codexProjectDir, ".agents", "AGENTS.md")),
-    "runtime folder must be installed",
-  );
-
-  const merged = readJson(path.join(codexProjectDir, ".codex", "hooks.json"));
-  const preToolGroups = merged.hooks.PreToolUse;
-  assert.equal(
-    preToolGroups.filter((group) =>
-      group.hooks?.some((hook) => hook.command === "echo custom-hook"),
-    ).length,
-    1,
-    "custom hook must be preserved",
-  );
-  assert.equal(
-    preToolGroups.filter((group) =>
-      group.hooks?.some((hook) => hook.command?.includes("codex_adapter.py")),
-    ).length,
-    1,
-    "kit hook must not be duplicated on update",
-  );
-
-  removeKitCodexHooks(codexProjectDir);
-  const cleaned = readJson(path.join(codexProjectDir, ".codex", "hooks.json"));
-  assert.deepEqual(
-    cleaned.hooks.PreToolUse,
-    [customHook],
-    "switch cleanup must preserve custom hooks",
-  );
-  assert.equal(
-    fs.existsSync(path.join(codexProjectDir, ".codex", "hooks", "harness_guard.py")),
-    false,
-    "switch cleanup must remove the shared hook policy",
-  );
-  assert.equal(
-    fs.existsSync(path.join(codexProjectDir, ".codex", "hooks", "codex_adapter.py")),
-    false,
-    "switch cleanup must remove the Codex adapter",
-  );
-  mirrorCopy(codexTemplatePath, codexProjectDir);
-  cleanupOldTarget(codexTemplatePath, codexProjectDir);
-  assert.equal(
-    fs.existsSync(path.join(codexProjectDir, "AGENTS.md")),
-    false,
-    "target switch cleanup must remove the old Codex root instruction",
-  );
-  assert.equal(
-    fs.existsSync(path.join(codexProjectDir, ".codex", "hooks", "harness_guard.py")),
-    false,
-    "target switch cleanup must remove kit-owned Codex hook files",
-  );
-  assert.deepEqual(
-    readJson(path.join(codexProjectDir, ".codex", "hooks.json")).hooks.PreToolUse,
-    [customHook],
-    "target switch cleanup must preserve project-owned Codex hooks",
-  );
-  mirrorCopy(geminiTemplatePath, codexProjectDir);
-  assert.equal(
-    detectInstalledTarget(codexProjectDir),
-    "gemini",
-    "status detection must detect Gemini after an isolated target switch",
-  );
-
-  const customGeminiHook = {
-    enabled: true,
-    PreToolUse: [
-      {
-        matcher: "custom_tool",
-        hooks: [{ type: "command", command: "python3 .agents/hooks/custom.py" }],
-      },
-    ],
-  };
-  fs.mkdirSync(path.join(geminiProjectDir, ".agents", "hooks"), { recursive: true });
-  writeJson(path.join(geminiProjectDir, ".agents", "hooks.json"), {
-    "custom-project-hook": customGeminiHook,
-  });
-  fs.writeFileSync(
-    path.join(geminiProjectDir, ".agents", "hooks", "custom.py"),
-    'print("custom")\n',
-  );
-
-  mirrorCopy(geminiTemplatePath, geminiProjectDir);
-  mirrorCopy(geminiTemplatePath, geminiProjectDir, {
-    overwriteRootInstruction: false,
-  });
-
-  assert.equal(
-    detectInstalledTarget(geminiProjectDir),
-    "gemini",
-    "status detection must read the Gemini marker file",
-  );
-  const geminiHooks = readJson(path.join(geminiProjectDir, ".agents", "hooks.json"));
-  assert.deepEqual(
-    geminiHooks["custom-project-hook"],
-    customGeminiHook,
-    "custom Gemini hook config must be preserved",
-  );
-  assert.ok(
-    geminiHooks["hieund-ai-kit-harness-guard"],
-    "managed Gemini hook config must be installed",
-  );
-  assert.equal(
-    Object.keys(geminiHooks).filter((key) => key === "hieund-ai-kit-harness-guard").length,
-    1,
-    "managed Gemini hook must not be duplicated on update",
-  );
-  assert.ok(
-    fs.existsSync(path.join(geminiProjectDir, ".agents", "hooks", "custom.py")),
-    "custom Gemini hook scripts must be preserved",
-  );
-  assert.ok(
-    fs.existsSync(path.join(geminiProjectDir, ".agents", "hooks", "harness_guard.py")),
-    "shared Gemini hook policy must be installed",
-  );
-  assert.ok(
-    fs.existsSync(path.join(geminiProjectDir, ".agents", "hooks", "gemini_adapter.py")),
-    "Gemini hook adapter must be installed",
-  );
-
-  // ============================================================================
-  // CONFIG & REPAIR TESTS
-  // ============================================================================
 
   const testProjectDir = fs.mkdtempSync(path.join(os.tmpdir(), "hieund-ai-kit-test-"));
+  const installDir = path.join(testProjectDir, ".agents");
+
   try {
-    // 1. Test init command creates .ai-kit.json
+    // -------------------------------------------------------------------------
+    // Prep project files for manual edits and hooks
+    // -------------------------------------------------------------------------
+    fs.mkdirSync(path.join(testProjectDir, ".codex"), { recursive: true });
+    writeJson(path.join(testProjectDir, ".codex", "hooks.json"), {
+      hooks: {
+        PreToolUse: [
+          {
+            matcher: "custom_tool",
+            hooks: [{ type: "command", command: "echo custom-codex" }]
+          }
+        ]
+      }
+    });
+
+    fs.mkdirSync(path.join(testProjectDir, ".agents"), { recursive: true });
+    writeJson(path.join(testProjectDir, ".agents", "hooks.json"), {
+      "custom-gemini-hook": {
+        enabled: true,
+        PreToolUse: [
+          {
+            matcher: "custom_tool",
+            hooks: [{ type: "command", command: "echo custom-gemini" }]
+          }
+        ]
+      }
+    });
+
+    fs.writeFileSync(
+      path.join(testProjectDir, "AGENTS.md"),
+      `# Project Instructions\n\n<!-- HARNESS:BEGIN -->\n## Harness\n<!-- HARNESS:END -->\n`
+    );
+    fs.writeFileSync(
+      path.join(testProjectDir, "GEMINI.md"),
+      `# Gemini Instructions\n\n<!-- HARNESS:BEGIN -->\n## Harness\n<!-- HARNESS:END -->\n`
+    );
+
+    // -------------------------------------------------------------------------
+    // ASSERTION 1: A single init command installs both runtimes side-by-side
+    // -------------------------------------------------------------------------
     execFileSync(process.execPath, [
       binLinkPath,
       "init",
-      "--target",
-      "codex",
       "--path",
       testProjectDir,
       "--force",
-    ]);
+    ], { env: testEnv });
 
+    assert.ok(fs.existsSync(path.join(testProjectDir, "AGENTS.md")), "AGENTS.md must exist at root");
+    assert.ok(fs.existsSync(path.join(testProjectDir, "GEMINI.md")), "GEMINI.md must exist at root");
+    assert.ok(fs.existsSync(path.join(installDir, "skills")), "Codex runtime (skills/) must exist flat under .agents/");
+    assert.ok(fs.existsSync(path.join(installDir, "gemini", "skills")), "Gemini runtime (skills/) must exist nested under .agents/gemini/");
+
+    // -------------------------------------------------------------------------
+    // ASSERTION 2: Workspace-level hook files are written correctly and custom hooks preserved
+    // -------------------------------------------------------------------------
+    const codexHooks = readJson(path.join(testProjectDir, ".codex", "hooks.json"));
+    assert.ok(codexHooks.hooks.PreToolUse.some(h => h.matcher === "custom_tool"), "Custom Codex hooks must be preserved");
+    assert.ok(codexHooks.hooks.PreToolUse.some(h => h.hooks.some(hook => hook.command.includes("codex_adapter.py"))), "Managed Codex hooks must be merged");
+
+    const geminiHooks = readJson(path.join(testProjectDir, ".agents", "hooks.json"));
+    assert.ok(geminiHooks["custom-gemini-hook"], "Custom Gemini hooks must be preserved");
+    assert.ok(geminiHooks["hieund-ai-kit-harness-guard"], "Managed Gemini hooks must be merged");
+
+    // -------------------------------------------------------------------------
+    // ASSERTION 3: Codex isolation check
+    // -------------------------------------------------------------------------
+    assert.ok(!fs.existsSync(path.join(installDir, "codex")), "Codex install must not create .agents/codex/skills/");
+    assert.ok(fs.existsSync(path.join(installDir, "skills", "debugger", "SKILL.md")), "Codex skills must reside flat at .agents/skills/");
+
+    // -------------------------------------------------------------------------
+    // ASSERTION 4: Gemini isolation check
+    // -------------------------------------------------------------------------
+    assert.ok(!fs.existsSync(path.join(installDir, "gemini", "skills", "debugger")), "Gemini install must not write into Codex flat skills folder");
+    assert.ok(fs.existsSync(path.join(installDir, "gemini", "skills", "api-patterns", "SKILL.md")), "Gemini skills must reside nested at .agents/gemini/skills/");
+
+    // -------------------------------------------------------------------------
+    // ASSERTION 5: Target-specific instructions check
+    // -------------------------------------------------------------------------
+    const agentsMdContent = readText(path.join(testProjectDir, "AGENTS.md"));
+    const geminiMdContent = readText(path.join(testProjectDir, "GEMINI.md"));
+    assert.ok(agentsMdContent.includes("AGENTS.md - Workspace Rules"), "AGENTS.md must contain Codex instruction rules");
+    assert.ok(geminiMdContent.includes("GEMINI.md - AG Kit"), "GEMINI.md must contain Gemini instruction rules");
+    assert.ok(!agentsMdContent.includes("GEMINI.md"), "AGENTS.md must not contain Gemini cross-references");
+    assert.ok(!geminiMdContent.includes("AGENTS.md"), "GEMINI.md must not contain Codex cross-references");
+
+    // -------------------------------------------------------------------------
+    // ASSERTION 6: Hooks path rewriting check
+    // -------------------------------------------------------------------------
+    const adapterCommand = geminiHooks["hieund-ai-kit-harness-guard"].PreToolUse[0].hooks[0].command;
+    assert.equal(
+      adapterCommand,
+      "python3 .agents/gemini/hooks/gemini_adapter.py pre-tool",
+      "Gemini hook command path must point to the nested gemini folder"
+    );
+
+    // -------------------------------------------------------------------------
+    // ASSERTION 7: Shared conflict preservation
+    // -------------------------------------------------------------------------
+    const sharedScriptPath = path.join(installDir, "scripts", "verify_all.py");
+    assert.ok(fs.existsSync(sharedScriptPath), "Shared script verify_all.py must exist");
+    // Manually modify the shared script
+    fs.writeFileSync(sharedScriptPath, "print('MANUAL_MODIFICATION')\n");
+    
+    // Run init again
+    execFileSync(process.execPath, [
+      binLinkPath,
+      "init",
+      "--path",
+      testProjectDir,
+      "--force",
+    ], { env: testEnv });
+
+    assert.equal(
+      readText(sharedScriptPath),
+      "print('MANUAL_MODIFICATION')\n",
+      "Manual modification of shared script must be preserved and not silently overwritten during init"
+    );
+
+    // -------------------------------------------------------------------------
+    // ASSERTION 8: Re-init idempotency
+    // -------------------------------------------------------------------------
+    // Run init a second time (above ran once, let's run it again and check blocks)
+    const geminiMdPre = readText(path.join(testProjectDir, "GEMINI.md"));
+    const agentsMdPre = readText(path.join(testProjectDir, "AGENTS.md"));
+
+    execFileSync(process.execPath, [
+      binLinkPath,
+      "init",
+      "--path",
+      testProjectDir,
+      "--force",
+    ], { env: testEnv });
+
+    const geminiMdPost = readText(path.join(testProjectDir, "GEMINI.md"));
+    const agentsMdPost = readText(path.join(testProjectDir, "AGENTS.md"));
+
+    assert.equal(geminiMdPre, geminiMdPost, "GEMINI.md content must be identical and not duplicated on consecutive inits");
+    assert.equal(agentsMdPre, agentsMdPost, "AGENTS.md content must be identical and not duplicated on consecutive inits");
+
+    const geminiHooksPost = readJson(path.join(testProjectDir, ".agents", "hooks.json"));
+    assert.ok(geminiHooksPost["hieund-ai-kit-harness-guard"], "Harness guard hooks must exist");
+    // Count the harness guard entries
+    assert.equal(
+      Object.keys(geminiHooksPost).filter(k => k === "hieund-ai-kit-harness-guard").length,
+      1,
+      "Managed hook keys must be idempotent and not duplicated"
+    );
+
+    // -------------------------------------------------------------------------
+    // ASSERTION 9: Legacy migration
+    // -------------------------------------------------------------------------
     const configPath = path.join(testProjectDir, ".ai-kit.json");
-    assert.ok(fs.existsSync(configPath), "init must create .ai-kit.json");
+    writeJson(configPath, {
+      target: "codex",
+      targets: {
+        codex: { version: "1.0.0" }
+      },
+      version: "1.0.0",
+      ref: "main",
+      installedAt: "old-date",
+      paths: { installDir: ".agents" }
+    });
 
-    const config = readJson(configPath);
-    assert.equal(config.target, "codex", "config target must be codex");
-    assert.equal(config.paths.installDir, ".agents", "config installDir must be .agents");
-    assert.equal(config.features.backlog, true, "config backlog feature must be true");
-    assert.equal(config.harness.enabled, false, "harness must be disabled when no harness files exist");
+    execFileSync(process.execPath, [
+      binLinkPath,
+      "update",
+      "--path",
+      testProjectDir,
+    ], { env: testEnv });
 
-    // 2. Test status command works
+    const migratedConfig = readJson(configPath);
+    assert.equal(migratedConfig.target, undefined, "Old target property must be removed");
+    assert.equal(migratedConfig.targets, undefined, "Old targets property must be removed");
+    assert.equal(migratedConfig.version, "2.0.0", "Version must be updated");
+    assert.ok(migratedConfig.installedAt !== "old-date", "installedAt date must be refreshed");
+
+    // -------------------------------------------------------------------------
+    // ASSERTION 10: Status check and Corruption detection
+    // -------------------------------------------------------------------------
     const statusOutput = execFileSync(process.execPath, [
       binLinkPath,
       "status",
       "--path",
       testProjectDir,
-    ], { encoding: "utf8" });
-    assert.ok(statusOutput.includes("OpenAI Codex Kit: INSTALLED"), "status must report INSTALLED");
+    ], { encoding: "utf8", env: testEnv });
+    assert.ok(statusOutput.includes("AI Kit: INSTALLED"), "Status must report INSTALLED");
 
-    // 3. Test corruption detection
-    // Remove install folder and check status
-    const installDir = path.join(testProjectDir, ".agents");
-    fs.rmSync(installDir, { recursive: true, force: true });
+    // Break Codex skills folder
+    fs.rmSync(path.join(installDir, "skills"), { recursive: true, force: true });
     
     const corruptedStatus = execFileSync(process.execPath, [
       binLinkPath,
       "status",
       "--path",
       testProjectDir,
-    ], { encoding: "utf8" });
-    assert.ok(corruptedStatus.includes("CORRUPTED (Install folder missing)"), "status must report CORRUPTED");
+    ], { encoding: "utf8", env: testEnv });
+    assert.ok(corruptedStatus.includes("CORRUPTED (Missing Codex or Gemini runtime)"), "Status must report CORRUPTED when Codex is missing");
 
-    // 4. Test repair command
+    // Restore Codex skills and break Gemini folder
+    fs.mkdirSync(path.join(installDir, "skills"));
+    fs.rmSync(path.join(installDir, "gemini"), { recursive: true, force: true });
+    
+    const corruptedStatus2 = execFileSync(process.execPath, [
+      binLinkPath,
+      "status",
+      "--path",
+      testProjectDir,
+    ], { encoding: "utf8", env: testEnv });
+    assert.ok(corruptedStatus2.includes("CORRUPTED (Missing Codex or Gemini runtime)"), "Status must report CORRUPTED when Gemini is missing");
+
+    // -------------------------------------------------------------------------
+    // ASSERTION 11: Repair restores both runtimes
+    // -------------------------------------------------------------------------
     execFileSync(process.execPath, [
       binLinkPath,
       "repair",
       "--path",
       testProjectDir,
-    ]);
-    assert.ok(fs.existsSync(path.join(installDir, "AGENTS.md")), "repair must restore the install folder and its files");
-    
+    ], { env: testEnv });
+
+    assert.ok(fs.existsSync(path.join(installDir, "skills")), "Repair must restore Codex folder");
+    assert.ok(fs.existsSync(path.join(installDir, "gemini")), "Repair must restore Gemini folder");
+
     const repairedStatus = execFileSync(process.execPath, [
       binLinkPath,
       "status",
       "--path",
       testProjectDir,
-    ], { encoding: "utf8" });
-    assert.ok(repairedStatus.includes("OpenAI Codex Kit: INSTALLED"), "status must report INSTALLED after repair");
+    ], { encoding: "utf8", env: testEnv });
+    assert.ok(repairedStatus.includes("AI Kit: INSTALLED"), "Status must report INSTALLED after repair");
 
-    // 5. Test update command (migrates / updates config)
-    // Delete .ai-kit.json and run update to trigger auto-migration
-    fs.rmSync(configPath);
+    // -------------------------------------------------------------------------
+    // ASSERTION 12: Update refreshes both runtimes simultaneously
+    // -------------------------------------------------------------------------
+    // We modify some files to trace them
+    const codexSkillPath = path.join(installDir, "skills", "debugger", "SKILL.md");
+    const geminiSkillPath = path.join(installDir, "gemini", "skills", "api-patterns", "SKILL.md");
+    fs.writeFileSync(codexSkillPath, "CHANGED_CODEX_SKILL\n");
+    fs.writeFileSync(geminiSkillPath, "CHANGED_GEMINI_SKILL\n");
+
     execFileSync(process.execPath, [
       binLinkPath,
       "update",
       "--path",
       testProjectDir,
-    ]);
-    assert.ok(fs.existsSync(configPath), "update must auto-migrate/re-create .ai-kit.json if missing");
-    const migratedConfig = readJson(configPath);
-    assert.equal(migratedConfig.target, "codex", "migrated config target must be codex");
+    ], { env: testEnv });
 
-    // 6. Test target switch updates config
-    execFileSync(process.execPath, [
-      binLinkPath,
-      "init",
-      "--target",
-      "gemini",
-      "--path",
-      testProjectDir,
-      "--force",
-    ]);
-    const switchedConfig = readJson(configPath);
-    assert.equal(switchedConfig.target, "gemini", "config target must update to gemini after switch");
+    assert.ok(readText(codexSkillPath) !== "CHANGED_CODEX_SKILL\n", "Update must refresh Codex skills from template");
+    assert.ok(readText(geminiSkillPath) !== "CHANGED_GEMINI_SKILL\n", "Update must refresh Gemini skills from template");
 
   } finally {
     fs.rmSync(testProjectDir, { recursive: true, force: true });
@@ -334,7 +300,5 @@ ${harnessBlock}
 
   console.log("Installer regression tests passed.");
 } finally {
-  fs.rmSync(codexProjectDir, { recursive: true, force: true });
-  fs.rmSync(geminiProjectDir, { recursive: true, force: true });
   fs.rmSync(path.dirname(binLinkPath), { recursive: true, force: true });
 }

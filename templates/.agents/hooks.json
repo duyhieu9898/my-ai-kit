@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 .agents/hooks/gemini_adapter.py pre-tool",
+            "command": "python3 .agents/gemini/hooks/gemini_adapter.py pre-tool",
             "timeout": 10
           }
         ]

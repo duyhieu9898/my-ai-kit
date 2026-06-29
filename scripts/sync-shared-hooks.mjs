@@ -11,10 +11,10 @@ const checkOnly = process.argv.includes("--check");
 const copies = [
   ["shared/hooks/harness_guard.py", ".codex/hooks/harness_guard.py"],
   ["shared/hooks/codex_adapter.py", ".codex/hooks/codex_adapter.py"],
-  ["shared/hooks/harness_guard.py", "templates/codex/.codex/hooks/harness_guard.py"],
-  ["shared/hooks/codex_adapter.py", "templates/codex/.codex/hooks/codex_adapter.py"],
-  ["shared/hooks/harness_guard.py", "templates/gemini/.agents/hooks/harness_guard.py"],
-  ["shared/hooks/gemini_adapter.py", "templates/gemini/.agents/hooks/gemini_adapter.py"],
+  ["shared/hooks/harness_guard.py", "templates/.codex/hooks/harness_guard.py"],
+  ["shared/hooks/codex_adapter.py", "templates/.codex/hooks/codex_adapter.py"],
+  ["shared/hooks/harness_guard.py", "templates/.agents/gemini/hooks/harness_guard.py"],
+  ["shared/hooks/gemini_adapter.py", "templates/.agents/gemini/hooks/gemini_adapter.py"],
 ];
 
 let drift = false;

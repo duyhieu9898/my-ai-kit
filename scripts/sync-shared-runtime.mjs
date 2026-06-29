@@ -88,25 +88,45 @@ const sharedFiles = listFiles(sharedRoot).filter(
   (relativePath) => !isInsideSharedDirectory(relativePath),
 );
 
+const getTargetRelativePath = (target, relativePath) => {
+  if (target === "gemini") {
+    if (relativePath.startsWith(".agents/skills/")) {
+      return relativePath.replace(".agents/skills/", ".agents/gemini/skills/");
+    }
+    if (relativePath.startsWith(".agents/agents/")) {
+      return relativePath.replace(".agents/agents/", ".agents/gemini/agents/");
+    }
+    if (relativePath.startsWith(".agents/workflows/")) {
+      return relativePath.replace(".agents/workflows/", ".agents/gemini/workflows/");
+    }
+    if (relativePath.startsWith(".agents/hooks/")) {
+      return relativePath.replace(".agents/hooks/", ".agents/gemini/hooks/");
+    }
+  }
+  return relativePath;
+};
+
 for (const target of targets) {
-  const targetRoot = path.join(repoRoot, "templates", target);
+  const targetRoot = path.join(repoRoot, "templates");
 
   for (const relativePath of sharedFiles) {
     const source = path.join(sharedRoot, relativePath);
-    const destination = path.join(targetRoot, relativePath);
+    const destRel = getTargetRelativePath(target, relativePath);
+    const destination = path.join(targetRoot, destRel);
 
     if (!filesMatch(source, destination)) {
-      mismatches.push(`${target}:${relativePath}`);
+      mismatches.push(`${target}:${destRel}`);
       if (!checkOnly) syncFile(source, destination);
     }
   }
 
   for (const relativePath of sharedDirectories) {
     const source = path.join(sharedRoot, relativePath);
-    const destination = path.join(targetRoot, relativePath);
+    const destRel = getTargetRelativePath(target, relativePath);
+    const destination = path.join(targetRoot, destRel);
 
     if (!directoriesMatch(source, destination)) {
-      mismatches.push(`${target}:${relativePath}/`);
+      mismatches.push(`${target}:${destRel}/`);
       if (!checkOnly) syncDirectory(source, destination);
     }
   }

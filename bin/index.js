@@ -313,197 +313,121 @@ const mergeInstructionBlocks = (incomingText, existingText) => {
     return mergedText;
 };
 
-const copyRootInstructionFile = (src, dest, overwriteRootInstruction) => {
-    if (!overwriteRootInstruction && fs.existsSync(dest)) {
+const mergeRootInstructionBlock = (src, dest, overwriteRootInstruction) => {
+    if (!fs.existsSync(src)) {
         return;
     }
-
-    if (!fs.existsSync(dest)) {
+    if (overwriteRootInstruction || !fs.existsSync(dest)) {
         fs.copyFileSync(src, dest);
         return;
     }
-
     const incomingText = fs.readFileSync(src, 'utf8');
     const existingText = fs.readFileSync(dest, 'utf8');
     fs.writeFileSync(dest, mergeInstructionBlocks(incomingText, existingText));
 };
 
-const mergeGeminiHooks = (existingPath, incomingPath, destinationPath) => {
-    const existing = fs.existsSync(existingPath)
-        ? JSON.parse(fs.readFileSync(existingPath, 'utf8'))
-        : {};
-    const incoming = JSON.parse(fs.readFileSync(incomingPath, 'utf8'));
-    const merged = {
-        ...existing,
-        ...incoming,
-        [KIT_GEMINI_HOOK_KEY]: incoming[KIT_GEMINI_HOOK_KEY],
-    };
-    fs.writeFileSync(destinationPath, `${JSON.stringify(merged, null, 2)}\n`);
-};
-
-const atomicReplaceInstallDir = (src, dest) => {
-    const incomingHooksPath = path.join(src, GEMINI_HOOK_CONFIG);
-    if (!fs.existsSync(incomingHooksPath)) {
-        atomicReplaceDir(src, dest);
+const mergeWorkspaceHooks = (src, dest, targetName) => {
+    if (!fs.existsSync(src)) {
         return;
     }
+    if (targetName === 'codex') {
+        mergeCodexHooksFile(src, dest);
+    } else if (targetName === 'gemini') {
+        const existing = fs.existsSync(dest)
+            ? JSON.parse(fs.readFileSync(dest, 'utf8'))
+            : {};
+        const incoming = JSON.parse(fs.readFileSync(src, 'utf8'));
 
-    const parent = path.dirname(dest);
-    const staging = path.join(parent, `.${path.basename(dest)}.tmp-${process.pid}-${Date.now()}`);
-    try {
-        fs.rmSync(staging, { recursive: true, force: true });
-        fs.mkdirSync(staging, { recursive: true });
-
-        const existingHookFolder = path.join(dest, GEMINI_HOOK_FOLDER);
-        if (fs.existsSync(existingHookFolder)) {
-            fs.cpSync(existingHookFolder, path.join(staging, GEMINI_HOOK_FOLDER), {
-                recursive: true,
-            });
-        }
-
-        fs.cpSync(src, staging, { recursive: true });
-        mergeGeminiHooks(
-            path.join(dest, GEMINI_HOOK_CONFIG),
-            incomingHooksPath,
-            path.join(staging, GEMINI_HOOK_CONFIG),
-        );
-
-        fs.rmSync(dest, { recursive: true, force: true });
-        fs.renameSync(staging, dest);
-    } catch (error) {
-        fs.rmSync(staging, { recursive: true, force: true });
-        throw error;
+        const merged = {
+            ...existing,
+            ...incoming,
+            [KIT_GEMINI_HOOK_KEY]: incoming[KIT_GEMINI_HOOK_KEY],
+        };
+        fs.mkdirSync(path.dirname(dest), { recursive: true });
+        fs.writeFileSync(dest, `${JSON.stringify(merged, null, 2)}\n`);
     }
 };
 
-const removeKitCodexHooks = (projectDir) => {
-    const codexConfigDir = path.join(projectDir, CODEX_CONFIG_FOLDER);
-    const hooksDir = path.join(codexConfigDir, 'hooks');
-    const hooksPath = path.join(codexConfigDir, 'hooks.json');
+const copySharedFile = (src, dest) => {
+    fs.mkdirSync(path.dirname(dest), { recursive: true });
+    if (fs.existsSync(dest)) {
+        const srcBuf = fs.readFileSync(src);
+        const destBuf = fs.readFileSync(dest);
+        if (!srcBuf.equals(destBuf)) {
+            console.log(chalk.yellow(`⚠️  Preserved manually modified shared file: ${path.basename(dest)}`));
+            return;
+        }
+    }
+    fs.copyFileSync(src, dest);
+};
 
-    if (fs.existsSync(hooksPath)) {
-        try {
-            const config = JSON.parse(fs.readFileSync(hooksPath, 'utf8'));
-            const hooks = {};
-            for (const [event, groups] of Object.entries(config.hooks || {})) {
-                const retained = Array.isArray(groups)
-                    ? groups.filter((group) => !isKitCodexHookGroup(group))
-                    : groups;
-                if (!Array.isArray(retained) || retained.length > 0) {
-                    hooks[event] = retained;
-                }
+const mergeSharedAssets = (srcDir, destDir) => {
+    const srcScripts = path.join(srcDir, 'scripts');
+    const destScripts = path.join(destDir, 'scripts');
+    if (fs.existsSync(srcScripts)) {
+        const entries = fs.readdirSync(srcScripts, { recursive: true, withFileTypes: true });
+        for (const entry of entries) {
+            const relPath = path.relative(srcScripts, path.join(entry.parentPath || entry.path, entry.name));
+            const srcFile = path.join(srcScripts, relPath);
+            const destFile = path.join(destScripts, relPath);
+            if (entry.isFile()) {
+                copySharedFile(srcFile, destFile);
             }
-            const updated = { ...config, hooks };
-            if (Object.keys(hooks).length === 0 && Object.keys(updated).length === 1) {
-                fs.rmSync(hooksPath, { force: true });
-            } else {
-                fs.writeFileSync(hooksPath, `${JSON.stringify(updated, null, 2)}\n`);
-            }
-        } catch (e) {
-            // Ignore error
         }
     }
 
-    fs.rmSync(
-        path.join(hooksDir, 'harness_guard.py'),
-        { force: true }
-    );
-    fs.rmSync(
-        path.join(hooksDir, 'codex_adapter.py'),
-        { force: true }
-    );
-
-    // Clean up __pycache__ inside hooksDir
-    const pycacheDir = path.join(hooksDir, '__pycache__');
-    if (fs.existsSync(pycacheDir)) {
-        try {
-            const pycacheFiles = fs.readdirSync(pycacheDir);
-            for (const file of pycacheFiles) {
-                if (file.startsWith('harness_guard.cpython-') || file.startsWith('codex_adapter.cpython-')) {
-                    fs.rmSync(path.join(pycacheDir, file), { force: true });
-                }
+    const srcShared = path.join(srcDir, 'shared');
+    const destShared = path.join(destDir, 'shared');
+    if (fs.existsSync(srcShared)) {
+        const entries = fs.readdirSync(srcShared, { recursive: true, withFileTypes: true });
+        for (const entry of entries) {
+            const relPath = path.relative(srcShared, path.join(entry.parentPath || entry.path, entry.name));
+            const srcFile = path.join(srcShared, relPath);
+            const destFile = path.join(destShared, relPath);
+            if (entry.isFile()) {
+                copySharedFile(srcFile, destFile);
             }
-            if (fs.readdirSync(pycacheDir).length === 0) {
-                fs.rmSync(pycacheDir, { recursive: true, force: true });
-            }
-        } catch (e) {
-            // Ignore
-        }
-    }
-
-    // Clean up hooks directory if empty
-    if (fs.existsSync(hooksDir)) {
-        try {
-            if (fs.readdirSync(hooksDir).length === 0) {
-                fs.rmSync(hooksDir, { recursive: true, force: true });
-            }
-        } catch (e) {
-            // Ignore
-        }
-    }
-
-    // Clean up .codex directory if empty
-    if (fs.existsSync(codexConfigDir)) {
-        try {
-            if (fs.readdirSync(codexConfigDir).length === 0) {
-                fs.rmSync(codexConfigDir, { recursive: true, force: true });
-            }
-        } catch (e) {
-            // Ignore
         }
     }
 };
 
-/**
- * Mirror-copy a template directory into the project root. The `.agents/`
- * install folder is replaced atomically. Shared configuration directories such
- * as `.codex/` are merged so project-local settings are preserved.
- * @param {string} templatePath
- * @param {string} projectDir
- * @param {object} options
- * @param {boolean} options.overwriteRootInstruction
- */
-const mirrorCopy = (templatePath, projectDir, { overwriteRootInstruction = true } = {}) => {
-    if (!fs.existsSync(templatePath)) {
-        throw new Error(`Template not found: ${templatePath}`);
+const installCodexRuntime = (templatePath, projectDir, overwriteRootInstruction) => {
+    const srcAgents = path.join(templatePath, 'AGENTS.md');
+    const destAgents = path.join(projectDir, 'AGENTS.md');
+    mergeRootInstructionBlock(srcAgents, destAgents, overwriteRootInstruction);
+
+    const srcHooks = path.join(templatePath, CODEX_CONFIG_FOLDER, 'hooks.json');
+    const destHooks = path.join(projectDir, CODEX_CONFIG_FOLDER, 'hooks.json');
+    mergeWorkspaceHooks(srcHooks, destHooks, 'codex');
+
+    const srcSkills = path.join(templatePath, INSTALL_FOLDER, 'skills');
+    const destSkills = path.join(projectDir, INSTALL_FOLDER, 'skills');
+    if (fs.existsSync(srcSkills)) {
+        atomicReplaceDir(srcSkills, destSkills);
     }
 
-    const entries = fs.readdirSync(templatePath, { withFileTypes: true });
-
-    for (const entry of entries) {
-        const src = path.join(templatePath, entry.name);
-        const dest = path.join(projectDir, entry.name);
-
-        if (entry.isFile()) {
-            copyRootInstructionFile(src, dest, overwriteRootInstruction);
-        } else if (entry.name === CODEX_CONFIG_FOLDER) {
-            mergeDirectory(src, dest);
-        } else if (entry.name === INSTALL_FOLDER) {
-            atomicReplaceInstallDir(src, dest);
-        } else {
-            atomicReplaceDir(src, dest);
-        }
-    }
+    mergeSharedAssets(path.join(templatePath, INSTALL_FOLDER), path.join(projectDir, INSTALL_FOLDER));
 };
 
-/**
- * Delete an installed target's root instruction files from the project root.
- * @param {string} oldTemplatePath path to the old target's template directory
- * @param {string} projectDir
- */
-const cleanupOldTarget = (oldTemplatePath, projectDir, oldTarget) => {
-    const rootFiles = getRootInstructionFiles(oldTemplatePath);
-    for (const file of rootFiles) {
-        const filePath = path.join(projectDir, file);
-        if (fs.existsSync(filePath)) {
-            fs.unlinkSync(filePath);
-            console.log(chalk.gray(`  Deleted: ${file}`));
-        }
+const installGeminiRuntime = (templatePath, projectDir, overwriteRootInstruction) => {
+    const srcGemini = path.join(templatePath, 'GEMINI.md');
+    const destGemini = path.join(projectDir, 'GEMINI.md');
+    mergeRootInstructionBlock(srcGemini, destGemini, overwriteRootInstruction);
+
+    const srcHooks = path.join(templatePath, INSTALL_FOLDER, 'hooks.json');
+    const destHooks = path.join(projectDir, INSTALL_FOLDER, 'hooks.json');
+    mergeWorkspaceHooks(srcHooks, destHooks, 'gemini');
+
+    const srcGeminiDir = path.join(templatePath, INSTALL_FOLDER, 'gemini');
+    const destGeminiDir = path.join(projectDir, INSTALL_FOLDER, 'gemini');
+    if (fs.existsSync(srcGeminiDir)) {
+        atomicReplaceDir(srcGeminiDir, destGeminiDir);
     }
-    if (oldTarget === 'codex' || fs.existsSync(path.join(oldTemplatePath, CODEX_CONFIG_FOLDER))) {
-        removeKitCodexHooks(projectDir);
-    }
+
+    mergeSharedAssets(path.join(templatePath, INSTALL_FOLDER), path.join(projectDir, INSTALL_FOLDER));
 };
+
+
 
 /**
  * Download a single target's template subdirectory into a fresh temporary
@@ -514,12 +438,23 @@ const cleanupOldTarget = (oldTemplatePath, projectDir, oldTarget) => {
  *   to pin the download for reproducibility/security
  * @returns {Promise<string>} path to the downloaded template directory
  */
-const downloadTarget = async (config, ref) => {
+/**
+ * Download the unified templates folder from the repository.
+ * @param {string} [ref] optional repository ref
+ * @returns {Promise<string>} path to the downloaded templates directory
+ */
+const downloadTemplates = async (ref) => {
     const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), TEMP_PREFIX));
-    const subdir = `${TEMPLATES_FOLDER}/${config.templateDir}`;
+    const localSource = process.env.HIEUND_AI_KIT_TEMPLATE_SOURCE;
+    if (localSource) {
+        if (fs.existsSync(localSource)) {
+            fs.cpSync(localSource, tempDir, { recursive: true });
+            return tempDir;
+        }
+    }
     const suffix = ref ? `#${ref}` : '';
     // giget supports fetching a subdirectory at a given ref: repo/sub/dir#ref
-    await downloadTemplate(`${REPO}/${subdir}${suffix}`, { dir: tempDir, force: true });
+    await downloadTemplate(`${REPO}/${TEMPLATES_FOLDER}${suffix}`, { dir: tempDir, force: true });
     return tempDir;
 };
 
@@ -548,94 +483,45 @@ const isDirectCliInvocation = () => {
 // ============================================================================
 
 /**
- * Initialize a selected target in the project. Destructive: replaces the
- * install folder and (on switch/force) the root instruction files.
+ * Initialize the AI Kit in the project. Installs both runtimes side-by-side.
  */
 const initCommand = async (options) => {
-    // Handle the deprecated --gemini flag.
-    let targetName = options.target;
-    if (options.gemini) {
-        console.log(chalk.yellow('⚠️  --gemini is deprecated. Use --target gemini instead.'));
-        targetName = targetName && targetName !== DEFAULT_TARGET ? targetName : 'gemini';
-    }
-    targetName = targetName || DEFAULT_TARGET;
-
-    const config = getTargetConfig(targetName);
-    showBanner(config);
-
     const projectDir = path.resolve(options.path || process.cwd());
-
-    const installedTarget = detectInstalledTarget(projectDir);
-    const isSwitch = installedTarget && installedTarget !== targetName;
-    const isSameTarget = installedTarget === targetName;
-    const installDir = path.join(projectDir, INSTALL_FOLDER);
+    showBanner(TARGET_REGISTRY.codex);
 
     const spinner = ora({ text: 'Downloading templates from repository...', color: 'cyan' }).start();
 
     let templatePath = null;
-    let oldTemplatePath = null;
     const ref = resolveRef(options);
     try {
-        templatePath = await downloadTarget(config, ref);
-        // On a switch, fetch the old target's template too so we can detect
-        // which root instruction files it left behind.
-        if (isSwitch) {
-            oldTemplatePath = await downloadTarget(TARGET_REGISTRY[installedTarget], ref);
-        }
+        templatePath = await downloadTemplates(ref);
         spinner.stop();
 
-        // Determine which existing files would be affected.
-        const newRootFiles = getRootInstructionFiles(templatePath);
-        const collidingRootFiles = newRootFiles.filter((f) => fs.existsSync(path.join(projectDir, f)));
+        const collidingRootFiles = ['AGENTS.md', 'GEMINI.md'].filter((f) => fs.existsSync(path.join(projectDir, f)));
+        const installDir = path.join(projectDir, INSTALL_FOLDER);
         const installExists = fs.existsSync(installDir);
 
-        // Confirmation gate (skipped with --force).
-        if (!options.force) {
-            if (isSwitch) {
-                console.log(chalk.yellow(`\n⚠️  Switching target: ${chalk.cyan(installedTarget)} → ${chalk.cyan(targetName)}`));
-                const oldRootFiles = getRootInstructionFiles(oldTemplatePath).filter((f) =>
-                    fs.existsSync(path.join(projectDir, f))
-                );
-                console.log(chalk.gray('   Will delete:'));
-                oldRootFiles.forEach((f) => console.log(chalk.gray(`     - ${f}`)));
-                if (installExists) console.log(chalk.gray(`     - ${INSTALL_FOLDER}/`));
-                console.log(chalk.gray('   Will install:'));
-                newRootFiles.forEach((f) => console.log(chalk.gray(`     + ${f}`)));
-                console.log(chalk.gray(`     + ${INSTALL_FOLDER}/`));
-            } else if (isSameTarget || installExists || collidingRootFiles.length > 0) {
-                console.log(chalk.yellow(`\n⚠️  Existing files will be overwritten:`));
-                if (installExists) console.log(chalk.gray(`     - ${INSTALL_FOLDER}/`));
-                collidingRootFiles.forEach((f) => console.log(chalk.gray(`     - ${f}`)));
-            }
-
-            if (isSwitch || isSameTarget || installExists || collidingRootFiles.length > 0) {
-                const ok = await confirm('Continue?');
-                if (!ok) {
-                    console.log(chalk.gray('Operation cancelled.'));
-                    cleanup(templatePath);
-                    cleanup(oldTemplatePath);
-                    process.exit(0);
-                }
+        if (!options.force && (installExists || collidingRootFiles.length > 0)) {
+            console.log(chalk.yellow(`\n⚠️  Existing AI Kit files/folders will be merged or updated:`));
+            if (installExists) console.log(chalk.gray(`     - ${INSTALL_FOLDER}/`));
+            collidingRootFiles.forEach((f) => console.log(chalk.gray(`     - ${f}`)));
+            const ok = await confirm('Continue?');
+            if (!ok) {
+                console.log(chalk.gray('Operation cancelled.'));
+                cleanup(templatePath);
+                process.exit(0);
             }
         }
 
-        // Clean up the old target's root instructions on a switch.
-        if (isSwitch) {
-            cleanupOldTarget(oldTemplatePath, projectDir, installedTarget);
-        }
+        installCodexRuntime(templatePath, projectDir, true);
+        installGeminiRuntime(templatePath, projectDir, true);
 
-        // Install.
-        const installsCodexConfig = fs.existsSync(path.join(templatePath, CODEX_CONFIG_FOLDER));
-        mirrorCopy(templatePath, projectDir, { overwriteRootInstruction: true });
         cleanup(templatePath);
-        cleanup(oldTemplatePath);
 
-        // Auto-detect harness
         const harnessExists = fs.existsSync(path.join(projectDir, 'docs', 'HARNESS.md')) ||
                               fs.existsSync(path.join(projectDir, 'scripts', 'bin', 'harness-cli'));
 
         const configContent = {
-            target: targetName,
             version: '2.0.0',
             ref: ref || 'main',
             installedAt: new Date().toISOString(),
@@ -656,91 +542,57 @@ const initCommand = async (options) => {
         const configPath = path.join(projectDir, CONFIG_FILE);
         fs.writeFileSync(configPath, `${JSON.stringify(configContent, null, 2)}\n`);
 
-        // Success summary.
-        console.log(chalk.green(`\n✅ Successfully installed ${config.displayName}!`));
+        console.log(chalk.green(`\n✅ Successfully installed AI Kit!`));
         console.log(chalk.gray('\n──────────────────────────────────────────────────────'));
         console.log(chalk.white('📁 Installed:'));
         console.log(`   ${chalk.cyan(INSTALL_FOLDER + '/')} → ${chalk.gray(installDir)}`);
-        if (installsCodexConfig) {
-            console.log(`   ${chalk.cyan(CODEX_CONFIG_FOLDER + '/')} → ${chalk.gray(path.join(projectDir, CODEX_CONFIG_FOLDER))}`);
-        }
-        newRootFiles.forEach((f) => {
-            console.log(`   ${chalk.cyan(f)} → ${chalk.gray(path.join(projectDir, f))}`);
-        });
+        console.log(`   ${chalk.cyan('AGENTS.md')} → ${chalk.gray(path.join(projectDir, 'AGENTS.md'))}`);
+        console.log(`   ${chalk.cyan('GEMINI.md')} → ${chalk.gray(path.join(projectDir, 'GEMINI.md'))}`);
         console.log(chalk.gray('──────────────────────────────────────────────────────'));
-        console.log(config.bannerColor(`\n${config.tagLine}`));
         console.log(chalk.gray(`💡 Run tests via: ${chalk.cyan('python3 .agents/scripts/verify_all.py .')}\n`));
     } catch (error) {
         spinner.stop();
         console.error(chalk.red(`❌ Error: ${error.message}`));
         cleanup(templatePath);
-        cleanup(oldTemplatePath);
         process.exit(1);
     }
 };
 
 /**
- * Update the installed target's `.agents/` folder while preserving root
- * instruction files. Auto-detects the target when --target is omitted.
+ * Update the installed AI Kit runtimes while preserving root instructions.
  */
 const updateCommand = async (options) => {
     const projectDir = path.resolve(options.path || process.cwd());
-    const installedTarget = detectInstalledTarget(projectDir);
+    const configPath = path.join(projectDir, CONFIG_FILE);
 
-    // Resolve which target to update.
-    let targetName = options.target;
-    if (options.gemini) {
-        console.log(chalk.yellow('⚠️  --gemini is deprecated. Use --target gemini instead.'));
-        targetName = targetName || 'gemini';
-    }
-
-    if (!targetName) {
-        // Auto-detect.
-        if (!installedTarget) {
-            console.error(chalk.red('❌ No installed target detected.'));
-            console.log(chalk.yellow(`💡 Run ${chalk.cyan('hieund-ai-kit init')} to install first.`));
-            process.exit(1);
+    let existingConfig = {};
+    if (fs.existsSync(configPath)) {
+        try {
+            existingConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8')) || {};
+        } catch {
+            // Ignore parse errors
         }
-        targetName = installedTarget;
-    } else if (installedTarget && installedTarget !== targetName) {
-        // Mismatch.
-        console.error(chalk.red(`❌ Target mismatch: ${chalk.cyan(installedTarget)} is installed, but --target ${chalk.cyan(targetName)} was requested.`));
-        console.log(chalk.yellow(`💡 To switch targets, run ${chalk.cyan('hieund-ai-kit init --target ' + targetName)}.`));
-        process.exit(1);
     }
-
-    const config = getTargetConfig(targetName);
-    showBanner(config);
 
     const spinner = ora({ text: 'Downloading templates from repository...', color: 'cyan' }).start();
 
     let templatePath = null;
+    const ref = resolveRef(options) || existingConfig.ref || 'main';
     try {
-        const ref = resolveRef(options);
-        templatePath = await downloadTarget(config, ref);
+        templatePath = await downloadTemplates(ref);
         spinner.stop();
 
-        mirrorCopy(templatePath, projectDir, { overwriteRootInstruction: false });
-        cleanup(templatePath);
+        installCodexRuntime(templatePath, projectDir, false);
+        installGeminiRuntime(templatePath, projectDir, false);
 
-        // Write or update `.ai-kit.json`
-        const configPath = path.join(projectDir, CONFIG_FILE);
-        let existingConfig = {};
-        if (fs.existsSync(configPath)) {
-            try {
-                existingConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8')) || {};
-            } catch {
-                // Ignore parsing errors, overwrite
-            }
-        }
+        cleanup(templatePath);
 
         const harnessExists = fs.existsSync(path.join(projectDir, 'docs', 'HARNESS.md')) ||
                               fs.existsSync(path.join(projectDir, 'scripts', 'bin', 'harness-cli'));
 
         const updatedConfig = {
-            target: targetName,
             version: '2.0.0',
-            ref: ref || existingConfig.ref || 'main',
+            ref: ref,
             installedAt: new Date().toISOString(),
             paths: {
                 installDir: existingConfig.paths?.installDir || INSTALL_FOLDER,
@@ -757,7 +609,7 @@ const updateCommand = async (options) => {
         };
         fs.writeFileSync(configPath, `${JSON.stringify(updatedConfig, null, 2)}\n`);
 
-        console.log(chalk.green(`\n✅ Updated ${config.displayName} (${INSTALL_FOLDER}/ refreshed, shared config merged, root instructions preserved).`));
+        console.log(chalk.green(`\n✅ Updated AI Kit (${INSTALL_FOLDER}/ refreshed, shared configs merged, root instructions preserved).`));
     } catch (error) {
         spinner.stop();
         console.error(chalk.red(`❌ Error: ${error.message}`));
@@ -773,29 +625,29 @@ const statusCommand = (options) => {
     const projectDir = path.resolve(options.path || process.cwd());
     const configPath = path.join(projectDir, CONFIG_FILE);
     
-    // Check if configuration file exists
     const configExists = fs.existsSync(configPath);
     let config = null;
     if (configExists) {
         try {
             config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
             
-            // Auto-sync harness state if mismatched
             const harnessExists = fs.existsSync(path.join(projectDir, 'docs', 'HARNESS.md')) ||
                                   fs.existsSync(path.join(projectDir, 'scripts', 'bin', 'harness-cli'));
             if (config && config.harness && config.harness.enabled !== harnessExists) {
                 config.harness.enabled = harnessExists;
                 config.harness.source = harnessExists ? 'repository-harness' : 'standalone';
+                
+                delete config.target;
+                delete config.targets;
+
                 fs.writeFileSync(configPath, `${JSON.stringify(config, null, 2)}\n`);
                 console.log(chalk.gray('ℹ️ Automatically synchronized harness configuration state in .ai-kit.json.'));
             }
         } catch (e) {
-            // Ignore parse errors, config remains null
+            // Ignore parse errors
         }
     }
 
-    // Determine target and installDir
-    const installedTarget = detectInstalledTarget(projectDir);
     let installDirName = INSTALL_FOLDER;
     if (config && config.paths && config.paths.installDir) {
         installDirName = config.paths.installDir;
@@ -803,16 +655,17 @@ const statusCommand = (options) => {
     const installDir = path.join(projectDir, installDirName);
     const installDirExists = fs.existsSync(installDir);
 
-    console.log(chalk.blueBright('\n📊 Kit Installation Status\n'));
+    const codexExists = fs.existsSync(path.join(installDir, 'skills'));
+    const geminiExists = fs.existsSync(path.join(installDir, 'gemini'));
 
-    if (!installedTarget && !configExists && !installDirExists) {
-        console.log(chalk.red('❌ No target installed in this directory.'));
-        const validTargets = Object.keys(TARGET_REGISTRY).join(', ');
-        console.log(chalk.yellow(`💡 Run ${chalk.cyan('hieund-ai-kit init --target <name>')} (targets: ${validTargets}).\n`));
+    console.log(chalk.blueBright('\n📊 AI Kit Installation Status\n'));
+
+    if (!configExists && !installDirExists) {
+        console.log(chalk.red('❌ AI Kit is not installed in this directory.'));
+        console.log(chalk.yellow(`💡 Run ${chalk.cyan('hieund-ai-kit init')} to install.\n`));
         return;
     }
 
-    // Detect corruption/mismatches
     let statusText = 'INSTALLED';
     let isCorrupted = false;
     let isUnconfigured = false;
@@ -823,19 +676,13 @@ const statusCommand = (options) => {
     } else if (!configExists && installDirExists) {
         statusText = 'UNCONFIGURED (Config file missing)';
         isUnconfigured = true;
+    } else if (configExists && installDirExists && (!codexExists || !geminiExists)) {
+        statusText = 'CORRUPTED (Missing Codex or Gemini runtime)';
+        isCorrupted = true;
     }
 
-    const activeTarget = installedTarget || (config && config.target) || 'unknown';
-    const targetConfig = TARGET_REGISTRY[activeTarget] || {
-        displayName: 'Unknown Target',
-        description: 'No registry metadata for this target',
-        bannerColor: chalk.redBright,
-    };
-
-    console.log(targetConfig.bannerColor(`${targetConfig.displayName}: ${statusText}`));
+    console.log(chalk.magentaBright(`AI Kit: ${statusText}`));
     console.log(chalk.gray('──────────────────────────────────────────────────────'));
-    console.log(`🎯 Target:       ${chalk.cyan(activeTarget)}`);
-    console.log(`📝 About:        ${chalk.gray(targetConfig.description)}`);
     console.log(`📁 Path:         ${chalk.cyan(installDir)}`);
     
     if (config) {
@@ -853,14 +700,14 @@ const statusCommand = (options) => {
             console.log(`📅 Modified:     ${chalk.gray(stats.mtime.toLocaleString('en-US'))}`);
             console.log(`📄 Items:        ${chalk.yellow(files.length)} items`);
         } catch (e) {
-            // Ignore stats errors
+            // Ignore stats
         }
     }
     console.log(chalk.gray('──────────────────────────────────────────────────────'));
 
     if (isCorrupted) {
         console.log(chalk.red('\n❌ Error: The installation is corrupted.'));
-        console.log(chalk.yellow(`💡 Run ${chalk.cyan('hieund-ai-kit repair')} to fix the missing or mismatched files.\n`));
+        console.log(chalk.yellow(`💡 Run ${chalk.cyan('hieund-ai-kit repair')} to restore the missing runtimes.\n`));
     } else if (isUnconfigured) {
         console.log(chalk.yellow('\n⚠️  Warning: The installation is unconfigured.'));
         console.log(chalk.yellow(`💡 Run ${chalk.cyan('hieund-ai-kit update')} to automatically generate the configuration file.\n`));
@@ -870,27 +717,17 @@ const statusCommand = (options) => {
 };
 
 /**
- * Repair the installed target's `.agents/` folder and config.
+ * Repair the installed AI Kit runtimes.
  */
 const repairCommand = async (options) => {
     const projectDir = path.resolve(options.path || process.cwd());
     const configPath = path.join(projectDir, CONFIG_FILE);
 
     if (!fs.existsSync(configPath)) {
-        // Check if we can fall back to detectInstalledTarget
-        const detected = detectInstalledTarget(projectDir);
-        if (!detected) {
-            console.error(chalk.red('❌ No configuration file found and no installed target detected.'));
-            console.log(chalk.yellow(`💡 Run ${chalk.cyan('hieund-ai-kit init')} to install a new kit.`));
-            process.exit(1);
-        }
-        
         console.log(chalk.yellow('⚠️  Configuration file missing. Re-creating config and repairing...'));
-        // Re-create the configuration file first
         const harnessExists = fs.existsSync(path.join(projectDir, 'docs', 'HARNESS.md')) ||
                               fs.existsSync(path.join(projectDir, 'scripts', 'bin', 'harness-cli'));
         const configContent = {
-            target: detected,
             version: '2.0.0',
             ref: 'main',
             installedAt: new Date().toISOString(),
@@ -913,49 +750,29 @@ const repairCommand = async (options) => {
     let config;
     try {
         config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
-        
-        // Auto-sync harness state
-        const harnessExists = fs.existsSync(path.join(projectDir, 'docs', 'HARNESS.md')) ||
-                              fs.existsSync(path.join(projectDir, 'scripts', 'bin', 'harness-cli'));
-        if (config && config.harness && config.harness.enabled !== harnessExists) {
-            config.harness.enabled = harnessExists;
-            config.harness.source = harnessExists ? 'repository-harness' : 'standalone';
-            fs.writeFileSync(configPath, `${JSON.stringify(config, null, 2)}\n`);
-        }
     } catch (e) {
         console.error(chalk.red(`❌ Failed to parse config file: ${e.message}`));
         process.exit(1);
     }
 
-    const targetName = config.target;
-    const installDirName = config.paths?.installDir || INSTALL_FOLDER;
     const ref = config.ref || 'main';
 
-    if (!TARGET_REGISTRY[targetName]) {
-        console.error(chalk.red(`❌ Unknown target in configuration: "${targetName}"`));
-        process.exit(1);
-    }
-
-    const targetConfig = TARGET_REGISTRY[targetName];
-    showBanner(targetConfig);
-
-    const spinner = ora({ text: `Downloading clean template for ${targetName}@${ref}...`, color: 'cyan' }).start();
+    const spinner = ora({ text: `Downloading clean templates @${ref}...`, color: 'cyan' }).start();
 
     let templatePath = null;
     try {
-        templatePath = await downloadTarget(targetConfig, ref);
+        templatePath = await downloadTemplates(ref);
         spinner.stop();
 
-        // Restore target files (mirrorCopy with overwriteRootInstruction = false so we don't destroy user modifications in project root files)
-        mirrorCopy(templatePath, projectDir, { overwriteRootInstruction: false });
-        
+        installCodexRuntime(templatePath, projectDir, false);
+        installGeminiRuntime(templatePath, projectDir, false);
+
         cleanup(templatePath);
 
-        // Update installedAt timestamp in config
         config.installedAt = new Date().toISOString();
         fs.writeFileSync(configPath, `${JSON.stringify(config, null, 2)}\n`);
 
-        console.log(chalk.green(`\n✅ Successfully repaired ${targetConfig.displayName}!`));
+        console.log(chalk.green(`\n✅ Successfully repaired AI Kit!`));
     } catch (error) {
         spinner.stop();
         console.error(chalk.red(`❌ Repair failed: ${error.message}`));
@@ -977,23 +794,19 @@ program
 
 program
     .command('init')
-    .description('Install a target kit and integrations (default: codex)')
-    .option('-t, --target <name>', 'Target to install (codex, gemini)')
+    .description('Install the AI Kit runtimes and integrations (Codex and Gemini)')
     .option('-f, --force', 'Overwrite existing files without confirmation', false)
     .option('-p, --path <dir>', 'Path to the project directory', process.cwd())
     .option('-b, --branch <name>', 'Select repository branch')
     .option('-r, --ref <ref>', 'Pin to a repository ref (tag, commit, or branch); overrides --branch')
-    .option('-g, --gemini', '[deprecated] alias for --target gemini', false)
     .action(initCommand);
 
 program
     .command('update')
-    .description('Refresh the installed target runtime and integrations')
-    .option('-t, --target <name>', 'Target to update (defaults to installed target)')
+    .description('Refresh the installed AI Kit runtimes and integrations')
     .option('-p, --path <dir>', 'Path to the project directory', process.cwd())
     .option('-b, --branch <name>', 'Select repository branch')
     .option('-r, --ref <ref>', 'Pin to a repository ref (tag, commit, or branch); overrides --branch')
-    .option('-g, --gemini', '[deprecated] alias for --target gemini', false)
     .action(updateCommand);
 
 program
@@ -1004,7 +817,7 @@ program
 
 program
     .command('repair')
-    .description('Restore missing or corrupted files of the installed target')
+    .description('Restore missing or corrupted files of the installed AI Kit')
     .option('-p, --path <dir>', 'Path to the project directory', process.cwd())
     .action(repairCommand);
 
@@ -1016,4 +829,11 @@ if (isDirectCliInvocation()) {
     }
 }
 
-export { cleanupOldTarget, detectInstalledTarget, mirrorCopy, removeKitCodexHooks };
+export {
+    installCodexRuntime,
+    installGeminiRuntime,
+    copySharedFile,
+    mergeSharedAssets,
+    mergeRootInstructionBlock,
+    mergeWorkspaceHooks
+};

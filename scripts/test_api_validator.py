@@ -12,8 +12,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 VALIDATORS = (
-    ROOT / "templates/codex/.agents/skills/api-patterns/scripts/api_validator.py",
-    ROOT / "templates/gemini/.agents/skills/api-patterns/scripts/api_validator.py",
+    ROOT / "templates/.agents/skills/api-patterns/scripts/api_validator.py",
+    ROOT / "templates/.agents/gemini/skills/api-patterns/scripts/api_validator.py",
 )
 
 
