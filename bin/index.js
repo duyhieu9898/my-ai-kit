@@ -513,8 +513,8 @@ const initCommand = async (options) => {
             }
         }
 
-        installCodexRuntime(templatePath, projectDir, true);
-        installGeminiRuntime(templatePath, projectDir, true);
+        installCodexRuntime(templatePath, projectDir, !!options.force);
+        installGeminiRuntime(templatePath, projectDir, !!options.force);
 
         cleanup(templatePath);
 
