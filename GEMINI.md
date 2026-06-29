@@ -80,3 +80,19 @@ $$\text{Security} \rightarrow \text{Lint} \rightarrow \text{Schema} \rightarrow 
     *   *Unit Tests:* `.agents/skills/testing-patterns/scripts/test_runner.py`
 *   **UI/UX Design Rules:** Read `.agents/agents/frontend-specialist.md` (Strict rules: Purple Ban on violet/purple colors; Template Ban on generic, outdated layouts).
 <!-- KIT:END -->
+
+<!-- HARNESS:BEGIN -->
+## Harness
+
+This repo uses Harness. Before work, read:
+
+- `README.md`
+- `docs/HARNESS.md`
+- `docs/FEATURE_INTAKE.md`
+- `docs/ARCHITECTURE.md`
+- `docs/CONTEXT_RULES.md`
+- `scripts/bin/harness-cli query matrix`
+
+Use the Rust Harness CLI at `scripts/bin/harness-cli` as the main operational
+tool.
+<!-- HARNESS:END -->
