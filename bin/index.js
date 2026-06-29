@@ -261,32 +261,56 @@ const extractInstructionBlocks = (text) =>
     }));
 
 const mergeInstructionBlocks = (incomingText, existingText) => {
-    const existingBlocks = extractInstructionBlocks(existingText);
-    if (existingBlocks.length === 0) {
-        return incomingText;
+    const incomingBlocks = extractInstructionBlocks(incomingText);
+
+    // If incomingText has no blocks, fall back to old behavior of using incomingText as base
+    if (incomingBlocks.length === 0) {
+        const existingBlocks = extractInstructionBlocks(existingText);
+        if (existingBlocks.length === 0) {
+            return incomingText;
+        }
+
+        let mergedText = incomingText;
+        const incomingBlockNames = new Set(extractInstructionBlocks(incomingText).map((block) => block.name));
+        const appendedBlocks = [];
+
+        for (const block of existingBlocks) {
+            if (incomingBlockNames.has(block.name)) {
+                const blockPattern = new RegExp(
+                    `^<!--\\s*${block.name}:BEGIN\\s*-->[\\s\\S]*?^<!--\\s*${block.name}:END\\s*-->`,
+                    'm',
+                );
+                mergedText = mergedText.replace(blockPattern, block.text);
+            } else {
+                appendedBlocks.push(block.text);
+            }
+        }
+
+        if (appendedBlocks.length === 0) {
+            return mergedText;
+        }
+
+        return `${mergedText.trimEnd()}\n\n${appendedBlocks.join('\n\n')}\n`;
     }
 
-    let mergedText = incomingText;
-    const incomingBlockNames = new Set(extractInstructionBlocks(incomingText).map((block) => block.name));
-    const appendedBlocks = [];
+    // New behavior: existingText (project-owned file) is the base.
+    let mergedText = existingText;
+    const existingBlocks = extractInstructionBlocks(existingText);
+    const existingBlockNames = new Set(existingBlocks.map((block) => block.name));
 
-    for (const block of existingBlocks) {
-        if (incomingBlockNames.has(block.name)) {
+    for (const block of incomingBlocks) {
+        if (existingBlockNames.has(block.name)) {
             const blockPattern = new RegExp(
                 `^<!--\\s*${block.name}:BEGIN\\s*-->[\\s\\S]*?^<!--\\s*${block.name}:END\\s*-->`,
                 'm',
             );
             mergedText = mergedText.replace(blockPattern, block.text);
         } else {
-            appendedBlocks.push(block.text);
+            mergedText = `${mergedText.trimEnd()}\n\n${block.text}\n`;
         }
     }
 
-    if (appendedBlocks.length === 0) {
-        return mergedText;
-    }
-
-    return `${mergedText.trimEnd()}\n\n${appendedBlocks.join('\n\n')}\n`;
+    return mergedText;
 };
 
 const copyRootInstructionFile = (src, dest, overwriteRootInstruction) => {

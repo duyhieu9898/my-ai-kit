@@ -79,10 +79,14 @@ ${harnessBlock}
     codexRootInstruction.includes(harnessBlock),
     "force-style Codex install must preserve project-specific Harness blocks",
   );
+  assert.ok(
+    codexRootInstruction.includes("# Project Instructions"),
+    "force-style Codex install must preserve project-owned custom text outside blocks",
+  );
   assert.equal(
     detectInstalledTarget(codexProjectDir),
     "codex",
-    "status detection must read the Codex marker file",
+    "status detection must detect installed target",
   );
 
   fs.writeFileSync(path.join(codexProjectDir, "GEMINI.md"), "# Gemini\n");

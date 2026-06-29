@@ -1,3 +1,4 @@
+<!-- KIT:BEGIN -->
 # AGENTS.md - Workspace Rules
 
 Keep repository-wide rules here. Put domain procedures, examples, and tool-specific guidance in skills.
@@ -84,3 +85,4 @@ python3 .agents/scripts/checklist.py .
 ```
 
 Use narrower skill scripts when they better match the changed surface.
+<!-- KIT:END -->

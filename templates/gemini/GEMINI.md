@@ -1,3 +1,4 @@
+<!-- KIT:BEGIN -->
 ---
 trigger: always_on
 ---
@@ -78,3 +79,4 @@ $$\text{Security} \rightarrow \text{Lint} \rightarrow \text{Schema} \rightarrow 
     *   *Linter:* `.agents/skills/lint-and-validate/scripts/lint_runner.py`
     *   *Unit Tests:* `.agents/skills/testing-patterns/scripts/test_runner.py`
 *   **UI/UX Design Rules:** Read `.agents/agents/frontend-specialist.md` (Strict rules: Purple Ban on violet/purple colors; Template Ban on generic, outdated layouts).
+<!-- KIT:END -->
