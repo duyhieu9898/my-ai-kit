@@ -4,21 +4,20 @@
 
 ## Proof Strategy
 
-The story is done when the CLI passes syntax check, all command help outputs show
-the new `--target` surface, and a manual dry-run exercises install, target switch,
-update, and status in a scratch directory. Deep behavioral testing is performed
-by the human after install.
+The story is done when the CLI passes syntax check, both runtimes (Codex and Gemini)
+are installed side-by-side on `init`, and a dry-run confirms correct file layout,
+merged hooks, and preserved root instructions on update.
 
 ## Test Plan
 
 | Layer | Cases |
 | --- | --- |
 | Unit | none (manual only) |
-| Integration | init → status → update cycle per target; codex→gemini switch cleanup; init --force overwrite |
+| Integration | `init` installs both runtimes; `update` preserves root instructions; `init --force` overwrites; `repair` restores missing dirs |
 | E2E | none |
-| Platform | `node --check bin/index.js`; `node bin/index.js {init,update} --help` |
+| Platform | `node --check bin/index.js`; `node bin/index.js {init,update,status,repair} --help` |
 | Performance | n/a |
-| Logs/Audit | verify deletion log on switch; success summary lists correct paths |
+| Logs/Audit | success summary lists both `.agents/skills` and `.agents/gemini` paths |
 
 ## Fixtures
 
@@ -33,27 +32,29 @@ node bin/index.js --help
 node bin/index.js init --help
 node bin/index.js update --help
 # scratch dir dry-run
-node bin/index.js init                       # default codex
-node bin/index.js status                      # shows codex
-node bin/index.js init --target gemini --force
-node bin/index.js status                      # shows gemini
-node bin/index.js update                      # auto-detect gemini
+node bin/index.js init                        # installs codex + gemini side-by-side
+node bin/index.js status                      # shows INSTALLED with harness info
+node bin/index.js update                      # refreshes both runtimes, preserves root instructions
+node bin/index.js repair                      # restores if corrupted
 npm pack --dry-run --json                     # templates/codex + templates/gemini included
 ```
 
 ## Acceptance Evidence
 
-Verified 2026-06-12 (manual validation, agent: kiro):
+Verified 2026-06-12 (manual validation, agent: kiro) — original single-target pass.
 
-- `node --check bin/index.js` → pass (story verify KIT-008: pass).
-- `init|update --help` → show `--target <name>` (`-t`); `--gemini` marked deprecated.
-- Local mirror-logic test (scratch dir against migrated templates):
-  - codex root instruction = `AGENTS.md`, gemini = `GEMINI.md`.
-  - marker detection returns correct target after install.
-  - codex→gemini switch deletes `AGENTS.md`, installs `GEMINI.md`.
-  - `update` (overwriteRootInstruction:false) preserved a user-edited root file.
-- `npm pack --dry-run` → templates/codex (326 files) + templates/gemini (212 files),
-  both `.kit-target` markers present, zero old `.codex`/`.antigravity`/`root` folders.
+Revalidated 2026-06-29 (clean-code refactor, agent: antigravity):
 
-Pending (out of agent scope): full network e2e install via giget requires the new
-template layout to be pushed to `main`. Deep behavioral testing by human.
+- Dead code removed: `detectInstalledTarget`, `getTargetConfig`, `getRootInstructionFiles`,
+  `mergeDirectory`, `DEFAULT_TARGET`, `gemini` entry in `TARGET_REGISTRY`.
+- `TARGET_REGISTRY` simplified to `codex`-only with three banner fields.
+- `showBanner` fixed: replaced `%-40s` printf placeholders (unsupported in Node.js)
+  with `.padEnd(40)` + template literals for correct alignment.
+- `mergeInstructionBlocks` fallback branch simplified: removed unreachable inner
+  `if (incomingBlockNames.has(...))` (always false when `incomingBlocks.length === 0`).
+- `node --check bin/index.js` → pass.
+- `node scripts/test-installer.mjs` → installer regression tests passed.
+- `node scripts/check-template-consistency.mjs` → 766 checks passed.
+- `python3 scripts/test-validator-regressions.py` → 16 tests OK.
+- `python3 scripts/test-hooks.py` → 9/9 hook tests passed.
+- `harness-cli story verify KIT-008` → pass.

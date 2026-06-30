@@ -18,7 +18,6 @@ const REPO = 'github:duyhieu9898/my-ai-kit';
 const TEMPLATES_FOLDER = 'templates';
 const TEMP_PREFIX = 'hieund-ai-kit-';
 const INSTALL_FOLDER = '.agents';
-const DEFAULT_TARGET = 'codex';
 const CODEX_CONFIG_FOLDER = '.codex';
 const CONFIG_FILE = '.ai-kit.json';
 const CODEX_HOOK_COMMAND_MARKERS = [
@@ -32,107 +31,13 @@ const INSTRUCTION_BLOCK_PATTERN = /^<!--\s*([A-Z0-9_-]+):BEGIN\s*-->[\s\S]*?^<!-
 
 /**
  * Target registry — maps a target name to its configuration.
- * Adding a new AI tool target means adding one entry here and one folder
- * under `templates/<templateDir>/`.
  */
 const TARGET_REGISTRY = {
     codex: {
         displayName: 'OpenAI Codex Kit',
         bannerColor: chalk.magentaBright,
         tagLine: '✨ Codex Standard (Recommended)',
-        description: 'Unified composable skills & cascading rules',
-        templateDir: 'codex',
-        // Signature root instruction file, used as a detection fallback when
-        // the `.kit-target` marker is missing. Must be unique per target.
-        rootInstruction: 'AGENTS.md',
     },
-    gemini: {
-        displayName: 'Gemini Antigravity Kit',
-        bannerColor: chalk.blueBright,
-        tagLine: '🚀 Gemini Framework',
-        description: 'Multi-agent routing & slash workflows',
-        templateDir: 'gemini',
-        rootInstruction: 'GEMINI.md',
-    },
-};
-
-// ============================================================================
-// REGISTRY & DETECTION
-// ============================================================================
-
-/**
- * Resolve a target configuration by name. Exits the process with a non-zero
- * code and a helpful message when the target is unknown.
- * @param {string} targetName
- * @returns {object} target configuration
- */
-const getTargetConfig = (targetName) => {
-    const config = TARGET_REGISTRY[targetName];
-    if (!config) {
-        const validTargets = Object.keys(TARGET_REGISTRY).join(', ');
-        console.error(chalk.red(`❌ Unknown target: "${targetName}". Valid targets: ${validTargets}`));
-        process.exit(1);
-    }
-    return config;
-};
-
-/**
- * Convention-based root instruction detection. Returns the names of top-level
- * files in a template directory (everything that is not the `.agents/` install
- * folder).
- * @param {string} templatePath
- * @returns {string[]}
- */
-const getRootInstructionFiles = (templatePath) => {
-    if (!fs.existsSync(templatePath)) {
-        return [];
-    }
-    return fs
-        .readdirSync(templatePath, { withFileTypes: true })
-        .filter((entry) => entry.isFile())
-        .map((entry) => entry.name);
-};
-
-/**
- * Detect the installed target.
- *
- * Primary signal: the `.agents/.kit-target` marker file. When the marker is
- * missing or invalid, fall back to detecting a target by its signature root
- * instruction file (e.g. `AGENTS.md` for codex, `GEMINI.md` for gemini). The
- * fallback only resolves when exactly one target's signature is present, to
- * avoid guessing on ambiguous setups.
- * @param {string} projectDir
- * @returns {string|null} target name or null when none is detected
- */
-const detectInstalledTarget = (projectDir) => {
-    const configPath = path.join(projectDir, CONFIG_FILE);
-    let configTarget = null;
-    if (fs.existsSync(configPath)) {
-        try {
-            const config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
-            if (config && config.target && TARGET_REGISTRY[config.target]) {
-                configTarget = config.target;
-            }
-        } catch {
-            // Ignore parsing errors
-        }
-    }
-
-    if (configTarget) {
-        return configTarget;
-    }
-
-    // Fallback: infer from signature root instruction files.
-    const installExists = fs.existsSync(path.join(projectDir, INSTALL_FOLDER));
-    const matches = Object.entries(TARGET_REGISTRY).filter(([, cfg]) =>
-        cfg.rootInstruction && fs.existsSync(path.join(projectDir, cfg.rootInstruction))
-    );
-    // Only trust the fallback when .agents/ exists and exactly one target's
-    // signature file is found.
-    if (installExists && matches.length === 1) {
-        return matches[0][0];
-    }
-    return null;
 };
 
 // ============================================================================
@@ -144,17 +49,16 @@ const detectInstalledTarget = (projectDir) => {
  * @param {object} config
  */
 const showBanner = (config) => {
-    console.log(config.bannerColor(`
-    ╔══════════════════════════════════════════════════════╗
-    ║             ⚡ HIEUND AI KIT CLI ⚡                  ║
-    ╠══════════════════════════════════════════════════════╣
-    ║  Target:   %-40s  ║
-    ║  Format:   %-40s  ║
-    ╚══════════════════════════════════════════════════════╝
-    `),
-    config.displayName,
-    config.tagLine
-    );
+    const targetLine = `  Target:   ${config.displayName.padEnd(40)}  `;
+    const formatLine = `  Format:   ${config.tagLine.padEnd(40)}  `;
+    console.log(config.bannerColor([
+        '    ╔══════════════════════════════════════════════════════╗',
+        '    ║             ⚡ HIEUND AI KIT CLI ⚡                  ║',
+        '    ╠══════════════════════════════════════════════════════╣',
+        `    ║${targetLine}║`,
+        `    ║${formatLine}║`,
+        '    ╚══════════════════════════════════════════════════════╝'
+    ].join('\n')));
 };
 
 /**
@@ -236,23 +140,6 @@ const mergeCodexHooksFile = (src, dest) => {
     fs.writeFileSync(dest, `${JSON.stringify(merged, null, 2)}\n`);
 };
 
-const mergeDirectory = (src, dest) => {
-    fs.mkdirSync(dest, { recursive: true });
-    for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
-        const entrySrc = path.join(src, entry.name);
-        const entryDest = path.join(dest, entry.name);
-        if (entry.isDirectory()) {
-            mergeDirectory(entrySrc, entryDest);
-        } else if (
-            path.basename(src) === CODEX_CONFIG_FOLDER &&
-            entry.name === 'hooks.json'
-        ) {
-            mergeCodexHooksFile(entrySrc, entryDest);
-        } else {
-            fs.copyFileSync(entrySrc, entryDest);
-        }
-    }
-};
 
 const extractInstructionBlocks = (text) =>
     [...text.matchAll(INSTRUCTION_BLOCK_PATTERN)].map((match) => ({
@@ -263,34 +150,14 @@ const extractInstructionBlocks = (text) =>
 const mergeInstructionBlocks = (incomingText, existingText) => {
     const incomingBlocks = extractInstructionBlocks(incomingText);
 
-    // If incomingText has no blocks, fall back to old behavior of using incomingText as base
+    // If incomingText has no blocks, fall back to old behavior of appending existing blocks to incomingText
     if (incomingBlocks.length === 0) {
         const existingBlocks = extractInstructionBlocks(existingText);
         if (existingBlocks.length === 0) {
             return incomingText;
         }
-
-        let mergedText = incomingText;
-        const incomingBlockNames = new Set(extractInstructionBlocks(incomingText).map((block) => block.name));
-        const appendedBlocks = [];
-
-        for (const block of existingBlocks) {
-            if (incomingBlockNames.has(block.name)) {
-                const blockPattern = new RegExp(
-                    `^<!--\\s*${block.name}:BEGIN\\s*-->[\\s\\S]*?^<!--\\s*${block.name}:END\\s*-->`,
-                    'm',
-                );
-                mergedText = mergedText.replace(blockPattern, block.text);
-            } else {
-                appendedBlocks.push(block.text);
-            }
-        }
-
-        if (appendedBlocks.length === 0) {
-            return mergedText;
-        }
-
-        return `${mergedText.trimEnd()}\n\n${appendedBlocks.join('\n\n')}\n`;
+        const appendedBlocks = existingBlocks.map((block) => block.text);
+        return `${incomingText.trimEnd()}\n\n${appendedBlocks.join('\n\n')}\n`;
     }
 
     // New behavior: existingText (project-owned file) is the base.
