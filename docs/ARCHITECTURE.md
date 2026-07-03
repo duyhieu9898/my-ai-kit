@@ -27,8 +27,11 @@ shared/hooks/
   Canonical Harness guard policy plus target-specific lifecycle adapters
 
 shared/runtime/
-  Canonical source for all executable scripts and Backlog runtime shared by
-  both targets
+  Canonical source for executable scripts shared by both targets
+
+backlog-mcp/
+  Workstation-local stdio MCP server and centralized Backlog runtime/state;
+  registered separately with Claude Code, Codex, or another MCP client
 
 docs/
   Repository Harness policy, product contracts, stories, and decisions
@@ -59,10 +62,11 @@ Each template folder mirrors the project layout exactly:
 
 - Treat `templates/` as package data; preserve relative paths during
   publication and installation.
-- Edit shared executable scripts and Backlog runtime under `shared/runtime/`,
-  then run
+- Edit shared executable scripts under `shared/runtime/`, then run
   `npm run sync:shared-runtime` to refresh their committed copies under both
   target templates.
+- Edit and test the Backlog integration under `backlog-mcp/`. It is not copied
+  into target templates or included in the npm package.
 - Keep target-specific metadata such as `SKILL.md`, Codex `agents/openai.yaml`,
   environment files, and runtime logs outside the shared source.
 - Edit shared lifecycle policy and adapters under `shared/hooks/`, then run

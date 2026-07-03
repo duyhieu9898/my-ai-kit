@@ -10,7 +10,8 @@ One local stdio MCP server at `backlog-mcp/` serves every project on the worksta
 
 ## Affected Users
 
-- Developers using Codex or Gemini across multiple local projects.
+- Developers using Claude Code, Codex, Gemini, or another MCP client across
+  multiple local projects.
 - Maintainers evolving Backlog workflows in the kit repository.
 
 ## Affected Product Docs
@@ -18,6 +19,8 @@ One local stdio MCP server at `backlog-mcp/` serves every project on the worksta
 - `docs/product/toolkits.md`
 - `docs/product/overview.md`
 - `README.md`
+- `backlog-mcp/README.md`
+- `backlog-mcp/ARCHITECTURE.md`
 
 ## Non-Goals
 

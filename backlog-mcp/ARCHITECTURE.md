@@ -6,7 +6,7 @@ This document describes the design, components, and data flow of the Workstation
 
 ## 📋 Overview
 
-The **Backlog MCP Server** is a workstation-local [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that communicates using the `stdio` transport. It exposes the Backlog project management workflows and issue-tracking actions to AI clients (like Codex and Gemini) as structured **Tools** and **Resources**.
+The **Backlog MCP Server** is a workstation-local [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that communicates using the `stdio` transport. It exposes the Backlog project management workflows and issue-tracking actions to MCP clients such as Claude Code, Codex, and Gemini as structured **Tools** and **Resources**.
 
 The server acts as a wrapper around the `backlog_tool` core CLI/domain runtime, ensuring that credentials, configurations, metrics, and logs are centralized under a single repository-root project directory instead of being duplicated in client runtimes.
 
@@ -83,7 +83,7 @@ Because this server operates locally on a developer's workstation with mutation 
 > **Credential Protection**
 > The Backlog API key is never written to log files. Request URLs containing query parameters are automatically stripped before being output to standard logs.
 
-* **Targeted Operations**: Unless a project key is explicitly supplied, queries fall back to the `default_project_key` in `backlog.json`. The server never loops or lists issues across multiple projects implicitly.
+* **Targeted Operations**: An explicit project key wins. Otherwise the runtime uses `BACKLOG_PROJECT_KEY`, `.backlog-project.json`, or a recognized workspace path segment. Claude Code supplies that workspace through `CLAUDE_PROJECT_DIR`; `BACKLOG_WORKSPACE_PATH` remains the explicit client override. Resolution fails instead of querying every configured project.
 
 ---
 
@@ -91,7 +91,7 @@ Because this server operates locally on a developer's workstation with mutation 
 
 All local workstation state lives under the `backlog-mcp/` root:
 * **Credentials**: Store in `.env` (ignored by Git).
-* **Configuration**: Workstation default project, spaces, and user mapping reside in `config/backlog.json`.
+* **Configuration**: Backlog space, configured projects, and user mapping reside in `config/backlog.json`.
 * **Catalogs**: Cached project configuration maps reside under `config/projects/`.
 * **Logs & Metrics**: Detailed session files, log history, and aggregated statistics reside under `logs/`.
 

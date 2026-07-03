@@ -75,6 +75,7 @@ class GetStoriesResponse(BaseModel):
 
 IssueView = Literal["compact", "full"]
 SortOrder = Literal["asc", "desc"]
+MutationMode = Literal["preview", "apply"]
 IssueSort = Literal[
     "issueType",
     "category",
@@ -99,6 +100,7 @@ IssueSort = Literal[
 
 SERVER_INSTRUCTIONS = (
     "Use this server for configured Backlog projects. Read before mutating. "
+    "Preview mutations first and use apply mode only when the user explicitly requests the write. "
     "When a project is omitted, resolve it from workspace configuration or workspace path only if unambiguous. If the project cannot be resolved confidently, return an error instead of guessing. "
     "Never expose API keys or full request URLs containing query strings."
 )
@@ -125,6 +127,11 @@ def _append_custom_fields(args: list[str], custom_fields: dict[str, Any] | None)
     for key, value in (custom_fields or {}).items():
         if value not in (None, ""):
             args.extend(("--custom", f"{key}={value}"))
+
+
+def _append_apply_mode(args: list[str], mode: MutationMode) -> None:
+    if mode == "apply":
+        args.extend(("--apply",))
 
 
 def _append_list_controls(
@@ -303,6 +310,15 @@ def _error_result(args: Sequence[str], error: Exception) -> CallToolResult:
     )
 
 
+def _workspace_path() -> str | None:
+    """Resolve the active client workspace without exposing it as a tool input."""
+    return (
+        os.environ.get("BACKLOG_WORKSPACE_PATH")
+        or os.environ.get("CLAUDE_PROJECT_DIR")
+        or None
+    )
+
+
 def _invoke(
     args: list[str],
     list_key: str | None = None,
@@ -314,9 +330,8 @@ def _invoke(
     if full:
         if "--json-full" not in args:
             args.append("--json-full")
-    workspace_path = os.environ.get("BACKLOG_WORKSPACE_PATH") or None
     try:
-        res = execute(args, workspace_path=workspace_path)
+        res = execute(args, workspace_path=_workspace_path())
     except Exception as error:
         return _error_result(args, error)
     data = res.data
@@ -481,6 +496,7 @@ def create_issue(
     estimated_hours: Annotated[float | None, Field(description="Estimated hours. Omit when unknown.")] = None,
     actual_hours: Annotated[float | None, Field(description="Actual hours. Omit when unknown.")] = None,
     custom_fields: Annotated[dict[str, Any] | None, Field(description="Custom field values keyed by configured custom field key, e.g. {'qc_activity':'Unit Test'}.")] = None,
+    mode: Annotated[MutationMode, Field(description="Execution mode: preview returns the planned change without writing; apply submits it to Backlog.")] = "preview",
 ) -> CallToolResult:
     """Create a Backlog issue.
 
@@ -503,7 +519,7 @@ def create_issue(
         actual_hours=actual_hours,
         custom_fields=custom_fields,
     )
-    args.append("--apply")
+    _append_apply_mode(args, mode)
     return _invoke(args)
 
 
@@ -523,6 +539,7 @@ def update_issue(
     estimated_hours: Annotated[float | None, Field(description="New estimated hours. Omit to keep current value.")] = None,
     actual_hours: Annotated[float | None, Field(description="New actual hours. Omit to keep current value.")] = None,
     custom_fields: Annotated[dict[str, Any] | None, Field(description="Custom field updates keyed by configured custom field key.")] = None,
+    mode: Annotated[MutationMode, Field(description="Execution mode: preview returns the planned change without writing; apply submits it to Backlog.")] = "preview",
 ) -> CallToolResult:
     """Update a Backlog issue.
 
@@ -546,7 +563,7 @@ def update_issue(
     _append(args, "--summary", summary)
     _append(args, "--status", status)
     _append(args, "--comment", comment)
-    args.append("--apply")
+    _append_apply_mode(args, mode)
     return _invoke(args)
 
 
@@ -617,6 +634,7 @@ def resolve_bug(
     comment: Annotated[str, Field(description="Resolve comment text.")] = "",
     commit: Annotated[str, Field(description="Git commit hash/ref related to the fix.")] = "",
     fix_description: Annotated[str, Field(description="Corrective action or fix description text.")] = "",
+    mode: Annotated[MutationMode, Field(description="Execution mode: preview returns the planned resolution without writing; apply submits it to Backlog.")] = "preview",
 ) -> CallToolResult:
     """Resolve a bug with workflow defaults.
 
@@ -638,7 +656,7 @@ def resolve_bug(
         ("--fix-description", fix_description),
     ):
         _append(args, flag, value)
-    args.append("--apply")
+    _append_apply_mode(args, mode)
     return _invoke(args)
 
 
@@ -648,6 +666,7 @@ def create_ut_bug(
     module: Annotated[str, Field(description="Name of the module or file with the failing unit test")],
     description: Annotated[str, Field(description="Unit test failure description details")],
     project_key: Annotated[str, Field(description="Project key (e.g., 'PRJ'). Omit or pass an empty string to resolve from the active workspace path or configuration.")] = "",
+    mode: Annotated[MutationMode, Field(description="Execution mode: preview returns the planned bug without writing; apply submits it to Backlog.")] = "preview",
 ) -> CallToolResult:
     """Create a Unit Test sub-task bug under a parent issue.
 
@@ -656,7 +675,7 @@ def create_ut_bug(
     """
     args = ["bug", "create-ut", parent_key, module, description]
     _append(args, "--project", project_key)
-    args.append("--apply")
+    _append_apply_mode(args, mode)
     return _invoke(args)
 
 

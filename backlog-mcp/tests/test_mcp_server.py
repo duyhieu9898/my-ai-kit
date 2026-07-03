@@ -15,7 +15,7 @@ def test_runtime_state_is_rooted_in_local_mcp_directory():
     assert settings.CONFIG_PATH == os.path.join(settings.MCP_ROOT, "config", "backlog.json")
 
 
-def test_create_issue_applies_directly():
+def test_create_issue_previews_by_default():
     expected_result = CallToolResult(
         content=[TextContent(type="text", text="success")],
         structuredContent={"ok": True}
@@ -27,10 +27,17 @@ def test_create_issue_applies_directly():
     args = invoke.call_args.args[0]
     assert args[:3] == ["issue", "create", "Summary"]
     assert "--issue-type" in args
-    assert "--apply" in args
+    assert "--apply" not in args
 
 
-def test_resolve_bug_applies_directly():
+def test_create_issue_applies_only_when_requested():
+    with mock.patch.object(server, "_invoke") as invoke:
+        server.create_issue("Summary", issue_type="Bug", mode="apply")
+
+    assert invoke.call_args.args[0][-1] == "--apply"
+
+
+def test_resolve_bug_previews_by_default_and_applies_when_requested():
     expected_result = CallToolResult(
         content=[TextContent(type="text", text="{}")],
         structuredContent={}
@@ -38,7 +45,21 @@ def test_resolve_bug_applies_directly():
     with mock.patch.object(server, "_invoke", return_value=expected_result) as invoke:
         server.resolve_bug("AQM-1")
 
+    assert "--apply" not in invoke.call_args.args[0]
+
+    with mock.patch.object(server, "_invoke", return_value=expected_result) as invoke:
+        server.resolve_bug("AQM-1", mode="apply")
+
     assert invoke.call_args.args[0][-1] == "--apply"
+
+
+def test_update_issue_and_create_ut_bug_preview_by_default():
+    with mock.patch.object(server, "_invoke") as invoke:
+        server.update_issue("AQM-1", summary="Updated")
+        server.create_ut_bug("AQM-1", "module", "failure")
+
+    for call in invoke.call_args_list:
+        assert "--apply" not in call.args[0]
 
 
 def test_inspect_project_does_not_write_by_default():
@@ -122,6 +143,29 @@ def test_invoke_returns_stable_success_envelope_with_pagination():
     assert "Retrieved 1 items via 'issue:list'." in result.content[0].text
 
 
+def test_invoke_uses_claude_project_directory_as_workspace():
+    command_result = SimpleNamespace(data=[], text="[]")
+    with (
+        mock.patch.dict(os.environ, {"CLAUDE_PROJECT_DIR": "/work/AQM"}, clear=True),
+        mock.patch.object(server, "execute", return_value=command_result) as execute,
+    ):
+        server._invoke(["issue", "list"])
+
+    execute.assert_called_once_with(["issue", "list"], workspace_path="/work/AQM")
+
+
+def test_explicit_backlog_workspace_overrides_claude_project_directory():
+    with mock.patch.dict(
+        os.environ,
+        {
+            "BACKLOG_WORKSPACE_PATH": "/work/OOP",
+            "CLAUDE_PROJECT_DIR": "/work/AQM",
+        },
+        clear=True,
+    ):
+        assert server._workspace_path() == "/work/OOP"
+
+
 def test_invoke_returns_structured_error_without_raising():
     with mock.patch.object(server, "execute", side_effect=ValueError("bad field")):
         result = server._invoke(["issue", "update", "AQM-1"])
@@ -147,7 +191,10 @@ def test_tool_schema_exposes_enums_and_use_when_descriptions():
     assert "cursor" in get_issues.inputSchema["properties"]
     assert "offset" not in get_issues.inputSchema["properties"]
     assert get_issues.inputSchema["properties"]["cursor"]["type"] == "string"
-    assert "mode" not in create_issue.inputSchema["properties"]
+    for mutation_name in ("create_issue", "update_issue", "resolve_bug", "create_ut_bug"):
+        mode_schema = tools[mutation_name].inputSchema["properties"]["mode"]
+        assert mode_schema["enum"] == ["preview", "apply"]
+        assert mode_schema["default"] == "preview"
     assert "workspace_path" not in create_issue.inputSchema["properties"]
     assert "parent" not in create_issue.inputSchema["properties"]
     assert "parent_key" in create_issue.inputSchema["properties"]
@@ -282,6 +329,3 @@ def test_issue_resource_success_and_error():
         res = json.loads(res_json)
         assert res["ok"] is False
         assert res["error"] == "Issue not found"
-
-
-

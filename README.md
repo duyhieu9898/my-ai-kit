@@ -48,6 +48,18 @@ Với Gemini Antigravity, `.agents/hooks.json` và các script hook tùy chỉnh
 có được giữ lại khi `init` hoặc `update`; kit chỉ thay entry
 `hieund-ai-kit-harness-guard` do nó quản lý.
 
+## Backlog MCP Cục Bộ
+
+Repository có một MCP server độc lập tại `backlog-mcp/` để dùng chung Backlog
+trên workstation. Server này không nằm trong package npm và không được copy vào
+project khi chạy `init` hoặc `update`.
+
+Để kết nối với Claude Code, Codex, Claude Desktop hoặc client MCP khác, clone
+repository vào một đường dẫn ổn định rồi làm theo
+[`backlog-mcp/README.md`](backlog-mcp/README.md). Với Claude Code, server được
+đăng ký ở scope `user` và dùng `CLAUDE_PROJECT_DIR` để nhận diện workspace đang
+hoạt động.
+
 ## Lệnh CLI
 
 Thay `hieund-ai-kit` bằng `npx -y hieund-ai-kit` nếu chưa cài global.

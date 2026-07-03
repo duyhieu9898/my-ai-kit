@@ -18,7 +18,11 @@ No database is introduced. JSON config and project catalogs live under `backlog-
 
 ## UI / Platform Impact
 
-Codex and Gemini register the same local stdio command once at user scope. Project templates no longer include the Backlog skill.
+Claude Code, Codex, Gemini, and other MCP clients register the same local stdio
+command once at user scope. Claude Code provides its active workspace through
+`CLAUDE_PROJECT_DIR`; the server keeps `BACKLOG_WORKSPACE_PATH` as an explicit
+override for other clients. Project templates no longer include the Backlog
+skill.
 
 ## Observability
 

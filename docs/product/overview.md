@@ -39,7 +39,7 @@ target repository.
 | Dual toolkit package | Publish Codex and Gemini Antigravity templates | `KIT-002` |
 | Instruction safety | Keep repository and nested toolkit instructions separate | `KIT-003` |
 | Installation detection | Report active and obsolete toolkit locations | `KIT-004` |
-| Backlog integration | Ship a validated Backlog workflow skill | `KIT-005` |
+| Backlog integration | Provide one workstation-local MCP runtime outside installed templates | `KIT-024` |
 | Proportional verification | Select checks based on change surface and risk | `KIT-006` |
 | Scoped clean-code guidance | Keep implementation guidance focused and local | `KIT-007` |
 | Multi-target registry | Select toolkits through the target registry and `.kit-target` marker | `KIT-008` |
