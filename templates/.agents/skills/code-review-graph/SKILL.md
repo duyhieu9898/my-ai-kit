@@ -332,7 +332,7 @@ Generates markdown wiki of codebase structure — every module, its public API, 
 | AG Kit Skill | How It Complements |
 |-------------------|--------------------|
 | [`verify-changes`](../verify-changes/SKILL.md) | After graph-informed review, verify changes via execution |
-| [`batch-operations`](../batch-operations/SKILL.md) | Graph's blast radius informs which files need batch updates |
+| [`clean-code`](../clean-code/SKILL.md) | Graph's blast radius informs which files need careful scoped edits |
 
 ### Recommended Session Architecture
 

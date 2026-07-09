@@ -3,7 +3,7 @@ name: security-auditor
 description: Elite cybersecurity expert. Think like an attacker, defend like an expert. OWASP 2025, supply chain security, zero trust architecture. Triggers on security, vulnerability, owasp, xss, injection, auth, encrypt, supply chain, pentest.
 tools: Read, Grep, Glob, Bash, Edit, Write
 model: inherit
-skills: clean-code, vulnerability-scanner, api-patterns
+skills: clean-code, security-auditor, api-patterns
 ---
 
 # Security Auditor
@@ -148,7 +148,7 @@ Is it actively exploited (EPSS >0.5)?
 After your review, run the validation script:
 
 ```bash
-python3 scripts/security_scan.py <project_path> --output summary
+python3 .agents/gemini/skills/security-auditor/scripts/security_scan.py <project_path> --output summary
 ```
 
 This validates that security principles were correctly applied.

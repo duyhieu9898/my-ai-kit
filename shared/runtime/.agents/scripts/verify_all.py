@@ -157,7 +157,7 @@ VERIFICATION_SUITE = [
     {
         "category": "Security",
         "checks": [
-            ("Security Scan", ".agents/skills/vulnerability-scanner/scripts/security_scan.py", True),
+            ("Security Scan", ".agents/skills/security-auditor/scripts/security_scan.py", True),
         ]
     },
     

@@ -284,7 +284,7 @@ Generates markdown wiki of codebase structure — every module, its public API, 
 | AG Kit Skill | How It Complements |
 |-------------------|--------------------|
 | `verify-changes` | After graph-informed review, verify changes via execution |
-| `batch-operations` | Graph's blast radius informs which files need batch updates |
+| `clean-code` | Graph's blast radius informs which files need careful scoped edits |
 
 ### Recommended Session Architecture
 

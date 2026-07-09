@@ -75,7 +75,7 @@ $$\text{Security} \rightarrow \text{Lint} \rightarrow \text{Schema} \rightarrow 
 
 *   **Main Verification Scripts:**
     *   *Verify All:* `.agents/scripts/verify_all.py`
-    *   *Security Scan:* `.agents/skills/vulnerability-scanner/scripts/security_scan.py`
+    *   *Security Scan:* `.agents/skills/security-auditor/scripts/security_scan.py`
     *   *Linter:* `.agents/skills/lint-and-validate/scripts/lint_runner.py`
     *   *Unit Tests:* `.agents/skills/testing-patterns/scripts/test_runner.py`
 *   **UI/UX Design Rules:** Read `.agents/agents/frontend-specialist.md` (Strict rules: Purple Ban on violet/purple colors; Template Ban on generic, outdated layouts).

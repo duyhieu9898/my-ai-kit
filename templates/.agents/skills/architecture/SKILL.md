@@ -39,7 +39,7 @@ allowed-tools:
 |:---|:---|
 | Database schema design | [`database-design`](../database-design/SKILL.md) |
 | API design patterns | [`api-patterns`](../api-patterns/SKILL.md) |
-| Deployment architecture | [`deployment-procedures`](../deployment-procedures/SKILL.md) |
+| Deployment architecture | [`devops-engineer`](../devops-engineer/SKILL.md) |
 
 ---
 

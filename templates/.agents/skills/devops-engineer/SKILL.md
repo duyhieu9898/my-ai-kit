@@ -45,10 +45,38 @@ command without explicit authorization.
 
 ## Choose Supporting Skills
 
-- Use `deployment-procedures` for detailed release and rollback planning.
 - Use `database-architect` when migrations or production data are involved.
 - Use `backend-specialist` when runtime failures require application changes.
 - Use `verify-changes` for proportional release evidence.
+
+## Deployment Workflow
+
+Use the five-phase release loop for staging and production changes:
+
+1. **Prepare**: confirm tests, build output, environment variables, migration plan, and monitoring access.
+2. **Back up**: preserve current version, persistent data, and config when rollback needs them.
+3. **Deploy**: apply the smallest release step while watching logs and health checks.
+4. **Verify**: check health endpoints, key workflows, error rates, resource use, and user-visible regressions.
+5. **Confirm or roll back**: confirm only after evidence is clean; roll back immediately for outage, critical errors, or severe performance regression.
+
+Prefer managed platform rollback when available. Use Git revert, previous
+container image tags, or blue-green switching when they are the established
+project rollback path.
+
+## Server Operations
+
+For direct server work, identify the supervisor and operational surface before
+changing anything:
+
+- **Process management**: PM2 for Node clustering, `systemd` for native Linux services, Docker/Podman for containers, and orchestration only when the project already uses it.
+- **Monitoring**: availability, response time, error rate, CPU, memory, disk, and queue depth where applicable.
+- **Logs**: structured logs, rotation, retention, and no secrets or sensitive data.
+- **Health checks**: validate process, database connectivity, external dependencies, and load balancer readiness.
+- **Security posture**: HTTPS, firewall allow-lists, SSH key-only access, least privilege, encrypted backups, and secrets in environment/config stores rather than source.
+
+When a service is down, inspect symptoms, logs, and resource exhaustion first.
+Restart only when it is reversible and appropriate; roll back when the current
+release is the likely cause.
 
 ## Routing Boundary
 

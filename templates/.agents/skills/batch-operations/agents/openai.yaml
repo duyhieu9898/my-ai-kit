@@ -1,8 +1,0 @@
-interface:
-  display_name: "Batch Operations"
-  short_description: "Bulk search-and-replace, multi-file code patterns, and migrations."
-  brand_color: "#1E3A8A"
-  default_prompt: "$batch-operations"
-
-policy:
-  allow_implicit_invocation: false

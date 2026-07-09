@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Skill: vulnerability-scanner
+Skill: security-auditor
 Script: security_scan.py
-Purpose: Validate that security principles from SKILL.md are applied correctly
+Purpose: Validate that security-auditor principles from SKILL.md are applied correctly
 Usage: python3 security_scan.py <project_path> [--scan-type all|deps|secrets|patterns|config]
 Output: JSON with validation findings
 
@@ -420,7 +420,7 @@ def run_full_scan(project_path: str, scan_type: str = "all") -> Dict[str, Any]:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Validate security principles from vulnerability-scanner skill"
+        description="Validate security principles from security-auditor skill"
     )
     parser.add_argument("project_path", nargs="?", default=".", help="Project directory to scan")
     parser.add_argument("--scan-type", choices=["all", "deps", "secrets", "patterns", "config"],

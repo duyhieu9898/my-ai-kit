@@ -32,7 +32,7 @@ allowed-tools: Read, Glob, Grep
 |-------|---------|
 | `@[skills/database-design]` | Database schema design |
 | `@[skills/api-patterns]` | API design patterns |
-| `@[skills/deployment-procedures]` | Deployment architecture |
+| `@[agents/devops-engineer]` | Deployment architecture |
 
 ---
 

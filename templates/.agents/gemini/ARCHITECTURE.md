@@ -9,8 +9,8 @@
 AG Kit is a modular system consisting of:
 
 - **15 Specialist Agents** - Role-based AI personas
-- **33 Skills** - Domain-specific knowledge modules with conditional loading
-- **11 Workflows** - Slash command procedures
+- **29 Skills** - Domain-specific knowledge modules with conditional loading
+- **10 Workflows** - Slash command procedures
 
 ---
 
@@ -22,8 +22,8 @@ AG Kit is a modular system consisting of:
 ├── hooks.json               # Antigravity lifecycle hook registration
 ├── hooks/                   # Shared Harness policy + Gemini adapter
 ├── agents/                  # 15 Specialist Agents
-├── skills/                  # 33 Skills (with conditional loading)
-├── workflows/               # 11 Slash Commands
+├── skills/                  # 29 Skills (with conditional loading)
+├── workflows/               # 10 Slash Commands
 └── scripts/                 # Master Validation Scripts
 ```
 
@@ -39,10 +39,10 @@ Specialist AI personas for different domains.
 | `frontend-specialist`    | Web UI/UX & Architecture   | frontend-design, nextjs-react-expert, react-refactor-patterns, tailwind-patterns, frontend-specialist |
 | `backend-specialist`     | API, business logic        | api-patterns, nodejs-best-practices, database-design     |
 | `database-architect`     | Schema, SQL                | database-design                                          |
-| `devops-engineer`        | CI/CD, Docker              | deployment-procedures                                    |
-| `security-auditor`       | Security compliance        | vulnerability-scanner                                    |
+| `devops-engineer`        | CI/CD, Docker              | clean-code                                               |
+| `security-auditor`       | Security compliance        | security-auditor                                         |
 | `test-engineer`          | Testing strategies         | testing-patterns, tdd-workflow, webapp-testing, playwright-pitfalls, playwright-pro-patterns |
-| `debugger`               | Root cause analysis        | systematic-debugging                                     |
+| `debugger`               | Root cause analysis        | clean-code                                               |
 | `performance-optimizer`  | Speed, Web Vitals          | performance-profiling                                    |
 | `seo-specialist`         | Ranking, visibility        | seo-fundamentals                                         |
 | `documentation-writer`   | Manuals, docs              | documentation-writer                                     |
@@ -53,7 +53,7 @@ Specialist AI personas for different domains.
 
 ---
 
-## 🧩 Skills (33)
+## 🧩 Skills (29)
 
 Modular knowledge domains that agents can load on-demand based on task context.
 Most Gemini skills have a `when_to_use` frontmatter field for
@@ -84,13 +84,6 @@ only provide `description`.
 | ----------------- | --------------------------- |
 | `database-design` | Schema design, optimization |
 
-### Cloud & Infrastructure
-
-| Skill                   | Description               |
-| ----------------------- | ------------------------- |
-| `deployment-procedures` | CI/CD, deploy workflows   |
-| `server-management`     | Infrastructure management |
-
 ### Testing & Quality
 
 | Skill                    | Description                                                   |
@@ -107,7 +100,7 @@ only provide `description`.
 
 | Skill                   | Description              |
 | ----------------------- | ------------------------ |
-| `vulnerability-scanner` | Security auditing, OWASP |
+| `security-auditor`     | Security auditing, OWASP |
 
 ### Architecture & Planning
 
@@ -129,7 +122,6 @@ only provide `description`.
 | Skill                     | Description                                                 |
 | ------------------------- | ----------------------------------------------------------- |
 | `verify-changes`          | Prove code works by running it, not just inspecting         |
-| `batch-operations`        | Multi-file pattern-based modifications                      |
 | `simplify-code`           | Reduce over-engineered complexity                           |
 | `code-review-graph`       | Token-efficient code review via Tree-sitter AST + MCP       |
 
@@ -141,7 +133,6 @@ only provide `description`.
 | `mcp-builder`             | Model Context Protocol    |
 | `i18n-localization`       | Internationalization      |
 | `performance-profiling`   | Web Vitals, optimization  |
-| `systematic-debugging`    | Troubleshooting           |
 
 ---
 
@@ -251,8 +242,8 @@ The current template ships the runtime scripts directly under `.agents/scripts/`
 | Metric              | Value                             |
 | ------------------- | --------------------------------- |
 | **Total Agents**    | 15                                |
-| **Total Skills**    | 34                                |
-| **Total Workflows** | 11                                |
+| **Total Skills**    | 29                                |
+| **Total Workflows** | 10                                |
 | **Total Scripts**   | 4 master + 12 skill-level script directories |
 
 ---
@@ -264,7 +255,7 @@ The current template ships the runtime scripts directly under `.agents/scripts/`
 | Web App  | `frontend-specialist` | frontend-design, nextjs-react-expert, react-refactor-patterns, tailwind-patterns, frontend-specialist |
 | API      | `backend-specialist`  | api-patterns, nodejs-best-practices   |
 | Database | `database-architect`  | database-design                       |
-| Security | `security-auditor`    | vulnerability-scanner                 |
+| Security | `security-auditor`    | security-auditor                      |
 | Testing  | `test-engineer`       | testing-patterns, webapp-testing, playwright-pitfalls, playwright-pro-patterns |
-| Debug    | `debugger`            | systematic-debugging                  |
+| Debug    | `debugger`            | clean-code                            |
 | Plan     | `project-planner`     | brainstorming, plan-writing           |

@@ -28,7 +28,6 @@ allowed-tools:
 
 | Skill | Relationship | When to Use Together |
 |:---|:---|:---|
-| [`systematic-debugging`](../systematic-debugging/SKILL.md) | Deeper debugging workflow | When a bug needs a stricter investigation protocol |
 | [`test-engineer`](../test-engineer/SKILL.md) | Regression and reproduction tests | When a bug fix needs test coverage |
 | [`performance-optimizer`](../performance-optimizer/SKILL.md) | Profiling and performance diagnosis | When symptoms involve latency, memory, or throughput |
 | [`backend-specialist`](../backend-specialist/SKILL.md) | Server-side root-cause context | When errors involve APIs, services, or data flow |
@@ -113,6 +112,16 @@ allowed-tools:
 ---
 
 ## Investigation Principles
+
+### Strict Debugging Protocol
+
+For complex or intermittent bugs, do not move to a fix until these are true:
+
+1. Reproduction steps, expected behavior, actual behavior, and reproduction rate are documented.
+2. The suspect area is isolated with logs, tests, debugger breakpoints, binary search, or a minimal reproduction.
+3. The root cause explains the symptom and the trigger.
+4. The fix is the smallest change that addresses the cause.
+5. Verification includes the original reproduction and a regression test or focused executable check when feasible.
 
 ### The 5 Whys Technique
 

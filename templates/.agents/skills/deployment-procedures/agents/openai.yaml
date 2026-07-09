@@ -1,8 +1,0 @@
-interface:
-  display_name: "Deployment Procedures"
-  short_description: "Production release workflows, rollbacks, and verification."
-  brand_color: "#EA580C"
-  default_prompt: "$deployment-procedures"
-
-policy:
-  allow_implicit_invocation: false
