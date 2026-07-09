@@ -2,44 +2,37 @@
 
 CLI cài đặt bộ skill và rule cho AI coding agents vào repository hiện tại.
 
-CLI chọn tool qua option `--target <name>`. Mặc định là `codex`. Hỗ trợ hiện tại: `codex`, `gemini`.
-
-Mỗi project chỉ cài 1 target tại một thời điểm. `init` lại sẽ xóa target cũ và cài target mới.
+CLI cài đồng thời runtime và rule cho Codex, Gemini Antigravity, và Claude
+Code vào cùng một repository.
 
 ## Cài Đặt Nhanh
 
 Không cần cài global — dùng `npx` (khuyến nghị):
 
-Codex (mặc định):
+Codex + Gemini + Claude Code:
 
 ```bash
 npx -y hieund-ai-kit init
-```
-
-Gemini Antigravity:
-
-```bash
-npx -y hieund-ai-kit init --target gemini
 ```
 
 Hoặc trỏ thẳng repo GitHub:
 
 ```bash
 npx -y github:duyhieu9898/my-ai-kit init
-npx -y github:duyhieu9898/my-ai-kit init --target gemini
 ```
 
 > **Lưu ý:** Lệnh `hieund-ai-kit init` (không có `npx`) chỉ chạy được sau khi bạn `npm link` hoặc `npm install -g` trong repo CLI. Nếu terminal báo `command not found`, dùng các lệnh `npx` ở trên.
 
 Kết quả cài đặt:
 
-| Target | Runtime Folder | Integration Config | Root Instruction |
+| Tool | Runtime Folder | Integration Config | Root Instruction |
 |:---|:---|:---|:---|
-| `codex` | `.agents/` | `.codex/` hooks | `AGENTS.md` |
-| `gemini` | `.agents/` | `.agents/hooks.json` | `GEMINI.md` |
+| Codex | `.agents/skills/` | `.codex/hooks.json` | `AGENTS.md` |
+| Gemini Antigravity | `.agents/gemini/` | `.agents/hooks.json` | `GEMINI.md` |
+| Claude Code | `.agents/claude/` | `.claude/settings.json` | `CLAUDE.md` |
 
-`.agents/` chứa `skills/`, `scripts/`, các tài nguyên runtime, và marker `.kit-target`
-ghi tên target đang cài. CLI **không** tự sửa `.gitignore` — bạn tự quản lý.
+`.agents/` chứa `skills/`, `scripts/`, các tài nguyên runtime dùng chung, và
+các phần tích hợp theo tool. CLI **không** tự sửa `.gitignore` — bạn tự quản lý.
 Với Codex, `.codex/hooks.json` được merge với hooks hiện có thay vì thay thế
 toàn bộ cấu hình `.codex/`. Codex sẽ yêu cầu review/trust hook mới hoặc hook đã
 thay đổi trước khi chạy.
@@ -47,6 +40,9 @@ thay đổi trước khi chạy.
 Với Gemini Antigravity, `.agents/hooks.json` và các script hook tùy chỉnh hiện
 có được giữ lại khi `init` hoặc `update`; kit chỉ thay entry
 `hieund-ai-kit-harness-guard` do nó quản lý.
+
+Với Claude Code, `.claude/settings.json` được merge với settings hiện có; kit
+chỉ thay các hook group trỏ tới `.agents/claude/hooks/claude_adapter.py`.
 
 ## Backlog MCP Cục Bộ
 
@@ -66,21 +62,12 @@ Thay `hieund-ai-kit` bằng `npx -y hieund-ai-kit` nếu chưa cài global.
 
 | Lệnh | Mô tả |
 |:---|:---|
-| `init` | Cài codex (mặc định) vào repo hiện tại |
-| `init --target gemini` | Cài gemini thay vì codex |
+| `init` | Cài Codex, Gemini, và Claude Code vào repo hiện tại |
 | `init --force` | Bỏ qua xác nhận, ghi đè toàn bộ |
 | `init --path <dir>` | Cài vào thư mục chỉ định |
 | `init --ref <tag\|commit>` | Ghim phiên bản theo git ref (tag, commit, branch) |
-| `update` | Cập nhật `.agents/` cho target đang cài (tự nhận diện) |
-| `update --target <name>` | Cập nhật target chỉ định (báo lỗi nếu khác target đang cài) |
-| `status` | Kiểm tra target nào đang cài |
-
-Khi chuyển target (ví dụ đang codex, chạy `init --target gemini`), CLI sẽ xóa
-root instruction cũ (`AGENTS.md`), xóa `.agents/`, rồi cài target mới — có hỏi
-xác nhận trừ khi dùng `--force`.
-
-> **Lưu ý:** `--gemini` vẫn dùng được nhưng đã deprecated; nó được map sang
-> `--target gemini` kèm cảnh báo.
+| `update` | Cập nhật `.agents/`, hooks/settings, giữ root instructions hiện có |
+| `status` | Kiểm tra trạng thái cài đặt |
 
 > **Ghim phiên bản:** Mặc định CLI tải từ nhánh chính của repo. Để tái lập và
 > giảm rủi ro supply-chain, ghim theo git ref bằng `--ref`:
@@ -127,57 +114,40 @@ hieund-ai-kit status
 
 ## Cấu Trúc Template
 
-Mỗi target là một folder **mirror** đúng cấu trúc sẽ copy vào project. CLI chỉ
-việc copy thẳng, không transform.
+`templates/` là layout generated được installer copy/merge vào project. CLI
+không compose skill trong lúc cài; các bản generated phải được commit sẵn.
 
 ```text
 templates/
-├── codex/
-│   ├── AGENTS.md            # Root instruction → copy ra project root
-│   ├── .codex/              # Codex hooks → merge vào project/.codex/
-│   │   ├── hooks.json
-│   │   └── hooks/
-│   │       └── harness_guard.py
-│   └── .agents/             # Install folder → copy vào project/.agents/
-│       ├── .kit-target      # Marker, nội dung: "codex"
-│       ├── AGENTS.md
-│       ├── ARCHITECTURE.md
-│       ├── .shared/
-│       ├── scripts/
-│       └── skills/
-└── gemini/
-    ├── GEMINI.md            # Root instruction → copy ra project root
-    └── .agents/             # Install folder → copy vào project/.agents/
-        ├── .kit-target      # Marker, nội dung: "gemini"
-        ├── hooks.json       # Antigravity lifecycle hooks → merge theo entry
-        ├── hooks/
-        │   ├── harness_guard.py
-        │   └── gemini_adapter.py
-        ├── ARCHITECTURE.md
-        ├── agents/
-        ├── scripts/
-        ├── skills/
-        └── workflows/
+├── AGENTS.md                # Codex root instruction → project/AGENTS.md
+├── GEMINI.md                # Gemini root instruction → project/GEMINI.md
+├── CLAUDE.md                # Claude Code root instruction → project/CLAUDE.md
+├── .codex/                  # Codex hooks → merge vào project/.codex/
+├── .claude/                 # Claude settings → merge vào project/.claude/
+└── .agents/                 # Shared install folder → project/.agents/
+    ├── ARCHITECTURE.md
+    ├── .shared/
+    ├── scripts/
+    ├── skills/              # Codex/open Agent Skills runtime
+    ├── gemini/              # Gemini agents/skills/workflows/hooks
+    └── claude/              # Claude hook adapter/runtime files
 ```
-
-Thêm target mới (ví dụ `claude`): thêm 1 entry vào `TARGET_REGISTRY` trong
-`bin/index.js` và tạo folder `templates/claude/` theo đúng cấu trúc mirror.
 
 ## Phát Triển Skill
 
-Codex skills:
+Codex/Claude reusable skills:
 
 ```text
-templates/codex/.agents/skills/<skill-name>/SKILL.md
-templates/codex/.agents/skills/<skill-name>/agents/openai.yaml
-templates/codex/.agents/skills/<skill-name>/references/
-templates/codex/.agents/skills/<skill-name>/scripts/
+templates/.agents/skills/<skill-name>/SKILL.md
+templates/.agents/skills/<skill-name>/agents/openai.yaml
+templates/.agents/skills/<skill-name>/references/
+templates/.agents/skills/<skill-name>/scripts/
 ```
 
 Gemini Antigravity skills:
 
 ```text
-templates/gemini/.agents/skills/<skill-name>/SKILL.md
+templates/.agents/gemini/skills/<skill-name>/SKILL.md
 ```
 
 Sau khi sửa template, push lên `main`; các project khác có thể cập nhật bằng:
@@ -186,12 +156,13 @@ Sau khi sửa template, push lên `main`; các project khác có thể cập nh�
 npx -y hieund-ai-kit update
 ```
 
-`update` thay thế `.agents/`, merge cấu hình `.codex/` do kit quản lý, và giữ
-nguyên root instruction hiện có.
+`update` refresh `.agents/`, merge cấu hình `.codex/`, `.agents/hooks.json`,
+và `.claude/settings.json` do kit quản lý, đồng thời giữ nguyên root
+instructions hiện có.
 
-Toàn bộ executable scripts dùng chung giữa Codex và Gemini, cùng runtime
-Backlog, có source chính tại `shared/runtime/`. Chỉ sửa bản shared rồi đồng bộ
-các bản template:
+Toàn bộ executable scripts dùng chung giữa các runtime, cùng runtime Backlog,
+có source chính tại `shared/runtime/`. Chỉ sửa bản shared rồi đồng bộ các bản
+template:
 
 ```bash
 npm run sync:shared-runtime
@@ -199,7 +170,7 @@ npm run check:shared-runtime
 ```
 
 Harness lifecycle guard dùng chung có source chính tại `shared/hooks/`; mỗi
-target giữ một adapter nhỏ cho payload/output native:
+tool giữ một adapter nhỏ cho payload/output native:
 
 ```bash
 npm run sync:shared-hooks

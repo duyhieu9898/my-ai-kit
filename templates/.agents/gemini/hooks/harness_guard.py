@@ -69,6 +69,7 @@ SHELL_TOOL_NAMES = {
 }
 
 FILE_READ_TOOL_NAMES = {
+    "read",
     "read_file",
     "view_file",
 }
@@ -77,6 +78,8 @@ FILE_EDIT_TOOL_NAMES = {
     "apply_patch",
     "delete_file",
     "edit",
+    "multiedit",
+    "notebookedit",
     "multi_replace_file_content",
     "replace_file_content",
     "write",

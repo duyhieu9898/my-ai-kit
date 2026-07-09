@@ -71,6 +71,19 @@ try {
       }
     });
 
+    fs.mkdirSync(path.join(testProjectDir, ".claude"), { recursive: true });
+    writeJson(path.join(testProjectDir, ".claude", "settings.json"), {
+      model: "sonnet",
+      hooks: {
+        PreToolUse: [
+          {
+            matcher: "custom_tool",
+            hooks: [{ type: "command", command: "echo custom-claude" }]
+          }
+        ]
+      }
+    });
+
     fs.writeFileSync(
       path.join(testProjectDir, "AGENTS.md"),
       `# Project Instructions\n\n<!-- HARNESS:BEGIN -->\n## Harness\n<!-- HARNESS:END -->\n`
@@ -79,9 +92,13 @@ try {
       path.join(testProjectDir, "GEMINI.md"),
       `# Gemini Instructions\n\n<!-- HARNESS:BEGIN -->\n## Harness\n<!-- HARNESS:END -->\n`
     );
+    fs.writeFileSync(
+      path.join(testProjectDir, "CLAUDE.md"),
+      `# Claude Instructions\n\n<!-- HARNESS:BEGIN -->\n## Harness\n<!-- HARNESS:END -->\n`
+    );
 
     // -------------------------------------------------------------------------
-    // ASSERTION 1: A single init command installs both runtimes side-by-side
+    // ASSERTION 1: A single init command installs all runtimes side-by-side
     // -------------------------------------------------------------------------
     execFileSync(process.execPath, [
       binLinkPath,
@@ -93,8 +110,10 @@ try {
 
     assert.ok(fs.existsSync(path.join(testProjectDir, "AGENTS.md")), "AGENTS.md must exist at root");
     assert.ok(fs.existsSync(path.join(testProjectDir, "GEMINI.md")), "GEMINI.md must exist at root");
+    assert.ok(fs.existsSync(path.join(testProjectDir, "CLAUDE.md")), "CLAUDE.md must exist at root");
     assert.ok(fs.existsSync(path.join(installDir, "skills")), "Codex runtime (skills/) must exist flat under .agents/");
     assert.ok(fs.existsSync(path.join(installDir, "gemini", "skills")), "Gemini runtime (skills/) must exist nested under .agents/gemini/");
+    assert.ok(fs.existsSync(path.join(installDir, "claude", "hooks")), "Claude runtime hooks must exist nested under .agents/claude/");
 
     // -------------------------------------------------------------------------
     // ASSERTION 2: Workspace-level hook files are written correctly and custom hooks preserved
@@ -106,6 +125,11 @@ try {
     const geminiHooks = readJson(path.join(testProjectDir, ".agents", "hooks.json"));
     assert.ok(geminiHooks["custom-gemini-hook"], "Custom Gemini hooks must be preserved");
     assert.ok(geminiHooks["hieund-ai-kit-harness-guard"], "Managed Gemini hooks must be merged");
+
+    const claudeSettings = readJson(path.join(testProjectDir, ".claude", "settings.json"));
+    assert.equal(claudeSettings.model, "sonnet", "Custom Claude settings must be preserved");
+    assert.ok(claudeSettings.hooks.PreToolUse.some(h => h.matcher === "custom_tool"), "Custom Claude hooks must be preserved");
+    assert.ok(claudeSettings.hooks.PreToolUse.some(h => h.hooks.some(hook => hook.command.includes("claude_adapter.py"))), "Managed Claude hooks must be merged");
 
     // -------------------------------------------------------------------------
     // ASSERTION 3: Codex isolation check
@@ -124,8 +148,10 @@ try {
     // -------------------------------------------------------------------------
     const agentsMdContent = readText(path.join(testProjectDir, "AGENTS.md"));
     const geminiMdContent = readText(path.join(testProjectDir, "GEMINI.md"));
+    const claudeMdContent = readText(path.join(testProjectDir, "CLAUDE.md"));
     assert.ok(agentsMdContent.includes("AGENTS.md - Workspace Rules"), "AGENTS.md must contain Codex instruction rules");
     assert.ok(geminiMdContent.includes("GEMINI.md - AG Kit"), "GEMINI.md must contain Gemini instruction rules");
+    assert.ok(claudeMdContent.includes("CLAUDE.md - Workspace Rules"), "CLAUDE.md must contain Claude instruction rules");
     assert.ok(!agentsMdContent.includes("GEMINI.md"), "AGENTS.md must not contain Gemini cross-references");
     assert.ok(!geminiMdContent.includes("AGENTS.md"), "GEMINI.md must not contain Codex cross-references");
 
@@ -137,6 +163,12 @@ try {
       adapterCommand,
       "python3 .agents/gemini/hooks/gemini_adapter.py pre-tool",
       "Gemini hook command path must point to the nested gemini folder"
+    );
+    const claudeAdapterCommand = claudeSettings.hooks.PreToolUse.find(h => h.hooks.some(hook => hook.command.includes("claude_adapter.py"))).hooks[0].command;
+    assert.equal(
+      claudeAdapterCommand,
+      "python3 \"${CLAUDE_PROJECT_DIR}/.agents/claude/hooks/claude_adapter.py\" pre-tool",
+      "Claude hook command path must point to the nested claude folder"
     );
 
     // -------------------------------------------------------------------------
@@ -168,6 +200,7 @@ try {
     // Run init a second time (above ran once, let's run it again and check blocks)
     const geminiMdPre = readText(path.join(testProjectDir, "GEMINI.md"));
     const agentsMdPre = readText(path.join(testProjectDir, "AGENTS.md"));
+    const claudeMdPre = readText(path.join(testProjectDir, "CLAUDE.md"));
 
     execFileSync(process.execPath, [
       binLinkPath,
@@ -179,9 +212,11 @@ try {
 
     const geminiMdPost = readText(path.join(testProjectDir, "GEMINI.md"));
     const agentsMdPost = readText(path.join(testProjectDir, "AGENTS.md"));
+    const claudeMdPost = readText(path.join(testProjectDir, "CLAUDE.md"));
 
     assert.equal(geminiMdPre, geminiMdPost, "GEMINI.md content must be identical and not duplicated on consecutive inits");
     assert.equal(agentsMdPre, agentsMdPost, "AGENTS.md content must be identical and not duplicated on consecutive inits");
+    assert.equal(claudeMdPre, claudeMdPost, "CLAUDE.md content must be identical and not duplicated on consecutive inits");
 
     const geminiHooksPost = readJson(path.join(testProjectDir, ".agents", "hooks.json"));
     assert.ok(geminiHooksPost["hieund-ai-kit-harness-guard"], "Harness guard hooks must exist");
@@ -190,6 +225,12 @@ try {
       Object.keys(geminiHooksPost).filter(k => k === "hieund-ai-kit-harness-guard").length,
       1,
       "Managed hook keys must be idempotent and not duplicated"
+    );
+    const claudeSettingsPost = readJson(path.join(testProjectDir, ".claude", "settings.json"));
+    assert.equal(
+      claudeSettingsPost.hooks.PreToolUse.filter(h => h.hooks.some(hook => hook.command.includes("claude_adapter.py"))).length,
+      1,
+      "Managed Claude hooks must be idempotent and not duplicated"
     );
 
     // -------------------------------------------------------------------------
@@ -240,7 +281,7 @@ try {
       "--path",
       testProjectDir,
     ], { encoding: "utf8", env: testEnv });
-    assert.ok(corruptedStatus.includes("CORRUPTED (Missing Codex or Gemini runtime)"), "Status must report CORRUPTED when Codex is missing");
+    assert.ok(corruptedStatus.includes("CORRUPTED (Missing Codex, Gemini, or Claude runtime)"), "Status must report CORRUPTED when Codex is missing");
 
     // Restore Codex skills and break Gemini folder
     fs.mkdirSync(path.join(installDir, "skills"));
@@ -252,10 +293,22 @@ try {
       "--path",
       testProjectDir,
     ], { encoding: "utf8", env: testEnv });
-    assert.ok(corruptedStatus2.includes("CORRUPTED (Missing Codex or Gemini runtime)"), "Status must report CORRUPTED when Gemini is missing");
+    assert.ok(corruptedStatus2.includes("CORRUPTED (Missing Codex, Gemini, or Claude runtime)"), "Status must report CORRUPTED when Gemini is missing");
+
+    // Restore Gemini folder and break Claude folder
+    fs.mkdirSync(path.join(installDir, "gemini"));
+    fs.rmSync(path.join(installDir, "claude"), { recursive: true, force: true });
+
+    const corruptedStatus3 = execFileSync(process.execPath, [
+      binLinkPath,
+      "status",
+      "--path",
+      testProjectDir,
+    ], { encoding: "utf8", env: testEnv });
+    assert.ok(corruptedStatus3.includes("CORRUPTED (Missing Codex, Gemini, or Claude runtime)"), "Status must report CORRUPTED when Claude is missing");
 
     // -------------------------------------------------------------------------
-    // ASSERTION 11: Repair restores both runtimes
+    // ASSERTION 11: Repair restores all runtimes
     // -------------------------------------------------------------------------
     execFileSync(process.execPath, [
       binLinkPath,
@@ -266,6 +319,7 @@ try {
 
     assert.ok(fs.existsSync(path.join(installDir, "skills")), "Repair must restore Codex folder");
     assert.ok(fs.existsSync(path.join(installDir, "gemini")), "Repair must restore Gemini folder");
+    assert.ok(fs.existsSync(path.join(installDir, "claude")), "Repair must restore Claude folder");
 
     const repairedStatus = execFileSync(process.execPath, [
       binLinkPath,
@@ -276,13 +330,15 @@ try {
     assert.ok(repairedStatus.includes("AI Kit: INSTALLED"), "Status must report INSTALLED after repair");
 
     // -------------------------------------------------------------------------
-    // ASSERTION 12: Update refreshes both runtimes simultaneously
+    // ASSERTION 12: Update refreshes all runtimes simultaneously
     // -------------------------------------------------------------------------
     // We modify some files to trace them
     const codexSkillPath = path.join(installDir, "skills", "debugger", "SKILL.md");
     const geminiSkillPath = path.join(installDir, "gemini", "skills", "api-patterns", "SKILL.md");
+    const claudeAdapterPath = path.join(installDir, "claude", "hooks", "claude_adapter.py");
     fs.writeFileSync(codexSkillPath, "CHANGED_CODEX_SKILL\n");
     fs.writeFileSync(geminiSkillPath, "CHANGED_GEMINI_SKILL\n");
+    fs.writeFileSync(claudeAdapterPath, "CHANGED_CLAUDE_ADAPTER\n");
 
     execFileSync(process.execPath, [
       binLinkPath,
@@ -293,6 +349,7 @@ try {
 
     assert.ok(readText(codexSkillPath) !== "CHANGED_CODEX_SKILL\n", "Update must refresh Codex skills from template");
     assert.ok(readText(geminiSkillPath) !== "CHANGED_GEMINI_SKILL\n", "Update must refresh Gemini skills from template");
+    assert.ok(readText(claudeAdapterPath) !== "CHANGED_CLAUDE_ADAPTER\n", "Update must refresh Claude hooks from template");
 
   } finally {
     fs.rmSync(testProjectDir, { recursive: true, force: true });

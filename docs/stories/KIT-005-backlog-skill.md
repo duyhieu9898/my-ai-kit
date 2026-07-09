@@ -16,7 +16,7 @@ through one CLI with compact output and dry-run defaults.
 ## Relevant Product Docs
 
 - `docs/product/toolkits.md`
-- `templates/.codex/skills/backlog/SKILL.md`
+- `templates/.agents/skills/backlog/SKILL.md`
 
 ## Acceptance Criteria
 
@@ -39,6 +39,6 @@ through one CLI with compact output and dry-run defaults.
 ## Evidence
 
 ```bash
-cd templates/.codex/skills/backlog
+cd templates/.agents/skills/backlog
 PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests
 ```

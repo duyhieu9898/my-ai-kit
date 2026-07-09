@@ -64,7 +64,7 @@ def main():
     print("|" + "-" * 10 + "|" + "-" * 14 + "|" + "-" * 12 + "|" + "-" * 14 + "|" + "-" * 12 + "|")
     
     # Gemini Paths
-    gemini_base = "templates/gemini/.agents"
+    gemini_base = "templates/.agents/gemini"
     gemini_arch = os.path.join(gemini_base, "ARCHITECTURE.md")
     
     gemini_actual = {
@@ -85,7 +85,7 @@ def main():
     print("|" + "-" * 10 + "|" + "-" * 14 + "|" + "-" * 12 + "|" + "-" * 14 + "|" + "-" * 12 + "|")
     
     # Codex Paths
-    codex_base = "templates/codex/.agents"
+    codex_base = "templates/.agents"
     codex_arch = os.path.join(codex_base, "ARCHITECTURE.md")
     
     codex_actual = {

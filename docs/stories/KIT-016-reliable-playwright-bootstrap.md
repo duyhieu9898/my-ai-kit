@@ -17,7 +17,7 @@ stdout and stderr when any verification check fails.
 ## Relevant Product Docs
 
 - `docs/product/toolkits.md`
-- `templates/codex/.agents/scripts/verify_all.py`
+- `templates/.agents/scripts/verify_all.py`
 - Equivalent Gemini template path.
 
 ## Acceptance Criteria

@@ -148,26 +148,26 @@ product docs plus executable tests become the living contract.
 
 ## Skill Authoring And Validation
 
-Skills follow the open Agent Skills format first, then target-specific toolkit
+Skills follow the open Agent Skills format first, then tool-specific toolkit
 contracts. Use `$skill-creator` when creating or substantially updating a Codex
 skill workflow; use the repository standards as the review and conversion
 contracts:
 
 - `CODEX_SKILL_STANDARD.md` for Codex skills under
-  `templates/codex/.agents/skills/`.
+  `templates/.agents/skills/`.
 - `ANTIGRAVITY_SKILL_STANDARD.md` for Gemini Antigravity skills under
-  `templates/gemini/.agents/skills/`.
+  `templates/.agents/gemini/skills/`.
 
-When converting skills between targets or refactoring existing skills, preserve
-target-specific metadata while keeping `SKILL.md` frontmatter compatible with
-the Agent Skills whitelist. Store custom target metadata under `metadata`
+When converting skills between tools or refactoring existing skills, preserve
+tool-specific metadata while keeping `SKILL.md` frontmatter compatible with
+the Agent Skills whitelist. Store custom tool metadata under `metadata`
 instead of adding new top-level frontmatter fields.
 
 Use `skills-ref` as the upstream structural validator when it is available:
 
 ```bash
-skills-ref validate templates/codex/.agents/skills/<skill-name>
-skills-ref validate templates/gemini/.agents/skills/<skill-name>
+skills-ref validate templates/.agents/skills/<skill-name>
+skills-ref validate templates/.agents/gemini/skills/<skill-name>
 ```
 
 For bulk template work, validate each affected skill with `skills-ref` before

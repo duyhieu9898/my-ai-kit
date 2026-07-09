@@ -15,19 +15,17 @@ toolkits into another repository.
 
 ```text
 bin/index.js
-  CLI configuration, target registry, install, update, and status commands
+  CLI configuration, install, update, repair, and status commands
 
-templates/codex/
-  Codex toolkit in mirror layout: AGENTS.md + .agents/ runtime + .codex/ hooks
-
-templates/gemini/
-  Gemini Antigravity toolkit: GEMINI.md + .agents/ runtime and native hooks
+templates/
+  Generated installer layout: root instructions, shared .agents/ runtime,
+  Codex hooks, Gemini hooks/runtime, and Claude Code settings/hooks
 
 shared/hooks/
-  Canonical Harness guard policy plus target-specific lifecycle adapters
+  Canonical Harness guard policy plus tool-specific lifecycle adapters
 
 shared/runtime/
-  Canonical source for executable scripts shared by both targets
+  Canonical source for executable scripts shared by installed runtimes
 
 backlog-mcp/
   Workstation-local stdio MCP server and centralized Backlog runtime/state;
@@ -37,15 +35,12 @@ docs/
   Repository Harness policy, product contracts, stories, and decisions
 ```
 
-## Target Registry
+## Installer Layout
 
-Targets are defined in a `TARGET_REGISTRY` object in `bin/index.js`, keyed by
-target name. Each entry carries display metadata and a `templateDir` pointing at
-`templates/<templateDir>/`. The `--target <name>` option selects an entry;
-`init` defaults to `codex`. Adding a target is one registry entry plus one
-mirror-layout template folder — no command logic changes.
-
-Each template folder mirrors the project layout exactly:
+`init`, `update`, and `repair` install the supported coding-agent runtimes
+side-by-side from the generated `templates/` layout. The installer performs
+structured merges for tool-owned config files and direct refreshes for runtime
+folders.
 
 - Top-level files (e.g. `AGENTS.md`, `GEMINI.md`) are Root Instruction Files,
   copied to the project root.
@@ -55,8 +50,9 @@ Each template folder mirrors the project layout exactly:
 - The Gemini `.agents/hooks.json` lifecycle entry and `.agents/hooks/` scripts
   are merged during the otherwise atomic `.agents/` replacement so
   project-owned hooks survive updates.
-- `.agents/.kit-target` is a marker file whose content is the target name; it is
-  the source of truth for `detectInstalledTarget`.
+- Claude Code `.claude/settings.json` hook groups are merged into
+  `project/.claude/settings.json`; unrelated Claude settings and custom hooks
+  are preserved.
 
 ## Installation Boundaries
 
@@ -67,38 +63,47 @@ Each template folder mirrors the project layout exactly:
   target templates.
 - Edit and test the Backlog integration under `backlog-mcp/`. It is not copied
   into target templates or included in the npm package.
-- Keep target-specific metadata such as `SKILL.md`, Codex `agents/openai.yaml`,
+- Keep tool-specific metadata such as `SKILL.md`, Codex `agents/openai.yaml`,
   environment files, and runtime logs outside the shared source.
 - Edit shared lifecycle policy and adapters under `shared/hooks/`, then run
   `npm run sync:shared-hooks` to refresh committed target copies.
-- Install uses mirror ownership rules: `.agents/` is replaced except for
-  merged Gemini hook customizations, `.codex/` is merged, and top-level root
+- Install uses mirror ownership rules: `.agents/skills`, `.agents/gemini`, and
+  `.agents/claude` are refreshed from templates; `.codex/`,
+  `.agents/hooks.json`, and `.claude/settings.json` are merged; top-level root
   instruction files honour the overwrite flag.
-- `init` is destructive (replaces install folder and, on switch/force, root
-  instructions) and gates destructive actions behind a confirmation prompt or
-  `--force`.
-- On target switch, the previous target's root instruction files are deleted
-  before installing the new target.
-- `update` refreshes `.agents/`, updates kit-managed Codex and Gemini hooks
-  through structured merges, and preserves existing root instruction files.
+- `init` replaces runtime folders and, with `--force`, root instructions. It
+  gates existing AI Kit files behind a confirmation prompt unless `--force` is
+  supplied.
+- `update` refreshes runtime folders, updates kit-managed Codex, Gemini, and
+  Claude Code hooks through structured merges, and preserves existing root
+  instruction files.
 - The CLI does not modify `.gitignore`; users manage it themselves.
 
 ## Instruction Hierarchy
 
 ```text
-target/AGENTS.md
+templates/AGENTS.md
   repository-wide workflow and skill loading
 
-target/.codex/hooks.json
+templates/GEMINI.md
+  Gemini-specific workflow and skill loading
+
+templates/CLAUDE.md
+  Claude Code workflow and skill loading
+
+templates/.codex/hooks.json
   warning-only lifecycle guardrails merged with project hooks
 
-target/.agents/hooks.json
+templates/.agents/hooks.json
   Gemini Antigravity lifecycle adapter using the same shared guard policy
 
-target/.agents/AGENTS.md
+templates/.claude/settings.json
+  Claude Code lifecycle adapter using the same shared guard policy
+
+templates/.agents/AGENTS.md
   maintenance rules scoped to the installed toolkit
 
-target/.agents/skills/*/SKILL.md
+templates/.agents/skills/*/SKILL.md
   domain-specific procedures loaded on demand
 ```
 
@@ -112,11 +117,11 @@ When changing installer behavior, inspect together:
 
 - `bin/index.js`
 - `README.md`
-- the affected target folder under `templates/<target>/`
+- the affected generated template paths under `templates/`
 - `package.json` package inclusion rules
 
 When changing skill discovery or toolkit structure, update
-`templates/codex/.agents/ARCHITECTURE.md`.
+`templates/.agents/ARCHITECTURE.md`.
 
 ## Validation Ladder
 

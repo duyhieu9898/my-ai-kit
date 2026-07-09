@@ -1,7 +1,8 @@
 <!-- KIT:BEGIN -->
-# AGENTS.md - Workspace Rules
+# CLAUDE.md - Workspace Rules
 
-Keep repository-wide rules here. Put domain procedures, examples, and tool-specific guidance in skills.
+Keep repository-wide rules here. Put domain procedures, examples, and
+tool-specific guidance in skills.
 
 ## Load Skills
 
@@ -13,9 +14,10 @@ Before implementation:
 4. Prefer bundled scripts when they provide the required operation.
 
 Instructions are cumulative. Within a directory scope, the nearest nested
-`AGENTS.md` takes precedence, followed by the active skill and its references.
+`CLAUDE.md` takes precedence, followed by the active skill and its references.
 
-Do not load every reference file or activate broad coordination skills for a single-domain task.
+Do not load every reference file or activate broad coordination skills for a
+single-domain task.
 
 ## Route Requests
 
@@ -33,7 +35,6 @@ Do not load every reference file or activate broad coordination skills for a sin
 
 Prefer execution when intent is clear. Ask only when missing information would
 make the next action risky, destructive, or likely wrong.
-Mention the applied skill only when it helps the user understand the approach.
 
 ## Work Safely
 
@@ -48,19 +49,24 @@ Use `.agents/skills/clean-code/SKILL.md` when writing or refactoring code. Keep
 changes scoped, avoid speculative abstractions, and update dependent files in
 the same task.
 
-Never expose secrets, commit local credentials, or run destructive commands without an explicit request.
+Never expose secrets, commit local credentials, or run destructive commands
+without an explicit request.
 
 ## Clarify Minimally
 
-Ask only when missing information makes the next action ambiguous, risky, or destructive.
+Ask only when missing information makes the next action ambiguous, risky, or
+destructive.
 
-Proceed when intent is clear, including direct requests such as `continue`, `fix it`, or `sửa toàn bộ`. For broad work, state a short plan before editing.
+Proceed when intent is clear, including direct requests such as `continue`,
+`fix it`, or `sua toan bo`. For broad work, state a short plan before editing.
 
 ## Communicate
 
-Respond in the user's language. Keep code identifiers and comments in English unless the project uses another convention.
+Respond in the user's language. Keep code identifiers and comments in English
+unless the project uses another convention.
 
-Report material assumptions, blockers, and verification results. Avoid fixed skill-announcement templates and unnecessary process narration.
+Report material assumptions, blockers, and verification results. Avoid fixed
+skill-announcement templates and unnecessary process narration.
 
 ## Verify
 

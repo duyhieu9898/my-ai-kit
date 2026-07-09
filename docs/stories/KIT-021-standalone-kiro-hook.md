@@ -23,7 +23,7 @@ deterministic boundary available in Codex and Gemini.
 
 - Remove `templates/kiro/.kiro/hooks/harness-guard.kiro.hook`.
 - Remove Kiro hook assertions and package documentation.
-- Keep Kiro out of `TARGET_REGISTRY`.
+- Keep Kiro out of the installed runtime set.
 - Preserve this story as the reason not to reintroduce an always-on
   `preToolUse` `askAgent` guard.
 - Reconsider a deterministic Kiro adapter only after Kiro IDE command hooks

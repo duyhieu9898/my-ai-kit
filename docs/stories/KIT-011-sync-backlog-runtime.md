@@ -17,15 +17,15 @@ Codex-style `SKILL.md` frontmatter.
 ## Relevant Product Docs
 
 - `docs/product/toolkits.md`
-- `templates/codex/.agents/skills/backlog/SKILL.md`
-- `templates/gemini/.agents/skills/backlog/SKILL.md`
+- `templates/.agents/skills/backlog/SKILL.md`
+- `templates/.agents/gemini/skills/backlog/SKILL.md`
 
 ## Acceptance Criteria
 
 - Shared Backlog runtime directories are synchronized from Gemini to Codex:
   `backlog_tool/`, `config/`, `references/`, `scripts/`, `tests/`, and
   `workflows/`.
-- Codex retains `templates/codex/.agents/skills/backlog/agents/openai.yaml`.
+- Codex retains `templates/.agents/skills/backlog/agents/openai.yaml`.
 - Codex retains Codex-style `SKILL.md` metadata.
 - Python `__pycache__` and bytecode artifacts are absent from both Backlog
   templates.
@@ -64,7 +64,7 @@ templates without overwriting target-specific skill metadata.
 - `scripts/bin/harness-cli story verify KIT-011` passed via
   `npm run check:templates` with `Template consistency check passed:
   311 checks.`
-- `uvx --with requests pytest templates/codex/.agents/skills/backlog/tests`
+- `uvx --with requests pytest templates/.agents/skills/backlog/tests`
   passed with 92 tests.
-- `uvx --with requests pytest templates/gemini/.agents/skills/backlog/tests`
+- `uvx --with requests pytest templates/.agents/gemini/skills/backlog/tests`
   passed with 92 tests.

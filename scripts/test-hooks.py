@@ -81,6 +81,14 @@ class HarnessGuardTests(unittest.TestCase):
         warnings = harness_guard.evaluate("pre-tool", payload)
         self.assertTrue(any("secret-bearing" in warning for warning in warnings))
 
+    def test_claude_large_native_read_warns(self) -> None:
+        payload = {
+            "tool_name": "Read",
+            "tool_input": {"file_path": "docs/HARNESS.md"},
+        }
+        warnings = harness_guard.evaluate("post-tool", payload)
+        self.assertTrue(any("Large read of docs/HARNESS.md" in warning for warning in warnings))
+
     def test_codex_adapter_surfaces_system_message(self) -> None:
         response = run_adapter(
             ROOT / "shared/hooks/codex_adapter.py",
@@ -113,6 +121,19 @@ class HarnessGuardTests(unittest.TestCase):
         )
         self.assertEqual(response["decision"], "allow")
         self.assertIn("Large read of docs/HARNESS.md", response["reason"])
+
+    def test_claude_adapter_injects_warning_context(self) -> None:
+        response = run_adapter(
+            ROOT / "shared/hooks/claude_adapter.py",
+            {
+                "hook_event_name": "PreToolUse",
+                "tool_name": "Bash",
+                "tool_input": {"command": "rm -rf build"},
+            },
+        )
+        output = response["hookSpecificOutput"]
+        self.assertEqual(output["hookEventName"], "PreToolUse")
+        self.assertIn("Destructive command", output["additionalContext"])
 
 
 def run_adapter(path: Path, payload: dict[str, object]) -> dict[str, object]:

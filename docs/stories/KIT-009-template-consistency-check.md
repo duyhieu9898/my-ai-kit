@@ -16,8 +16,8 @@ toolkit templates, product docs, architecture docs, and basic skill metadata.
 ## Relevant Product Docs
 
 - `docs/product/toolkits.md`
-- `templates/codex/.agents/ARCHITECTURE.md`
-- `templates/gemini/.agents/ARCHITECTURE.md`
+- `templates/.agents/ARCHITECTURE.md`
+- `templates/.agents/gemini/ARCHITECTURE.md`
 
 ## Acceptance Criteria
 

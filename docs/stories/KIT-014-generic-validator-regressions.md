@@ -17,9 +17,9 @@ findings, and both targets retain identical configuration behavior.
 ## Relevant Product Docs
 
 - `docs/product/toolkits.md`
-- `templates/codex/.agents/skills/frontend-design/scripts/`
-- `templates/codex/.agents/skills/lint-and-validate/scripts/type_coverage.py`
-- `templates/codex/.agents/skills/seo-fundamentals/scripts/seo_checker.py`
+- `templates/.agents/skills/frontend-design/scripts/`
+- `templates/.agents/skills/lint-and-validate/scripts/type_coverage.py`
+- `templates/.agents/skills/seo-fundamentals/scripts/seo_checker.py`
 - Equivalent Gemini template paths.
 
 ## Acceptance Criteria

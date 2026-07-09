@@ -17,13 +17,13 @@ intake, stories, decisions, traces, and proof evidence.
 ## Relevant Product Docs
 
 - `docs/product/toolkits.md`
-- `templates/codex/.agents/ARCHITECTURE.md`
-- `templates/gemini/.agents/ARCHITECTURE.md`
+- `templates/.agents/ARCHITECTURE.md`
+- `templates/.agents/gemini/ARCHITECTURE.md`
 
 ## Acceptance Criteria
 
-- Codex no longer ships `templates/codex/.agents/skills/memory-system/`.
-- Gemini no longer ships `templates/gemini/.agents/skills/memory-system/`.
+- Codex no longer ships `templates/.agents/skills/memory-system/`.
+- Gemini no longer ships `templates/.agents/gemini/skills/memory-system/`.
 - Gemini no longer ships `.agents/workflows/remember.md`.
 - Toolkit docs and architecture docs report the current skill/workflow counts.
 - Template consistency validation passes after removal.

@@ -196,6 +196,10 @@ const codexHookAdapterPath = "templates/.codex/hooks/codex_adapter.py";
 const geminiHooksConfigPath = "templates/.agents/hooks.json";
 const geminiHarnessGuardPath = "templates/.agents/gemini/hooks/harness_guard.py";
 const geminiHookAdapterPath = "templates/.agents/gemini/hooks/gemini_adapter.py";
+const claudeRootInstructionPath = "templates/CLAUDE.md";
+const claudeSettingsPath = "templates/.claude/settings.json";
+const claudeHarnessGuardPath = "templates/.agents/claude/hooks/harness_guard.py";
+const claudeHookAdapterPath = "templates/.agents/claude/hooks/claude_adapter.py";
 const codexSkillMarkdownPaths = recursiveFiles("templates/.agents/skills", ".md");
 const geminiSkillMarkdownPaths = recursiveFiles("templates/.agents/gemini/skills", ".md");
 const geminiAgentMarkdownPaths = recursiveFiles("templates/.agents/gemini/agents", ".md");
@@ -282,6 +286,14 @@ record(
     exists(geminiHookAdapterPath),
   `${geminiHooksConfigPath}, ${geminiHarnessGuardPath}, ${geminiHookAdapterPath}`,
 );
+record(
+  "Claude Code instruction and hook files exist",
+  exists(claudeRootInstructionPath) &&
+    exists(claudeSettingsPath) &&
+    exists(claudeHarnessGuardPath) &&
+    exists(claudeHookAdapterPath),
+  `${claudeRootInstructionPath}, ${claudeSettingsPath}, ${claudeHarnessGuardPath}, ${claudeHookAdapterPath}`,
+);
 if (exists(codexHooksConfigPath)) {
   const codexHooksConfig = JSON.parse(readText(codexHooksConfigPath));
   const hookText = JSON.stringify(codexHooksConfig);
@@ -302,11 +314,23 @@ if (exists(geminiHooksConfigPath)) {
     geminiHooksConfigPath,
   );
 }
-if (exists(codexHarnessGuardPath) && exists(geminiHarnessGuardPath)) {
+if (exists(claudeSettingsPath)) {
+  const claudeSettings = JSON.parse(readText(claudeSettingsPath));
+  const hookText = JSON.stringify(claudeSettings);
   record(
-    "Codex and Gemini share the same Harness guard policy",
-    readText(codexHarnessGuardPath) === readText(geminiHarnessGuardPath),
-    `${codexHarnessGuardPath}, ${geminiHarnessGuardPath}`,
+    "Claude Code settings use native lifecycle hooks",
+    hookText.includes("PreToolUse") &&
+      hookText.includes("PostToolUse") &&
+      hookText.includes("claude_adapter.py"),
+    claudeSettingsPath,
+  );
+}
+if (exists(codexHarnessGuardPath) && exists(geminiHarnessGuardPath) && exists(claudeHarnessGuardPath)) {
+  record(
+    "Codex, Gemini, and Claude share the same Harness guard policy",
+    readText(codexHarnessGuardPath) === readText(geminiHarnessGuardPath) &&
+      readText(codexHarnessGuardPath) === readText(claudeHarnessGuardPath),
+    `${codexHarnessGuardPath}, ${geminiHarnessGuardPath}, ${claudeHarnessGuardPath}`,
   );
 }
 if (exists(codexUxAuditConfigPath) && exists(geminiUxAuditConfigPath)) {

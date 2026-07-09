@@ -22,15 +22,15 @@ and target-switch cleanup boundaries.
 
 ## Acceptance Criteria
 
-- The installer test suite exercises Codex and Gemini template installation in
-  isolated temporary directories.
-- Status detection is covered through `.agents/.kit-target` and root
-  instruction fallback behavior.
+- The installer test suite exercises Codex, Gemini, and Claude Code template
+  installation in isolated temporary directories.
+- Status detection is covered through required runtime folders, settings files,
+  and root instruction presence.
 - Update-style installs preserve existing root instructions.
 - Force/init-style installs refresh root instructions while preserving marked
   project instruction blocks.
-- Target-switch cleanup removes kit-owned Codex hook files and preserves
-  project-owned hook config.
+- Runtime refresh removes stale kit-owned files and preserves project-owned hook
+  config.
 - The tests run without downloading templates or mutating the repository root.
 
 ## Design Notes

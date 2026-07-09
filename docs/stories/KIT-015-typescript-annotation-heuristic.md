@@ -16,8 +16,8 @@ than presenting regex-based return-type detection as proof of type safety.
 ## Relevant Product Docs
 
 - `docs/product/toolkits.md`
-- `templates/codex/.agents/skills/lint-and-validate/SKILL.md`
-- `templates/gemini/.agents/skills/lint-and-validate/SKILL.md`
+- `templates/.agents/skills/lint-and-validate/SKILL.md`
+- `templates/.agents/gemini/skills/lint-and-validate/SKILL.md`
 
 ## Acceptance Criteria
 

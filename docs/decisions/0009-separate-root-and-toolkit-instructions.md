@@ -14,9 +14,10 @@ Repository Harness and project-specific blocks also need to survive updates.
 
 ## Decision
 
-Store repository-wide Codex instructions in `templates/root/AGENTS.md` and
-toolkit-maintenance instructions in `templates/.codex/AGENTS.md`. Refresh
-`.agents/` during updates but preserve existing root instructions.
+Store repository-wide tool instructions in top-level template files such as
+`templates/AGENTS.md`, `templates/GEMINI.md`, and `templates/CLAUDE.md`.
+Store toolkit-maintenance instructions under `.agents/`. Refresh runtime files
+during updates but preserve existing root instructions.
 
 ## Alternatives Considered
 

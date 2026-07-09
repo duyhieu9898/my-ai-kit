@@ -19,43 +19,39 @@ const TEMPLATES_FOLDER = 'templates';
 const TEMP_PREFIX = 'hieund-ai-kit-';
 const INSTALL_FOLDER = '.agents';
 const CODEX_CONFIG_FOLDER = '.codex';
+const CLAUDE_CONFIG_FOLDER = '.claude';
 const CONFIG_FILE = '.ai-kit.json';
 const CODEX_HOOK_COMMAND_MARKERS = [
     '.codex/hooks/codex_adapter.py',
     '.codex/hooks/harness_guard.py',
+];
+const CLAUDE_HOOK_COMMAND_MARKERS = [
+    '.agents/claude/hooks/claude_adapter.py',
+    '.agents/claude/hooks/harness_guard.py',
 ];
 const GEMINI_HOOK_CONFIG = 'hooks.json';
 const GEMINI_HOOK_FOLDER = 'hooks';
 const KIT_GEMINI_HOOK_KEY = 'hieund-ai-kit-harness-guard';
 const INSTRUCTION_BLOCK_PATTERN = /^<!--\s*([A-Z0-9_-]+):BEGIN\s*-->[\s\S]*?^<!--\s*\1:END\s*-->/gm;
 
-/**
- * Target registry — maps a target name to its configuration.
- */
-const TARGET_REGISTRY = {
-    codex: {
-        displayName: 'OpenAI Codex Kit',
-        bannerColor: chalk.magentaBright,
-        tagLine: '✨ Codex Standard (Recommended)',
-    },
-};
+const BANNER_COLOR = chalk.magentaBright;
+const BANNER_RUNTIME_LINE = 'Codex + Gemini + Claude Code';
 
 // ============================================================================
 // UTILITIES
 // ============================================================================
 
 /**
- * Display dynamic ASCII banner.
- * @param {object} config
+ * Display the installer banner.
  */
-const showBanner = (config) => {
-    const targetLine = `  Target:   ${config.displayName.padEnd(40)}  `;
-    const formatLine = `  Format:   ${config.tagLine.padEnd(40)}  `;
-    console.log(config.bannerColor([
+const showBanner = () => {
+    const runtimeLine = `  Runtimes: ${BANNER_RUNTIME_LINE.padEnd(40)}  `;
+    const formatLine = `  Format:   ${'Unified AI Kit'.padEnd(40)}  `;
+    console.log(BANNER_COLOR([
         '    ╔══════════════════════════════════════════════════════╗',
         '    ║             ⚡ HIEUND AI KIT CLI ⚡                  ║',
         '    ╠══════════════════════════════════════════════════════╣',
-        `    ║${targetLine}║`,
+        `    ║${runtimeLine}║`,
         `    ║${formatLine}║`,
         '    ╚══════════════════════════════════════════════════════╝'
     ].join('\n')));
@@ -122,6 +118,13 @@ const isKitCodexHookGroup = (group) =>
         CODEX_HOOK_COMMAND_MARKERS.some((marker) => hook.command.includes(marker))
     );
 
+const isKitClaudeHookGroup = (group) =>
+    Array.isArray(group?.hooks) &&
+    group.hooks.some((hook) =>
+        typeof hook?.command === 'string' &&
+        CLAUDE_HOOK_COMMAND_MARKERS.some((marker) => hook.command.includes(marker))
+    );
+
 const mergeCodexHooksFile = (src, dest) => {
     const incoming = JSON.parse(fs.readFileSync(src, 'utf8'));
     const existing = fs.existsSync(dest)
@@ -132,6 +135,24 @@ const mergeCodexHooksFile = (src, dest) => {
     for (const [event, incomingGroups] of Object.entries(incoming.hooks || {})) {
         const existingGroups = Array.isArray(merged.hooks[event])
             ? merged.hooks[event].filter((group) => !isKitCodexHookGroup(group))
+            : [];
+        merged.hooks[event] = [...existingGroups, ...incomingGroups];
+    }
+
+    fs.mkdirSync(path.dirname(dest), { recursive: true });
+    fs.writeFileSync(dest, `${JSON.stringify(merged, null, 2)}\n`);
+};
+
+const mergeClaudeSettingsFile = (src, dest) => {
+    const incoming = JSON.parse(fs.readFileSync(src, 'utf8'));
+    const existing = fs.existsSync(dest)
+        ? JSON.parse(fs.readFileSync(dest, 'utf8'))
+        : {};
+    const merged = { ...existing, hooks: { ...(existing.hooks || {}) } };
+
+    for (const [event, incomingGroups] of Object.entries(incoming.hooks || {})) {
+        const existingGroups = Array.isArray(merged.hooks[event])
+            ? merged.hooks[event].filter((group) => !isKitClaudeHookGroup(group))
             : [];
         merged.hooks[event] = [...existingGroups, ...incomingGroups];
     }
@@ -199,6 +220,8 @@ const mergeWorkspaceHooks = (src, dest, targetName) => {
     }
     if (targetName === 'codex') {
         mergeCodexHooksFile(src, dest);
+    } else if (targetName === 'claude') {
+        mergeClaudeSettingsFile(src, dest);
     } else if (targetName === 'gemini') {
         const existing = fs.existsSync(dest)
             ? JSON.parse(fs.readFileSync(dest, 'utf8'))
@@ -294,17 +317,26 @@ const installGeminiRuntime = (templatePath, projectDir, overwriteRootInstruction
     mergeSharedAssets(path.join(templatePath, INSTALL_FOLDER), path.join(projectDir, INSTALL_FOLDER));
 };
 
+const installClaudeRuntime = (templatePath, projectDir, overwriteRootInstruction) => {
+    const srcClaude = path.join(templatePath, 'CLAUDE.md');
+    const destClaude = path.join(projectDir, 'CLAUDE.md');
+    mergeRootInstructionBlock(srcClaude, destClaude, overwriteRootInstruction);
+
+    const srcSettings = path.join(templatePath, CLAUDE_CONFIG_FOLDER, 'settings.json');
+    const destSettings = path.join(projectDir, CLAUDE_CONFIG_FOLDER, 'settings.json');
+    mergeWorkspaceHooks(srcSettings, destSettings, 'claude');
+
+    const srcClaudeDir = path.join(templatePath, INSTALL_FOLDER, 'claude');
+    const destClaudeDir = path.join(projectDir, INSTALL_FOLDER, 'claude');
+    if (fs.existsSync(srcClaudeDir)) {
+        atomicReplaceDir(srcClaudeDir, destClaudeDir);
+    }
+
+    mergeSharedAssets(path.join(templatePath, INSTALL_FOLDER), path.join(projectDir, INSTALL_FOLDER));
+};
 
 
-/**
- * Download a single target's template subdirectory into a fresh temporary
- * directory (outside the project tree). Returns the path to the temp dir,
- * whose contents are the template files themselves.
- * @param {object} config target configuration
- * @param {string} [ref] optional repository ref (tag, commit, or branch) used
- *   to pin the download for reproducibility/security
- * @returns {Promise<string>} path to the downloaded template directory
- */
+
 /**
  * Download the unified templates folder from the repository.
  * @param {string} [ref] optional repository ref
@@ -350,11 +382,11 @@ const isDirectCliInvocation = () => {
 // ============================================================================
 
 /**
- * Initialize the AI Kit in the project. Installs both runtimes side-by-side.
+ * Initialize the AI Kit in the project. Installs all runtimes side-by-side.
  */
 const initCommand = async (options) => {
     const projectDir = path.resolve(options.path || process.cwd());
-    showBanner(TARGET_REGISTRY.codex);
+    showBanner();
 
     const spinner = ora({ text: 'Downloading templates from repository...', color: 'cyan' }).start();
 
@@ -364,7 +396,7 @@ const initCommand = async (options) => {
         templatePath = await downloadTemplates(ref);
         spinner.stop();
 
-        const collidingRootFiles = ['AGENTS.md', 'GEMINI.md'].filter((f) => fs.existsSync(path.join(projectDir, f)));
+        const collidingRootFiles = ['AGENTS.md', 'GEMINI.md', 'CLAUDE.md'].filter((f) => fs.existsSync(path.join(projectDir, f)));
         const installDir = path.join(projectDir, INSTALL_FOLDER);
         const installExists = fs.existsSync(installDir);
 
@@ -382,6 +414,7 @@ const initCommand = async (options) => {
 
         installCodexRuntime(templatePath, projectDir, !!options.force);
         installGeminiRuntime(templatePath, projectDir, !!options.force);
+        installClaudeRuntime(templatePath, projectDir, !!options.force);
 
         cleanup(templatePath);
 
@@ -402,6 +435,7 @@ const initCommand = async (options) => {
             features: {
                 backlog: true,
                 guardHooks: true,
+                claudeCode: true,
                 toolRegistry: true,
             },
         };
@@ -415,6 +449,7 @@ const initCommand = async (options) => {
         console.log(`   ${chalk.cyan(INSTALL_FOLDER + '/')} → ${chalk.gray(installDir)}`);
         console.log(`   ${chalk.cyan('AGENTS.md')} → ${chalk.gray(path.join(projectDir, 'AGENTS.md'))}`);
         console.log(`   ${chalk.cyan('GEMINI.md')} → ${chalk.gray(path.join(projectDir, 'GEMINI.md'))}`);
+        console.log(`   ${chalk.cyan('CLAUDE.md')} → ${chalk.gray(path.join(projectDir, 'CLAUDE.md'))}`);
         console.log(chalk.gray('──────────────────────────────────────────────────────'));
         console.log(chalk.gray(`💡 Run tests via: ${chalk.cyan('python3 .agents/scripts/verify_all.py .')}\n`));
     } catch (error) {
@@ -451,6 +486,7 @@ const updateCommand = async (options) => {
 
         installCodexRuntime(templatePath, projectDir, false);
         installGeminiRuntime(templatePath, projectDir, false);
+        installClaudeRuntime(templatePath, projectDir, false);
 
         cleanup(templatePath);
 
@@ -471,6 +507,7 @@ const updateCommand = async (options) => {
             features: {
                 backlog: existingConfig.features?.backlog !== undefined ? existingConfig.features.backlog : true,
                 guardHooks: existingConfig.features?.guardHooks !== undefined ? existingConfig.features.guardHooks : true,
+                claudeCode: existingConfig.features?.claudeCode !== undefined ? existingConfig.features.claudeCode : true,
                 toolRegistry: existingConfig.features?.toolRegistry !== undefined ? existingConfig.features.toolRegistry : true,
             },
         };
@@ -524,6 +561,9 @@ const statusCommand = (options) => {
 
     const codexExists = fs.existsSync(path.join(installDir, 'skills'));
     const geminiExists = fs.existsSync(path.join(installDir, 'gemini'));
+    const claudeExists = fs.existsSync(path.join(installDir, 'claude')) &&
+                         fs.existsSync(path.join(projectDir, CLAUDE_CONFIG_FOLDER, 'settings.json')) &&
+                         fs.existsSync(path.join(projectDir, 'CLAUDE.md'));
 
     console.log(chalk.blueBright('\n📊 AI Kit Installation Status\n'));
 
@@ -543,8 +583,8 @@ const statusCommand = (options) => {
     } else if (!configExists && installDirExists) {
         statusText = 'UNCONFIGURED (Config file missing)';
         isUnconfigured = true;
-    } else if (configExists && installDirExists && (!codexExists || !geminiExists)) {
-        statusText = 'CORRUPTED (Missing Codex or Gemini runtime)';
+    } else if (configExists && installDirExists && (!codexExists || !geminiExists || !claudeExists)) {
+        statusText = 'CORRUPTED (Missing Codex, Gemini, or Claude runtime)';
         isCorrupted = true;
     }
 
@@ -608,6 +648,7 @@ const repairCommand = async (options) => {
             features: {
                 backlog: true,
                 guardHooks: true,
+                claudeCode: true,
                 toolRegistry: true,
             },
         };
@@ -633,6 +674,7 @@ const repairCommand = async (options) => {
 
         installCodexRuntime(templatePath, projectDir, false);
         installGeminiRuntime(templatePath, projectDir, false);
+        installClaudeRuntime(templatePath, projectDir, false);
 
         cleanup(templatePath);
 
@@ -661,7 +703,7 @@ program
 
 program
     .command('init')
-    .description('Install the AI Kit runtimes and integrations (Codex and Gemini)')
+    .description('Install the AI Kit runtimes and integrations (Codex, Gemini, and Claude Code)')
     .option('-f, --force', 'Overwrite existing files without confirmation', false)
     .option('-p, --path <dir>', 'Path to the project directory', process.cwd())
     .option('-b, --branch <name>', 'Select repository branch')
@@ -699,6 +741,7 @@ if (isDirectCliInvocation()) {
 export {
     installCodexRuntime,
     installGeminiRuntime,
+    installClaudeRuntime,
     copySharedFile,
     mergeSharedAssets,
     mergeRootInstructionBlock,

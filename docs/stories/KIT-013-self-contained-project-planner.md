@@ -17,13 +17,13 @@ verification stack.
 
 ## Relevant Product Docs
 
-- `templates/codex/.agents/skills/project-planner/SKILL.md`
-- `templates/codex/.agents/skills/plan-writing/SKILL.md`
-- `templates/codex/.agents/ARCHITECTURE.md`
-- `templates/gemini/.agents/agents/project-planner.md`
-- `templates/gemini/.agents/skills/plan-writing/SKILL.md`
-- `templates/gemini/.agents/workflows/plan.md`
-- `templates/gemini/.agents/ARCHITECTURE.md`
+- `templates/.agents/skills/project-planner/SKILL.md`
+- `templates/.agents/skills/plan-writing/SKILL.md`
+- `templates/.agents/ARCHITECTURE.md`
+- `templates/.agents/gemini/agents/project-planner.md`
+- `templates/.agents/gemini/skills/plan-writing/SKILL.md`
+- `templates/.agents/gemini/workflows/plan.md`
+- `templates/.agents/gemini/ARCHITECTURE.md`
 
 ## Acceptance Criteria
 

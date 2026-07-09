@@ -17,8 +17,8 @@ without treating unrelated source or tests as API implementation.
 ## Relevant Product Docs
 
 - `docs/product/toolkits.md`
-- `templates/codex/.agents/skills/api-patterns/SKILL.md`
-- `templates/gemini/.agents/skills/api-patterns/SKILL.md`
+- `templates/.agents/skills/api-patterns/SKILL.md`
+- `templates/.agents/gemini/skills/api-patterns/SKILL.md`
 
 ## Acceptance Criteria
 

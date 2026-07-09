@@ -1,14 +1,16 @@
 # Product Overview
 
-`hieund-ai-kit` installs reusable Codex or Gemini Antigravity tooling into a
-target repository.
+`hieund-ai-kit` installs reusable Codex, Gemini Antigravity, and Claude Code
+tooling into a target repository.
 
 ## User Contract
 
-- `init` installs the selected toolkit into `.agents/`.
+- `init` installs all supported runtimes into `.agents/`.
 - Codex installs repository-wide `AGENTS.md` separately from
   `.agents/AGENTS.md`.
 - Gemini installs repository-wide `GEMINI.md` separately from its toolkit.
+- Claude Code installs repository-wide `CLAUDE.md` separately from its hook
+  adapter runtime.
 - Existing toolkit directories require confirmation unless `--force` is used.
 - `update` refreshes `.agents/` while preserving existing root instructions.
 - `status` reports active and obsolete toolkit locations.
@@ -36,10 +38,10 @@ target repository.
 | Capability | Contract | Proof owner |
 | --- | --- | --- |
 | CLI command surface | Expose `init`, `update`, and `status` with documented options | `KIT-001` |
-| Dual toolkit package | Publish Codex and Gemini Antigravity templates | `KIT-002` |
+| Unified toolkit package | Publish Codex, Gemini Antigravity, and Claude Code templates | `KIT-002`, `KIT-026` |
 | Instruction safety | Keep repository and nested toolkit instructions separate | `KIT-003` |
 | Installation detection | Report active and obsolete toolkit locations | `KIT-004` |
 | Backlog integration | Provide one workstation-local MCP runtime outside installed templates | `KIT-024` |
 | Proportional verification | Select checks based on change surface and risk | `KIT-006` |
 | Scoped clean-code guidance | Keep implementation guidance focused and local | `KIT-007` |
-| Multi-target registry | Select toolkits through the target registry and `.kit-target` marker | `KIT-008` |
+| Unified runtime installer | Install all supported coding-agent runtimes side-by-side | `KIT-026` |

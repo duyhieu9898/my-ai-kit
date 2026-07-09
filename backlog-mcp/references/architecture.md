@@ -117,4 +117,4 @@ Khi nhà phát triển thay đổi mã nguồn, họ chỉ cần cập nhật m�
 ```bash
 npm run sync:shared-runtime
 ```
-Hệ thống sẽ tự động đồng bộ hóa các thay đổi mã nguồn mới nhất vào thư mục cài đặt mẫu (`templates/codex/` và `templates/gemini/`) trước khi phân phối tới các dự án đích của khách hàng.
+Hệ thống sẽ tự động đồng bộ hóa các thay đổi mã nguồn mới nhất vào layout cài đặt mẫu unified (`templates/`) trước khi phân phối tới các dự án đích của khách hàng.

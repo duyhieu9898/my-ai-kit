@@ -1,4 +1,4 @@
-# 0008 Install Both Toolkit Modes Into `.agents`
+# 0008 Install Supported Tool Runtimes Into `.agents`
 
 Date: 2026-06-11
 
@@ -8,18 +8,18 @@ Accepted
 
 ## Context
 
-The CLI supports Codex and Gemini Antigravity, but maintaining separate runtime
+The CLI supports multiple coding tools. Maintaining separate top-level runtime
 folders makes status detection, ignore rules, and updates inconsistent.
 
 ## Decision
 
-Install either selected toolkit into `.agents/`. Detect the active mode from
-the installed directory shape.
+Install supported tool runtimes under `.agents/`, with tool-specific root
+instructions and integration settings outside `.agents/`.
 
 ## Alternatives Considered
 
 1. Keep Codex in `.codex/` and Gemini in `.agent/`.
-2. Install both modes simultaneously.
+2. Install all supported runtimes side-by-side.
 
 ## Consequences
 
@@ -27,12 +27,12 @@ Positive:
 
 - One runtime location and one ignore rule.
 - Simpler status and update behavior.
-- Mode selection remains explicit.
+- One install command prepares the project for all supported tools.
 
 Tradeoffs:
 
-- Switching modes replaces the existing `.agents/` toolkit.
-- Mode detection depends on stable template structure.
+- Runtime detection depends on stable template structure and required config
+  files.
 
 ## Follow-Up
 

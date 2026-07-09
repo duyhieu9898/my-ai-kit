@@ -25,9 +25,15 @@ AGENTS.md                     # Repository-wide workflow and skill rules
 └── hooks/
     ├── harness_guard.py     # Shared warning-only Harness policy
     └── codex_adapter.py     # Codex payload and response adapter
+.claude/
+└── settings.json            # Claude Code lifecycle hook registration
 .agents/
 ├── AGENTS.md                # Rules scoped to shared toolkit maintenance
 ├── ARCHITECTURE.md          # This file (Human-developer map)
+├── claude/
+│   └── hooks/
+│       ├── harness_guard.py # Shared warning-only Harness policy
+│       └── claude_adapter.py # Claude payload and response adapter
 ├── skills/                  # 49 Composable Skills (Expert Personas + Domain Knowledge)
 │   ├── {skill-name}/
 │   │   ├── SKILL.md         # Metadata, triggers, and prompt guidelines
@@ -49,14 +55,19 @@ adds toolkit-maintenance constraints without duplicating the root rules.
 
 The CLI sources these files separately:
 
-- `templates/codex/AGENTS.md` installs as root `AGENTS.md`.
-- `templates/codex/.codex/` merges into root `.codex/` without replacing
+- `templates/AGENTS.md` installs as root `AGENTS.md`.
+- `templates/GEMINI.md` installs as root `GEMINI.md`.
+- `templates/CLAUDE.md` installs as root `CLAUDE.md`.
+- `templates/.codex/` merges into root `.codex/` without replacing
   unrelated project configuration or custom hooks.
-- `templates/codex/.agents/AGENTS.md` installs as `.agents/AGENTS.md`.
+- `templates/.claude/settings.json` merges into root `.claude/settings.json`
+  without replacing unrelated Claude settings or custom hooks.
+- `templates/.agents/AGENTS.md` installs as `.agents/AGENTS.md`.
 
-Kit updates replace `.agents/`, merge kit-managed `.codex/` hooks, and preserve
-an existing root instruction so project-specific rules and external Harness
-blocks are not lost.
+Kit updates refresh runtime folders, merge kit-managed `.codex/`,
+`.agents/hooks.json`, and `.claude/settings.json` hooks, and preserve existing
+root instructions so project-specific rules and external Harness blocks are not
+lost.
 
 ---
 

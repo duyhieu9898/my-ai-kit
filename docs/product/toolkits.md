@@ -2,15 +2,15 @@
 
 ## Codex
 
-- Source: `templates/codex/`.
+- Source: `templates/`.
 - Runtime destination: `.agents/`.
-- Repository instruction: `templates/codex/AGENTS.md` to root `AGENTS.md`.
-- Lifecycle integration: `templates/codex/.codex/` merges into root `.codex/`.
+- Repository instruction: `templates/AGENTS.md` to root `AGENTS.md`.
+- Lifecycle integration: `templates/.codex/` merges into root `.codex/`.
   Preserve unrelated project config and custom hooks while updating the
   kit-managed Harness guard.
 - Hook policy: generated from `shared/hooks/harness_guard.py`; the Codex
   adapter maps native lifecycle payloads and warning output.
-- Nested instruction: `templates/codex/.agents/AGENTS.md` to
+- Nested instruction: `templates/.agents/AGENTS.md` to
   `.agents/AGENTS.md`.
 - Skills use `SKILL.md`, required `agents/openai.yaml`, optional `references/`,
   `scripts/`, and `assets/`.
@@ -19,10 +19,10 @@
 
 ## Gemini Antigravity
 
-- Source: `templates/gemini/`.
+- Source: `templates/`.
 - Runtime destination: `.agents/`.
-- Repository instruction: `templates/gemini/GEMINI.md` to root `GEMINI.md`.
-- Lifecycle integration: `templates/gemini/.agents/hooks.json` and
+- Repository instruction: `templates/GEMINI.md` to root `GEMINI.md`.
+- Lifecycle integration: `templates/.agents/hooks.json` and
   `.agents/hooks/` install warning-only Antigravity guards. Preserve unrelated
   hook entries and scripts while updating the kit-managed entry.
 - Hook policy: generated from `shared/hooks/harness_guard.py`; the Gemini
@@ -33,11 +33,27 @@
 - The current template ships 15 agent files, 33 skill directories, 11 workflow
   files, and four top-level runtime scripts.
 
+## Claude Code
+
+- Source: `templates/`.
+- Runtime destination: `.agents/`.
+- Repository instruction: `templates/CLAUDE.md` to root `CLAUDE.md`.
+- Lifecycle integration: `templates/.claude/settings.json` merges into root
+  `.claude/settings.json`. Preserve unrelated Claude settings and custom hooks
+  while updating hook groups that call the kit-managed Claude adapter.
+- Hook policy: generated from `shared/hooks/harness_guard.py`; the Claude
+  adapter maps Claude Code hook payloads and injects warning context without
+  blocking tool calls.
+- Claude reuses the shared `.agents/skills/` instructions. The kit does not
+  duplicate the full skill tree under `.claude/skills/`.
+- The current template ships Claude hook files under `.agents/claude/hooks/`.
+
 ## Shared Rules
 
 - Preserve relative paths within each toolkit.
-- All executable scripts present in both targets and `.shared` resources have their canonical source under `shared/runtime/`.
-  Both target templates retain committed generated copies so installation
+- All executable scripts present in the runtimes and `.shared` resources have
+  their canonical source under `shared/runtime/`. Generated templates retain
+  committed generated copies so installation
   remains a direct mirror-copy with no composition step.
 - Shared lifecycle policy and target adapters have canonical sources under
   `shared/hooks/` and committed generated copies in each target template.
@@ -53,12 +69,12 @@
 - Validate the narrowest affected skill or script before broad verification.
   For skill frontmatter and naming compatibility, run `skills-ref validate` on
   affected skill directories, then apply `CODEX_SKILL_STANDARD.md` or
-  `ANTIGRAVITY_SKILL_STANDARD.md` for target-specific quality and conversion
+  `ANTIGRAVITY_SKILL_STANDARD.md` for tool-specific quality and conversion
   rules.
 
 ## External Backlog MCP
 
-- `backlog-mcp/` is a workstation-local runtime, not part of either installed
+- `backlog-mcp/` is a workstation-local runtime, not part of any installed
   toolkit and not part of the npm package.
 - Claude Code, Codex, Gemini, and other MCP clients start the same server over
   stdio from a stable absolute checkout path.

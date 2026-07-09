@@ -15,6 +15,8 @@ const copies = [
   ["shared/hooks/codex_adapter.py", "templates/.codex/hooks/codex_adapter.py"],
   ["shared/hooks/harness_guard.py", "templates/.agents/gemini/hooks/harness_guard.py"],
   ["shared/hooks/gemini_adapter.py", "templates/.agents/gemini/hooks/gemini_adapter.py"],
+  ["shared/hooks/harness_guard.py", "templates/.agents/claude/hooks/harness_guard.py"],
+  ["shared/hooks/claude_adapter.py", "templates/.agents/claude/hooks/claude_adapter.py"],
 ];
 
 let drift = false;
