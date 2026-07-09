@@ -145,7 +145,7 @@ only provide `description`.
 
 ---
 
-## 🔄 Workflows (11)
+## 🔄 Workflows (10)
 
 Slash command procedures. Invoke with `/command`.
 
@@ -160,7 +160,6 @@ Slash command procedures. Invoke with `/command`.
 | `/preview`       | Preview changes                                |
 | `/status`        | Check project status                           |
 | `/test`          | Run tests                                      |
-| `/ui-ux-pro-max` | Design with 50 styles                          |
 | `/verify`        | **NEW** Prove code works by running it         |
 
 ---
@@ -198,7 +197,6 @@ allowed-tools: Read, Grep, Glob
 
 | Skill               | Files | Coverage                            |
 | ------------------- | ----- | ----------------------------------- |
-| `ui-ux-pro-max`     | 27    | 50 styles, 21 palettes, 50 fonts    |
 | `app-builder`       | 20    | Full-stack scaffolding              |
 
 ---

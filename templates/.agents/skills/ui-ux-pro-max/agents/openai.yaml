@@ -1,8 +1,0 @@
-interface:
-  display_name: "UI UX Pro Max"
-  short_description: "AI-powered design intelligence with 50+ styles and 95+ palettes"
-  brand_color: "#EC4899"
-  default_prompt: "$ui-ux-pro-max"
-
-policy:
-  allow_implicit_invocation: true

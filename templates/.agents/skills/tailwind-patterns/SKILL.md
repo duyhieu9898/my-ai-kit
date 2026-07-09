@@ -31,7 +31,6 @@ allowed-tools:
 | Need | Skill |
 |:---|:---|
 | Core Web Vitals optimization techniques | [`performance-optimizer`](../performance-optimizer/SKILL.md) |
-| Custom design search tools | [`ui-ux-pro-max`](../ui-ux-pro-max/SKILL.md) |
 | Designing clean frontend styles and systems | [`frontend-design`](../frontend-design/SKILL.md) |
 
 ---

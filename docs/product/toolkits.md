@@ -14,7 +14,7 @@
   `.agents/AGENTS.md`.
 - Skills use `SKILL.md`, required `agents/openai.yaml`, optional `references/`,
   `scripts/`, and `assets/`.
-- The current template ships 49 skill directories and four top-level runtime
+- The current template ships 48 skill directories and four top-level runtime
   scripts.
 
 ## Gemini Antigravity
@@ -30,7 +30,7 @@
   context. Context-read warnings run at `PreToolUse` because Antigravity's
   `PostToolUse` payload does not include tool arguments.
 - Preserve its agents, skills, workflows, scripts, and shared assets.
-- The current template ships 15 agent files, 33 skill directories, 11 workflow
+- The current template ships 15 agent files, 33 skill directories, 10 workflow
   files, and four top-level runtime scripts.
 
 ## Claude Code
