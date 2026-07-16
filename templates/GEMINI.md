@@ -50,7 +50,7 @@ Classify the user request before execution to select the correct operation mode:
 ## 🧹 UNIVERSAL RULES
 
 *   **Language:** Respond in the user's language (e.g., Vietnamese). Keep all identifiers, variable names, and code comments in English.
-*   **Clean Code:** Follow `@[skills/clean-code]`. Write concise, minimalist code, avoid unnecessary abstractions, and do not over-engineer.
+*   **Clean Code:** Follow `@[.agents/gemini/skills/clean-code]`. Write concise, minimalist code, avoid unnecessary abstractions, and do not over-engineer.
 *   **File Dependency:** Check `.agents/ARCHITECTURE.md` for file dependencies before editing, and update all affected files simultaneously.
 *   **System Map:** Read `ARCHITECTURE.md` at the start of the session to understand the relationship between Agents, Skills, and Scripts.
 
@@ -75,8 +75,8 @@ $$\text{Security} \rightarrow \text{Lint} \rightarrow \text{Schema} \rightarrow 
 
 *   **Main Verification Scripts:**
     *   *Verify All:* `.agents/scripts/verify_all.py`
-    *   *Security Scan:* `.agents/skills/security-auditor/scripts/security_scan.py`
-    *   *Linter:* `.agents/skills/lint-and-validate/scripts/lint_runner.py`
-    *   *Unit Tests:* `.agents/skills/testing-patterns/scripts/test_runner.py`
-*   **UI/UX Design Rules:** Read `.agents/agents/frontend-specialist.md` (Strict rules: Purple Ban on violet/purple colors; Template Ban on generic, outdated layouts).
+    *   *Security Scan:* `.agents/gemini/skills/security-auditor/scripts/security_scan.py`
+    *   *Linter:* `.agents/gemini/skills/lint-and-validate/scripts/lint_runner.py`
+    *   *Unit Tests:* `.agents/gemini/skills/testing-patterns/scripts/test_runner.py`
+*   **UI/UX Design Rules:** Read `.agents/gemini/agents/frontend-specialist.md` (Strict rules: Purple Ban on violet/purple colors; Template Ban on generic, outdated layouts).
 <!-- KIT:END -->
