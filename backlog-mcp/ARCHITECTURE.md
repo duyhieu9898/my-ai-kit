@@ -83,7 +83,7 @@ Because this server operates locally on a developer's workstation with mutation 
 > **Credential Protection**
 > The Backlog API key is never written to log files. Request URLs containing query parameters are automatically stripped before being output to standard logs.
 
-* **Targeted Operations**: An explicit project key wins. Otherwise the runtime uses `BACKLOG_PROJECT_KEY`, `.backlog-project.json`, or a recognized workspace path segment. Claude Code supplies that workspace through `CLAUDE_PROJECT_DIR`; `BACKLOG_WORKSPACE_PATH` remains the explicit client override. Resolution fails instead of querying every configured project.
+* **Targeted Operations**: An explicit project key wins. Otherwise the runtime uses `.backlog-project.json` or a recognized workspace path segment. Claude Code supplies that workspace through `CLAUDE_PROJECT_DIR`; `BACKLOG_WORKSPACE_PATH` remains the explicit client override. Resolution fails instead of querying every configured project.
 
 ---
 

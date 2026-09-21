@@ -141,7 +141,7 @@ def find_workspace_project_key(start_path=None):
 
 
 def resolve_project_key(config, project_key=None, start_path=None):
-    # 1. Parameter project_key
+    # 1. Explicit argument
     if project_key:
         key = project_key
         if key not in project_keys(config):
@@ -149,18 +149,7 @@ def resolve_project_key(config, project_key=None, start_path=None):
             raise ValueError(f"Unknown Backlog project '{key}'. Available projects: {keys}")
         return key
 
-    # 2. Environment variable
-    env_key = os.environ.get("BACKLOG_PROJECT_KEY")
-    if env_key:
-        if env_key not in project_keys(config):
-            keys = ", ".join(sorted(project_keys(config)))
-            raise ValueError(
-                f"Env BACKLOG_PROJECT_KEY '{env_key}' is invalid. "
-                f"Available projects: {keys}."
-            )
-        return env_key
-
-    # 3. Local workspace config
+    # 2. Local workspace config (.backlog-project.json walk-up to .git)
     workspace_key = find_workspace_project_key(start_path)
     if workspace_key:
         if workspace_key not in project_keys(config):
@@ -171,7 +160,7 @@ def resolve_project_key(config, project_key=None, start_path=None):
             )
         return workspace_key
 
-    # 4. Workspace path convention
+    # 3. Workspace path convention (segment match)
     curr_path = os.path.abspath(start_path or os.getcwd())
     p_keys = project_keys(config)
     segments = curr_path.split(os.sep)

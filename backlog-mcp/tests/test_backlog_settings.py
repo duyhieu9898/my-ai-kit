@@ -121,18 +121,6 @@ class BacklogSettingsTest(unittest.TestCase):
         self.assertEqual("line one\nline two", data["body"])
         self.assertEqual(1, len(content.splitlines()))
 
-    def test_resolve_project_key_from_env_var(self):
-        config = {
-            "base_url": "https://example.backlog.com",
-            "projects": ["AQM", "OOP", "VTO"],
-        }
-        with mock.patch.dict(os.environ, {"BACKLOG_PROJECT_KEY": "VTO"}):
-            self.assertEqual("VTO", backlog_settings.resolve_project_key(config))
-
-        with mock.patch.dict(os.environ, {"BACKLOG_PROJECT_KEY": "INVALID"}):
-            with self.assertRaisesRegex(ValueError, "Env BACKLOG_PROJECT_KEY 'INVALID' is invalid"):
-                backlog_settings.resolve_project_key(config)
-
     def test_resolve_project_key_from_local_config(self):
         config = {
             "base_url": "https://example.backlog.com",
