@@ -74,11 +74,12 @@
 
 ## External Backlog MCP
 
-- `backlog-mcp/` is a workstation-local runtime, not part of any installed
-  toolkit and not part of the npm package.
+- `../hieund-backlog-mcp/` is a workstation-local runtime (sibling project,
+  not inside this repo), not part of any installed toolkit and not part of
+  the npm package.
 - Claude Code, Codex, Gemini, and other MCP clients start the same server over
   stdio from a stable absolute checkout path.
 - Claude Code registration uses user scope and passes the active workspace in
   `CLAUDE_PROJECT_DIR`; the MCP uses that path for project resolution.
 - Credentials, configuration, catalogs, logs, and sessions stay under
-  `backlog-mcp/` and must not be copied into target templates.
+  `../hieund-backlog-mcp/` and must not be copied into target templates.
