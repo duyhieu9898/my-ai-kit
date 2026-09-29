@@ -11,15 +11,26 @@
   content hashes).
 - Merge a kit-owned `KIT` block into each root instruction file; the rest of
   the file is left untouched.
-- Skip a colliding skill directory that differs from the kit's copy unless
-  `--force`; adopt one that is already byte-identical as managed.
+- A project-owned skill directory whose name collides with a selected kit
+  skill and differs from the kit's copy aborts the whole run before anything
+  is written; `--force` lets the kit take it over. One that is already
+  byte-identical is adopted as managed.
+- `install --profile P` keeps earlier explicit excludes for skills in `P`;
+  re-add such a skill by name (`install <skill>`).
+- Names stored in the selection that no longer exist in the kit are dropped
+  with a warning; names passed on the command line must exist.
 - Support `--path`, `--ref`, `--source`, `--link` (requires `--source`),
-  `--dry-run`, and `--profile <names>` / `--all`.
+  `--dry-run`, `--force`, and `--profile <names>` / `--all`.
 
-### `remove <skills...>`
+### `remove [skills...] [--profile <names>]`
 
 - Remove the named skills from the manifest selection and from the project
-  (including their `.claude/skills/<name>` symlink).
+  (including their `.claude/skills/<name>` symlink). A skill name is accepted
+  when it exists in the kit, in the selection, or in `managedSkills`, so a
+  skill deleted upstream can still be removed.
+- `--profile <names>` (comma-separated) drops profiles from the selection; a
+  name that is neither selected nor in the kit fails. Pass skills, `--profile`,
+  or both.
 - Support the same `--path`, `--ref`, `--source`, `--link`, `--dry-run`, and
   `--force` options as `install`.
 
@@ -29,6 +40,9 @@
   Antigravity, and Claude Code.
 - Skip a managed skill that was modified locally unless `--force` is
   supplied; never touch a skill that is not in `managedSkills`.
+- Drop skills and profiles that no longer exist in the kit from the selection
+  with a warning, and remove their managed copies (a locally modified copy is
+  kept).
 - Refresh the `KIT` block in each root instruction file; never overwrite the
   rest of the file, even with `--force`.
 - Support `--path`, `--ref`, `--source`, `--link`, `--dry-run`, and `--force`.

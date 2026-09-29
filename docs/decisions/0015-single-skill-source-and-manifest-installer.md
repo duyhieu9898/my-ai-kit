@@ -24,13 +24,18 @@ existed three times, Claude Code discovered no skills, and `update` replaced
   skills are skipped unless `--force`.
 - `--source <dir> --link` symlinks project skills to a local checkout for
   development; GitHub by ref remains the release channel.
+- Skills and profiles deleted or renamed upstream: `update` and `install`
+  drop them from the stored selection with a warning, and managed copies are
+  removed (kept if locally modified); names typed in the current run must
+  still exist. `remove` accepts a name that is in the kit, the selection, or
+  `managedSkills`, and `remove --profile` drops profiles from the selection.
 
 | Component / Path | Owner | Install / Update Rule |
 | --- | --- | --- |
 | `.agents/skills/<name>` listed in `managedSkills` | Kit | Replaced per skill; skipped when locally modified. |
 | `.agents/skills/<name>` not listed | Project | Never modified or removed. |
-| `.claude/skills/<name>` symlink into `.agents/skills/` | Kit | Created and removed with the managed skill. |
-| Other `.claude/skills/` entries | Project | Never modified. |
+| `.claude/skills/<name>` symlink into `.agents/skills/` for a managed skill | Kit | Created and removed with the managed skill. |
+| Other `.claude/skills/` entries, including links to project-owned skills | Project | Never modified. |
 
 ## Consequences
 

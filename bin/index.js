@@ -63,7 +63,11 @@ const installAction = async (skills, options) => {
 };
 
 const removeAction = async (skills, options) => {
-    report(await runPipeline({ projectDir: projectDirOf(options), command: 'remove', remove: skills, options }));
+    const removeProfiles = options.profile ? splitList(options.profile) : [];
+    if (skills.length === 0 && removeProfiles.length === 0) {
+        throw new KitError('Nothing to remove: pass skill names and/or --profile <names>');
+    }
+    report(await runPipeline({ projectDir: projectDirOf(options), command: 'remove', remove: skills, removeProfiles, options }));
 };
 
 const updateAction = async (options) => {
@@ -128,8 +132,9 @@ withSource(program.command('install').alias('init'))
     .action(run(installAction));
 
 withSource(program.command('remove'))
-    .description('Remove skills from the selection and the project')
-    .argument('<skills...>', 'Skill names to remove')
+    .description('Remove skills or profiles from the selection and the project')
+    .argument('[skills...]', 'Skill names to remove')
+    .option('--profile <names>', 'Comma-separated profile names to remove from the selection')
     .action(run(removeAction));
 
 withSource(program.command('update'))

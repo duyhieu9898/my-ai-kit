@@ -104,6 +104,12 @@ try {
   cli("update", "--path", prof);
   assert.ok(!fs.existsSync(path.join(prof, ".agents", "skills", "debugger")), "update respects exclude");
   assert.match(cliFails("install", "debuger", "--path", prof), /did you mean: debugger/);
+  const dropProfile = newDir("kit-drop-profile-");
+  cli("install", "security-auditor", "--path", dropProfile, "--source", repoRoot, "--profile", "starter");
+  assert.match(cliFails("remove", "--path", dropProfile), /Nothing to remove/);
+  cli("remove", "--profile", "starter", "--path", dropProfile);
+  assert.deepEqual(readJson(path.join(dropProfile, ".ai-kit.json")).selection.profiles, [], "remove --profile drops the profile");
+  assert.deepEqual(fs.readdirSync(path.join(dropProfile, ".agents", "skills")), ["security-auditor"]);
 
   // --- Project-owned, conflicts, local edits -------------------------------
   const own = newDir("kit-own-");

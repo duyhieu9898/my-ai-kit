@@ -111,3 +111,57 @@ test('rerun converges after a partial failure', async () => {
     const { manifest } = await run('install');
     assert.deepEqual(Object.keys(manifest.managedSkills).sort(), ['a', 'b', 'c']);
 });
+
+const dropFromKit = (kit, { skills = [], profiles = {} }) => {
+    for (const name of skills) fs.rmSync(path.join(kit.skillsDir, name), { recursive: true });
+    fs.writeFileSync(path.join(kit.templateDir, 'kit.json'), JSON.stringify({ formatVersion: 1, profiles }));
+};
+
+test('update drops skills and profiles that vanished from the kit, with a warning', async () => {
+    const { kit, projectDir, run } = setup();
+    await run('install', { add: { all: false, profiles: ['p'], skills: ['c'] } });
+    await run('remove', { remove: ['b'] });
+    dropFromKit(kit, { skills: ['b', 'c'] });
+
+    const { manifest, warnings } = await run('update');
+
+    assert.deepEqual(manifest.selection, { all: false, profiles: [], skills: [], exclude: [] });
+    assert.deepEqual(warnings.sort(), [
+        'Dropped "b" from the selection: it no longer exists in the kit',
+        'Dropped "c" from the selection: it no longer exists in the kit',
+        'Dropped "p" from the selection: it no longer exists in the kit',
+    ]);
+    assert.ok(!exists(projectDir, '.agents', 'skills', 'c'));
+    assert.equal(fs.lstatSync(path.join(projectDir, '.claude', 'skills', 'c'), { throwIfNoEntry: false }), undefined);
+    assert.deepEqual(Object.keys(manifest.managedSkills), []);
+});
+
+test('install still rejects unknown names given on the command line', async () => {
+    const { kit, run } = setup();
+    await run('install', { add: { all: false, profiles: [], skills: ['c'] } });
+    dropFromKit(kit, { skills: ['c'], profiles: { p: ['a', 'b'] } });
+    await assert.rejects(run('install', { add: { all: false, profiles: [], skills: ['c'] } }), { name: 'KitError', message: /Unknown skill "c"/ });
+    await assert.rejects(run('install', { add: { all: false, profiles: ['q'], skills: [] } }), { name: 'KitError', message: /Unknown profile "q"/ });
+    const { warnings } = await run('install', { add: { all: false, profiles: [], skills: ['a'] } });
+    assert.deepEqual(warnings, ['Dropped "c" from the selection: it no longer exists in the kit']);
+});
+
+test('remove accepts a skill that vanished from the kit', async () => {
+    const { kit, projectDir, run } = setup();
+    await run('install');
+    dropFromKit(kit, { skills: ['c'], profiles: { p: ['a', 'b'] } });
+    const { manifest, warnings } = await run('remove', { remove: ['c'] });
+    assert.deepEqual(Object.keys(manifest.managedSkills).sort(), ['a', 'b']);
+    assert.deepEqual(warnings, []);
+    assert.ok(!exists(projectDir, '.agents', 'skills', 'c'));
+});
+
+test('remove --profile drops profiles from the selection', async () => {
+    const { projectDir, run } = setup();
+    await run('install', { add: { all: false, profiles: ['p'], skills: ['c'] } });
+    const { manifest } = await run('remove', { removeProfiles: ['p'] });
+    assert.deepEqual(manifest.selection.profiles, []);
+    assert.deepEqual(Object.keys(manifest.managedSkills), ['c']);
+    assert.ok(!exists(projectDir, '.agents', 'skills', 'a'));
+    await assert.rejects(run('remove', { removeProfiles: ['nope'] }), { name: 'KitError', message: /Unknown profile "nope"/ });
+});
