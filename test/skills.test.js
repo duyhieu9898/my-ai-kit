@@ -58,6 +58,15 @@ test('conflict items are refused', () => {
     assert.throws(() => apply([{ name: 'a', action: 'conflict' }]), { name: 'KitError' });
 });
 
+test('conflict is checked before any filesystem writes, across the whole plan', () => {
+    const { projectSkillsDir, apply } = setup();
+    assert.throws(
+        () => apply([{ name: 'a', action: 'add' }, { name: 'b', action: 'conflict' }]),
+        { name: 'KitError', message: /Refusing to overwrite project-owned skill\(s\): b/ },
+    );
+    assert.ok(!fs.existsSync(path.join(projectSkillsDir, 'a')));
+});
+
 test('syncClaudeLinks links managed skills and removes stale kit links only', () => {
     const { projectDir, apply } = setup();
     apply([{ name: 'a', action: 'add' }]);
