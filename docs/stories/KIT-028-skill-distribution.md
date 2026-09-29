@@ -1,4 +1,4 @@
-# KIT-027 Skill Distribution
+# KIT-028 Skill Distribution
 
 ## Status
 
@@ -48,7 +48,7 @@ same skills natively.
 ## Validation
 
 When updating durable proof status, use numeric booleans:
-`scripts/bin/harness-cli story update --id KIT-027 --unit 1 --integration 1 --e2e 0 --platform 0`.
+`scripts/bin/harness-cli story update --id KIT-028 --unit 1 --integration 1 --e2e 0 --platform 0`.
 
 | Layer | Expected proof |
 | --- | --- |
