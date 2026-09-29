@@ -24,3 +24,9 @@ test('loadRegistry rejects a newer formatVersion', () => {
     const { templateDir } = makeKit({ formatVersion: 2 });
     assert.throws(() => loadRegistry(templateDir), { name: 'KitError', message: /formatVersion 2 .*Upgrade/ });
 });
+
+test('loadRegistry reports a malformed kit.json with its path', () => {
+    const { templateDir } = makeKit();
+    fs.writeFileSync(path.join(templateDir, 'kit.json'), '{oops');
+    assert.throws(() => loadRegistry(templateDir), { name: 'KitError', message: /^Cannot parse .*kit\.json: / });
+});

@@ -28,3 +28,22 @@ test('installIntegrations tolerates a template without integration files', () =>
 test('detectHarness reports standalone when no harness files exist', () => {
     assert.deepEqual(detectHarness(makeProject()), { enabled: false, source: 'standalone' });
 });
+
+for (const [label, relPath] of [
+    ['Codex hooks', path.join('.codex', 'hooks.json')],
+    ['Claude settings', path.join('.claude', 'settings.json')],
+    ['Gemini hooks', path.join('.agents', 'hooks.json')],
+]) {
+    test(`installIntegrations reports malformed project ${label} with its path`, () => {
+        const { templateDir } = makeKit();
+        fs.mkdirSync(path.dirname(path.join(templateDir, relPath)), { recursive: true });
+        fs.writeFileSync(path.join(templateDir, relPath), JSON.stringify({ hooks: {} }));
+        const projectDir = makeProject();
+        fs.mkdirSync(path.dirname(path.join(projectDir, relPath)), { recursive: true });
+        fs.writeFileSync(path.join(projectDir, relPath), '{oops');
+        assert.throws(
+            () => installIntegrations(templateDir, projectDir),
+            { name: 'KitError', message: new RegExp(`^Cannot parse ${path.join(projectDir, relPath).replace(/[.]/g, '\\.')}: `) },
+        );
+    });
+}

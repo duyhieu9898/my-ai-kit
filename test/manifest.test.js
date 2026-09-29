@@ -36,3 +36,15 @@ test('unparseable manifest fails with the file path', () => {
     fs.writeFileSync(path.join(projectDir, '.ai-kit.json'), '{oops');
     assert.throws(() => readManifest(projectDir), { name: 'KitError', message: /\.ai-kit\.json/ });
 });
+
+test('a manifest from a newer CLI asks the user to upgrade', () => {
+    const projectDir = makeProject();
+    fs.writeFileSync(path.join(projectDir, '.ai-kit.json'), JSON.stringify({ formatVersion: 2, managedSkills: {} }));
+    assert.throws(() => readManifest(projectDir), { name: 'KitError', message: /formatVersion 2\b.*Upgrade the CLI/ });
+});
+
+test('a formatVersion 1 manifest without managedSkills is rejected', () => {
+    const projectDir = makeProject();
+    fs.writeFileSync(path.join(projectDir, '.ai-kit.json'), JSON.stringify({ formatVersion: 1 }));
+    assert.throws(() => readManifest(projectDir), { name: 'KitError', message: /\.ai-kit\.json is missing managedSkills$/ });
+});

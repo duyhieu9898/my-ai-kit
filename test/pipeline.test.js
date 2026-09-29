@@ -165,3 +165,12 @@ test('remove --profile drops profiles from the selection', async () => {
     assert.ok(!exists(projectDir, '.agents', 'skills', 'a'));
     await assert.rejects(run('remove', { removeProfiles: ['nope'] }), { name: 'KitError', message: /Unknown profile "nope"/ });
 });
+
+test('status of a legacy install lists no project-owned skills', () => {
+    const projectDir = makeProject();
+    fs.writeFileSync(path.join(projectDir, '.ai-kit.json'), JSON.stringify({ version: '2.0.0', ref: 'main' }));
+    fs.mkdirSync(path.join(projectDir, '.agents', 'skills', 'a'), { recursive: true });
+    const status = collectStatus(projectDir);
+    assert.equal(status.legacy, true);
+    assert.deepEqual(status.projectOwned, []);
+});
