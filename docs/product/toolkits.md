@@ -43,8 +43,8 @@
 - Hook policy: generated from `shared/hooks/harness_guard.py`; the Claude
   adapter maps Claude Code hook payloads and injects warning context without
   blocking tool calls.
-- Claude reuses the shared `.agents/skills/` instructions. The kit does not
-  duplicate the full skill tree under `.claude/skills/`.
+- Skills: each managed skill is exposed as `.claude/skills/<name>`, a relative
+  symlink to `../../.agents/skills/<name>`.
 - The current template ships Claude hook files under `.agents/claude/hooks/`.
 
 ## Shared Rules

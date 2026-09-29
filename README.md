@@ -25,11 +25,11 @@ npx -y github:duyhieu9898/my-ai-kit init
 
 Kết quả cài đặt:
 
-| Tool | Runtime Folder | Integration Config | Root Instruction |
+| Tool | Skills | Integration Config | Root Instruction |
 |:---|:---|:---|:---|
-| Codex | `.agents/skills/` | `.codex/hooks.json` | `AGENTS.md` |
-| Gemini Antigravity | `.agents/gemini/` | `.agents/hooks.json` | `GEMINI.md` |
-| Claude Code | `.agents/claude/` | `.claude/settings.json` | `CLAUDE.md` |
+| Codex | `.agents/skills/` | `.codex/hooks.json` + `.codex/hooks/` | `AGENTS.md` |
+| Gemini Antigravity | `.agents/skills/` | `.agents/hooks.json` + `.agents/gemini/hooks/` | `GEMINI.md` |
+| Claude Code | `.claude/skills/<name>` → `../../.agents/skills/<name>` | `.claude/settings.json` | `CLAUDE.md` |
 
 `.agents/` chứa `skills/`, `scripts/`, các tài nguyên runtime dùng chung, và
 các phần tích hợp theo tool. CLI **không** tự sửa `.gitignore` — bạn tự quản lý.
@@ -61,29 +61,46 @@ Thay `hieund-ai-kit` bằng `npx -y hieund-ai-kit` nếu chưa cài global.
 
 | Lệnh | Mô tả |
 |:---|:---|
-| `init` | Cài Codex, Gemini, và Claude Code vào repo hiện tại |
-| `init --force` | Bỏ qua xác nhận, ghi đè toàn bộ |
-| `init --path <dir>` | Cài vào thư mục chỉ định |
-| `init --ref <tag\|commit>` | Ghim phiên bản theo git ref (tag, commit, branch) |
-| `update` | Cập nhật `.agents/`, hooks/settings, giữ root instructions hiện có |
-| `status` | Kiểm tra trạng thái cài đặt |
+| `install` | Cài tất cả skill, hooks, và root instructions (alias: `init`) |
+| `install --profile a,b` | Thêm skill theo profile khai báo trong `templates/kit.json` |
+| `install <skill...>` | Thêm từng skill |
+| `remove <skill...>` | Bỏ skill khỏi lựa chọn và khỏi project |
+| `update` | Cập nhật skill do kit quản lý, hooks, và block `KIT` |
+| `list` | Liệt kê skill và profile có sẵn |
+| `status` | Kiểm tra trạng thái (không cần mạng) |
+
+Tùy chọn chung: `--path <dir>`, `--ref <ref>`, `--source <dir>`, `--link`,
+`--dry-run`, `--force`.
 
 > **Ghim phiên bản:** Mặc định CLI tải từ nhánh chính của repo. Để tái lập và
 > giảm rủi ro supply-chain, ghim theo git ref bằng `--ref`:
 >
 > ```bash
-> npx -y hieund-ai-kit init --ref v2.0.0
+> npx -y hieund-ai-kit install --ref v3.0.0
 > npx -y hieund-ai-kit update --ref <commit-sha>
 > ```
->
-> `--ref` ưu tiên hơn `--branch` nếu cả hai cùng có.
 
 Ví dụ trong thư mục project:
 
 ```bash
-npx -y hieund-ai-kit init
+npx -y hieund-ai-kit install
 npx -y hieund-ai-kit status
 ```
+
+## Phát Triển Skill Với `--link`
+
+Khi sửa skill trên máy này, link project vào checkout của kit để thấy thay đổi
+ngay mà không cần push hay cài lại:
+
+```bash
+hieund-ai-kit install --path ~/code/my-project --source ~/code/hieund-ai-kit-cli --link --profile starter
+```
+
+Thêm/xóa skill hoặc sửa profile thì chạy `update`. Quay lại bản copy từ GitHub:
+`hieund-ai-kit update --ref main`.
+
+Skill trong `.agents/skills/` không có trong `managedSkills` của `.ai-kit.json`
+là skill của project; kit không bao giờ sửa hay xóa chúng.
 
 ## Cài Đặt Local Để Phát Triển
 
@@ -121,20 +138,21 @@ templates/
 ├── AGENTS.md                # Codex root instruction → project/AGENTS.md
 ├── GEMINI.md                # Gemini root instruction → project/GEMINI.md
 ├── CLAUDE.md                # Claude Code root instruction → project/CLAUDE.md
+├── kit.json                 # Registry: formatVersion + profiles
 ├── .codex/                  # Codex hooks → merge vào project/.codex/
 ├── .claude/                 # Claude settings → merge vào project/.claude/
 └── .agents/                 # Shared install folder → project/.agents/
     ├── ARCHITECTURE.md
-    ├── .shared/
     ├── scripts/
-    ├── skills/              # Codex/open Agent Skills runtime
-    ├── gemini/              # Gemini agents/skills/workflows/hooks
-    └── claude/              # Claude hook adapter/runtime files
+    ├── skills/<skill-name>/ # Skill nguồn duy nhất, Codex + Antigravity đọc trực tiếp
+    ├── claude/hooks/         # Claude hook adapter/runtime files
+    └── gemini/hooks/         # Gemini hook adapter/runtime files
 ```
 
 ## Phát Triển Skill
 
-Codex/Claude reusable skills:
+Một skill có một nguồn duy nhất; cả Codex, Gemini Antigravity, và Claude Code
+đều đọc từ đây (Claude Code qua symlink `.claude/skills/<name>`):
 
 ```text
 templates/.agents/skills/<skill-name>/SKILL.md
@@ -143,30 +161,17 @@ templates/.agents/skills/<skill-name>/references/
 templates/.agents/skills/<skill-name>/scripts/
 ```
 
-Gemini Antigravity skills:
-
-```text
-templates/.agents/gemini/skills/<skill-name>/SKILL.md
-```
-
 Sau khi sửa template, push lên `main`; các project khác có thể cập nhật bằng:
 
 ```bash
 npx -y hieund-ai-kit update
 ```
 
-`update` refresh `.agents/`, merge cấu hình `.codex/`, `.agents/hooks.json`,
-và `.claude/settings.json` do kit quản lý, đồng thời giữ nguyên root
-instructions hiện có.
-
-Toàn bộ executable scripts dùng chung giữa các runtime, cùng runtime Backlog,
-có source chính tại `shared/runtime/`. Chỉ sửa bản shared rồi đồng bộ các bản
-template:
-
-```bash
-npm run sync:shared-runtime
-npm run check:shared-runtime
-```
+`update` cập nhật skill do kit quản lý (bỏ qua skill đã sửa cục bộ trừ khi
+dùng `--force`), merge cấu hình `.codex/`, `.agents/hooks.json`, và
+`.claude/settings.json` do kit quản lý, block `KIT` trong root instructions,
+đồng thời giữ nguyên phần còn lại của root instructions và mọi skill của
+project.
 
 Harness lifecycle guard dùng chung có source chính tại `shared/hooks/`; mỗi
 tool giữ một adapter nhỏ cho payload/output native:

@@ -15,17 +15,35 @@ toolkits into another repository.
 
 ```text
 bin/index.js
-  CLI configuration, install, update, repair, and status commands
+  Commander definitions and output only for install/init, remove, update,
+  list, and status commands
+
+lib/
+  errors.js       KitError for expected, user-facing failures
+  fsx.js          lstatOrNull
+  integrations.js Hook merges, root instruction block merge, shared assets,
+                  runtime hook folders, Codex hook scripts, detectHarness
+  registry.js     Load and validate templates/kit.json; list skills
+  hash.js         hashSkillDir, isIgnoredName
+  resolve.js      Pure selection logic and unknown-name messages
+  manifest.js     Read, migrate, create, write .ai-kit.json
+  plan.js         Classify each skill into an action
+  skills.js       Apply actions, Claude links, legacy adoption, stale
+                  staging cleanup
+  source.js       Resolve and fetch the template source
+  pipeline.js     runPipeline, loadCatalog
+  status.js       collectStatus (offline)
 
 templates/
-  Generated installer layout: root instructions, shared .agents/ runtime,
-  Codex hooks, Gemini hooks/runtime, and Claude Code settings/hooks
+  Generated installer layout: root instructions, templates/kit.json
+  (registry), the single skill source under .agents/skills/, Codex hooks,
+  Gemini hooks, and Claude Code settings/hooks
+
+templates/kit.json
+  Registry: formatVersion plus named skill profiles
 
 shared/hooks/
   Canonical Harness guard policy plus tool-specific lifecycle adapters
-
-shared/runtime/
-  Canonical source for executable scripts shared by installed runtimes
 
 ../hieund-backlog-mcp/
   Workstation-local stdio MCP server and centralized Backlog runtime/state;
@@ -38,19 +56,26 @@ docs/
 
 ## Installer Layout
 
-`init`, `update`, and `repair` install the supported coding-agent runtimes
-side-by-side from the generated `templates/` layout. The installer performs
-structured merges for tool-owned config files and direct refreshes for runtime
-folders.
+`install` (alias `init`), `remove`, and `update` manage skills, hooks, and
+root instructions from the generated `templates/` layout, driven by
+`lib/pipeline.js`. The installer performs structured merges for tool-owned
+config files and per-skill actions (add/keep/update/skip/conflict) for
+`.agents/skills/`.
 
-- Top-level files (e.g. `AGENTS.md`, `GEMINI.md`) are Root Instruction Files,
-  copied to the project root.
-- The `.agents/` subdirectory is the install folder, copied to `project/.agents/`.
-- The Codex `.codex/` subdirectory contains lifecycle hooks. It is merged into
-  `project/.codex/`; existing project config and unrelated hooks are preserved.
-- The Gemini `.agents/hooks.json` lifecycle entry and `.agents/hooks/` scripts
-  are merged during the otherwise atomic `.agents/` replacement so
-  project-owned hooks survive updates.
+- Top-level files (e.g. `AGENTS.md`, `GEMINI.md`, `CLAUDE.md`) are Root
+  Instruction Files; a kit-owned `KIT` block is merged into each, the rest of
+  the file is left untouched.
+- `.agents/skills/<name>` listed in the manifest's `managedSkills` is
+  installed, updated, or removed by the kit; a locally modified managed skill
+  is skipped unless `--force`. Skills not listed in `managedSkills` belong to
+  the project and are never touched.
+- `.claude/skills/<name>` is a relative symlink to `../../.agents/skills/<name>`,
+  created and removed alongside its managed skill.
+- The Codex `.codex/hooks.json` and `.codex/hooks/` files are merged into
+  `project/.codex/`; existing project config and unrelated hooks are
+  preserved.
+- The Gemini `.agents/hooks.json` lifecycle entry and `.agents/gemini/hooks/`
+  scripts are merged so project-owned hooks survive updates.
 - Claude Code `.claude/settings.json` hook groups are merged into
   `project/.claude/settings.json`; unrelated Claude settings and custom hooks
   are preserved.
@@ -59,25 +84,21 @@ folders.
 
 - Treat `templates/` as package data; preserve relative paths during
   publication and installation.
-- Edit shared executable scripts under `shared/runtime/`, then run
-  `npm run sync:shared-runtime` to refresh their committed copies under both
-  target templates.
+- Edit a skill directly under `templates/.agents/skills/<name>/`; it is the
+  single source Codex, Gemini Antigravity, and Claude Code all read from.
 - Edit and test the Backlog integration under `../hieund-backlog-mcp/`. It is not copied
   into target templates or included in the npm package.
 - Keep tool-specific metadata such as `SKILL.md`, Codex `agents/openai.yaml`,
   environment files, and runtime logs outside the shared source.
 - Edit shared lifecycle policy and adapters under `shared/hooks/`, then run
   `npm run sync:shared-hooks` to refresh committed target copies.
-- Install uses mirror ownership rules: `.agents/skills`, `.agents/gemini`, and
-  `.agents/claude` are refreshed from templates; `.codex/`,
-  `.agents/hooks.json`, and `.claude/settings.json` are merged; top-level root
-  instruction files honour the overwrite flag.
-- `init` replaces runtime folders and, with `--force`, root instructions. It
-  gates existing AI Kit files behind a confirmation prompt unless `--force` is
-  supplied.
-- `update` refreshes runtime folders, updates kit-managed Codex, Gemini, and
-  Claude Code hooks through structured merges, and preserves existing root
-  instruction files.
+- `install`/`update` skip a managed skill that was modified locally unless
+  `--force` is supplied; `--force` never overwrites root instructions, since
+  those are always block-merged.
+- `update` refreshes managed skills, kit-managed Codex/Gemini/Claude hooks
+  through structured merges, and the `KIT` block in root instructions, leaving
+  the rest of each root instruction file and every project-owned skill
+  untouched.
 - The CLI does not modify `.gitignore`; users manage it themselves.
 
 ## Instruction Hierarchy
@@ -101,7 +122,7 @@ templates/.agents/hooks.json
 templates/.claude/settings.json
   Claude Code lifecycle adapter using the same shared guard policy
 
-templates/.agents/AGENTS.md
+templates/.agents/ARCHITECTURE.md
   maintenance rules scoped to the installed toolkit
 
 templates/.agents/skills/*/SKILL.md

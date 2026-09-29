@@ -156,7 +156,7 @@ contracts:
 - `CODEX_SKILL_STANDARD.md` for Codex skills under
   `templates/.agents/skills/`.
 - `ANTIGRAVITY_SKILL_STANDARD.md` for Gemini Antigravity skills under
-  `templates/.agents/gemini/skills/`.
+  `templates/.agents/skills/`.
 
 When converting skills between tools or refactoring existing skills, preserve
 tool-specific metadata while keeping `SKILL.md` frontmatter compatible with
@@ -167,7 +167,6 @@ Use `skills-ref` as the upstream structural validator when it is available:
 
 ```bash
 skills-ref validate templates/.agents/skills/<skill-name>
-skills-ref validate templates/.agents/gemini/skills/<skill-name>
 ```
 
 For bulk template work, validate each affected skill with `skills-ref` before
