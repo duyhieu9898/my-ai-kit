@@ -54,6 +54,12 @@ test('unmanaged directory with a kit name is a conflict unless forced', () => {
     assert.deepEqual(actions(plan({ targetSkills: ['a'], managedSkills: {}, force: true })), { a: 'update' });
 });
 
+test('unmanaged directory that already matches the source is adopted as unchanged', () => {
+    const { projectSkillsDir, kit, plan } = setup();
+    fs.cpSync(path.join(kit.skillsDir, 'a'), path.join(projectSkillsDir, 'a'), { recursive: true });
+    assert.deepEqual(actions(plan({ targetSkills: ['a'], managedSkills: {} })), { a: 'unchanged' });
+});
+
 test('project-owned skills outside the target are not planned', () => {
     const { projectSkillsDir, plan } = setup();
     fs.mkdirSync(path.join(projectSkillsDir, 'mine'));

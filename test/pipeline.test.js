@@ -98,3 +98,16 @@ test('status reports modified skills, broken links, and project-owned skills', a
 test('status on an empty directory reports not installed', () => {
     assert.deepEqual(collectStatus(makeProject()), { installed: false });
 });
+
+test('rerun converges after a partial failure', async () => {
+    const { projectDir, run } = setup();
+    fs.mkdirSync(path.join(projectDir, '.claude'), { recursive: true });
+    fs.writeFileSync(path.join(projectDir, '.claude', 'skills'), 'x');
+
+    await assert.rejects(run('install'));
+    assert.ok(!exists(projectDir, '.ai-kit.json'));
+
+    fs.rmSync(path.join(projectDir, '.claude', 'skills'));
+    const { manifest } = await run('install');
+    assert.deepEqual(Object.keys(manifest.managedSkills).sort(), ['a', 'b', 'c']);
+});
