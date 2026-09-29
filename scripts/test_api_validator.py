@@ -13,7 +13,6 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 VALIDATORS = (
     ROOT / "templates/.agents/skills/api-patterns/scripts/api_validator.py",
-    ROOT / "templates/.agents/gemini/skills/api-patterns/scripts/api_validator.py",
 )
 
 
@@ -26,9 +25,6 @@ def load_validator(path: Path):
 
 
 class ApiValidatorTests(unittest.TestCase):
-    def test_validator_copies_match(self):
-        self.assertEqual(VALIDATORS[0].read_text(), VALIDATORS[1].read_text())
-
     def test_valid_openapi_passes_for_both_targets(self):
         document = {
             "openapi": "3.1.0",

@@ -112,7 +112,6 @@ try {
     assert.ok(fs.existsSync(path.join(testProjectDir, "GEMINI.md")), "GEMINI.md must exist at root");
     assert.ok(fs.existsSync(path.join(testProjectDir, "CLAUDE.md")), "CLAUDE.md must exist at root");
     assert.ok(fs.existsSync(path.join(installDir, "skills")), "Codex runtime (skills/) must exist flat under .agents/");
-    assert.ok(fs.existsSync(path.join(installDir, "gemini", "skills")), "Gemini runtime (skills/) must exist nested under .agents/gemini/");
     assert.ok(fs.existsSync(path.join(installDir, "claude", "hooks")), "Claude runtime hooks must exist nested under .agents/claude/");
 
     // -------------------------------------------------------------------------
@@ -140,8 +139,6 @@ try {
     // -------------------------------------------------------------------------
     // ASSERTION 4: Gemini isolation check
     // -------------------------------------------------------------------------
-    assert.ok(!fs.existsSync(path.join(installDir, "gemini", "skills", "debugger")), "Gemini install must not write into Codex flat skills folder");
-    assert.ok(fs.existsSync(path.join(installDir, "gemini", "skills", "api-patterns", "SKILL.md")), "Gemini skills must reside nested at .agents/gemini/skills/");
 
     // -------------------------------------------------------------------------
     // ASSERTION 5: Target-specific instructions check
@@ -334,10 +331,8 @@ try {
     // -------------------------------------------------------------------------
     // We modify some files to trace them
     const codexSkillPath = path.join(installDir, "skills", "debugger", "SKILL.md");
-    const geminiSkillPath = path.join(installDir, "gemini", "skills", "api-patterns", "SKILL.md");
     const claudeAdapterPath = path.join(installDir, "claude", "hooks", "claude_adapter.py");
     fs.writeFileSync(codexSkillPath, "CHANGED_CODEX_SKILL\n");
-    fs.writeFileSync(geminiSkillPath, "CHANGED_GEMINI_SKILL\n");
     fs.writeFileSync(claudeAdapterPath, "CHANGED_CLAUDE_ADAPTER\n");
 
     execFileSync(process.execPath, [
@@ -348,7 +343,6 @@ try {
     ], { env: testEnv });
 
     assert.ok(readText(codexSkillPath) !== "CHANGED_CODEX_SKILL\n", "Update must refresh Codex skills from template");
-    assert.ok(readText(geminiSkillPath) !== "CHANGED_GEMINI_SKILL\n", "Update must refresh Gemini skills from template");
     assert.ok(readText(claudeAdapterPath) !== "CHANGED_CLAUDE_ADAPTER\n", "Update must refresh Claude hooks from template");
 
   } finally {

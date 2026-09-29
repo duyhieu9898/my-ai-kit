@@ -5,7 +5,7 @@ node_modules
 __pycache__/
 *.pyc
 /.agents
-.codex
+/.codex
 
 # Harness durable layer
 harness.db

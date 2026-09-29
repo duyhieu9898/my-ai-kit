@@ -163,7 +163,6 @@ function checkSkillReferenceLinks(targetName, skillsPath, markdownPaths) {
 
 const toolkitDocs = readText("docs/product/toolkits.md");
 const codexArchitecture = readText("templates/.agents/ARCHITECTURE.md");
-const geminiArchitecture = readText("templates/.agents/gemini/ARCHITECTURE.md");
 const projectPlannerPath =
   "templates/.agents/skills/project-planner/SKILL.md";
 const planWritingPath = "templates/.agents/skills/plan-writing/SKILL.md";
@@ -172,24 +171,13 @@ const projectPlannerOpenAiPath =
 const projectPlanner = readText(projectPlannerPath);
 const planWriting = readText(planWritingPath);
 const projectPlannerOpenAi = readText(projectPlannerOpenAiPath);
-const geminiProjectPlannerPath =
-  "templates/.agents/gemini/agents/project-planner.md";
-const geminiPlanWritingPath =
-  "templates/.agents/gemini/skills/plan-writing/SKILL.md";
-const geminiPlanWorkflowPath = "templates/.agents/gemini/workflows/plan.md";
-const geminiProjectPlanner = readText(geminiProjectPlannerPath);
-const geminiPlanWorkflow = readText(geminiPlanWorkflowPath);
 
 const codexSkillCount = immediateDirectories("templates/.agents/skills").length;
 const codexOpenAiCount = immediateDirectories("templates/.agents/skills").filter(
   (skillName) =>
     exists(`templates/.agents/skills/${skillName}/agents/openai.yaml`),
 ).length;
-const geminiSkillCount = immediateDirectories("templates/.agents/gemini/skills").length;
-const geminiAgentCount = immediateFiles("templates/.agents/gemini/agents", ".md").length;
-const geminiWorkflowCount = immediateFiles("templates/.agents/gemini/workflows", ".md").length;
 const codexUxAuditConfigPath = "templates/.agents/ux_audit.json";
-const geminiUxAuditConfigPath = "templates/.agents/ux_audit.json";
 const codexHooksConfigPath = "templates/.codex/hooks.json";
 const codexHarnessGuardPath = "templates/.codex/hooks/harness_guard.py";
 const codexHookAdapterPath = "templates/.codex/hooks/codex_adapter.py";
@@ -201,47 +189,18 @@ const claudeSettingsPath = "templates/.claude/settings.json";
 const claudeHarnessGuardPath = "templates/.agents/claude/hooks/harness_guard.py";
 const claudeHookAdapterPath = "templates/.agents/claude/hooks/claude_adapter.py";
 const codexSkillMarkdownPaths = recursiveFiles("templates/.agents/skills", ".md");
-const geminiSkillMarkdownPaths = recursiveFiles("templates/.agents/gemini/skills", ".md");
-const geminiAgentMarkdownPaths = recursiveFiles("templates/.agents/gemini/agents", ".md");
-const geminiWorkflowMarkdownPaths = recursiveFiles("templates/.agents/gemini/workflows", ".md");
-const templateMarkdownPaths = [
-  ...codexSkillMarkdownPaths,
-  ...geminiSkillMarkdownPaths,
-  ...geminiAgentMarkdownPaths,
-  ...geminiWorkflowMarkdownPaths,
-];
+const templateMarkdownPaths = codexSkillMarkdownPaths;
 
 const docsCodexSkillCount = requireMatch(
   toolkitDocs,
   /Codex[\s\S]*?ships (\d+) skill directories/,
   "Codex skill count in docs/product/toolkits.md",
 );
-const docsGeminiCounts = toolkitDocs.match(
-  /Gemini Antigravity[\s\S]*?ships (\d+) agent files, (\d+) skill directories, (\d+) workflow/,
-);
-if (!docsGeminiCounts) {
-  throw new Error("Could not find Gemini counts in docs/product/toolkits.md");
-}
 
 record(
   "docs/product/toolkits.md Codex skill count matches template",
   docsCodexSkillCount === codexSkillCount,
   `docs=${docsCodexSkillCount}, actual=${codexSkillCount}`,
-);
-record(
-  "docs/product/toolkits.md Gemini agent count matches template",
-  Number.parseInt(docsGeminiCounts[1], 10) === geminiAgentCount,
-  `docs=${docsGeminiCounts[1]}, actual=${geminiAgentCount}`,
-);
-record(
-  "docs/product/toolkits.md Gemini skill count matches template",
-  Number.parseInt(docsGeminiCounts[2], 10) === geminiSkillCount,
-  `docs=${docsGeminiCounts[2]}, actual=${geminiSkillCount}`,
-);
-record(
-  "docs/product/toolkits.md Gemini workflow count matches template",
-  Number.parseInt(docsGeminiCounts[3], 10) === geminiWorkflowCount,
-  `docs=${docsGeminiCounts[3]}, actual=${geminiWorkflowCount}`,
 );
 
 record(
@@ -251,26 +210,14 @@ record(
   `actual=${codexSkillCount}`,
 );
 record(
-  "Gemini architecture agent count matches template",
-  requireMatch(geminiArchitecture, /Agents \((\d+)\)/, "Gemini architecture agent count") ===
-    geminiAgentCount,
-  `actual=${geminiAgentCount}`,
-);
-record(
-  "Gemini architecture skill count matches template",
-  requireMatch(geminiArchitecture, /Skills \((\d+)\)/, "Gemini architecture skill count") ===
-    geminiSkillCount,
-  `actual=${geminiSkillCount}`,
-);
-record(
   "Codex openai.yaml coverage matches skill count",
   codexOpenAiCount === codexSkillCount,
   `openai.yaml=${codexOpenAiCount}, skills=${codexSkillCount}`,
 );
 record(
-  "Codex and Gemini UX audit configs both exist",
-  exists(codexUxAuditConfigPath) && exists(geminiUxAuditConfigPath),
-  `${codexUxAuditConfigPath}, ${geminiUxAuditConfigPath}`,
+  "UX audit config exists",
+  exists(codexUxAuditConfigPath),
+  codexUxAuditConfigPath,
 );
 record(
   "Codex lifecycle hook files exist",
@@ -333,19 +280,7 @@ if (exists(codexHarnessGuardPath) && exists(geminiHarnessGuardPath) && exists(cl
     `${codexHarnessGuardPath}, ${geminiHarnessGuardPath}, ${claudeHarnessGuardPath}`,
   );
 }
-if (exists(codexUxAuditConfigPath) && exists(geminiUxAuditConfigPath)) {
-  const codexUxAuditConfig = JSON.parse(readText(codexUxAuditConfigPath));
-  const geminiUxAuditConfig = JSON.parse(readText(geminiUxAuditConfigPath));
-  record(
-    "Codex and Gemini UX audit configs match",
-    JSON.stringify(codexUxAuditConfig) === JSON.stringify(geminiUxAuditConfig),
-    `${codexUxAuditConfigPath}, ${geminiUxAuditConfigPath}`,
-  );
-}
-
-
 checkSkillFrontmatter("codex", "templates/.agents/skills", true);
-checkSkillFrontmatter("gemini", "templates/.agents/gemini/skills", false);
 for (const markdownPath of templateMarkdownPaths) {
   checkRelativeLinks(markdownPath);
 }
@@ -353,11 +288,6 @@ checkSkillReferenceLinks(
   "codex",
   "templates/.agents/skills",
   codexSkillMarkdownPaths,
-);
-checkSkillReferenceLinks(
-  "gemini",
-  "templates/.agents/gemini/skills",
-  [...geminiSkillMarkdownPaths, ...geminiAgentMarkdownPaths, ...geminiWorkflowMarkdownPaths],
 );
 
 record(
@@ -394,34 +324,6 @@ record(
     !planWriting.includes("Phase X"),
   planWritingPath,
 );
-record(
-  "Gemini project-planner uses one canonical default plan path",
-  geminiProjectPlanner.includes("docs/PLAN-{task-slug}.md") &&
-    !geminiProjectPlanner.includes("./{task-slug}.md (project root)"),
-  geminiProjectPlannerPath,
-);
-record(
-  "Gemini project-planner does not require removed specialist skills",
-  !/\b(mobile-developer|coordinator-mode|context-compression)\b/.test(
-    geminiProjectPlanner,
-  ),
-  geminiProjectPlannerPath,
-);
-record(
-  "Gemini project-planner verification remains stack-neutral",
-  geminiProjectPlanner.includes("Select Proportional Verification") &&
-    !geminiProjectPlanner.includes("npm run build") &&
-    !geminiProjectPlanner.includes("verify_all.py"),
-  geminiProjectPlannerPath,
-);
-record(
-  "Gemini plan workflow matches planner output contract",
-  geminiPlanWorkflow.includes("docs/PLAN-{task-slug}.md") &&
-    geminiPlanWorkflow.includes("INPUT -> OUTPUT -> VERIFY") &&
-    !geminiPlanWorkflow.includes("Phase X"),
-  geminiPlanWorkflowPath,
-);
-
 const failed = checks.filter((check) => !check.passed);
 
 for (const check of checks) {

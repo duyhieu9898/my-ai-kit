@@ -13,12 +13,10 @@ from unittest.mock import patch
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-TARGETS = ("codex", "gemini")
+TARGETS = ("codex",)
 
 
 def script_path(target: str, relative_path: str) -> Path:
-    if target == "gemini":
-        return REPO_ROOT / "templates" / ".agents" / "gemini" / "skills" / relative_path
     return REPO_ROOT / "templates" / ".agents" / "skills" / relative_path
 
 
