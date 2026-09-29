@@ -1,6 +1,6 @@
 {
   "name": "hieund-ai-kit",
-  "version": "1.0.0",
+  "version": "3.0.0",
   "description": "Custom CLI tool to setup Hieund AI Kit skills and MCPs",
   "main": "bin/index.js",
   "type": "module",
