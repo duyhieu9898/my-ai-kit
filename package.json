@@ -11,13 +11,14 @@
     "test:installer": "node scripts/test-installer.mjs",
     "test:unit": "node --test 'test/*.test.js'",
     "check:templates": "npm run check:shared-hooks && node scripts/check-template-consistency.mjs",
-    "verify": "node --check bin/index.js && npm run test:installer && npm run test:hooks && npm run check:templates"
+    "verify": "node --check bin/index.js && npm run test:unit && npm run test:installer && npm run test:hooks && npm run check:templates"
   },
   "bin": {
     "hieund-ai-kit": "./bin/index.js"
   },
   "files": [
     "bin",
+    "lib",
     "scripts/check-template-consistency.mjs",
     "scripts/test-installer.mjs",
     "templates"
