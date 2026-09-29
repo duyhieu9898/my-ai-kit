@@ -9,6 +9,7 @@ import fs from 'fs';
 import os from 'os';
 import readline from 'readline';
 import { fileURLToPath } from 'url';
+import { installIntegrations, detectHarness } from '../lib/integrations.js';
 
 // ============================================================================
 // CONSTANTS & CONFIGURATION
@@ -18,21 +19,8 @@ const REPO = 'github:duyhieu9898/my-ai-kit';
 const TEMPLATES_FOLDER = 'templates';
 const TEMP_PREFIX = 'hieund-ai-kit-';
 const INSTALL_FOLDER = '.agents';
-const CODEX_CONFIG_FOLDER = '.codex';
 const CLAUDE_CONFIG_FOLDER = '.claude';
 const CONFIG_FILE = '.ai-kit.json';
-const CODEX_HOOK_COMMAND_MARKERS = [
-    '.codex/hooks/codex_adapter.py',
-    '.codex/hooks/harness_guard.py',
-];
-const CLAUDE_HOOK_COMMAND_MARKERS = [
-    '.agents/claude/hooks/claude_adapter.py',
-    '.agents/claude/hooks/harness_guard.py',
-];
-const GEMINI_HOOK_CONFIG = 'hooks.json';
-const GEMINI_HOOK_FOLDER = 'hooks';
-const KIT_GEMINI_HOOK_KEY = 'hieund-ai-kit-harness-guard';
-const INSTRUCTION_BLOCK_PATTERN = /^<!--\s*([A-Z0-9_-]+):BEGIN\s*-->[\s\S]*?^<!--\s*\1:END\s*-->/gm;
 
 const BANNER_COLOR = chalk.magentaBright;
 const BANNER_RUNTIME_LINE = 'Codex + Gemini + Claude Code';
@@ -85,257 +73,6 @@ const cleanup = (tempDir) => {
         fs.rmSync(tempDir, { recursive: true, force: true });
     }
 };
-
-/**
- * Atomically replace a destination directory with the contents of `src`.
- * Copies into a staging sibling directory first (same filesystem as `dest`),
- * then swaps it in with `rename`. This guarantees `dest` is never left in a
- * half-written state: on any failure during the copy, the original is
- * untouched and the staging dir is cleaned up.
- * @param {string} src source directory
- * @param {string} dest destination directory
- */
-const atomicReplaceDir = (src, dest) => {
-    const parent = path.dirname(dest);
-    const staging = path.join(parent, `.${path.basename(dest)}.tmp-${process.pid}-${Date.now()}`);
-    try {
-        fs.rmSync(staging, { recursive: true, force: true });
-        fs.cpSync(src, staging, { recursive: true });
-        // Swap: remove old, move staging into place. The window between these
-        // two calls is tiny; rename within a filesystem is atomic.
-        fs.rmSync(dest, { recursive: true, force: true });
-        fs.renameSync(staging, dest);
-    } catch (error) {
-        fs.rmSync(staging, { recursive: true, force: true });
-        throw error;
-    }
-};
-
-const isKitCodexHookGroup = (group) =>
-    Array.isArray(group?.hooks) &&
-    group.hooks.some((hook) =>
-        typeof hook?.command === 'string' &&
-        CODEX_HOOK_COMMAND_MARKERS.some((marker) => hook.command.includes(marker))
-    );
-
-const isKitClaudeHookGroup = (group) =>
-    Array.isArray(group?.hooks) &&
-    group.hooks.some((hook) =>
-        typeof hook?.command === 'string' &&
-        CLAUDE_HOOK_COMMAND_MARKERS.some((marker) => hook.command.includes(marker))
-    );
-
-const mergeCodexHooksFile = (src, dest) => {
-    const incoming = JSON.parse(fs.readFileSync(src, 'utf8'));
-    const existing = fs.existsSync(dest)
-        ? JSON.parse(fs.readFileSync(dest, 'utf8'))
-        : {};
-    const merged = { ...existing, hooks: { ...(existing.hooks || {}) } };
-
-    for (const [event, incomingGroups] of Object.entries(incoming.hooks || {})) {
-        const existingGroups = Array.isArray(merged.hooks[event])
-            ? merged.hooks[event].filter((group) => !isKitCodexHookGroup(group))
-            : [];
-        merged.hooks[event] = [...existingGroups, ...incomingGroups];
-    }
-
-    fs.mkdirSync(path.dirname(dest), { recursive: true });
-    fs.writeFileSync(dest, `${JSON.stringify(merged, null, 2)}\n`);
-};
-
-const mergeClaudeSettingsFile = (src, dest) => {
-    const incoming = JSON.parse(fs.readFileSync(src, 'utf8'));
-    const existing = fs.existsSync(dest)
-        ? JSON.parse(fs.readFileSync(dest, 'utf8'))
-        : {};
-    const merged = { ...existing, hooks: { ...(existing.hooks || {}) } };
-
-    for (const [event, incomingGroups] of Object.entries(incoming.hooks || {})) {
-        const existingGroups = Array.isArray(merged.hooks[event])
-            ? merged.hooks[event].filter((group) => !isKitClaudeHookGroup(group))
-            : [];
-        merged.hooks[event] = [...existingGroups, ...incomingGroups];
-    }
-
-    fs.mkdirSync(path.dirname(dest), { recursive: true });
-    fs.writeFileSync(dest, `${JSON.stringify(merged, null, 2)}\n`);
-};
-
-
-const extractInstructionBlocks = (text) =>
-    [...text.matchAll(INSTRUCTION_BLOCK_PATTERN)].map((match) => ({
-        name: match[1],
-        text: match[0],
-    }));
-
-const mergeInstructionBlocks = (incomingText, existingText) => {
-    const incomingBlocks = extractInstructionBlocks(incomingText);
-
-    // If incomingText has no blocks, fall back to old behavior of appending existing blocks to incomingText
-    if (incomingBlocks.length === 0) {
-        const existingBlocks = extractInstructionBlocks(existingText);
-        if (existingBlocks.length === 0) {
-            return incomingText;
-        }
-        const appendedBlocks = existingBlocks.map((block) => block.text);
-        return `${incomingText.trimEnd()}\n\n${appendedBlocks.join('\n\n')}\n`;
-    }
-
-    // New behavior: existingText (project-owned file) is the base.
-    let mergedText = existingText;
-    const existingBlocks = extractInstructionBlocks(existingText);
-    const existingBlockNames = new Set(existingBlocks.map((block) => block.name));
-
-    for (const block of incomingBlocks) {
-        if (existingBlockNames.has(block.name)) {
-            const blockPattern = new RegExp(
-                `^<!--\\s*${block.name}:BEGIN\\s*-->[\\s\\S]*?^<!--\\s*${block.name}:END\\s*-->`,
-                'm',
-            );
-            mergedText = mergedText.replace(blockPattern, block.text);
-        } else {
-            mergedText = `${mergedText.trimEnd()}\n\n${block.text}\n`;
-        }
-    }
-
-    return mergedText;
-};
-
-const mergeRootInstructionBlock = (src, dest, overwriteRootInstruction) => {
-    if (!fs.existsSync(src)) {
-        return;
-    }
-    if (overwriteRootInstruction || !fs.existsSync(dest)) {
-        fs.copyFileSync(src, dest);
-        return;
-    }
-    const incomingText = fs.readFileSync(src, 'utf8');
-    const existingText = fs.readFileSync(dest, 'utf8');
-    fs.writeFileSync(dest, mergeInstructionBlocks(incomingText, existingText));
-};
-
-const mergeWorkspaceHooks = (src, dest, targetName) => {
-    if (!fs.existsSync(src)) {
-        return;
-    }
-    if (targetName === 'codex') {
-        mergeCodexHooksFile(src, dest);
-    } else if (targetName === 'claude') {
-        mergeClaudeSettingsFile(src, dest);
-    } else if (targetName === 'gemini') {
-        const existing = fs.existsSync(dest)
-            ? JSON.parse(fs.readFileSync(dest, 'utf8'))
-            : {};
-        const incoming = JSON.parse(fs.readFileSync(src, 'utf8'));
-
-        const merged = {
-            ...existing,
-            ...incoming,
-            [KIT_GEMINI_HOOK_KEY]: incoming[KIT_GEMINI_HOOK_KEY],
-        };
-        fs.mkdirSync(path.dirname(dest), { recursive: true });
-        fs.writeFileSync(dest, `${JSON.stringify(merged, null, 2)}\n`);
-    }
-};
-
-const copySharedFile = (src, dest) => {
-    fs.mkdirSync(path.dirname(dest), { recursive: true });
-    if (fs.existsSync(dest)) {
-        const srcBuf = fs.readFileSync(src);
-        const destBuf = fs.readFileSync(dest);
-        if (!srcBuf.equals(destBuf)) {
-            console.log(chalk.yellow(`⚠️  Preserved manually modified shared file: ${path.basename(dest)}`));
-            return;
-        }
-    }
-    fs.copyFileSync(src, dest);
-};
-
-const mergeSharedAssets = (srcDir, destDir) => {
-    const srcScripts = path.join(srcDir, 'scripts');
-    const destScripts = path.join(destDir, 'scripts');
-    if (fs.existsSync(srcScripts)) {
-        const entries = fs.readdirSync(srcScripts, { recursive: true, withFileTypes: true });
-        for (const entry of entries) {
-            const relPath = path.relative(srcScripts, path.join(entry.parentPath || entry.path, entry.name));
-            const srcFile = path.join(srcScripts, relPath);
-            const destFile = path.join(destScripts, relPath);
-            if (entry.isFile()) {
-                copySharedFile(srcFile, destFile);
-            }
-        }
-    }
-
-    const srcShared = path.join(srcDir, 'shared');
-    const destShared = path.join(destDir, 'shared');
-    if (fs.existsSync(srcShared)) {
-        const entries = fs.readdirSync(srcShared, { recursive: true, withFileTypes: true });
-        for (const entry of entries) {
-            const relPath = path.relative(srcShared, path.join(entry.parentPath || entry.path, entry.name));
-            const srcFile = path.join(srcShared, relPath);
-            const destFile = path.join(destShared, relPath);
-            if (entry.isFile()) {
-                copySharedFile(srcFile, destFile);
-            }
-        }
-    }
-};
-
-const installCodexRuntime = (templatePath, projectDir, overwriteRootInstruction) => {
-    const srcAgents = path.join(templatePath, 'AGENTS.md');
-    const destAgents = path.join(projectDir, 'AGENTS.md');
-    mergeRootInstructionBlock(srcAgents, destAgents, overwriteRootInstruction);
-
-    const srcHooks = path.join(templatePath, CODEX_CONFIG_FOLDER, 'hooks.json');
-    const destHooks = path.join(projectDir, CODEX_CONFIG_FOLDER, 'hooks.json');
-    mergeWorkspaceHooks(srcHooks, destHooks, 'codex');
-
-    const srcSkills = path.join(templatePath, INSTALL_FOLDER, 'skills');
-    const destSkills = path.join(projectDir, INSTALL_FOLDER, 'skills');
-    if (fs.existsSync(srcSkills)) {
-        atomicReplaceDir(srcSkills, destSkills);
-    }
-
-    mergeSharedAssets(path.join(templatePath, INSTALL_FOLDER), path.join(projectDir, INSTALL_FOLDER));
-};
-
-const installGeminiRuntime = (templatePath, projectDir, overwriteRootInstruction) => {
-    const srcGemini = path.join(templatePath, 'GEMINI.md');
-    const destGemini = path.join(projectDir, 'GEMINI.md');
-    mergeRootInstructionBlock(srcGemini, destGemini, overwriteRootInstruction);
-
-    const srcHooks = path.join(templatePath, INSTALL_FOLDER, 'hooks.json');
-    const destHooks = path.join(projectDir, INSTALL_FOLDER, 'hooks.json');
-    mergeWorkspaceHooks(srcHooks, destHooks, 'gemini');
-
-    const srcGeminiDir = path.join(templatePath, INSTALL_FOLDER, 'gemini');
-    const destGeminiDir = path.join(projectDir, INSTALL_FOLDER, 'gemini');
-    if (fs.existsSync(srcGeminiDir)) {
-        atomicReplaceDir(srcGeminiDir, destGeminiDir);
-    }
-
-    mergeSharedAssets(path.join(templatePath, INSTALL_FOLDER), path.join(projectDir, INSTALL_FOLDER));
-};
-
-const installClaudeRuntime = (templatePath, projectDir, overwriteRootInstruction) => {
-    const srcClaude = path.join(templatePath, 'CLAUDE.md');
-    const destClaude = path.join(projectDir, 'CLAUDE.md');
-    mergeRootInstructionBlock(srcClaude, destClaude, overwriteRootInstruction);
-
-    const srcSettings = path.join(templatePath, CLAUDE_CONFIG_FOLDER, 'settings.json');
-    const destSettings = path.join(projectDir, CLAUDE_CONFIG_FOLDER, 'settings.json');
-    mergeWorkspaceHooks(srcSettings, destSettings, 'claude');
-
-    const srcClaudeDir = path.join(templatePath, INSTALL_FOLDER, 'claude');
-    const destClaudeDir = path.join(projectDir, INSTALL_FOLDER, 'claude');
-    if (fs.existsSync(srcClaudeDir)) {
-        atomicReplaceDir(srcClaudeDir, destClaudeDir);
-    }
-
-    mergeSharedAssets(path.join(templatePath, INSTALL_FOLDER), path.join(projectDir, INSTALL_FOLDER));
-};
-
-
 
 /**
  * Download the unified templates folder from the repository.
@@ -412,14 +149,15 @@ const initCommand = async (options) => {
             }
         }
 
-        installCodexRuntime(templatePath, projectDir, !!options.force);
-        installGeminiRuntime(templatePath, projectDir, !!options.force);
-        installClaudeRuntime(templatePath, projectDir, !!options.force);
+        installIntegrations(templatePath, projectDir);
+        const srcSkills = path.join(templatePath, INSTALL_FOLDER, 'skills');
+        if (fs.existsSync(srcSkills)) {
+            fs.cpSync(srcSkills, path.join(projectDir, INSTALL_FOLDER, 'skills'), { recursive: true, force: true });
+        }
 
         cleanup(templatePath);
 
-        const harnessExists = fs.existsSync(path.join(projectDir, 'docs', 'HARNESS.md')) ||
-                              fs.existsSync(path.join(projectDir, 'scripts', 'bin', 'harness-cli'));
+        const harness = detectHarness(projectDir);
 
         const configContent = {
             version: '2.0.0',
@@ -428,10 +166,7 @@ const initCommand = async (options) => {
             paths: {
                 installDir: INSTALL_FOLDER,
             },
-            harness: {
-                enabled: harnessExists,
-                source: harnessExists ? 'repository-harness' : 'standalone',
-            },
+            harness,
             features: {
                 backlog: true,
                 guardHooks: true,
@@ -484,14 +219,15 @@ const updateCommand = async (options) => {
         templatePath = await downloadTemplates(ref);
         spinner.stop();
 
-        installCodexRuntime(templatePath, projectDir, false);
-        installGeminiRuntime(templatePath, projectDir, false);
-        installClaudeRuntime(templatePath, projectDir, false);
+        installIntegrations(templatePath, projectDir);
+        const srcSkills = path.join(templatePath, INSTALL_FOLDER, 'skills');
+        if (fs.existsSync(srcSkills)) {
+            fs.cpSync(srcSkills, path.join(projectDir, INSTALL_FOLDER, 'skills'), { recursive: true, force: true });
+        }
 
         cleanup(templatePath);
 
-        const harnessExists = fs.existsSync(path.join(projectDir, 'docs', 'HARNESS.md')) ||
-                              fs.existsSync(path.join(projectDir, 'scripts', 'bin', 'harness-cli'));
+        const harness = detectHarness(projectDir);
 
         const updatedConfig = {
             version: '2.0.0',
@@ -500,10 +236,7 @@ const updateCommand = async (options) => {
             paths: {
                 installDir: existingConfig.paths?.installDir || INSTALL_FOLDER,
             },
-            harness: {
-                enabled: harnessExists,
-                source: harnessExists ? 'repository-harness' : 'standalone',
-            },
+            harness,
             features: {
                 backlog: existingConfig.features?.backlog !== undefined ? existingConfig.features.backlog : true,
                 guardHooks: existingConfig.features?.guardHooks !== undefined ? existingConfig.features.guardHooks : true,
@@ -534,13 +267,12 @@ const statusCommand = (options) => {
     if (configExists) {
         try {
             config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
-            
-            const harnessExists = fs.existsSync(path.join(projectDir, 'docs', 'HARNESS.md')) ||
-                                  fs.existsSync(path.join(projectDir, 'scripts', 'bin', 'harness-cli'));
-            if (config && config.harness && config.harness.enabled !== harnessExists) {
-                config.harness.enabled = harnessExists;
-                config.harness.source = harnessExists ? 'repository-harness' : 'standalone';
-                
+
+            const harness = detectHarness(projectDir);
+            if (config && config.harness && config.harness.enabled !== harness.enabled) {
+                config.harness.enabled = harness.enabled;
+                config.harness.source = harness.source;
+
                 delete config.target;
                 delete config.targets;
 
@@ -632,8 +364,7 @@ const repairCommand = async (options) => {
 
     if (!fs.existsSync(configPath)) {
         console.log(chalk.yellow('⚠️  Configuration file missing. Re-creating config and repairing...'));
-        const harnessExists = fs.existsSync(path.join(projectDir, 'docs', 'HARNESS.md')) ||
-                              fs.existsSync(path.join(projectDir, 'scripts', 'bin', 'harness-cli'));
+        const harness = detectHarness(projectDir);
         const configContent = {
             version: '2.0.0',
             ref: 'main',
@@ -641,10 +372,7 @@ const repairCommand = async (options) => {
             paths: {
                 installDir: INSTALL_FOLDER,
             },
-            harness: {
-                enabled: harnessExists,
-                source: harnessExists ? 'repository-harness' : 'standalone',
-            },
+            harness,
             features: {
                 backlog: true,
                 guardHooks: true,
@@ -672,9 +400,11 @@ const repairCommand = async (options) => {
         templatePath = await downloadTemplates(ref);
         spinner.stop();
 
-        installCodexRuntime(templatePath, projectDir, false);
-        installGeminiRuntime(templatePath, projectDir, false);
-        installClaudeRuntime(templatePath, projectDir, false);
+        installIntegrations(templatePath, projectDir);
+        const srcSkills = path.join(templatePath, INSTALL_FOLDER, 'skills');
+        if (fs.existsSync(srcSkills)) {
+            fs.cpSync(srcSkills, path.join(projectDir, INSTALL_FOLDER, 'skills'), { recursive: true, force: true });
+        }
 
         cleanup(templatePath);
 
@@ -737,13 +467,3 @@ if (isDirectCliInvocation()) {
         program.outputHelp();
     }
 }
-
-export {
-    installCodexRuntime,
-    installGeminiRuntime,
-    installClaudeRuntime,
-    copySharedFile,
-    mergeSharedAssets,
-    mergeRootInstructionBlock,
-    mergeWorkspaceHooks
-};

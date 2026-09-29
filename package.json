@@ -9,6 +9,7 @@
     "check:shared-hooks": "node scripts/sync-shared-hooks.mjs --check",
     "test:hooks": "python3 scripts/test-hooks.py",
     "test:installer": "node scripts/test-installer.mjs",
+    "test:unit": "node --test 'test/*.test.js'",
     "check:templates": "npm run check:shared-hooks && node scripts/check-template-consistency.mjs",
     "verify": "node --check bin/index.js && npm run test:installer && npm run test:hooks && npm run check:templates"
   },
