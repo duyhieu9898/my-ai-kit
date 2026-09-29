@@ -1,0 +1,6 @@
+{
+  "formatVersion": 1,
+  "profiles": {
+    "starter": ["clean-code", "debugger", "verify-changes"]
+  }
+}

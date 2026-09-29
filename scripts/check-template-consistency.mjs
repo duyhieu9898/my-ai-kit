@@ -281,6 +281,22 @@ if (exists(codexHarnessGuardPath) && exists(geminiHarnessGuardPath) && exists(cl
   );
 }
 checkSkillFrontmatter("codex", "templates/.agents/skills", true);
+const kitRegistry = JSON.parse(readText("templates/kit.json"));
+const codexSkillNames = new Set(immediateDirectories("templates/.agents/skills"));
+record(
+  "templates/kit.json declares formatVersion 1",
+  kitRegistry.formatVersion === 1,
+  `formatVersion=${kitRegistry.formatVersion}`,
+);
+for (const [profileName, skillNames] of Object.entries(kitRegistry.profiles ?? {})) {
+  for (const skillName of skillNames) {
+    record(
+      `kit.json profile ${profileName} references existing skill ${skillName}`,
+      codexSkillNames.has(skillName),
+      skillName,
+    );
+  }
+}
 for (const markdownPath of templateMarkdownPaths) {
   checkRelativeLinks(markdownPath);
 }
