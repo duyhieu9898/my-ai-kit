@@ -72,3 +72,36 @@ test('link mode: correct link is unchanged, copied dir is updated', () => {
     const managedSkills = { a: {}, b: copyIn('b') };
     assert.deepEqual(actions(plan({ targetSkills: ['a', 'b'], managedSkills, mode: 'link' })), { a: 'unchanged', b: 'update' });
 });
+
+test('modified managed skill that already equals the source converges to unchanged', () => {
+    const { kit, projectSkillsDir, copyIn, plan } = setup();
+    const managedSkills = { a: copyIn('a') };
+    fs.appendFileSync(path.join(projectSkillsDir, 'a', 'SKILL.md'), 'fix\n');
+    fs.appendFileSync(path.join(kit.skillsDir, 'a', 'SKILL.md'), 'fix\n');
+    assert.deepEqual(actions(plan({ targetSkills: ['a'], managedSkills })), { a: 'unchanged' });
+    assert.deepEqual(actions(plan({ targetSkills: [], managedSkills })), { a: 'skip-modified' });
+});
+
+test('link mode: a link replaced by an edited directory is skipped unless forced', () => {
+    const { kit, projectSkillsDir, plan } = setup();
+    fs.cpSync(path.join(kit.skillsDir, 'a'), path.join(projectSkillsDir, 'a'), { recursive: true });
+    fs.appendFileSync(path.join(projectSkillsDir, 'a', 'SKILL.md'), 'fork\n');
+    const managedSkills = { a: {} };
+    assert.deepEqual(actions(plan({ targetSkills: ['a'], managedSkills, mode: 'link' })), { a: 'skip-modified' });
+    assert.deepEqual(actions(plan({ targetSkills: [], managedSkills, mode: 'link' })), { a: 'skip-modified' });
+    assert.deepEqual(actions(plan({ targetSkills: ['a'], managedSkills, mode: 'link', force: true })), { a: 'update' });
+});
+
+test('link mode: a link replaced by an identical directory is updated', () => {
+    const { kit, projectSkillsDir, plan } = setup();
+    fs.cpSync(path.join(kit.skillsDir, 'a'), path.join(projectSkillsDir, 'a'), { recursive: true });
+    assert.deepEqual(actions(plan({ targetSkills: ['a'], managedSkills: { a: {} }, mode: 'link' })), { a: 'update' });
+});
+
+test('managed skill that vanished from the source is removed without reading the source', () => {
+    const { kit, copyIn, plan } = setup();
+    const managedSkills = { a: copyIn('a') };
+    fs.rmSync(path.join(kit.skillsDir, 'a'), { recursive: true });
+    assert.deepEqual(actions(plan({ targetSkills: [], managedSkills })), { a: 'remove' });
+    assert.deepEqual(actions(plan({ targetSkills: [], managedSkills: { a: {} }, mode: 'link' })), { a: 'skip-modified' });
+});
