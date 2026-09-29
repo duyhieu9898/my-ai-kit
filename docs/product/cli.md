@@ -7,8 +7,8 @@
 - Install skills (all by default, or a named profile, or individual skills)
   plus hooks and root instructions for Codex, Gemini Antigravity, and Claude
   Code, side-by-side.
-- Write and maintain `.ai-kit.json` (source, selection, `managedSkills` with
-  content hashes).
+- Write and maintain `.ai-kit.json` (source, selection, and `managedSkills`
+  and `managedFiles` with content hashes).
 - Merge a kit-owned `KIT` block into each root instruction file; the rest of
   the file is left untouched.
 - A project-owned skill directory whose name collides with a selected kit
@@ -40,6 +40,8 @@
   Antigravity, and Claude Code.
 - Skip a managed skill that was modified locally unless `--force` is
   supplied; never touch a skill that is not in `managedSkills`.
+- Update shared `.agents/` scripts and toolkit files that still match their
+  `managedFiles` hash; keep a locally modified one unless `--force`.
 - Drop skills and profiles that no longer exist in the kit from the selection
   with a warning, and remove their managed copies (a locally modified copy is
   kept).

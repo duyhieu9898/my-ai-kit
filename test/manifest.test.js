@@ -28,7 +28,14 @@ test('legacy manifest migrates to select all with unknown managed skills', () =>
     assert.deepEqual(manifest.source, { type: 'github', ref: 'v2' });
     assert.equal(manifest.selection.all, true);
     assert.equal(manifest.managedSkills, null);
+    assert.equal(manifest.managedFiles, null);
     assert.equal(manifest.features.backlog, false);
+});
+
+test('a formatVersion 1 manifest without managedFiles asks to adopt shared files', () => {
+    const projectDir = makeProject();
+    fs.writeFileSync(path.join(projectDir, '.ai-kit.json'), JSON.stringify({ formatVersion: 1, managedSkills: {} }));
+    assert.equal(readManifest(projectDir).managedFiles, null);
 });
 
 test('unparseable manifest fails with the file path', () => {

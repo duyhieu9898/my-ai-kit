@@ -79,6 +79,11 @@ config files and per-skill actions (add/keep/update/skip/conflict) for
 - Claude Code `.claude/settings.json` hook groups are merged into
   `project/.claude/settings.json`; unrelated Claude settings and custom hooks
   are preserved.
+- Shared files under `.agents/scripts/`, `.agents/shared/`, and the top-level
+  toolkit files are tracked in the manifest's `managedFiles` with content
+  hashes. A file still matching its recorded hash is updated; a locally
+  modified one is kept unless `--force`. A manifest without `managedFiles`
+  adopts the existing files and updates them.
 
 ## Installation Boundaries
 
