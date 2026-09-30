@@ -76,7 +76,7 @@ Tùy chọn chung: `--path <dir>`, `--ref <ref>`, `--source <dir>`, `--link`,
 > giảm rủi ro supply-chain, ghim theo git ref bằng `--ref`:
 >
 > ```bash
-> npx -y hieund-ai-kit install --ref v3.0.0
+> npx -y hieund-ai-kit install --ref v4.0.0
 > npx -y hieund-ai-kit update --ref <commit-sha>
 > ```
 
@@ -86,6 +86,59 @@ Ví dụ trong thư mục project:
 npx -y hieund-ai-kit install
 npx -y hieund-ai-kit status
 ```
+
+## Profile
+
+Kit có 26 skill. Cài theo profile để agent chỉ thấy các skill cần cho project;
+description của mọi skill đã cài đều được nạp vào context, nên cài thừa vừa tốn
+token vừa dễ làm agent chọn nhầm skill.
+
+| Profile | Skill |
+|:---|:---|
+| `core` | `clean-code`, `verify-changes`, `debugger`, `explorer-agent`, `lint-and-validate`, `code-review-checklist`, `security-auditor` |
+| `web` | `frontend-design`, `web-design-guidelines`, `nextjs-react-expert`, `react-refactor-patterns`, `performance-profiling` |
+| `backend` | `backend-specialist`, `api-patterns`, `database-design` |
+| `testing` | `testing-patterns`, `webapp-testing` |
+| `planning` | `plan-writing`, `project-planner`, `product-manager`, `architecture` |
+| `growth` | `seo-fundamentals`, `i18n-localization` |
+| `ops` | `devops-engineer` |
+| `mcp` | `mcp-builder` |
+| `docs` | `documentation-writer` |
+| `starter` | `clean-code`, `debugger`, `verify-changes` |
+
+Ví dụ:
+
+```bash
+# Fullstack Next.js + Node (17 skill)
+npx -y hieund-ai-kit install --profile core,web,backend,testing
+# Landing page / marketing (14 skill)
+npx -y hieund-ai-kit install --profile core,web,growth
+# MCP server (13 skill)
+npx -y hieund-ai-kit install --profile core,backend,mcp,testing
+```
+
+`install` không kèm profile hay tên skill sẽ cài toàn bộ 26 skill.
+
+## Nâng Cấp Từ 3.x
+
+Bản 4.0 gộp 43 skill thành 26. `update` tự gỡ các skill đã bỏ (kèm cảnh báo);
+bản bị sửa cục bộ thì được giữ lại. Nội dung của skill cũ nằm ở:
+
+| Skill cũ | Nay nằm trong |
+|:---|:---|
+| `test-engineer`, `tdd-workflow` | `testing-patterns` |
+| `qa-automation-engineer`, `playwright-pitfalls`, `playwright-pro-patterns` | `webapp-testing` |
+| `frontend-specialist`, `tailwind-patterns` | `frontend-design` |
+| `seo-specialist` | `seo-fundamentals` |
+| `performance-optimizer` | `performance-profiling` |
+| `nodejs-best-practices` | `backend-specialist` |
+| `database-architect` | `database-design` |
+| `simplify-code` | `clean-code` |
+| `code-archaeologist` | `explorer-agent` |
+| `brainstorming` | `product-manager` |
+| `python-patterns`, `app-builder`, `code-review-graph` | Bỏ, không có skill thay thế |
+
+Plan mặc định lưu ở `docs/PLAN-{task-slug}.md`, ADR ở `docs/decisions/`.
 
 ## Phát Triển Skill Với `--link`
 
@@ -160,6 +213,12 @@ templates/.agents/skills/<skill-name>/agents/openai.yaml
 templates/.agents/skills/<skill-name>/references/
 templates/.agents/skills/<skill-name>/scripts/
 ```
+
+Viết và review skill theo [`docs/skills/SKILL_STANDARD.md`](docs/skills/SKILL_STANDARD.md)
+và [`docs/skills/DESCRIPTION_GUIDE.md`](docs/skills/DESCRIPTION_GUIDE.md).
+`npm run check:templates` fail khi skill vi phạm chuẩn; dùng
+`node scripts/check-template-consistency.mjs --lenient` để chỉ in cảnh báo trong
+lúc đang sửa.
 
 Sau khi sửa template, push lên `main`; các project khác có thể cập nhật bằng:
 

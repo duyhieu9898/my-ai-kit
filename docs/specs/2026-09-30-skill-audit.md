@@ -1,7 +1,9 @@
 # Báo cáo audit skill và chuẩn viết skill mới
 
-Ngày: 2026-09-30. Trạng thái: **đề xuất, chờ duyệt**. Chưa skill nào bị sửa, xóa,
-và `templates/kit.json` chưa đổi.
+Ngày: 2026-09-30. Trạng thái: **đã thực hiện** (đợt 0–6, bản 4.0.0). Kit còn 26
+skill, tất cả qua `npm run check:templates` ở chế độ strict. Phần dưới giữ nguyên
+nội dung đề xuất lúc duyệt; kết quả thực tế có vài điểm khác, ví dụ
+`react_performance_checker.py` bị xóa thay vì sửa.
 
 Phạm vi: 43 skill trong `templates/.agents/skills/`. Đường dẫn dòng (`file:dòng`)
 tính từ thư mục skill, trừ khi ghi khác.

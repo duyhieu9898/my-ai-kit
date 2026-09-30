@@ -1,6 +1,15 @@
 {
   "formatVersion": 1,
   "profiles": {
+    "core": ["clean-code", "verify-changes", "debugger", "explorer-agent", "lint-and-validate", "code-review-checklist", "security-auditor"],
+    "web": ["frontend-design", "web-design-guidelines", "nextjs-react-expert", "react-refactor-patterns", "performance-profiling"],
+    "backend": ["backend-specialist", "api-patterns", "database-design"],
+    "testing": ["testing-patterns", "webapp-testing"],
+    "planning": ["plan-writing", "project-planner", "product-manager", "architecture"],
+    "growth": ["seo-fundamentals", "i18n-localization"],
+    "ops": ["devops-engineer"],
+    "mcp": ["mcp-builder"],
+    "docs": ["documentation-writer"],
     "starter": ["clean-code", "debugger", "verify-changes"]
   }
 }

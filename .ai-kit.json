@@ -39,7 +39,7 @@
     "web-design-guidelines": {},
     "webapp-testing": {}
   },
-  "installedAt": "2026-09-30T09:48:48.359Z",
+  "installedAt": "2026-09-30T10:19:57.855Z",
   "harness": {
     "enabled": true,
     "source": "repository-harness"
@@ -54,7 +54,7 @@
     ".agents/scripts/checklist.py": "sha256:3b66ad00a5496cd001a4ff9ee2a25d9637a5e9c35a17867fa4c5b32fed91d66d",
     ".agents/scripts/session_manager.py": "sha256:275e1af4c7f0ec378b0ffb98fce1068088702c602d7cd16ca3cb7f5d200e1ee2",
     ".agents/scripts/verify_all.py": "sha256:70bfa1d47e21edc9c320d169c3a747e5e695f14c50e008dc2ab27484422563b8",
-    ".agents/ARCHITECTURE.md": "sha256:ec5fe5a88ef7447fae6c240e4544242dc601fa6daa5b02028b897a5783bf1571",
+    ".agents/ARCHITECTURE.md": "sha256:eee160c3da5f34565d79e1bd19b39a0062777e5cd194e76bfa42cd93fde877c3",
     ".agents/ux_audit.json": "sha256:7468e8453200e680ced0339d9c412af1587d6f53d7464a4fa02142c5eafdf67f"
   }
 }
