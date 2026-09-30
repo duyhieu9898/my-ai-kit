@@ -148,20 +148,12 @@ product docs plus executable tests become the living contract.
 
 ## Skill Authoring And Validation
 
-Skills follow the open Agent Skills format first, then tool-specific toolkit
-contracts. Use `$skill-creator` when creating or substantially updating a Codex
-skill workflow; use the repository standards as the review and conversion
-contracts:
-
-- `CODEX_SKILL_STANDARD.md` for Codex skills under
-  `templates/.agents/skills/`.
-- `ANTIGRAVITY_SKILL_STANDARD.md` for Gemini Antigravity skills under
-  `templates/.agents/skills/`.
-
-When converting skills between tools or refactoring existing skills, preserve
-tool-specific metadata while keeping `SKILL.md` frontmatter compatible with
-the Agent Skills whitelist. Store custom tool metadata under `metadata`
-instead of adding new top-level frontmatter fields.
+Skills follow the open Agent Skills format and the kit standard in
+`docs/skills/SKILL_STANDARD.md` (ADR 0016). Descriptions follow
+`docs/skills/DESCRIPTION_GUIDE.md`. One `SKILL.md` under
+`templates/.agents/skills/` serves Claude Code, Codex, and Antigravity; keep
+frontmatter to `name` and `description`, and put Codex UI metadata in
+`agents/openai.yaml`.
 
 Use `skills-ref` as the upstream structural validator when it is available:
 

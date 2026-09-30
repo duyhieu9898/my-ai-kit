@@ -63,9 +63,8 @@
   conventions change.
 - Validate the narrowest affected skill or script before broad verification.
   For skill frontmatter and naming compatibility, run `skills-ref validate` on
-  affected skill directories, then apply `CODEX_SKILL_STANDARD.md` or
-  `ANTIGRAVITY_SKILL_STANDARD.md` for tool-specific quality and conversion
-  rules.
+  affected skill directories, then apply `docs/skills/SKILL_STANDARD.md` and
+  `docs/skills/DESCRIPTION_GUIDE.md`.
 
 ## External Backlog MCP
 

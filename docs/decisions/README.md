@@ -10,6 +10,7 @@ Project-specific accepted decisions:
 - `0010-proportional-change-verification.md`
 - `0011-scoped-clean-code-guidance.md`
 - `0015-single-skill-source-and-manifest-installer.md`
+- `0016-portable-skill-authoring-standard.md`
 
 The earlier `0001` through `0007` records describe the installed Harness
 framework itself.

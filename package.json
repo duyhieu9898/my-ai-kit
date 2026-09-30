@@ -20,6 +20,7 @@
     "bin",
     "lib",
     "scripts/check-template-consistency.mjs",
+    "scripts/skill-standard.mjs",
     "scripts/test-installer.mjs",
     "templates"
   ],

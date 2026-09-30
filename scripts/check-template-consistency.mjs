@@ -3,13 +3,16 @@
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
+import { lintSkill } from "./skill-standard.mjs";
 
 const args = process.argv.slice(2);
 const verbose = args.includes("--verbose");
-const rootArg = args.find((arg) => arg !== "--verbose") ?? ".";
+const strict = args.includes("--strict");
+const rootArg = args.find((arg) => !arg.startsWith("--")) ?? ".";
 const repoRoot = path.resolve(rootArg);
 
 const checks = [];
+const warnings = [];
 
 function readText(relativePath) {
   return fs.readFileSync(path.join(repoRoot, relativePath), "utf8");
@@ -73,53 +76,47 @@ function requireMatch(text, pattern, label) {
   return Number.parseInt(match[1], 10);
 }
 
-function readFrontmatter(relativePath) {
-  const text = readText(relativePath);
-  const match = text.match(/^---\n([\s\S]*?)\n---/);
-  if (!match) return null;
-  return match[1];
+function strayPaths(relativePath) {
+  const absolutePath = path.join(repoRoot, relativePath);
+  const entries = fs.readdirSync(absolutePath, { withFileTypes: true });
+  if (entries.length === 0) return [relativePath];
+
+  return entries
+    .filter((entry) => entry.isDirectory())
+    .flatMap((entry) => {
+      const child = path.join(relativePath, entry.name);
+      return entry.name === "__pycache__" ? [child] : strayPaths(child);
+    });
 }
 
-function frontmatterValue(frontmatter, key) {
-  const match = frontmatter.match(new RegExp(`^${key}:\\s*(.+)$`, "m"));
-  return match ? match[1].trim().replace(/^["']|["']$/g, "") : null;
-}
-
-function checkSkillFrontmatter(targetName, skillsPath, requireOpenAiYaml) {
-  const skillNames = immediateDirectories(skillsPath);
+function checkSkillStandard(targetName, skillsPath) {
+  const skillNames = new Set(immediateDirectories(skillsPath));
 
   for (const skillName of skillNames) {
-    const skillMd = `${skillsPath}/${skillName}/SKILL.md`;
-    const frontmatter = exists(skillMd) ? readFrontmatter(skillMd) : null;
+    const skillDir = `${skillsPath}/${skillName}`;
+    const skillMd = `${skillDir}/SKILL.md`;
+    const openAiYamlPath = `${skillDir}/agents/openai.yaml`;
+    const findings = lintSkill({
+      name: skillName,
+      skillMd: exists(skillMd) ? readText(skillMd) : "",
+      openAiYaml: exists(openAiYamlPath) ? readText(openAiYamlPath) : null,
+      skillNames,
+      strayPaths: strayPaths(skillDir).filter((stray) => stray !== skillDir),
+    });
 
-    record(
-      `${targetName}:${skillName} has SKILL.md frontmatter`,
-      Boolean(frontmatter),
-      skillMd,
-    );
-
-    if (!frontmatter) continue;
-
-    const declaredName = frontmatterValue(frontmatter, "name");
-    record(
-      `${targetName}:${skillName} frontmatter name matches folder`,
-      declaredName === skillName,
-      `expected ${skillName}, got ${declaredName ?? "missing"}`,
-    );
-
-    record(
-      `${targetName}:${skillName} has description`,
-      /^description:/m.test(frontmatter),
-      skillMd,
-    );
-
-    if (requireOpenAiYaml) {
-      record(
-        `${targetName}:${skillName} has agents/openai.yaml`,
-        exists(`${skillsPath}/${skillName}/agents/openai.yaml`),
-        `${skillsPath}/${skillName}/agents/openai.yaml`,
-      );
+    for (const finding of findings) {
+      const name = `${targetName}:${skillName} ${finding.rule}`;
+      if (finding.level === "error") {
+        record(name, false, finding.detail || skillMd);
+      } else {
+        warnings.push({ name, detail: finding.detail });
+      }
     }
+    record(
+      `${targetName}:${skillName} passes spec-level skill checks`,
+      findings.every((finding) => finding.level !== "error"),
+      skillMd,
+    );
   }
 }
 
@@ -280,7 +277,7 @@ if (exists(codexHarnessGuardPath) && exists(geminiHarnessGuardPath) && exists(cl
     `${codexHarnessGuardPath}, ${geminiHarnessGuardPath}, ${claudeHarnessGuardPath}`,
   );
 }
-checkSkillFrontmatter("codex", "templates/.agents/skills", true);
+checkSkillStandard("codex", "templates/.agents/skills");
 const kitRegistry = JSON.parse(readText("templates/kit.json"));
 const codexSkillNames = new Set(immediateDirectories("templates/.agents/skills"));
 record(
@@ -340,6 +337,9 @@ record(
     !planWriting.includes("Phase X"),
   planWritingPath,
 );
+if (strict) {
+  for (const warning of warnings) record(warning.name, false, warning.detail);
+}
 const failed = checks.filter((check) => !check.passed);
 
 for (const check of checks) {
@@ -349,6 +349,24 @@ for (const check of checks) {
   const message = `${status} ${check.name}${check.detail ? ` (${check.detail})` : ""}`;
   const output = check.passed ? console.log : console.error;
   output(message);
+}
+
+if (!strict && warnings.length > 0) {
+  if (verbose) {
+    for (const warning of warnings) {
+      console.warn(`warn ${warning.name}${warning.detail ? ` (${warning.detail})` : ""}`);
+    }
+  }
+  const byRule = new Map();
+  for (const warning of warnings) {
+    const rule = warning.name.replace(/^\S+ /, "");
+    byRule.set(rule, (byRule.get(rule) ?? 0) + 1);
+  }
+  console.warn(`Skill standard warnings: ${warnings.length} (see docs/skills/SKILL_STANDARD.md)`);
+  for (const [rule, count] of [...byRule].sort((a, b) => b[1] - a[1])) {
+    console.warn(`  ${String(count).padStart(3)}  ${rule}`);
+  }
+  if (!verbose) console.warn("  Run with --verbose to list them, or --strict to fail on them.");
 }
 
 if (failed.length > 0) {
