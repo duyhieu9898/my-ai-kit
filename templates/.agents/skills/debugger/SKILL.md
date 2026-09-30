@@ -29,7 +29,7 @@ allowed-tools:
 | Skill | Relationship | When to Use Together |
 |:---|:---|:---|
 | [`testing-patterns`](../testing-patterns/SKILL.md) | Regression and reproduction tests | When a bug fix needs test coverage |
-| [`performance-optimizer`](../performance-optimizer/SKILL.md) | Profiling and performance diagnosis | When symptoms involve latency, memory, or throughput |
+| [`performance-profiling`](../performance-profiling/SKILL.md) | Profiling and performance diagnosis | When symptoms involve latency, memory, or throughput |
 | [`backend-specialist`](../backend-specialist/SKILL.md) | Server-side root-cause context | When errors involve APIs, services, or data flow |
 | [`devops-engineer`](../devops-engineer/SKILL.md) | Production incident response | When bugs affect deployments, servers, or live operations |
 

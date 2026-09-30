@@ -64,7 +64,7 @@ Quick-start scaffolding for new projects. **Read the matching template only!**
 | Skill | Role |
 |:---|:---|
 | [`project-planner`](../project-planner/SKILL.md) | Task breakdown, dependency graph |
-| [`frontend-specialist`](../frontend-specialist/SKILL.md) | UI components, pages |
+| [`frontend-design`](../frontend-design/SKILL.md) | UI theming and styling |
 | [`backend-specialist`](../backend-specialist/SKILL.md) | API, business logic |
 | [`database-architect`](../database-architect/SKILL.md) | Schema, migrations |
 | [`devops-engineer`](../devops-engineer/SKILL.md) | Deployment, preview |
@@ -95,7 +95,7 @@ When orchestrated to scaffold a new full-stack application from scratch, follow 
 
 ### Step 5: Coordinate Multi-Agent Work
 1. Breakdown complex development tasks into distinct, modular assignments.
-2. Hand off development chunks to specialized agents (`frontend-specialist`, `backend-specialist`, `database-architect`, `devops-engineer`) using the sequencing pipeline in [references/agent-coordination.md](references/agent-coordination.md).
+2. Hand off development chunks to specialized agents (`frontend-design`, `backend-specialist`, `database-architect`, `devops-engineer`) using the sequencing pipeline in [references/agent-coordination.md](references/agent-coordination.md).
 3. Integrate and review agent code deliverables to ensure cross-module compatibility.
 
 ---

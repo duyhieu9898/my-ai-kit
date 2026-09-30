@@ -391,7 +391,7 @@ class UXAuditor:
             if subheadings == 0:
                 self.warnings.append(f"[Typography] {filename}: Long content without subheadings. Add h2/h3 to break up text.")
 
-        # --- 3. VISUAL EFFECTS (visual-effects.md) ---
+        # --- 3. VISUAL EFFECTS ---
 
         # Glassmorphism Check
         if 'backdrop-filter' in content or 'blur(' in content:
@@ -506,7 +506,7 @@ class UXAuditor:
         if has_long_text and effect_count == 0:
             self.warnings.append(f"[Visual] {filename}: Flat design with no depth. Consider shadows or subtle gradients for hierarchy.")
 
-        # --- 4. COLOR SYSTEM (color-system.md) ---
+        # --- 4. COLOR SYSTEM ---
 
         # 4.1 Banned colors check (customizable via configuration)
         banned_colors = self.config.get("banned_colors", [])
@@ -560,13 +560,7 @@ class UXAuditor:
         if has_blue and has_food_context:
             self.warnings.append(f"[Color] {filename}: Blue color in food context. Blue suppresses appetite; consider warm colors (red, orange, yellow).")
 
-        # 4.7 HSL-Based Palette Detection
-        # Check if using HSL for palette (recommended in color-system.md)
-        has_color_vars = bool(re.search(r'--color-|color-|primary-|secondary-', content))
-        if has_color_vars and not re.search(r'hsl\(', content):
-            self.warnings.append(f"[Color] {filename}: Color variables without HSL. Consider HSL for easier palette adjustment (Hue, Saturation, Lightness).")
-
-        # --- 5. ANIMATION GUIDE (animation-guide.md) ---
+        # --- 5. ANIMATION GUIDE ---
 
         # 5.1 Duration Appropriateness
         # Check for excessively long or short animations
@@ -614,7 +608,7 @@ class UXAuditor:
             if re.search(r'onScroll.*[^\w](width|height|top|left)', content):
                 self.warnings.append(f"[Animation] {filename}: Scroll handler animating layout properties. Use transform/opacity for 60fps.")
 
-        # --- 6. MOTION GRAPHICS (motion-graphics.md) ---
+        # --- 6. MOTION GRAPHICS ---
 
         # 6.1 Lottie Animation Checks
         has_lottie = bool(re.search(r'lottie|Lottie|@lottie-react', content))

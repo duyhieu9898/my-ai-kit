@@ -32,7 +32,7 @@ allowed-tools:
 | Need | Skill |
 |:---|:---|
 | Node.js backend development paradigms | [`nodejs-best-practices`](../nodejs-best-practices/SKILL.md) |
-| CPU profiling and asynchronous performance tuning | [`performance-optimizer`](../performance-optimizer/SKILL.md) |
+| CPU profiling and asynchronous performance tuning | [`performance-profiling`](../performance-profiling/SKILL.md) |
 
 ---
 

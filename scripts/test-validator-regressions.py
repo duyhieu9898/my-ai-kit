@@ -611,6 +611,23 @@ class ValidatorRegressionTests(unittest.TestCase):
                 self.assertTrue(any("Missing img alt text" in issue for issue in report["issues"]))
                 self.assertFalse(any("gradient" in warning.lower() for warning in report["warnings"]))
 
+    def test_ux_audit_accepts_oklch_tokens(self):
+        for target in TARGETS:
+            with self.subTest(target=target), tempfile.TemporaryDirectory() as temp_dir:
+                project = Path(temp_dir)
+                stylesheet = project / "globals.css"
+                stylesheet.write_text(
+                    ":root { --primary: oklch(0.21 0.03 264); }\n"
+                    "@theme inline { --color-primary: var(--primary); }\n",
+                    encoding="utf-8",
+                )
+
+                module = load_module(target, "ux_audit_oklch", "frontend-design/scripts/ux_audit.py")
+                auditor = module.UXAuditor(project)
+                auditor.audit_file(str(stylesheet))
+
+                self.assertFalse(any("HSL" in warning for warning in auditor.warnings))
+
     def test_security_scan_flags_shell_command_execution(self):
         for target in TARGETS:
             with self.subTest(target=target), tempfile.TemporaryDirectory() as temp_dir:
@@ -629,6 +646,44 @@ class ValidatorRegressionTests(unittest.TestCase):
 
                 self.assertIn(2, flagged_lines)
                 self.assertIn(3, flagged_lines)
+
+    def test_lighthouse_summary_reports_lab_metrics_and_top_opportunities(self):
+        for target in TARGETS:
+            with self.subTest(target=target):
+                module = load_module(target, "lighthouse", "performance-profiling/scripts/lighthouse_audit.py")
+                report = {
+                    "categories": {
+                        "performance": {"score": 0.42},
+                        "accessibility": {"score": None},
+                    },
+                    "audits": {
+                        "largest-contentful-paint": {"numericValue": 4200.4, "displayValue": "4.2 s"},
+                        "total-blocking-time": {"numericValue": 610, "displayValue": "610 ms"},
+                        "cumulative-layout-shift": {"numericValue": 0.31, "displayValue": "0.31"},
+                        "unused-javascript": {
+                            "title": "Reduce unused JavaScript",
+                            "details": {"type": "opportunity", "overallSavingsMs": 900},
+                        },
+                        "render-blocking-resources": {
+                            "title": "Eliminate render-blocking resources",
+                            "details": {"type": "opportunity", "overallSavingsMs": 300},
+                        },
+                        "uses-long-cache-ttl": {"title": "Cache", "details": {"type": "table"}},
+                    },
+                }
+
+                result = module.summarize_report(report, "https://example.com")
+
+                self.assertEqual(result["scores"]["performance"], 42)
+                self.assertIsNone(result["scores"]["accessibility"])
+                self.assertEqual(result["metrics"]["lcp_ms"], 4200)
+                self.assertEqual(result["metrics"]["tbt_ms"], 610)
+                self.assertEqual(result["metrics"]["cls"], 0.31)
+                self.assertEqual(
+                    [item["title"] for item in result["opportunities"]],
+                    ["Reduce unused JavaScript", "Eliminate render-blocking resources"],
+                )
+                self.assertIn("INP", result["note"])
 
     def test_playwright_runner_uses_load_state_not_networkidle(self):
         for target in TARGETS:

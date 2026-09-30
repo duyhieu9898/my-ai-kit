@@ -31,8 +31,7 @@ Review files for compliance with Web Interface Guidelines.
 
 | Need | Skill |
 |:---|:---|
-| Before coding - learn design principles (color, typography, UX psychology) | [`frontend-design`](../frontend-design/SKILL.md) |
-| Expert frontend implementations and frameworks | [`frontend-specialist`](../frontend-specialist/SKILL.md) |
+| Restyling or theming the UI that this audit reviews | [`frontend-design`](../frontend-design/SKILL.md) |
 
 ---
 

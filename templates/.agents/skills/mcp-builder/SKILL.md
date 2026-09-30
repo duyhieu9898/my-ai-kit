@@ -31,7 +31,7 @@ allowed-tools:
 | Need | Skill |
 |:---|:---|
 | Node.js coding conventions and package structures | [`nodejs-best-practices`](../nodejs-best-practices/SKILL.md) |
-| Transport profiling and latency optimization | [`performance-optimizer`](../performance-optimizer/SKILL.md) |
+| Transport profiling and latency optimization | [`performance-profiling`](../performance-profiling/SKILL.md) |
 
 ---
 

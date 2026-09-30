@@ -1,8 +1,0 @@
-interface:
-  display_name: "Seo Specialist"
-  short_description: "SEO/GEO audits, schema markup, Core Web Vitals, and AI citations."
-  brand_color: "#F59E0B"
-  default_prompt: "$seo-specialist"
-
-policy:
-  allow_implicit_invocation: true

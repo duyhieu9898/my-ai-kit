@@ -30,7 +30,7 @@ allowed-tools:
 
 | Skill | Relationship | When to Collaborate |
 |:---|:---|:---|
-| [`frontend-specialist`](../frontend-specialist/SKILL.md) | Parent Persona | For complete UX/UI and component architectural changes |
+| [`frontend-design`](../frontend-design/SKILL.md) | Styling | When the refactor also changes the look or theme tokens |
 | [`clean-code`](../clean-code/SKILL.md) | Quality Foundation | To ensure strict clean code, typing, and safety standards |
 | [`simplify-code`](../simplify-code/SKILL.md) | Refactor Companion | When dealing with redundant loops, nested conditions, or long blocks |
 
@@ -241,6 +241,8 @@ Ensure client state is globally accessible and performant.
     ```
 
 ### 5. Architectural Boundaries: React Query vs Zustand
+Choose the smallest home for each piece of state, in this order: local `useState` → shared parent or Context → URL (`searchParams`, when the state should survive reload or be shareable) → Zustand (truly global client state). Server data goes to React Query regardless.
+
 Clearly separate Server State (caching) from Client State (UI control).
 Rule: **"Does this data originate from the server?"**
 

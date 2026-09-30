@@ -4,7 +4,7 @@ Skill: performance-profiling
 Script: lighthouse_audit.py
 Purpose: Run Lighthouse performance audit on a URL
 Usage: python3 lighthouse_audit.py https://example.com
-Output: JSON with performance scores
+Output: JSON with category scores, lab metrics (LCP, TBT, CLS...), and top opportunities
 Note: Runs via npx -y lighthouse@12.8.2 (requires Node.js >=18.16)
 """
 import subprocess
@@ -44,17 +44,7 @@ def run_lighthouse(url: str) -> dict:
             with open(output_path, 'r') as f:
                 report = json.load(f)
 
-            categories = report.get("categories", {})
-            return {
-                "url": url,
-                "scores": {
-                    "performance": int(categories.get("performance", {}).get("score", 0) * 100),
-                    "accessibility": int(categories.get("accessibility", {}).get("score", 0) * 100),
-                    "best_practices": int(categories.get("best-practices", {}).get("score", 0) * 100),
-                    "seo": int(categories.get("seo", {}).get("score", 0) * 100)
-                },
-                "summary": get_summary(categories)
-            }
+            return summarize_report(report, url)
         else:
             return {"error": "Lighthouse failed to generate report", "stderr": result.stderr[:500]}
 
@@ -71,9 +61,68 @@ def run_lighthouse(url: str) -> dict:
             except Exception:
                 pass
 
+LAB_METRICS = {
+    "lcp_ms": "largest-contentful-paint",
+    "tbt_ms": "total-blocking-time",
+    "fcp_ms": "first-contentful-paint",
+    "speed_index_ms": "speed-index",
+}
+LAB_NOTE = (
+    "Lab run: INP cannot be measured here; TBT is its lab proxy. "
+    "Confirm INP with field data (CrUX, RUM) or a recorded interaction trace."
+)
+
+
+def category_score(categories: dict, key: str):
+    """Return a 0-100 score, or None when Lighthouse could not score the category."""
+    score = categories.get(key, {}).get("score")
+    return None if score is None else round(score * 100)
+
+
+def summarize_report(report: dict, url: str) -> dict:
+    """Reduce a Lighthouse JSON report to scores, lab metrics, and the top opportunities."""
+    categories = report.get("categories", {})
+    audits = report.get("audits", {})
+
+    metrics = {
+        key: round(audits[audit_id]["numericValue"])
+        for key, audit_id in LAB_METRICS.items()
+        if audits.get(audit_id, {}).get("numericValue") is not None
+    }
+    cls = audits.get("cumulative-layout-shift", {}).get("numericValue")
+    if cls is not None:
+        metrics["cls"] = round(cls, 3)
+
+    opportunities = sorted(
+        (
+            {"id": audit_id, "title": audit.get("title", audit_id),
+             "savings_ms": round(audit["details"]["overallSavingsMs"])}
+            for audit_id, audit in audits.items()
+            if audit.get("details", {}).get("type") == "opportunity"
+            and audit["details"].get("overallSavingsMs", 0) > 0
+        ),
+        key=lambda item: item["savings_ms"],
+        reverse=True,
+    )[:5]
+
+    return {
+        "url": url,
+        "scores": {
+            "performance": category_score(categories, "performance"),
+            "accessibility": category_score(categories, "accessibility"),
+            "best_practices": category_score(categories, "best-practices"),
+            "seo": category_score(categories, "seo"),
+        },
+        "metrics": metrics,
+        "opportunities": opportunities,
+        "summary": get_summary(categories),
+        "note": LAB_NOTE,
+    }
+
+
 def get_summary(categories: dict) -> str:
     """Generate summary based on scores."""
-    perf = categories.get("performance", {}).get("score", 0) * 100
+    perf = (categories.get("performance", {}).get("score") or 0) * 100
     if perf >= 90:
         return "[OK] Excellent performance"
     elif perf >= 50:

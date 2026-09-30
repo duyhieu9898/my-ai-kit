@@ -16,7 +16,7 @@ trigger: always_on
 1. **Modular Skill Loading:** Read the index file `SKILL.md` first, then only read specific sections directly related to the task.
 2. **Read -> Understand -> Apply:** Clearly identify the goal of the Agent/Skill, the mandatory principles, and how your solution differs from standard implementations before writing code.
 3. **Agent Persona Protocol:** AI automatically loads the most appropriate specialist agent and applies its knowledge when performing implementation tasks. Do NOT print the announcement banner (e.g. "Applying knowledge of...") unless explicitly requested by the user.
-   *(Masters: `project-planner`, `security-auditor`, `backend-specialist`, `frontend-specialist`, `debugger`)*
+   *(Masters: `project-planner`, `security-auditor`, `backend-specialist`, `frontend-design`, `debugger`)*
 
 ---
 
@@ -78,7 +78,7 @@ $$\text{Security} \rightarrow \text{Lint} \rightarrow \text{Schema} \rightarrow 
     *   *Security Scan:* `.agents/skills/security-auditor/scripts/security_scan.py`
     *   *Linter:* `.agents/skills/lint-and-validate/scripts/lint_runner.py`
     *   *Unit Tests:* `.agents/skills/testing-patterns/scripts/test_runner.py`
-*   **UI/UX Design Rules:** Read `.agents/skills/frontend-specialist/SKILL.md` (Strict rules: Purple Ban on violet/purple colors; Template Ban on generic, outdated layouts).
+*   **UI Styling Rules:** Read `.agents/skills/frontend-design/SKILL.md` before restyling or theming UI (tokens first, then component variants).
 <!-- KIT:END -->
 
 <!-- HARNESS:BEGIN -->

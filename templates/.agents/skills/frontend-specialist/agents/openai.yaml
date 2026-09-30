@@ -1,8 +1,0 @@
-interface:
-  display_name: "Frontend Specialist"
-  short_description: "React, Next.js, UI architecture, responsive design, and accessibility."
-  brand_color: "#EC4899"
-  default_prompt: "$frontend-specialist"
-
-policy:
-  allow_implicit_invocation: true
