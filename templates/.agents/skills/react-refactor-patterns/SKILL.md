@@ -32,7 +32,6 @@ allowed-tools:
 |:---|:---|:---|
 | [`frontend-design`](../frontend-design/SKILL.md) | Styling | When the refactor also changes the look or theme tokens |
 | [`clean-code`](../clean-code/SKILL.md) | Quality Foundation | To ensure strict clean code, typing, and safety standards |
-| [`simplify-code`](../simplify-code/SKILL.md) | Refactor Companion | When dealing with redundant loops, nested conditions, or long blocks |
 
 ---
 

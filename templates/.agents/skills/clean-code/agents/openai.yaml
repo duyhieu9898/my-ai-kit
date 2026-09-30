@@ -1,8 +1,4 @@
 interface:
   display_name: "Clean Code"
-  short_description: "Scoped implementation quality and maintainability heuristics"
-  brand_color: "#10B981"
-  default_prompt: "$clean-code"
-
-policy:
-  allow_implicit_invocation: true
+  short_description: "Keep code changes scoped, readable, and consistent"
+  default_prompt: "Use $clean-code to simplify this module without changing its behavior."

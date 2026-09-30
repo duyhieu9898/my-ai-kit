@@ -1,15 +1,10 @@
 ---
 name: clean-code
 description: >-
-  Use when writing, editing, or refactoring code. Provides pragmatic quality
-  heuristics for scoped changes, readable naming, simple control flow, useful
-  abstractions, comments, and dependency impact. Follow repository conventions
-  over generic style preferences. NOT for planning, documentation-only work, or
-  selecting validation commands.
-allowed-tools:
-  - Read
-  - Write
-  - Edit
+  Keeps code changes scoped, readable, and consistent with the repository,
+  including when to simplify existing code and when to leave it alone. Use
+  when writing, editing, or refactoring code. Not for choosing checks or tests
+  (use verify-changes).
 ---
 
 # Clean Code
@@ -75,6 +70,23 @@ signals. They are not universal pass/fail limits.
 Refactor when structure obscures intent, mixes responsibilities, duplicates
 meaningful logic, or makes changes unsafe. Keep cohesive code together when
 splitting it would add indirection without improving understanding.
+
+## Reducing Existing Complexity
+
+When the task is to simplify code, remove indirection that has no current
+reason to exist: a wrapper that only forwards, a configuration option with one
+value, a layer that adds no rule of its own. Keep complexity that pays for
+itself:
+
+| Keep it when | Why |
+|---|---|
+| It sits on a measured hot path | The plain version was slower |
+| A framework or library requires the shape | External contract |
+| The user or repository chose the pattern | Explicit decision |
+| An interface exists for tests or injection | Removing it breaks the seam |
+
+If an abstraction looks unjustified but its reason is unclear, ask before
+removing it.
 
 ## Checklist
 

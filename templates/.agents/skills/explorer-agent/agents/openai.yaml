@@ -1,8 +1,4 @@
 interface:
-  display_name: "Explorer Agent"
-  short_description: "Codebase discovery, architecture mapping, audits, and feasibility research."
-  brand_color: "#4B5563"
-  default_prompt: "$explorer-agent"
-
-policy:
-  allow_implicit_invocation: true
+  display_name: "Explorer"
+  short_description: "Map an unfamiliar codebase and its history"
+  default_prompt: "Use $explorer-agent to explain how checkout works end to end in this repo."

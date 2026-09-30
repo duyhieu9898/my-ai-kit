@@ -118,4 +118,4 @@
 
 ---
 
-> **Usage:** Copy relevant checklists into your PLAN.md or security report.
+> **Usage:** Copy relevant checklists into the plan or security report.

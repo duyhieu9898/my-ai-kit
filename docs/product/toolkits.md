@@ -14,7 +14,7 @@
   `.agents/AGENTS.md`.
 - Skills use `SKILL.md`, required `agents/openai.yaml`, optional `references/`,
   `scripts/`, and `assets/`.
-- The current template ships 34 skill directories and four top-level runtime
+- The current template ships 26 skill directories and four top-level runtime
   scripts.
 
 ## Gemini Antigravity

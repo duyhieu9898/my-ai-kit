@@ -68,10 +68,12 @@ Proposed | Accepted | Deprecated | Superseded by [ADR-YYY]
 
 ## ADR Storage
 
+Use the project's existing decision folder. If there is none:
+
 ```
 docs/
-└── architecture/
-    ├── adr-001-use-nextjs.md
-    ├── adr-002-postgresql-over-mongodb.md
-    └── adr-003-adopt-repository-pattern.md
+└── decisions/
+    ├── 0001-use-nextjs.md
+    ├── 0002-postgresql-over-mongodb.md
+    └── 0003-adopt-repository-pattern.md
 ```

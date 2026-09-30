@@ -45,7 +45,7 @@ command without explicit authorization.
 
 ## Choose Supporting Skills
 
-- Use `database-architect` when migrations or production data are involved.
+- Use `database-design` when migrations or production data are involved.
 - Use `backend-specialist` when runtime failures require application changes.
 - Use `verify-changes` for proportional release evidence.
 

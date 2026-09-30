@@ -1,8 +1,4 @@
 interface:
   display_name: "Backend Specialist"
-  short_description: "Backend APIs, auth, databases, security, and server architecture."
-  brand_color: "#3B82F6"
-  default_prompt: "$backend-specialist"
-
-policy:
-  allow_implicit_invocation: true
+  short_description: "Build and fix Node.js backend routes, jobs, and auth"
+  default_prompt: "Use $backend-specialist to add a validated, authorized endpoint for archiving projects."

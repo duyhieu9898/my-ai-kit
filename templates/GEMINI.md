@@ -29,8 +29,8 @@ Classify the user request before execution to select the correct operation mode:
 | **QUESTION** | "what is", "how does", "explain" | `ask` Mode: Direct text response. |
 | **SURVEY/INTEL** | "analyze", "list files", "overview" | `ask`/`plan` Mode: System exploration, no file modifications. |
 | **SIMPLE EDIT** | "fix", "add", "change" (1 file) | `edit` Mode: Inline modification of a single file. |
-| **COMPLEX TASK** | "build", "create", "implement", "refactor" | `plan` then `edit` Mode: **Creates `{task-slug}.md` checklist** |
-| **DESIGN/UI** | "design", "UI", "page", "dashboard" | `plan` then `edit` Mode: **Creates `{task-slug}.md` checklist** |
+| **COMPLEX TASK** | "build", "create", "implement", "refactor" | `plan` then `edit` Mode: **Creates `docs/PLAN-{task-slug}.md` checklist** |
+| **DESIGN/UI** | "design", "UI", "page", "dashboard" | `plan` then `edit` Mode: **Creates `docs/PLAN-{task-slug}.md` checklist** |
 
 > 🔴 **Mode Rules:**
 > *   **Plan Mode:** Explore context, propose architecture, and write an installation plan to `docs/PLAN-{task-slug}.md`. Do not modify production files during planning.

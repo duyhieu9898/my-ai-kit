@@ -28,7 +28,6 @@ allowed-tools:
 
 | Need | Skill |
 |:---|:---|
-| Automated token-efficient AST codebase indexing | [`code-review-graph`](../code-review-graph/SKILL.md) |
 | Standard clean code formatting practices | [`clean-code`](../clean-code/SKILL.md) |
 | Security-focused review | [`security-auditor`](../security-auditor/SKILL.md) |
 | Lint, type, test, and build validation | [`lint-and-validate`](../lint-and-validate/SKILL.md) |

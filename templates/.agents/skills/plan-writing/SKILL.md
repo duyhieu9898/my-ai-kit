@@ -36,11 +36,14 @@ Do not implement tasks or mark checks complete while writing the plan.
 
 ## Default Plan Path
 
-Save bounded implementation plans in the project root as:
+Save bounded implementation plans as:
 
 ```text
-{task-slug}.md
+docs/PLAN-{task-slug}.md
 ```
+
+This is the same location `project-planner` uses, so every plan lives in one
+place.
 
 Use lowercase kebab-case derived from the requested change. If the repository or
 user specifies another location, follow that stronger authority.

@@ -11,7 +11,7 @@ Codex Kit is a modular toolkit organized around a unified, composable
 model with skill directories that can be loaded on demand.
 
 The kit contains:
-- **34 Composable Skills** - Direct domain-specific knowledge packages and expert personas under `skills/`.
+- **26 Composable Skills** - Direct domain-specific knowledge packages and expert personas under `skills/`.
 - **4 Master Scripts** - System-level automation and validation scripts under `scripts/`.
 
 ---
@@ -34,7 +34,7 @@ AGENTS.md                     # Repository-wide workflow and skill rules
 │   └── hooks/
 │       ├── harness_guard.py # Shared warning-only Harness policy
 │       └── claude_adapter.py # Claude payload and response adapter
-├── skills/                  # 34 Composable Skills (Expert Personas + Domain Knowledge)
+├── skills/                  # 26 Composable Skills (Expert Personas + Domain Knowledge)
 │   ├── {skill-name}/
 │   │   ├── SKILL.md         # Metadata, triggers, and prompt guidelines
 │   │   ├── agents/
@@ -71,18 +71,17 @@ lost.
 
 ---
 
-## 🧩 The 34 Composable Skills
+## 🧩 The 26 Composable Skills
 
 In Codex, the boundary between "agents" and "skills" is dissolved. Every specialist capability or expert persona is implemented as a **Skill** that the unified AI engine can dynamically load into its context.
 
-### 🎭 Expert Persona Skills (8)
+### 🎭 Expert Persona Skills (7)
 These skills contain specialized persona prompts, deep domain methodologies, and dynamic color branding for the Codex UI.
 
 | Skill | Focus | Primary Invocation / Triggers |
 | :--- | :--- | :--- |
 | `project-planner` | Self-contained initiative roadmaps | Major features, new projects, migrations, cross-module plans |
 | `backend-specialist` | Scaleable APIs & serverless logic | Server-side development, endpoint design, auth |
-| `database-architect` | High-efficiency database & schemas | Prisma, Drizzle, migrations, query performance |
 | `devops-engineer` | CI/CD, containerization & cloud infra | Docker, PM2, deployment pipelines, Nginx |
 | `security-auditor` | Security compliance & vulnerabilities | OWASP, auth audits, static analysis review |
 | `debugger` | Systematic root-cause analysis | Complex bug investigation, system crashes |
@@ -91,17 +90,17 @@ These skills contain specialized persona prompts, deep domain methodologies, and
 
 ---
 
-### 🧩 Domain Knowledge Skills (26)
+### 🧩 Domain Knowledge Skills (19)
 These skills provide specific instructions and toolsets to guide implementation in target technologies and patterns.
 
 | Domain Category | Skills Included |
 | :--- | :--- |
 | **Frontend & UI** | `react-refactor-patterns`, `web-design-guidelines`, `frontend-design`, `seo-fundamentals`, `i18n-localization`, `webapp-testing`, `nextjs-react-expert` |
-| **Backend & API** | `api-patterns`, `nodejs-best-practices`, `python-patterns`, `database-design`, `mcp-builder` |
+| **Backend & API** | `api-patterns`, `database-design`, `mcp-builder` |
 | **Testing & QA** | `testing-patterns`, `verify-changes`, `lint-and-validate`, `clean-code`, `performance-profiling` |
-| **Security & Audits** | `code-review-checklist`, `code-review-graph` |
-| **Planning & Design** | `app-builder`, `architecture`, `plan-writing`, `brainstorming` |
-| **System Operations** | `simplify-code`, `code-archaeologist`, `explorer-agent` |
+| **Security & Audits** | `code-review-checklist` |
+| **Planning & Design** | `architecture`, `plan-writing` |
+| **System Operations** | `explorer-agent` |
 
 ---
 

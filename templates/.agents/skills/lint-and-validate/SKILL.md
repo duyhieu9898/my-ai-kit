@@ -31,7 +31,7 @@ allowed-tools:
 | Need | Skill |
 |:---|:---|
 | Validating functional system test cases | [`verify-changes`](../verify-changes/SKILL.md) |
-| Code quality linting in Node.js backends | [`nodejs-best-practices`](../nodejs-best-practices/SKILL.md) |
+| Code quality linting in Node.js backends | [`backend-specialist`](../backend-specialist/SKILL.md) |
 
 ---
 

@@ -13,15 +13,10 @@
   },
   "managedSkills": {
     "api-patterns": {},
-    "app-builder": {},
     "architecture": {},
     "backend-specialist": {},
-    "brainstorming": {},
     "clean-code": {},
-    "code-archaeologist": {},
     "code-review-checklist": {},
-    "code-review-graph": {},
-    "database-architect": {},
     "database-design": {},
     "debugger": {},
     "devops-engineer": {},
@@ -32,22 +27,19 @@
     "lint-and-validate": {},
     "mcp-builder": {},
     "nextjs-react-expert": {},
-    "nodejs-best-practices": {},
     "performance-profiling": {},
     "plan-writing": {},
     "product-manager": {},
     "project-planner": {},
-    "python-patterns": {},
     "react-refactor-patterns": {},
     "security-auditor": {},
     "seo-fundamentals": {},
-    "simplify-code": {},
     "testing-patterns": {},
     "verify-changes": {},
     "web-design-guidelines": {},
     "webapp-testing": {}
   },
-  "installedAt": "2026-09-30T09:34:43.729Z",
+  "installedAt": "2026-09-30T09:48:48.359Z",
   "harness": {
     "enabled": true,
     "source": "repository-harness"
@@ -62,7 +54,7 @@
     ".agents/scripts/checklist.py": "sha256:3b66ad00a5496cd001a4ff9ee2a25d9637a5e9c35a17867fa4c5b32fed91d66d",
     ".agents/scripts/session_manager.py": "sha256:275e1af4c7f0ec378b0ffb98fce1068088702c602d7cd16ca3cb7f5d200e1ee2",
     ".agents/scripts/verify_all.py": "sha256:70bfa1d47e21edc9c320d169c3a747e5e695f14c50e008dc2ab27484422563b8",
-    ".agents/ARCHITECTURE.md": "sha256:fac74cae1ffe436f2d0bccdb6bb58e499c3d2ae673b8fa9a665c0b81edb3f454",
+    ".agents/ARCHITECTURE.md": "sha256:ec5fe5a88ef7447fae6c240e4544242dc601fa6daa5b02028b897a5783bf1571",
     ".agents/ux_audit.json": "sha256:7468e8453200e680ced0339d9c412af1587d6f53d7464a4fa02142c5eafdf67f"
   }
 }

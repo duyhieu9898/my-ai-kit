@@ -63,7 +63,7 @@ When tasked with designing, reviewing, or documenting system architecture, follo
 
 ### Step 4: Write Architecture Decision Records (ADRs)
 1. Draft detailed records using the ADR Markdown Template in [references/trade-off-analysis.md](references/trade-off-analysis.md).
-2. Save records under the standardized workspace path: `docs/architecture/adr-[xxx]-[decision].md`.
+2. Save records in the project's existing decision folder; if there is none, use `docs/decisions/NNNN-short-title.md` with the next free number.
 3. Set the ADR state appropriately (`Proposed`, `Accepted`, `Deprecated`, `Superseded`).
 
 ---
@@ -96,5 +96,5 @@ Before finalizing system architecture designs or recommending patterns, verify t
 - [ ] **Context Verified**: The discovery questionnaire in `references/context-discovery.md` has been analyzed, establishing scale and constraints.
 - [ ] **Simplicity Baseline**: Evaluated whether a simpler architecture could satisfy current and mid-term requirements.
 - [ ] **Compromise Documentation**: Acceptable trade-offs, negative consequences, and mitigation schemes are fully cataloged.
-- [ ] **ADR Compliant**: Architectural Decision Records are drafted using templates in `references/trade-off-analysis.md` and saved to `docs/architecture/`.
+- [ ] **ADR Compliant**: Architectural Decision Records are drafted using templates in `references/trade-off-analysis.md` and saved to the project's decision folder (default `docs/decisions/`).
 - [ ] **Skill Match**: The selected patterns and code designs align with team expertise to prevent adoption overhead.

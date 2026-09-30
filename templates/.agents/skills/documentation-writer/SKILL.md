@@ -96,7 +96,7 @@ npm run dev
 ## Documentation
 
 - API Reference: `docs/api.md`
-- Architecture Decision Records: `docs/adr/`
+- Architecture Decision Records: `docs/decisions/`
 ```
 
 ### 2. API Endpoint Template
@@ -155,22 +155,10 @@ All notable changes to this project will be documented in this file.
 - Initial project release structures
 ```
 
-### 5. Architecture Decision Record (ADR) Template
-```markdown
-# ADR-001: [Title]
+### 5. Architecture Decision Records
 
-## Status
-Proposed / Accepted / Deprecated / Superseded
-
-## Context
-[Why are we making this decision? What are the constraints, requirements, and alternatives?]
-
-## Decision
-[What did we decide? What tech/framework is selected and why?]
-
-## Consequences
-[What are the trade-offs, benefits, and technical debt generated?]
-```
+ADRs are written with the `architecture` skill, which owns the template and the
+storage path.
 
 ### 6. AI-Friendly Documentation (`llms.txt`) Template
 ```markdown

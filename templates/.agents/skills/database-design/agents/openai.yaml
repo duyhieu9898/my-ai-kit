@@ -1,8 +1,4 @@
 interface:
   display_name: "Database Design"
-  short_description: "Schema design, indexing, ORMs, and query optimization."
-  brand_color: "#10B981"
-  default_prompt: "$database-design"
-
-policy:
-  allow_implicit_invocation: true
+  short_description: "Design schemas, indexes, RLS, and safe migrations"
+  default_prompt: "Use $database-design to add a non-null column to the orders table without downtime."

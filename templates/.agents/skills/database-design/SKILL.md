@@ -1,95 +1,108 @@
 ---
 name: database-design
 description: >-
-  Use when designing database schemas, choosing ORMs, planning migrations, optimizing queries, or working with Prisma, Drizzle, or raw SQL.
-  Database design principles covering schema design, indexing strategy, serverless databases, and query optimization.
-  NOT for frontend-only data display without schema or query changes.
-allowed-tools:
-  - Read
-  - Write
-  - Edit
-  - Glob
-  - Grep
+  Designs schemas, indexes, and safe migrations for PostgreSQL, Supabase, and
+  MongoDB. Use when adding or changing tables, collections, columns,
+  constraints, indexes, row-level security policies, or migrations, or when a
+  query is slow. Not for application request handling (use
+  backend-specialist).
 ---
 
 # Database Design
 
-> **Learn to THINK, not copy SQL patterns.**
+Schema mistakes outlive the code that made them. Two situations cause most of
+the pain: a migration that locks a busy table, and a missing index that only
+shows up at production data volume. Plan for both before writing the change.
 
-## 🎯 Selective Reading Rule
+## Defaults
 
-**Read ONLY files relevant to the request!** Check the content map, find what you need.
+- **Tools:** use the project's database, ORM or query builder, and migration
+  tool. Do not add a second one.
+- **Applied migrations:** never edit one. Write a new migration that moves
+  forward.
+- **Business rules as constraints:** `NOT NULL`, `UNIQUE`, `CHECK`, and foreign
+  keys, in addition to validation in code.
 
-## 📑 Content Map
+## PostgreSQL
 
-| File | Description | When to Read |
-|:---|:---|:---|
-| [references/database-selection.md](references/database-selection.md) | PostgreSQL vs Neon vs Turso vs SQLite | Choosing database |
-| [references/orm-selection.md](references/orm-selection.md) | Drizzle vs Prisma vs Kysely | Choosing ORM |
-| [references/schema-design.md](references/schema-design.md) | Normalization, PKs, relationships | Designing schema |
-| [references/indexing.md](references/indexing.md) | Index types, composite indexes | Performance tuning |
-| [references/optimization.md](references/optimization.md) | N+1, EXPLAIN ANALYZE | Query optimization |
-| [references/migrations.md](references/migrations.md) | Safe migrations, serverless DBs | Schema changes |
-| [scripts/schema_validator.py](scripts/schema_validator.py) | Database schema validation script | Validating schema changes |
+- **Column types:**
+  - Keys: `bigint generated always as identity`, or `uuid` (v7 when the
+    project generates it, for index locality).
+  - Time: `timestamptz`, not `timestamp`.
+  - Strings: `text` plus a `CHECK` on length, not `varchar(n)`.
+- **Foreign keys are not indexed automatically.** Add an index on every
+  foreign key column that is filtered or joined on, or deletes on the parent
+  table scan the child.
+- **Composite index order:** equality columns first, then range or sort
+  columns. Add a partial index (`WHERE deleted_at IS NULL`) when queries
+  always carry that filter.
+- **Checking a query:** use `EXPLAIN (ANALYZE, BUFFERS)` on realistic data. A
+  plan on an empty development table proves nothing.
 
----
+### Safe migrations on live tables
 
-## 🔗 Related Skills
+Use an expand, migrate, contract sequence. Each step is its own deploy.
 
-| Skill | Relationship | When to Use Together |
-|:---|:---|:---|
-| [`database-architect`](../database-architect/SKILL.md) | Broader database architecture decisions | When schema work affects platform, scale, or production data |
-| [`backend-specialist`](../backend-specialist/SKILL.md) | Application data access and APIs | When schema changes affect backend services or auth |
-| [`api-patterns`](../api-patterns/SKILL.md) | API contracts and pagination | When database models shape resource design or response formats |
-| [`devops-engineer`](../devops-engineer/SKILL.md) | Production migration safety | When migrations require deployment, backup, or rollback planning |
+1. **Add** the new column as nullable, with no volatile default.
+2. **Backfill** in batches, not one `UPDATE` over the whole table.
+3. **Enforce NOT NULL without a long lock:**
+   1. `ADD CONSTRAINT … CHECK (col IS NOT NULL) NOT VALID`
+   2. `VALIDATE CONSTRAINT`
+   3. `SET NOT NULL` (Postgres 12+ skips the scan when a valid check exists)
+4. **Switch** the application to the new column, then drop the old one in a
+   later release.
 
----
+Also:
 
-## 🛠️ Instructions / Procedures
+- **Indexes on busy tables:** `CREATE INDEX CONCURRENTLY`. It cannot run
+  inside a transaction, so check whether the migration tool wraps each file
+  in one.
+- **Timeouts:** set `lock_timeout` (for example, `'5s'`) at the top of
+  migrations that take locks, so a blocked migration fails instead of queuing
+  every other query behind it.
+- **Renames and type changes:** follow the same expand and contract steps.
+  Never rename in place while the old code still runs.
 
-## ⚠️ Core Principle
+## Supabase
 
-- ASK user for database preferences when unclear
-- Choose database/ORM based on CONTEXT
-- Don't default to PostgreSQL for everything
+- **Row-level security:** enable RLS on every table in an exposed schema, and
+  write a policy for each operation the client performs.
+  - In policies, write `(select auth.uid())` rather than `auth.uid()`, so
+    Postgres evaluates it once per query instead of once per row.
+  - Index the columns that policies filter on.
+- **Migrations:** create them with `supabase migration new <name>`, or
+  generate them from local changes with `supabase db diff`. Regenerate types
+  after a schema change with `supabase gen types typescript`.
+- **Service role key:** the `service_role` key bypasses RLS, so it is for
+  server code only.
 
----
+## MongoDB
 
-## Decision Checklist
+- **Embed or reference** by access pattern:
+  - Embed data that is read together and bounded in size.
+  - Reference data that grows without limit, such as comments or events.
+  - Documents are capped at 16 MB, and very large arrays degrade updates.
+- **Schema:** enforce it with a `$jsonSchema` validator on the collection, or
+  with the project's Mongoose schemas.
+- **Compound indexes** follow the ESR rule: Equality fields, then Sort, then
+  Range. Check queries with `explain("executionStats")` and compare
+  `totalDocsExamined` with `nReturned`.
+- **Transactions** need a replica set; local development often needs one
+  started explicitly.
 
-Before designing schema:
+## Check
 
-- [ ] Asked user about database preference?
-- [ ] Chosen database for THIS context?
-- [ ] Considered deployment environment?
-- [ ] Planned index strategy?
-- [ ] Defined relationship types?
+For a Prisma schema, run the validator; do not read its source:
 
----
+`python3 .agents/skills/database-design/scripts/schema_validator.py <project>`
 
-## ❌ Anti-Patterns
+It lists naming problems, relations without an index, and similar
+suggestions. It always exits 0, so read the `issues` in its JSON output. It
+only understands Prisma schemas.
 
-❌ Default to PostgreSQL for simple apps (SQLite may suffice)
-❌ Skip indexing
-❌ Use SELECT * in production
-❌ Store JSON when structured data is better
-❌ Ignore N+1 queries
+## Done when
 
----
-
-## Script
-
-| Script | Purpose | Command |
-|:---|:---|:---|
-| [scripts/schema_validator.py](scripts/schema_validator.py) | Database schema validation | `python3 scripts/schema_validator.py <project_path>` |
-
----
-
-## ✅ Quality Audit Checklist
-
-- [ ] Database and ORM choices match the project context and deployment environment.
-- [ ] Core entities, relationships, primary keys, and foreign keys are explicit.
-- [ ] Query patterns have corresponding index and pagination strategies.
-- [ ] Migration plan accounts for rollback and production safety.
-- [ ] Schema avoids unnecessary JSON blobs, `SELECT *`, and missing constraints.
-- [ ] `scripts/schema_validator.py` was considered or run for schema validation.
+The migration runs forward on a copy of realistic data without long locks,
+queries on the changed tables use the intended indexes, constraints encode
+the business rules, and, on Supabase, RLS policies cover each client
+operation.

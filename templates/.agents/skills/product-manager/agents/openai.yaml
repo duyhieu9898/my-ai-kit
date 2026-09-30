@@ -1,8 +1,4 @@
 interface:
   display_name: "Product Manager"
-  short_description: "Product requirements, user stories, priorities, and acceptance criteria."
-  brand_color: "#F59E0B"
-  default_prompt: "$product-manager"
-
-policy:
-  allow_implicit_invocation: true
+  short_description: "Turn a vague request into a testable feature spec"
+  default_prompt: "Use $product-manager to write a spec with acceptance criteria for shared reports."

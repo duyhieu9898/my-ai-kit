@@ -29,7 +29,7 @@ allowed-tools:
 | Need | Skill |
 |:---|:---|
 | Designing internationalized UX components | [`frontend-design`](../frontend-design/SKILL.md) |
-| Server-side i18n middleware setups | [`nodejs-best-practices`](../nodejs-best-practices/SKILL.md) |
+| Server-side i18n middleware setups | [`backend-specialist`](../backend-specialist/SKILL.md) |
 
 ---
 

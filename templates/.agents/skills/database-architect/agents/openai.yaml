@@ -1,8 +1,0 @@
-interface:
-  display_name: "Database Architect"
-  short_description: "Schema design, query optimization, migrations, and indexing."
-  brand_color: "#059669"
-  default_prompt: "$database-architect"
-
-policy:
-  allow_implicit_invocation: true
