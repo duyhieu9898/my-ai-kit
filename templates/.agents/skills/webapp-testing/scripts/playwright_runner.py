@@ -52,7 +52,7 @@ def run_basic_test(url: str, take_screenshot: bool = False) -> dict:
             page = context.new_page()
             
             # Navigate
-            response = page.goto(url, wait_until="networkidle", timeout=30000)
+            response = page.goto(url, wait_until="load", timeout=30000)
             
             # Basic info
             result["page"] = {
@@ -83,7 +83,7 @@ def run_basic_test(url: str, take_screenshot: bool = False) -> dict:
             # Screenshot - uses system temp directory (cross-platform, auto-cleaned)
             if take_screenshot:
                 # Cross-platform: Windows=%TEMP%, Linux/macOS=/tmp
-                screenshot_dir = os.path.join(tempfile.gettempdir(), "maestro_screenshots")
+                screenshot_dir = os.path.join(tempfile.gettempdir(), "playwright_runner_screenshots")
                 os.makedirs(screenshot_dir, exist_ok=True)
                 screenshot_path = os.path.join(screenshot_dir, f"screenshot_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
                 page.screenshot(path=screenshot_path, full_page=True)
@@ -123,7 +123,7 @@ def run_accessibility_check(url: str) -> dict:
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=True)
             page = browser.new_page()
-            page.goto(url, wait_until="networkidle", timeout=30000)
+            page.goto(url, wait_until="load", timeout=30000)
             
             # Basic a11y checks
             result["accessibility"] = {

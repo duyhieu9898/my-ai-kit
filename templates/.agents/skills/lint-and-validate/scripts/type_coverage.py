@@ -145,14 +145,13 @@ def check_python_coverage(project_path: Path) -> dict:
             any_matches = re.findall(r':\s*Any\b', content)
             stats['any_count'] += len(any_matches)
 
-            # Find functions with type hints
-            typed_funcs = re.findall(r'def\s+\w+\s*\([^)]*:[^)]+\)', content)
-            typed_funcs += re.findall(r'def\s+\w+\s*\([^)]*\)\s*->', content)
-            stats['typed_functions'] += len(typed_funcs)
-
-            # Find functions without type hints
-            all_funcs = re.findall(r'def\s+\w+\s*\(', content)
-            stats['untyped_functions'] += len(all_funcs) - len(typed_funcs)
+            # Classify each function once: typed when it annotates a parameter or the return.
+            for signature in re.finditer(r'def\s+\w+\s*\(([^)]*)\)\s*(->)?', content):
+                params, returns = signature.groups()
+                if returns or ':' in params:
+                    stats['typed_functions'] += 1
+                else:
+                    stats['untyped_functions'] += 1
 
         except Exception:
             continue

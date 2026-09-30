@@ -12,7 +12,6 @@ Analyzes code for compliance with:
    - Serial Position Effect (important items at start/end)
 
 2. EMOTIONAL DESIGN (Don Norman):
-   - Visceral (first impressions, gradients, animations)
    - Behavioral (feedback, usability, performance)
    - Reflective (brand story, values, identity)
 
@@ -171,17 +170,6 @@ class UXAuditor:
                     self.warnings.append(f"[Serial Position] {filename}: Last nav item may not be important. Place key actions at start/end.")
 
         # --- 1.5 EMOTIONAL DESIGN (Don Norman) ---
-
-        # Visceral: First impressions (aesthetics, gradients, animations)
-        has_hero = bool(re.search(r'hero|<h1|banner', content, re.IGNORECASE))
-        if has_hero:
-            # Check for visual appeal elements
-            has_gradient = bool(re.search(r'gradient|linear-gradient|radial-gradient', content))
-            has_animation = bool(re.search(r'@keyframes|transition:|animate-', content))
-            has_visual_interest = has_gradient or has_animation
-
-            if not has_visual_interest and not re.search(r'background:|bg-', content):
-                self.warnings.append(f"[Visceral] {filename}: Hero section lacks visual appeal. Consider gradients or subtle animations.")
 
         # Behavioral: Instant feedback and usability
         if 'onClick' in content or '@click' in content or 'onclick' in content:
@@ -458,10 +446,6 @@ class UXAuditor:
             gradient_count = len(re.findall(r'gradient', content, re.IGNORECASE))
             if gradient_count > 5:
                 self.warnings.append(f"[Visual] {filename}: Many gradients detected ({gradient_count}). Ensure this serves purpose, not decoration.")
-        else:
-            # Check if hero section exists without gradient
-            if has_hero and not re.search(r'background:|bg-', content):
-                self.warnings.append(f"[Visual] {filename}: Hero section without visual interest. Consider gradient for depth.")
 
         # --- 3.4 BORDER EFFECTS ---
         # Check for gradient borders or animated borders
@@ -693,7 +677,7 @@ class UXAuditor:
 
         # --- 7. ACCESSIBILITY ---
         if re.search(r'<img(?![^>]*alt=)[^>]*>', content):
-            self.warnings.append(f"[Accessibility] {filename}: Missing img alt text")
+            self.issues.append(f"[Accessibility] {filename}: Missing img alt text")
 
     def audit_directory(self, directory: str) -> None:
         extensions = {'.tsx', '.jsx', '.html', '.vue', '.svelte', '.css', '.scss'}

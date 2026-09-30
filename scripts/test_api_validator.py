@@ -9,6 +9,9 @@ import tempfile
 import unittest
 from pathlib import Path
 
+# Importing template scripts must not leave __pycache__ inside templates/.
+sys.dont_write_bytecode = True
+
 
 ROOT = Path(__file__).resolve().parents[1]
 VALIDATORS = (

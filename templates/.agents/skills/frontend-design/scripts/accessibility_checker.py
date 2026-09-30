@@ -41,6 +41,14 @@ def find_html_files(project_path: Path) -> list:
     return files[:50]
 
 
+ADVISORY_PREFIXES = ("Consider ", "Error reading file")
+
+
+def is_blocking(issue: str) -> bool:
+    """Suggestions and unreadable files are reported but do not fail the audit."""
+    return not issue.startswith(ADVISORY_PREFIXES)
+
+
 def check_accessibility(file_path: Path) -> list:
     """Check a single file for accessibility issues."""
     issues = []
@@ -185,8 +193,10 @@ def main():
         print("No accessibility issues found!")
 
     total_issues = sum(len(item["issues"]) for item in all_issues)
-    # Accessibility issues are important but not blocking
-    passed = total_issues < 5  # Allow minor issues
+    blocking_issues = sum(
+        1 for item in all_issues for issue in item["issues"] if is_blocking(issue)
+    )
+    passed = blocking_issues == 0
 
     output = {
         "script": "accessibility_checker",
@@ -194,6 +204,7 @@ def main():
         "files_checked": len(files),
         "files_with_issues": len(all_issues),
         "issues_found": total_issues,
+        "blocking_issues": blocking_issues,
         "passed": passed
     }
 

@@ -2,6 +2,7 @@
 """Regression tests for validators shared by the Codex and Gemini templates."""
 
 import importlib.util
+import sys
 import io
 import json
 import subprocess
@@ -10,6 +11,9 @@ import unittest
 from contextlib import redirect_stdout
 from pathlib import Path
 from unittest.mock import patch
+
+# Importing template scripts must not leave __pycache__ inside templates/.
+sys.dont_write_bytecode = True
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -531,6 +535,108 @@ class ValidatorRegressionTests(unittest.TestCase):
                 self.assertFalse(result["passed"])
                 self.assertIn("actionable stdout detail", rendered)
                 self.assertIn("actionable stderr detail", rendered)
+
+    def test_python_type_coverage_counts_each_function_once(self):
+        for target in TARGETS:
+            with self.subTest(target=target), tempfile.TemporaryDirectory() as temp_dir:
+                project = Path(temp_dir)
+                (project / "app.py").write_text(
+                    "def untyped(x):\n    return x\n\n"
+                    "def typed(y: int) -> int:\n    return y\n",
+                    encoding="utf-8",
+                )
+
+                module = load_module(
+                    target,
+                    "type_coverage_python",
+                    "lint-and-validate/scripts/type_coverage.py",
+                )
+                result = module.check_python_coverage(project)
+
+                self.assertEqual(result["stats"]["typed_functions"], 1)
+                self.assertEqual(result["stats"]["untyped_functions"], 1)
+                self.assertIn("[!] Type hints coverage: 50%", result["issues"])
+
+    def run_accessibility_checker(self, target: str, project: Path) -> subprocess.CompletedProcess:
+        return subprocess.run(
+            ["python3", str(script_path(target, "frontend-design/scripts/accessibility_checker.py")), str(project)],
+            capture_output=True,
+            text=True,
+        )
+
+    def test_accessibility_checker_fails_on_a_single_blocking_issue(self):
+        for target in TARGETS:
+            with self.subTest(target=target), tempfile.TemporaryDirectory() as temp_dir:
+                project = Path(temp_dir)
+                (project / "search.tsx").write_text(
+                    'export const Search = () => <input name="q" />\n',
+                    encoding="utf-8",
+                )
+
+                result = self.run_accessibility_checker(target, project)
+
+                self.assertEqual(result.returncode, 1, result.stdout)
+                self.assertIn('"passed": false', result.stdout)
+
+    def test_accessibility_checker_treats_suggestions_as_advisory(self):
+        for target in TARGETS:
+            with self.subTest(target=target), tempfile.TemporaryDirectory() as temp_dir:
+                project = Path(temp_dir)
+                (project / "layout.tsx").write_text(
+                    'export default () => <html lang="en"><body><main>Hi</main></body></html>\n',
+                    encoding="utf-8",
+                )
+
+                result = self.run_accessibility_checker(target, project)
+
+                self.assertIn("Consider adding skip-to-main-content link", result.stdout)
+                self.assertEqual(result.returncode, 0, result.stdout)
+
+    def test_ux_audit_fails_on_missing_alt_and_does_not_push_gradients(self):
+        for target in TARGETS:
+            with self.subTest(target=target), tempfile.TemporaryDirectory() as temp_dir:
+                project = Path(temp_dir)
+                page = project / "page.tsx"
+                page.write_text(
+                    'export default () => <main><h1>Hello</h1><img src="/a.png" /></main>\n',
+                    encoding="utf-8",
+                )
+
+                module = load_module(target, "ux_audit_alt", "frontend-design/scripts/ux_audit.py")
+                auditor = module.UXAuditor(project)
+                auditor.audit_file(str(page))
+                report = auditor.get_report()
+
+                self.assertFalse(report["compliant"])
+                self.assertTrue(any("Missing img alt text" in issue for issue in report["issues"]))
+                self.assertFalse(any("gradient" in warning.lower() for warning in report["warnings"]))
+
+    def test_security_scan_flags_shell_command_execution(self):
+        for target in TARGETS:
+            with self.subTest(target=target), tempfile.TemporaryDirectory() as temp_dir:
+                project = Path(temp_dir)
+                # Fixture text for the scanner to flag; it is written to a file, never executed.
+                (project / "run.py").write_text(
+                    "import os, subprocess\n"
+                    "os.system(input())\n"
+                    "subprocess.run(cmd, shell=True)\n",
+                    encoding="utf-8",
+                )
+
+                module = load_module(target, "security_scan", "security-auditor/scripts/security_scan.py")
+                result = module.scan_code_patterns(str(project))
+                flagged_lines = {finding["line"] for finding in result["findings"]}
+
+                self.assertIn(2, flagged_lines)
+                self.assertIn(3, flagged_lines)
+
+    def test_playwright_runner_uses_load_state_not_networkidle(self):
+        for target in TARGETS:
+            with self.subTest(target=target):
+                source = script_path(target, "webapp-testing/scripts/playwright_runner.py").read_text(encoding="utf-8")
+
+                self.assertNotIn("networkidle", source)
+                self.assertNotIn("maestro", source)
 
 
 if __name__ == "__main__":

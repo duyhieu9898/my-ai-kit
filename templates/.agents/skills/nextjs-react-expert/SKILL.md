@@ -59,10 +59,9 @@ When tasked with building React components, diagnosing UI lag, or optimizing cac
 1. Query the **Quick Decision Tree** to map the issue to the appropriate optimization category.
 2. If slow load or waterfall latency is present, **you must prioritize Critical references** (Waterfalls and Bundle size) before optimizing minor details.
 
-### Step 3: Run Automated Performance Audits
-1. Run the performance checking utility (`react_performance_checker.py`) via terminal command:
-   `python3 scripts/react_performance_checker.py <project_path>`
-2. Parse output warnings regarding barrel exports, sequential await calls, or client-side fetch patterns.
+### Step 3: Confirm Suspects in Code
+1. Search the affected routes for the Critical patterns: independent sequential `await` calls, imports from barrel `index` files or icon/UI libraries, and raw `<img>` tags.
+2. Confirm each hit against the matching reference before changing it; dependent awaits and small barrels are often fine.
 
 ### Step 4: Refactor and Eliminate Bottlenecks
 1. Apply targeted optimization principles (Promise.all Parallel fetches, Suspense streaming boundaries, next/image wrappers).
@@ -184,14 +183,6 @@ When tasked with building React components, diagnosing UI lag, or optimizing cac
 
 **Advanced (Focus on Full Optimization):**
 → All sections + Section 8: Advanced Patterns
-
----
-
-## 🔍 Validation Script
-
-| Script | Purpose | Command |
-|--------|---------|---------|
-| [scripts/react_performance_checker.py](scripts/react_performance_checker.py) | Automated performance audit | `python3 scripts/react_performance_checker.py <project_path>` |
 
 ---
 
