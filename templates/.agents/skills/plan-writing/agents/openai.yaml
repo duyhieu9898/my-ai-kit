@@ -1,8 +1,4 @@
 interface:
   display_name: "Plan Writing"
   short_description: "File-aware task plans with explicit verification"
-  brand_color: "#8B5CF6"
   default_prompt: "Use $plan-writing to turn this bounded change into a file-aware implementation plan."
-
-policy:
-  allow_implicit_invocation: true

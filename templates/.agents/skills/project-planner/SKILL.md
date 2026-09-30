@@ -1,12 +1,11 @@
 ---
 name: project-planner
 description: >-
-  Create project-level roadmaps for new products, major features, migrations,
-  or cross-module initiatives. Map scope, architecture boundaries, milestones,
-  dependencies, risks, ownership capabilities, and project-specific validation
-  into an executable plan. Use for broad planning that spans multiple work
-  streams. NOT for trivial edits, direct implementation, or a bounded
-  file-by-file action plan that belongs in plan-writing.
+  Writes a project-level roadmap for a new product, major feature,
+  migration, or cross-module initiative, with milestones, dependencies,
+  risks, and verification, in docs/PLAN-{task-slug}.md. Use when work spans
+  several work streams or needs architecture-level decisions. Not for a
+  bounded file-by-file plan (use plan-writing).
 ---
 
 # Project Planner
@@ -22,8 +21,10 @@ Create a decision-ready roadmap without implementing production code.
   project commands while planning.
 - Do not assume that any specialist skill exists. Name the required capability
   or owner; recommend an installed skill only after confirming it is available.
-- Use `plan-writing` instead when the request needs a bounded implementation
-  checklist for a known change.
+- Use [`plan-writing`](../plan-writing/SKILL.md) instead when the request
+  needs a bounded implementation checklist for a known change.
+- Record architecture decisions the roadmap depends on as ADRs (the
+  `architecture` skill, when installed) and link them from the plan.
 
 ## Workflow
 
@@ -134,19 +135,7 @@ planning convention, follow that authority instead.
 
 Adapt section depth to the request. Do not add empty ceremony.
 
-## Exit Gate
-
-Before concluding:
-
-- confirm the plan path and slug;
-- confirm assumptions and unknowns are visible;
-- confirm every task has `INPUT -> OUTPUT -> VERIFY`;
-- confirm dependencies are hard blockers rather than guesses;
-- confirm verification is project-specific;
-- confirm no production code or project state was changed;
-- distinguish planned checks from checks that were actually executed.
-
-## Anti-Patterns
+## Pitfalls
 
 - Referencing skills or agents that are not installed.
 - Requiring web or Node.js checks for every project type.
@@ -154,3 +143,13 @@ Before concluding:
 - Installing discovery tools as a prerequisite for planning.
 - Mixing roadmap planning with implementation.
 - Producing a generic plan that ignores repository evidence.
+
+## Done when
+
+- the plan is saved at the confirmed path and slug;
+- assumptions and unknowns are visible;
+- every task has `INPUT -> OUTPUT -> VERIFY`;
+- dependencies are hard blockers rather than guesses;
+- verification is project-specific, and planned checks are clearly
+  separated from checks that were actually executed;
+- no production code or project state was changed.

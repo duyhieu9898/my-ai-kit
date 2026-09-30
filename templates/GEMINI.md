@@ -11,12 +11,11 @@ trigger: always_on
 
 ## 🚀 DEVELOPMENT PROTOCOL
 
-> **MANDATORY:** You MUST read the appropriate specialist agent file and its skills BEFORE performing any implementation. Priority of rules: P0 (GEMINI.md) > P1 (Agent .md) > P2 (SKILL.md).
+> Read the relevant skill in `.agents/skills/<name>/SKILL.md` before implementation. Priority of rules: P0 (this file and the project's own conventions) > P1 (the active SKILL.md) > P2 (the skill's references).
 
 1. **Modular Skill Loading:** Read the index file `SKILL.md` first, then only read specific sections directly related to the task.
-2. **Read -> Understand -> Apply:** Clearly identify the goal of the Agent/Skill, the mandatory principles, and how your solution differs from standard implementations before writing code.
-3. **Agent Persona Protocol:** AI automatically loads the most appropriate specialist agent and applies its knowledge when performing implementation tasks. Do NOT print the announcement banner (e.g. "Applying knowledge of...") unless explicitly requested by the user.
-   *(Masters: `project-planner`, `security-auditor`, `backend-specialist`, `frontend-design`, `debugger`)*
+2. **Read -> Understand -> Apply:** Identify the goal of the skill and its project-specific rules before writing code.
+3. **Skill Selection:** Pick the smallest set of skills that matches the task and apply them without announcing them.
 
 ---
 
@@ -38,21 +37,18 @@ Classify the user request before execution to select the correct operation mode:
 
 ---
 
-## 🛑 SOCRATIC GATE (CLARIFICATION)
+## 🛑 CLARIFY MINIMALLY
 
-**Do not guess.** If any requirements are unclear or the task is complex, you must ask for clarification before using tools or writing code:
-*   **New Feature / Large Build:** Ask at least 3 strategic questions (Purpose, Target Users, Scope).
-*   **Bug Fix / Code Edit:** Confirm understanding of the issue and ask about the blast radius/impact.
-*   **Proceed trực tiếp:** If the user requests immediate implementation, ask 1-2 edge-case or risk-related questions only if necessary.
+Ask only when missing information makes the next action ambiguous, risky, or destructive. Proceed when intent is clear, including direct requests such as "continue" or "fix it". For broad work, state a short plan before editing. When a question is needed, give a default so work can continue (see the `product-manager` skill).
 
 ---
 
 ## 🧹 UNIVERSAL RULES
 
 *   **Language:** Respond in the user's language (e.g., Vietnamese). Keep all identifiers, variable names, and code comments in English.
-*   **Clean Code:** Follow `@[.agents/skills/clean-code]`. Write concise, minimalist code, avoid unnecessary abstractions, and do not over-engineer.
+*   **Clean Code:** Follow `.agents/skills/clean-code/SKILL.md`. Write concise, minimalist code, avoid unnecessary abstractions, and do not over-engineer.
 *   **File Dependency:** Check `.agents/ARCHITECTURE.md` for file dependencies before editing, and update all affected files simultaneously.
-*   **System Map:** Read `ARCHITECTURE.md` at the start of the session to understand the relationship between Agents, Skills, and Scripts.
+*   **System Map:** Read `.agents/ARCHITECTURE.md` when changing the shared agent toolkit.
 
 ---
 
@@ -63,7 +59,7 @@ Classify the user request before execution to select the correct operation mode:
 ### 1. Proof Ladder
 *   **Documentation (Docs):** Run `git diff --check`.
 *   **Source Code:** Run linters, type checks, or unit tests matching the modified files.
-*   **Installer/Toolkit:** Run `test-installer.mjs`, test-hooks, and `check-template-consistency.mjs`.
+*   **Toolkit or skill changes:** Validate frontmatter, links, scripts, and changed skill paths. See `.agents/skills/verify-changes/SKILL.md`.
 
 ### 2. Checklist Priority (Final verification request)
 Run the project audit command: `python3 .agents/scripts/checklist.py .` in the following priority order:

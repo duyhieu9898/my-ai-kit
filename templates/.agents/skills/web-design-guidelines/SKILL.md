@@ -1,115 +1,92 @@
 ---
 name: web-design-guidelines
 description: >-
-  Use when reviewing HTML/CSS elements for accessibility, web interface design audits, or HTML structure.
-  Audits UI codebases against Web Interface Guidelines. NOT for implementing new UI features from scratch.
-allowed-tools:
-  - Read
-  - Glob
-  - Grep
-metadata:
-  author: vercel
-  version: 1.0.0
-  argument-hint: <file-or-pattern>
+  Audits UI code against the Vercel Web Interface Guidelines for
+  accessibility, focus, forms, motion, and interaction, with file:line
+  findings. Use when asked to review a page or component for accessibility or
+  UX quality, or before shipping new UI. Not for restyling (use
+  frontend-design).
 ---
 
-# Web Interface Guidelines
+# Web Interface Guidelines Audit
 
-Review files for compliance with Web Interface Guidelines.
+The audit reads the target files, checks them against Vercel's Web Interface
+Guidelines, and reports terse `file:line` findings. It reviews; it does not
+fix unless the user asks.
 
----
+## Procedure
 
-## 📑 Content Map
+1. **Targets:** use the files, folder, or glob the user named. If none, audit
+   the files changed in the working tree (`git diff --name-only`) that
+   contain UI (`.tsx`, `.jsx`, `.vue`, `.svelte`, `.html`, `.css`). Ask only
+   if that is empty too.
+2. **Fetch the rules** fresh for each audit:
 
-| File | Description | When to Read |
-|:---|:---|:---|
-| _No supplementary files_ | Main web interface audit procedures are in this file | Use this file by default |
+   ```text
+   https://raw.githubusercontent.com/vercel-labs/web-interface-guidelines/main/command.md
+   ```
 
----
+   The file is written as a slash command: read its argument placeholder as
+   the targets from step 1. Its rules and output format override the fallback
+   list below.
+3. **If the fetch fails** (no network, blocked domain, non-200), say so in
+   the first line of the report ("Guidelines fetch failed; audited against
+   the built-in fallback list") and use the fallback list below.
+4. **Read each target file** and check it against the rules. Library
+   components count: an icon-only `<Button size="icon">` from shadcn/ui still
+   needs an `aria-label`. Read the library's source under `components/ui/`
+   before reporting a problem that the wrapper may already solve.
+5. **Report** in the output format below.
 
-## 🔗 Related Skills
+## Fallback rules (use only when the fetch fails)
 
-| Need | Skill |
-|:---|:---|
-| Restyling or theming the UI that this audit reviews | [`frontend-design`](../frontend-design/SKILL.md) |
+- Icon-only buttons have `aria-label`; decorative icons have
+  `aria-hidden="true"`.
+- Every form control has a `<label>` (`htmlFor`) or `aria-label`.
+- Actions use `<button>`, navigation uses `<a>` or `<Link>`; no clickable
+  `<div>` or `<span>`.
+- Images have `alt` (`alt=""` if decorative) and explicit `width` and
+  `height`.
+- Visible focus on every interactive element: no `outline-none` without a
+  `focus-visible:` replacement.
+- Headings are in order, and async messages (toasts, validation) use
+  `aria-live="polite"`.
+- Inputs have the right `type`, `inputmode`, `autocomplete`, and `name`;
+  paste is never blocked.
+- Errors appear inline next to the field, and focus moves to the first error
+  on submit.
+- Motion respects `prefers-reduced-motion`, animates only `transform` and
+  `opacity`, and never uses `transition: all`.
+- Zoom is never disabled (`user-scalable=no`, `maximum-scale=1`).
+- Long text truncates or wraps (`min-w-0` on flex children); empty states
+  render.
+- Lists over about 50 items are virtualized.
+- Stateful UI (filters, tabs, pagination) is reflected in the URL.
+- Destructive actions need confirmation or undo.
+- Dates and numbers use `Intl.*`, not hardcoded formats.
+- Dark themes set `color-scheme: dark` on `<html>`.
 
----
+## Output format
 
-## 🛠️ Instructions / Procedures
+Group by file, one finding per line, no preamble:
 
-When reviewing UI files for guidelines compliance, accessibility, or visual structure, strictly follow this step-by-step procedure:
+```text
+## src/components/Toolbar.tsx
 
-### Step 1: Fetch Latest Guidelines
-1. Fetch the latest fresh guidelines from the remote source URL prior to starting the audit:
-   `https://raw.githubusercontent.com/vercel-labs/web-interface-guidelines/main/command.md`
-2. Parse the fetched rules and formatting guidelines.
+src/components/Toolbar.tsx:42 - icon button missing aria-label
+src/components/Toolbar.tsx:67 - transition: all → list properties
 
-### Step 2: Read Specified Target Files
-1. Read the user's provided files or search the codebase for matching UI file patterns (glob/grep).
-2. If no files are specified, ask the user to clarify which elements or layout components to audit.
+## src/components/Card.tsx
 
-### Step 3: Run Layout & Style Audits
-1. Audit HTML, CSS, React components, or style sheets against the fetched rules.
-2. Review elements for accessibility features, color contrast compliance, responsive layouts, and proper DOM tag structures.
-
-### Step 4: Output Tersely Formatted Findings
-1. Output all findings in the strict, terse format requested by the guidelines:
-   `file:line - Description of violation / suggestion`
-2. Run the **Quality Audit Checklist** to ensure high-fidelity audits.
-
----
-
-## Guidelines Source
-
-Fetch fresh guidelines before each review:
-
-```
-https://raw.githubusercontent.com/vercel-labs/web-interface-guidelines/main/command.md
-```
-
-Use WebFetch or standard URL reading tools to retrieve the latest rules. The fetched content contains all the rules and output format instructions.
-
----
-
-## Usage
-
-When a user provides a file or pattern argument:
-1. Fetch guidelines from the source URL above
-2. Read the specified files
-3. Apply all rules from the fetched guidelines
-4. Output findings using the format specified in the guidelines
-
-If no files specified, ask the user which files to review.
-
----
-
-## Design Workflow
-
-```
-1. DESIGN   → Read frontend-design principles
-2. CODE     → Implement the design
-3. AUDIT    → Run web-design-guidelines review ← YOU ARE HERE
-4. FIX      → Address findings from audit
+✓ pass
 ```
 
----
+Add an explanation only when the fix is not obvious. The guidelines' copy
+rules (Title Case, `…` instead of `...`, curly quotes) are Vercel house style:
+report them only if the project follows that style or the user asks.
 
-## ❌ Anti-Patterns
+## Done when
 
-| Don't | Do |
-|:---|:---|
-| Audit from stale remembered rules | Fetch the latest official guidelines first |
-| Review only visual styling | Include accessibility, semantics, and responsive behavior |
-| Return broad subjective feedback | Report precise `file:line` findings |
-| Audit unspecified files silently | Ask for target files or patterns when missing |
-
----
-
-## ✅ Quality Audit Checklist
-
-Before concluding a Web Design audit task, verify compliance with the following:
-
-- [ ] **Guidelines Fetched**: Successfully fetched the latest Vercel Web Interface Guidelines from the official raw GitHub source.
-- [ ] **Comprehensive File Audit**: Reviewed all target HTML, CSS, React, or UI file formats.
-- [ ] **Accessibility (a11y) Checked**: Audited target elements for contrast ratios, aria attributes, alt text presence, and semantic headers.
-- [ ] **Format Conformed**: Output matches the strict `file:line` layout format with no extra conversation or conversational filler.
+Every target file is listed with findings or `✓ pass`, each finding has a
+`file:line`, and the report says whether the fetched guidelines or the
+fallback list was used.

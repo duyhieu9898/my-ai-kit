@@ -11,7 +11,7 @@ Codex Kit is a modular toolkit organized around a unified, composable
 model with skill directories that can be loaded on demand.
 
 The kit contains:
-- **26 Composable Skills** - Direct domain-specific knowledge packages and expert personas under `skills/`.
+- **26 Composable Skills** - Task-focused knowledge, procedures, and scripts under `skills/`.
 - **4 Master Scripts** - System-level automation and validation scripts under `scripts/`.
 
 ---
@@ -34,11 +34,11 @@ AGENTS.md                     # Repository-wide workflow and skill rules
 │   └── hooks/
 │       ├── harness_guard.py # Shared warning-only Harness policy
 │       └── claude_adapter.py # Claude payload and response adapter
-├── skills/                  # 26 Composable Skills (Expert Personas + Domain Knowledge)
+├── skills/                  # 26 Composable Skills
 │   ├── {skill-name}/
-│   │   ├── SKILL.md         # Metadata, triggers, and prompt guidelines
+│   │   ├── SKILL.md         # name + description frontmatter, then instructions
 │   │   ├── agents/
-│   │   │   └── openai.yaml  # Brand interface configuration
+│   │   │   └── openai.yaml  # Codex UI metadata
 │   │   ├── references/      # Deep domain documentation
 │   │   └── scripts/         # Skill-level utility scripts
 └── scripts/                 # Master validation and automation scripts
@@ -73,55 +73,40 @@ lost.
 
 ## 🧩 The 26 Composable Skills
 
-In Codex, the boundary between "agents" and "skills" is dissolved. Every specialist capability or expert persona is implemented as a **Skill** that the unified AI engine can dynamically load into its context.
+Every capability is a skill: a folder with a `SKILL.md` that the agent loads
+when its `description` matches the task. Skills follow
+`docs/skills/SKILL_STANDARD.md` in the kit repository. Named profiles in
+`kit.json` install a subset.
 
-### 🎭 Expert Persona Skills (7)
-These skills contain specialized persona prompts, deep domain methodologies, and dynamic color branding for the Codex UI.
-
-| Skill | Focus | Primary Invocation / Triggers |
-| :--- | :--- | :--- |
-| `project-planner` | Self-contained initiative roadmaps | Major features, new projects, migrations, cross-module plans |
-| `backend-specialist` | Scaleable APIs & serverless logic | Server-side development, endpoint design, auth |
-| `devops-engineer` | CI/CD, containerization & cloud infra | Docker, PM2, deployment pipelines, Nginx |
-| `security-auditor` | Security compliance & vulnerabilities | OWASP, auth audits, static analysis review |
-| `debugger` | Systematic root-cause analysis | Complex bug investigation, system crashes |
-| `documentation-writer` | Professional documentation & guides | API docs, user guides, README files |
-| `product-manager` | Business logic, user stories & backlog/MVP | Feature specifications, user flows, RICE prioritization |
-
----
-
-### 🧩 Domain Knowledge Skills (19)
-These skills provide specific instructions and toolsets to guide implementation in target technologies and patterns.
-
-| Domain Category | Skills Included |
+| Area | Skills |
 | :--- | :--- |
-| **Frontend & UI** | `react-refactor-patterns`, `web-design-guidelines`, `frontend-design`, `seo-fundamentals`, `i18n-localization`, `webapp-testing`, `nextjs-react-expert` |
-| **Backend & API** | `api-patterns`, `database-design`, `mcp-builder` |
-| **Testing & QA** | `testing-patterns`, `verify-changes`, `lint-and-validate`, `clean-code`, `performance-profiling` |
-| **Security & Audits** | `code-review-checklist` |
-| **Planning & Design** | `architecture`, `plan-writing` |
-| **System Operations** | `explorer-agent` |
+| **Core workflow** | `clean-code`, `verify-changes`, `debugger`, `explorer-agent`, `lint-and-validate`, `code-review-checklist`, `security-auditor` |
+| **Web frontend** | `frontend-design`, `web-design-guidelines`, `nextjs-react-expert`, `react-refactor-patterns`, `performance-profiling`, `seo-fundamentals`, `i18n-localization` |
+| **Backend and data** | `backend-specialist`, `api-patterns`, `database-design`, `mcp-builder` |
+| **Testing** | `testing-patterns`, `webapp-testing` |
+| **Planning** | `plan-writing`, `project-planner`, `product-manager`, `architecture` |
+| **Operations and docs** | `devops-engineer`, `documentation-writer` |
 
 ---
 
-## ⚡ Dynamic Skill Discovery (Standard native)
+## ⚡ Skill Discovery
 
 ```plaintext
-User Intent / Prompt → Scan Frontmatter `description` → Auto-inject relevant SKILL.md
+User request → agent compares it with every skill's `description` → loads the matching SKILL.md
 ```
 
-Unlike legacy systems that required hard-routed agent scripts or manual loading
-tables, this toolkit uses skill metadata for selective loading:
-1. Each `SKILL.md` has frontmatter with a `description`.
-2. Matching skills can be loaded for the current task, while unrelated
-   references stay out of context.
-3. Skill files use Content Maps and Related Skills tables to support
-   progressive disclosure.
+1. Each `SKILL.md` has frontmatter with `name` and `description` only.
+2. The description says what the skill does, when to use it, and at most one
+   sibling it should not be confused with.
+3. The body loads only after selection; `references/` load only when the body
+   says to read them.
 
 Negative routing boundaries are part of skill discovery. In particular,
 routine Git inspection, commit, branch, tag, pull, and push operations do not
 activate `devops-engineer` unless they directly involve deployment, CI/CD,
 production infrastructure, server access, rollback, or release management.
+`documentation-writer` is explicit-only: it runs when documentation is
+requested.
 
 ---
 

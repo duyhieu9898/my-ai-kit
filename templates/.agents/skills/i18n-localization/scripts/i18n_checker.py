@@ -3,6 +3,7 @@
 i18n Checker - Detects hardcoded strings and missing translations.
 Scans for untranslated text in React, Vue, and Python files.
 """
+import argparse
 import sys
 import re
 import json
@@ -75,16 +76,21 @@ def check_locale_completeness(locale_files: list) -> dict:
     if not locale_files:
         return {'passed': [], 'issues': ["[!] No locale files found"]}
 
-    # Group by parent folder (language)
+    # Group by language: locales/<lang>/<namespace>.json, or a flat
+    # messages/<lang>.json layout (next-intl default) where the file is the language.
+    flat_dirs = {'messages', 'locales', 'translations', 'lang', 'i18n'}
     locales = {}
     for f in locale_files:
         if f.suffix == '.json':
             try:
-                lang = f.parent.name
+                if f.parent.name in flat_dirs:
+                    lang, namespace = f.stem, f.parent.name
+                else:
+                    lang, namespace = f.parent.name, f.stem
                 content = json.loads(f.read_text(encoding='utf-8'))
                 if lang not in locales:
                     locales[lang] = {}
-                locales[lang][f.stem] = set(flatten_keys(content))
+                locales[lang][namespace] = set(flatten_keys(content))
             except:
                 continue
 
@@ -94,23 +100,18 @@ def check_locale_completeness(locale_files: list) -> dict:
 
     passed.append(f"[OK] Found {len(locales)} language(s): {', '.join(locales.keys())}")
 
-    # Compare keys across locales
-    all_langs = list(locales.keys())
-    base_lang = all_langs[0]
+    # Compare every language against the union of keys in all languages,
+    # so the result does not depend on which language is scanned first.
+    all_langs = sorted(locales.keys())
+    namespaces = sorted({ns for lang in all_langs for ns in locales[lang]})
 
-    for namespace in locales.get(base_lang, {}):
-        base_keys = locales[base_lang].get(namespace, set())
-
-        for lang in all_langs[1:]:
-            other_keys = locales.get(lang, {}).get(namespace, set())
-
-            missing = base_keys - other_keys
+    for namespace in namespaces:
+        union_keys = set().union(*(locales[lang].get(namespace, set()) for lang in all_langs))
+        for lang in all_langs:
+            missing = union_keys - locales[lang].get(namespace, set())
             if missing:
-                issues.append(f"[X] {lang}/{namespace}: Missing {len(missing)} keys")
-
-            extra = other_keys - base_keys
-            if extra:
-                issues.append(f"[!] {lang}/{namespace}: {len(extra)} extra keys")
+                sample = ', '.join(sorted(missing)[:3])
+                issues.append(f"[X] {lang}/{namespace}: Missing {len(missing)} keys ({sample})")
 
     if not issues:
         passed.append("[OK] All locales have matching keys")
@@ -201,8 +202,14 @@ def check_hardcoded_strings(project_path: Path) -> dict:
     return {'passed': passed, 'issues': issues}
 
 def main():
-    target = sys.argv[1] if len(sys.argv) > 1 else "."
-    project_path = Path(target)
+    parser = argparse.ArgumentParser(
+        description="Compare locale JSON keys across languages and flag likely "
+                    "hardcoded UI strings. Exits 1 on missing keys, or on "
+                    "hardcoded strings when locale files exist.")
+    parser.add_argument("path", nargs="?", default=".",
+                        help="project root to scan (default: current directory)")
+    args = parser.parse_args()
+    project_path = Path(args.path)
 
     print("\n" + "=" * 60)
     print("  i18n CHECKER - Internationalization Audit")

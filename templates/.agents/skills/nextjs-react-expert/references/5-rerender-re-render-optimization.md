@@ -9,14 +9,25 @@
 
 This section contains **12 rules** focused on re-render optimization.
 
+- 5.1 Calculate Derived State During Rendering
+- 5.2 Defer State Reads to Usage Point
+- 5.3 Do not wrap a simple expression with a primitive result type in useMemo
+- 5.4 Extract Default Non-primitive Parameter Value from Memoized Component to Constant
+- 5.5 Extract to Memoized Components
+- 5.6 Narrow Effect Dependencies
+- 5.7 Put Interaction Logic in Event Handlers
+- 5.8 Subscribe to Derived State
+- 5.9 Use Functional setState Updates
+- 5.10 Use Lazy State Initialization
+- 5.11 Use Transitions for Non-Urgent Updates
+- 5.12 Use useRef for Transient Values
+
 ---
 
 ## Rule 5.1: Calculate Derived State During Rendering
 
 **Impact:** MEDIUM  
 **Tags:** rerender, derived-state, useEffect, state  
-
-## Calculate Derived State During Rendering
 
 If a value can be computed from current props/state, do not store it in state or update it in an effect. Derive it during render to avoid extra renders and state drift. Do not set state in effects solely in response to prop changes; prefer derived values or keyed resets instead.
 
@@ -57,8 +68,6 @@ References: [You Might Not Need an Effect](https://react.dev/learn/you-might-not
 **Impact:** MEDIUM  
 **Tags:** rerender, searchParams, localStorage, optimization  
 
-## Defer State Reads to Usage Point
-
 Don't subscribe to dynamic state (searchParams, localStorage) if you only read it inside callbacks.
 
 **Incorrect (subscribes to all searchParams changes):**
@@ -97,8 +106,6 @@ function ShareButton({ chatId }: { chatId: string }) {
 **Impact:** LOW-MEDIUM  
 **Tags:** rerender, useMemo, optimization  
 
-## Do not wrap a simple expression with a primitive result type in useMemo
-
 When an expression is simple (few logical or arithmetical operators) and has a primitive result type (boolean, number, string), do not wrap it in `useMemo`.
 Calling `useMemo` and comparing hook dependencies may consume more resources than the expression itself.
 
@@ -132,8 +139,6 @@ function Header({ user, notifications }: Props) {
 
 **Impact:** MEDIUM  
 **Tags:** rerender, memo, optimization  
-
-## Extract Default Non-primitive Parameter Value from Memoized Component to Constant
 
 When memoized component has a default value for some non-primitive optional parameter, such as an array, function, or object, calling the component without that parameter results in broken memoization. This is because new value instances are created on every rerender, and they do not pass strict equality comparison in `memo()`.
 
@@ -169,8 +174,6 @@ const UserAvatar = memo(function UserAvatar({ onClick = NOOP }: { onClick?: () =
 
 **Impact:** MEDIUM  
 **Tags:** rerender, memo, useMemo, optimization  
-
-## Extract to Memoized Components
 
 Extract expensive work into memoized components to enable early returns before computation.
 
@@ -214,8 +217,6 @@ function Profile({ user, loading }: Props) {
 
 **Impact:** LOW  
 **Tags:** rerender, useEffect, dependencies, optimization  
-
-## Narrow Effect Dependencies
 
 Specify primitive dependencies instead of objects to minimize effect re-runs.
 
@@ -261,8 +262,6 @@ useEffect(() => {
 **Impact:** MEDIUM  
 **Tags:** rerender, useEffect, events, side-effects, dependencies  
 
-## Put Interaction Logic in Event Handlers
-
 If a side effect is triggered by a specific user action (submit, click, drag), run it in that event handler. Do not model the action as state + effect; it makes effects re-run on unrelated changes and can duplicate the action.
 
 **Incorrect (event modeled as state + effect):**
@@ -307,8 +306,6 @@ Reference: [Should this code move to an event handler?](https://react.dev/learn/
 **Impact:** MEDIUM  
 **Tags:** rerender, derived-state, media-query, optimization  
 
-## Subscribe to Derived State
-
 Subscribe to derived boolean state instead of continuous values to reduce re-render frequency.
 
 **Incorrect (re-renders on every pixel change):**
@@ -336,8 +333,6 @@ function Sidebar() {
 
 **Impact:** MEDIUM  
 **Tags:** react, hooks, useState, useCallback, callbacks, closures  
-
-## Use Functional setState Updates
 
 When updating state based on the current state value, use the functional update form of setState instead of directly referencing the state variable. This prevents stale closures, eliminates unnecessary dependencies, and creates stable callback references.
 
@@ -412,8 +407,6 @@ function TodoList() {
 **Impact:** MEDIUM  
 **Tags:** react, hooks, useState, performance, initialization  
 
-## Use Lazy State Initialization
-
 Pass a function to `useState` for expensive initial values. Without the function form, the initializer runs on every render even though the value is only used once.
 
 **Incorrect (runs on every render):**
@@ -471,8 +464,6 @@ For simple primitives (`useState(0)`), direct references (`useState(props.value)
 **Impact:** MEDIUM  
 **Tags:** rerender, transitions, startTransition, performance  
 
-## Use Transitions for Non-Urgent Updates
-
 Mark frequent, non-urgent state updates as transitions to maintain UI responsiveness.
 
 **Incorrect (blocks UI on every scroll):**
@@ -511,8 +502,6 @@ function ScrollTracker() {
 
 **Impact:** MEDIUM  
 **Tags:** rerender, useref, state, performance  
-
-## Use useRef for Transient Values
 
 When a value changes frequently and you don't want a re-render on every update (e.g., mouse trackers, intervals, transient flags), store it in `useRef` instead of `useState`. Keep component state for UI; use refs for temporary DOM-adjacent values. Updating a ref does not trigger a re-render.
 

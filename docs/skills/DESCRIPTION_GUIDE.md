@@ -304,8 +304,8 @@ because they share the listing budget and compete for selection.
 - `agents/openai.yaml` `interface.short_description` is a UI blurb for Codex
   (25–64 chars). It does not affect selection and must not replace
   `description`.
-- `scripts/check-template-consistency.mjs` should enforce the automatable
-  checks in section 4. That is planned for batch 0 of the audit.
+- `scripts/check-template-consistency.mjs` enforces the automatable checks in
+  section 4 through `scripts/skill-standard.mjs`.
 
 ## Sources
 

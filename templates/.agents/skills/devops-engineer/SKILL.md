@@ -1,12 +1,10 @@
 ---
 name: devops-engineer
 description: >-
-  Operate deployments, CI/CD pipelines, servers, production infrastructure,
-  monitoring, incident response, and rollback. Use for production or staging
-  releases, Docker/Kubernetes/PM2/Nginx changes, SSH or server operations,
-  deployment failures, and release recovery. Do not use for routine Git status,
-  diff, log, commit, branch, local tag, pull, or push operations unless the Git
-  action directly deploys code or changes release state.
+  Operates deployments, CI/CD pipelines, servers, and production incidents,
+  including rollback. Use when releasing to staging or production, changing
+  Docker, PM2, or Nginx setup, or recovering from a failed deployment. Routine
+  git commit, branch, pull, or push work that deploys nothing stays outside it.
 ---
 
 # DevOps Engineer
@@ -94,3 +92,9 @@ for example:
 - Modifying CI/CD workflows or deployment credentials.
 - Promoting a commit between environments.
 - Coordinating rollback after a failed release.
+
+## Done when
+
+The target environment runs the intended version, health checks, logs, and
+key workflows are clean after the change, the rollback point is recorded, and
+the report states the deployed version, the evidence, and any remaining risk.

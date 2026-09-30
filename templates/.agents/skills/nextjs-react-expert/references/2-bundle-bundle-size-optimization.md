@@ -9,14 +9,18 @@
 
 This section contains **5 rules** focused on bundle size optimization.
 
+- 2.1 Avoid Barrel File Imports
+- 2.2 Conditional Module Loading
+- 2.3 Defer Non-Critical Third-Party Libraries
+- 2.4 Dynamic Imports for Heavy Components
+- 2.5 Preload Based on User Intent
+
 ---
 
 ## Rule 2.1: Avoid Barrel File Imports
 
 **Impact:** CRITICAL  
 **Tags:** bundle, imports, tree-shaking, barrel-files, performance  
-
-## Avoid Barrel File Imports
 
 Import directly from source files instead of barrel files to avoid loading thousands of unused modules. **Barrel files** are entry points that re-export multiple modules (e.g., `index.js` that does `export * from './module'`).
 
@@ -48,24 +52,32 @@ import TextField from '@mui/material/TextField'
 // Loads only what you use
 ```
 
-**Alternative (Next.js 13.5+):**
+**Alternative in Next.js (13.5+): `optimizePackageImports`:**
+
+Next.js already optimizes a built-in list of barrel-heavy packages, including
+`lucide-react`, `date-fns`, `lodash-es`, `antd`, `@mui/material`,
+`@mui/icons-material`, `@tabler/icons-react`, `@headlessui/react`,
+`recharts`, `rxjs`, `react-use`, and `react-icons/*`. Barrel imports from those
+are fine in a Next.js app. Add only packages that are not on the list, such as
+an internal UI package:
 
 ```js
-// next.config.js - use optimizePackageImports
+// next.config.js
 module.exports = {
   experimental: {
-    optimizePackageImports: ['lucide-react', '@mui/material']
+    optimizePackageImports: ['@acme/ui']
   }
 }
 
-// Then you can keep the ergonomic barrel imports:
-import { Check, X, Menu } from 'lucide-react'
-// Automatically transformed to direct imports at build time
+// Barrel imports from the listed package are rewritten to direct imports at build time:
+import { Button, Dialog } from '@acme/ui'
 ```
+
+Outside Next.js (Vite, plain Node), use the direct imports shown above.
 
 Direct imports provide 15-70% faster dev boot, 28% faster builds, 40% faster cold starts, and significantly faster HMR.
 
-Libraries commonly affected: `lucide-react`, `@mui/material`, `@mui/icons-material`, `@tabler/icons-react`, `react-icons`, `@headlessui/react`, `@radix-ui/react-*`, `lodash`, `ramda`, `date-fns`, `rxjs`, `react-use`.
+Libraries commonly affected outside Next.js's default list: your own workspace packages and `@radix-ui/react-*`. Inside other bundlers, also `lucide-react`, `@mui/material`, `@mui/icons-material`, `@tabler/icons-react`, `react-icons`, `@headlessui/react`, `@radix-ui/react-*`, `lodash`, `ramda`, `date-fns`, `rxjs`, `react-use`.
 
 Reference: [How we optimized package imports in Next.js](https://vercel.com/blog/how-we-optimized-package-imports-in-next-js)
 
@@ -75,8 +87,6 @@ Reference: [How we optimized package imports in Next.js](https://vercel.com/blog
 
 **Impact:** HIGH  
 **Tags:** bundle, conditional-loading, lazy-loading  
-
-## Conditional Module Loading
 
 Load large data or modules only when a feature is activated.
 
@@ -107,8 +117,6 @@ The `typeof window !== 'undefined'` check prevents bundling this module for SSR,
 
 **Impact:** MEDIUM  
 **Tags:** bundle, third-party, analytics, defer  
-
-## Defer Non-Critical Third-Party Libraries
 
 Analytics, logging, and error tracking don't block user interaction. Load them after hydration.
 
@@ -158,8 +166,6 @@ export default function RootLayout({ children }) {
 **Impact:** CRITICAL  
 **Tags:** bundle, dynamic-import, code-splitting, next-dynamic  
 
-## Dynamic Imports for Heavy Components
-
 Use `next/dynamic` to lazy-load large components not needed on initial render.
 
 **Incorrect (Monaco bundles with main chunk ~300KB):**
@@ -193,8 +199,6 @@ function CodePanel({ code }: { code: string }) {
 
 **Impact:** MEDIUM  
 **Tags:** bundle, preload, user-intent, hover  
-
-## Preload Based on User Intent
 
 Preload heavy bundles before they're needed to reduce perceived latency.
 

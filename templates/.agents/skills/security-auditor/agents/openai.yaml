@@ -1,8 +1,4 @@
 interface:
   display_name: "Security Auditor"
-  short_description: "Security code reviews, OWASP checks, threat models, and supply chain audits."
-  brand_color: "#EF4444"
-  default_prompt: "$security-auditor"
-
-policy:
-  allow_implicit_invocation: true
+  short_description: "Audit code for OWASP 2025 flaws and leaked secrets"
+  default_prompt: "Use $security-auditor to audit the auth and payment routes before release."

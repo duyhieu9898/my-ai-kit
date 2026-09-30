@@ -1,8 +1,4 @@
 interface:
   display_name: "i18n & Localization"
-  short_description: "i18n keys, ICU formatting, locale JSON, and RTL support."
-  brand_color: "#3B82F6"
-  default_prompt: "$i18n-localization"
-
-policy:
-  allow_implicit_invocation: true
+  short_description: "Add locales, next-intl routing, ICU messages, RTL"
+  default_prompt: "Use $i18n-localization to add Vietnamese to the app and extract hardcoded strings."

@@ -9,14 +9,20 @@
 
 This section contains **7 rules** focused on server-side performance.
 
+- 3.1 Authenticate Server Actions Like API Routes
+- 3.2 Avoid Duplicate Serialization in RSC Props
+- 3.3 Cross-Request LRU Caching
+- 3.4 Minimize Serialization at RSC Boundaries
+- 3.5 Parallel Data Fetching with Component Composition
+- 3.6 Per-Request Deduplication with React.cache()
+- 3.7 Use after() for Non-Blocking Operations
+
 ---
 
 ## Rule 3.1: Authenticate Server Actions Like API Routes
 
 **Impact:** CRITICAL  
 **Tags:** server, server-actions, authentication, security, authorization  
-
-## Authenticate Server Actions Like API Routes
 
 **Impact: CRITICAL (prevents unauthorized access to server mutations)**
 
@@ -113,8 +119,6 @@ Reference: [https://nextjs.org/docs/app/guides/authentication](https://nextjs.or
 **Impact:** LOW  
 **Tags:** server, rsc, serialization, props, client-components  
 
-## Avoid Duplicate Serialization in RSC Props
-
 **Impact: LOW (reduces network payload by avoiding duplicate serialization)**
 
 RSC→client serialization deduplicates by object reference, not value. Same reference = serialized once; new reference = serialized again. Do transformations (`.toSorted()`, `.filter()`, `.map()`) in client, not server.
@@ -179,8 +183,6 @@ users={[{id:1},{id:2}]} sorted={users.toSorted()} // sends 2 arrays + 2 unique o
 **Impact:** HIGH  
 **Tags:** server, cache, lru, cross-request  
 
-## Cross-Request LRU Caching
-
 `React.cache()` only works within one request. For data shared across sequential requests (user clicks button A then button B), use an LRU cache.
 
 **Implementation:**
@@ -221,8 +223,6 @@ Reference: [https://github.com/isaacs/node-lru-cache](https://github.com/isaacs/
 **Impact:** HIGH  
 **Tags:** server, rsc, serialization, props  
 
-## Minimize Serialization at RSC Boundaries
-
 The React Server/Client boundary serializes all object properties into strings and embeds them in the HTML response and subsequent RSC requests. This serialized data directly impacts page weight and load time, so **size matters a lot**. Only pass fields that the client actually uses.
 
 **Incorrect (serializes all 50 fields):**
@@ -259,8 +259,6 @@ function Profile({ name }: { name: string }) {
 
 **Impact:** CRITICAL  
 **Tags:** server, rsc, parallel-fetching, composition  
-
-## Parallel Data Fetching with Component Composition
 
 React Server Components execute sequentially within a tree. Restructure with composition to parallelize data fetching.
 
@@ -344,8 +342,6 @@ export default function Page() {
 **Impact:** MEDIUM  
 **Tags:** server, cache, react-cache, deduplication  
 
-## Per-Request Deduplication with React.cache()
-
 Use `React.cache()` for server-side request deduplication. Authentication and database queries benefit most.
 
 **Usage:**
@@ -421,8 +417,6 @@ Reference: [React.cache documentation](https://react.dev/reference/react/cache)
 **Impact:** MEDIUM  
 **Tags:** server, async, logging, analytics, side-effects  
 
-## Use after() for Non-Blocking Operations
-
 Use Next.js's `after()` to schedule work that should execute after a response is sent. This prevents logging, analytics, and other side effects from blocking the response.
 
 **Incorrect (blocks response):**
@@ -485,6 +479,10 @@ The response is sent immediately while logging happens in the background.
 
 - `after()` runs even if the response fails or redirects
 - Works in Server Actions, Route Handlers, and Server Components
+- Stable since Next.js 15.1 (`unstable_after` before that)
+- In Server Components, `cookies()` and `headers()` cannot be called inside the
+  callback; read them first and pass the values in. The example above is a
+  Route Handler, where calling them inside the callback is allowed.
 
 Reference: [https://nextjs.org/docs/app/api-reference/functions/after](https://nextjs.org/docs/app/api-reference/functions/after)
 

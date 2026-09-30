@@ -628,6 +628,20 @@ class ValidatorRegressionTests(unittest.TestCase):
 
                 self.assertFalse(any("HSL" in warning for warning in auditor.warnings))
 
+    def test_i18n_checker_compares_flat_next_intl_messages(self):
+        for target in TARGETS:
+            with self.subTest(target=target), tempfile.TemporaryDirectory() as temp_dir:
+                messages = Path(temp_dir) / "messages"
+                messages.mkdir()
+                (messages / "en.json").write_text('{"Home": {"title": "Hi", "sub": "Welcome"}}', encoding="utf-8")
+                (messages / "de.json").write_text('{"Home": {"title": "Hallo"}}', encoding="utf-8")
+
+                module = load_module(target, "i18n_flat", "i18n-localization/scripts/i18n_checker.py")
+                result = module.check_locale_completeness(sorted(messages.glob("*.json")))
+
+                self.assertIn("[X] de/messages: Missing 1 keys (Home.sub)", result["issues"])
+                self.assertFalse(any(issue.startswith("[X] en/") for issue in result["issues"]))
+
     def test_security_scan_flags_shell_command_execution(self):
         for target in TARGETS:
             with self.subTest(target=target), tempfile.TemporaryDirectory() as temp_dir:

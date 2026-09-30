@@ -1,197 +1,142 @@
 ---
 name: documentation-writer
 description: >-
-  Use ONLY when the user explicitly requests writing, modifying, or creating technical documentation (such as READMEs, API specifications, ADRs, Changelogs, or docstring comments).
-  DO NOT auto-invoke or load during normal coding, implementation, or refactoring tasks unless documentation is explicitly requested.
-allowed-tools:
-  - Read
-  - Write
-  - Edit
-  - Glob
-  - Grep
+  Writes and updates project documentation such as READMEs, API reference
+  pages, changelogs, llms.txt files, and doc comments, using facts taken from
+  the code. Use when the user explicitly asks to write or change
+  documentation. Not for architecture decision records (use architecture).
+disable-model-invocation: true
 ---
 
 # Documentation Writer
 
-You are an expert technical writer specializing in producing clear, structured, and consistent software documentation using standard repository templates.
+This skill runs only when documentation is explicitly requested. Do not start
+it, or add documentation edits, during ordinary coding, debugging, or
+refactoring. It is explicit-only in Claude Code and Codex; on tools that
+still auto-load it, this rule is the gate.
 
-> [!IMPORTANT]
-> **Trigger Rule**: Do not auto-invoke this skill during ordinary development, debugging, or implementation tasks. Only load this skill when the user explicitly requests writing or updating documentation files.
+## Defaults
 
----
+- **Follow the project first:** its existing doc layout, heading style,
+  tone, and language. The templates below apply only when there is nothing
+  to follow.
+- **Facts come from the code,** not from memory or the old docs: commands
+  from `package.json` scripts or the `Makefile`, environment variables from
+  `.env.example` or the config loader, ports and routes from the code. Never
+  copy a real secret value from a `.env` file into documentation.
+- **No placeholders in the finished document.** If a fact cannot be found,
+  ask or mark it clearly as a TODO for the user; do not invent a plausible
+  value.
+- **Run what you document** when it is safe (install, build, test, a CLI
+  `--help`). Say which commands were not run.
+- **ADRs** belong to the `architecture` skill, which owns their template and
+  location.
 
-## 📑 Content Map
+## README
 
-| File | Description | When to Read |
-|:---|:---|:---|
-| _No supplementary files_ | Main documentation templates and procedures are in this file | Use this file by default |
+Order by what a new reader needs first. Keep reference material in `docs/`
+and link to it.
 
----
+~~~markdown
+# <Project name>
 
-## 🔗 Related Skills
+<One sentence: what it does and for whom.>
 
-| Need | Skill |
-|:---|:---|
-| Formulating detailed engineering plans | [`plan-writing`](../plan-writing/SKILL.md) |
-| Scoping specifications and requirements | [`product-manager`](../product-manager/SKILL.md) |
-| API pattern standards | [`api-patterns`](../api-patterns/SKILL.md) |
-
----
-
-## 🛠️ Instructions / Procedures
-
-When tasked with generating technical manuals, API specs, or code commentary guides, strictly follow this step-by-step procedure:
-
-### Step 1: Elicit Target Document Type & Audience
-1. Identify target readers (users, contributors, external developers, or AI crawlers).
-2. Select the appropriate template schema from the **Standard Templates** section.
-
-### Step 2: Extract Code/System Context
-1. Scan current code directories, router configs, and environment files to fetch active system properties (e.g. ports, environment variables, tested setup commands).
-2. Avoid using placeholder text or fake examples in final outputs.
-
-### Step 3: Populate Standard Template Schema
-1. Write the document utilizing the corresponding markdown structure.
-2. For code comments (JSDoc/TSDoc), comment only on non-obvious business logic ("Why") rather than repeating syntax ("What").
-
-### Step 4: Verify Formatting & AI crawling readiness
-1. Format files using clear scannability guidelines (single H1, clear header nesting levels).
-2. Ensure relative links are verified and operational.
-3. Confirm compliance against the **Quality Audit Checklist** before completing.
-
----
-
-## 📋 Standard Templates
-
-### 1. README Template
-```markdown
-# Project Name
-
-Brief one-line description of the project's purpose.
-
-## Quick Start
+## Quick start
 
 ```bash
-# Clone the repository
-git clone <repository-url>
-
-# Install dependencies
-npm install
-
-# Start development server
-npm run dev
+<install command from the project>
+<run command from the project>
 ```
-
-## Features
-
-- Feature A: Description
-- Feature B: Description
 
 ## Configuration
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| PORT | Server port | 3000 |
+| Variable | Required | Default | Purpose |
+|---|---|---|---|
+| `PORT` | no | `3000` | HTTP port |
+
+## Development
+
+How to run tests, lint, and build, using the project's own scripts.
 
 ## Documentation
 
-- API Reference: `docs/api.md`
-- Architecture Decision Records: `docs/decisions/`
-```
+- API reference: `docs/api.md`
+- Architecture decisions: `docs/decisions/`
+~~~
 
-### 2. API Endpoint Template
-```markdown
+## API reference
+
+One section per endpoint or exported function. Document the error cases, not
+only the success path, and use a real request and response taken from a test
+or a run.
+
+~~~markdown
 ## GET /api/v1/users/:id
 
-Get a user record by ID.
+Returns one user. Requires a session.
 
-**Parameters:**
-| Name | Type | Required | Description |
-|------|------|----------|-------------|
-| id | string | Yes | Unique user identifier |
+| Parameter | In | Type | Required | Notes |
+|---|---|---|---|---|
+| `id` | path | string | yes | User id, e.g. `usr_123` |
 
-**Response:**
-- 200: User object
-- 404: User not found
+Responses: `200` user object; `401` no session; `404` unknown id.
 
-**Example:**
-- Request: `GET /api/v1/users/usr_123`
-- Response (200 OK):
 ```json
-{
-  "id": "usr_123",
-  "email": "user@example.com",
-  "status": "active"
-}
+{ "id": "usr_123", "email": "user@example.com", "status": "active" }
 ```
-```
+~~~
 
-### 3. JSDoc/TSDoc Comments Template
-```typescript
-/**
- * Detailed description of why the function exists and what it computes.
- * 
- * @param paramName - Description of parameter input and bounds
- * @returns Description of return value
- * @throws ErrorType - When and why this exception occurs
- * 
- * @example
- * const result = functionName(input);
- */
-```
+If the project has an OpenAPI or GraphQL schema, update the schema and
+generate from it instead of hand-writing a parallel copy.
 
-### 4. Changelog Template
-```markdown
-# Changelog
+## Changelog
 
-All notable changes to this project will be documented in this file.
+Follow the project's existing changelog. If there is none, use the Keep a
+Changelog layout: an `Unreleased` section at the top, then one section per
+release as `## [x.y.z] - YYYY-MM-DD`, using the actual release date, with
+`Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, and `Security` groups
+as needed. Write entries for users of the project, not as a commit log, and
+call out breaking changes first.
 
-## [Unreleased]
-### Added
-- New feature implementation description
+## Doc comments (JSDoc, TSDoc, docstrings)
 
-## [1.0.0] - 2026-06-16
-### Added
-- Initial project release structures
-```
+- Document exported or non-obvious code: why it exists, constraints on the
+  inputs, what it throws, and side effects.
+- Do not restate what the signature or the types already say.
+- Keep `@example` blocks runnable; a broken example is worse than none.
 
-### 5. Architecture Decision Records
+## llms.txt
 
-ADRs are written with the `architecture` skill, which owns the template and the
-storage path.
+Follow the llms.txt format: an H1 with the project name, a one-paragraph
+blockquote summary, then H2 sections of Markdown links with a short note.
+Links are usually absolute URLs to the published docs or raw Markdown files;
+put secondary material under `## Optional`, which consumers may skip.
 
-### 6. AI-Friendly Documentation (`llms.txt`) Template
-```markdown
-# Project Name
-> One-liner objective.
+~~~markdown
+# <Project name>
 
-## Core Files
-- [src/index.ts]: Main entry
-- [src/api/]: API routes
-- [docs/]: Documentation index
+> <What the project is, in one or two sentences.>
 
-## Key Concepts
-- Concept A: Brief explanation
-- Concept B: Brief explanation
-```
+## Docs
 
----
+- [Quick start](https://<site>/docs/quick-start.md): install and first run
+- [API reference](https://<site>/docs/api.md): every endpoint with errors
 
-## ❌ Anti-Patterns
+## Optional
 
-- Auto-invoking or generating documentation edits when the user did not explicitly request them.
-- Leaving mock variables, bracketed placeholders `[...]`, or fake parameters in the finished docs.
-- Writing obvious inline comments that restate simple code lines.
-- Mixing README, API reference, ADR, and changelog formats without clear file or section boundaries.
+- [Architecture decisions](https://<site>/docs/decisions/): why the system is shaped this way
+~~~
 
----
+## Pitfalls
 
-## ✅ Quality Audit Checklist
+- Nesting a fenced code block inside another with the same fence: use `~~~`
+  or a longer backtick fence for the outer block, as above.
+- Relative links that break when the file moves; check each link resolves.
+- Duplicating the same instructions in several files; link to one source.
 
-Before concluding a documentation writing, README generation, or JSDoc/TSDoc API comments task, verify compliance with the following:
+## Done when
 
-- [ ] **Explicit Request Checked**: Verified this task was explicitly requested by the user and is not an automated addition to a standard code task.
-- [ ] **No Placeholders Left**: Substituted all mock tags with actual tested project paths, ports, or environment configurations.
-- [ ] **Examples Validated**: Code blocks, request payloads, and CLI setup commands are verified to run correctly.
-- [ ] **Why Documented**: Code docstrings and comments explain business reasons or edge cases, rather than syntax behavior.
-- [ ] **AI-Friendly Format Included**: Verified compatibility with AI indexers (single H1, clean headings, relative paths in `llms.txt`).
+The requested documents are written in the project's style, every command,
+path, variable, and link in them was checked against the code, and nothing
+unverified is presented as fact.

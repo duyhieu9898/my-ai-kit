@@ -1,8 +1,4 @@
 interface:
-  display_name: "Code Review Checklist"
-  short_description: "Guidelines covering correctness, security, performance, quality"
-  brand_color: "#F59E0B"
-  default_prompt: "$code-review-checklist"
-
-policy:
-  allow_implicit_invocation: true
+  display_name: "Code Review"
+  short_description: "Review a diff for correctness and security bugs"
+  default_prompt: "Use $code-review-checklist to review this branch against main before I merge it."

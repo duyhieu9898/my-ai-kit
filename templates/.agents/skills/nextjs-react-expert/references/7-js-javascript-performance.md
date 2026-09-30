@@ -9,14 +9,25 @@
 
 This section contains **12 rules** focused on javascript performance.
 
+- 7.1 Avoid Layout Thrashing
+- 7.2 Build Index Maps for Repeated Lookups
+- 7.3 Cache Property Access in Loops
+- 7.4 Cache Repeated Function Calls
+- 7.5 Cache Storage API Calls
+- 7.6 Combine Multiple Array Iterations
+- 7.7 Early Length Check for Array Comparisons
+- 7.8 Early Return from Functions
+- 7.9 Hoist RegExp Creation
+- 7.10 Use Loop for Min/Max Instead of Sort
+- 7.11 Use Set/Map for O(1) Lookups
+- 7.12 Use toSorted() Instead of sort() for Immutability
+
 ---
 
 ## Rule 7.1: Avoid Layout Thrashing
 
 **Impact:** MEDIUM  
 **Tags:** javascript, dom, css, performance, reflow, layout-thrashing  
-
-## Avoid Layout Thrashing
 
 Avoid interleaving style writes with layout reads. When you read a layout property (like `offsetWidth`, `getBoundingClientRect()`, or `getComputedStyle()`) between style changes, the browser is forced to trigger a synchronous reflow.
 
@@ -124,8 +135,6 @@ See [this gist](https://gist.github.com/paulirish/5d52fb081b3570c81e3a) and [CSS
 **Impact:** LOW-MEDIUM  
 **Tags:** javascript, map, indexing, optimization, performance  
 
-## Build Index Maps for Repeated Lookups
-
 Multiple `.find()` calls by the same key should use a Map.
 
 **Incorrect (O(n) per lookup):**
@@ -162,8 +171,6 @@ For 1000 orders × 1000 users: 1M ops → 2K ops.
 **Impact:** LOW-MEDIUM  
 **Tags:** javascript, loops, optimization, caching  
 
-## Cache Property Access in Loops
-
 Cache object property lookups in hot paths.
 
 **Incorrect (3 lookups × N iterations):**
@@ -190,8 +197,6 @@ for (let i = 0; i < len; i++) {
 
 **Impact:** MEDIUM  
 **Tags:** javascript, cache, memoization, performance  
-
-## Cache Repeated Function Calls
 
 Use a module-level Map to cache function results when the same function is called repeatedly with the same inputs during render.
 
@@ -272,8 +277,6 @@ Reference: [How we made the Vercel Dashboard twice as fast](https://vercel.com/b
 **Impact:** LOW-MEDIUM  
 **Tags:** javascript, localStorage, storage, caching, performance  
 
-## Cache Storage API Calls
-
 `localStorage`, `sessionStorage`, and `document.cookie` are synchronous and expensive. Cache reads in memory.
 
 **Incorrect (reads storage on every call):**
@@ -343,8 +346,6 @@ document.addEventListener('visibilitychange', () => {
 **Impact:** LOW-MEDIUM  
 **Tags:** javascript, arrays, loops, performance  
 
-## Combine Multiple Array Iterations
-
 Multiple `.filter()` or `.map()` calls iterate the array multiple times. Combine into one loop.
 
 **Incorrect (3 iterations):**
@@ -375,8 +376,6 @@ for (const user of users) {
 
 **Impact:** MEDIUM-HIGH  
 **Tags:** javascript, arrays, performance, optimization, comparison  
-
-## Early Length Check for Array Comparisons
 
 When comparing arrays with expensive operations (sorting, deep equality, serialization), check lengths first. If lengths differ, the arrays cannot be equal.
 
@@ -425,8 +424,6 @@ This new approach is more efficient because:
 
 **Impact:** LOW-MEDIUM  
 **Tags:** javascript, functions, optimization, early-return  
-
-## Early Return from Functions
 
 Return early when result is determined to skip unnecessary processing.
 
@@ -477,8 +474,6 @@ function validateUsers(users: User[]) {
 **Impact:** LOW-MEDIUM  
 **Tags:** javascript, regexp, optimization, memoization  
 
-## Hoist RegExp Creation
-
 Don't create RegExp inside render. Hoist to module scope or memoize with `useMemo()`.
 
 **Incorrect (new RegExp every render):**
@@ -522,8 +517,6 @@ regex.test('foo')  // false, lastIndex = 0
 
 **Impact:** LOW  
 **Tags:** javascript, arrays, performance, sorting, algorithms  
-
-## Use Loop for Min/Max Instead of Sort
 
 Finding the smallest or largest element only requires a single pass through the array. Sorting is wasteful and slower.
 
@@ -606,8 +599,6 @@ This works for small arrays, but can be slower or just throw an error for very l
 **Impact:** LOW-MEDIUM  
 **Tags:** javascript, set, map, data-structures, performance  
 
-## Use Set/Map for O(1) Lookups
-
 Convert arrays to Set/Map for repeated membership checks.
 
 **Incorrect (O(n) per check):**
@@ -630,8 +621,6 @@ items.filter(item => allowedIds.has(item.id))
 
 **Impact:** MEDIUM-HIGH  
 **Tags:** javascript, arrays, immutability, react, state, mutation  
-
-## Use toSorted() Instead of sort() for Immutability
 
 `.sort()` mutates the array in place, which can cause bugs with React state and props. Use `.toSorted()` to create a new sorted array without mutation.
 

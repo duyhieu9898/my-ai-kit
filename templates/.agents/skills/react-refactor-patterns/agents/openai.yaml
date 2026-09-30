@@ -1,8 +1,4 @@
 interface:
   display_name: "React Refactor Patterns"
-  short_description: "Refactor existing React code: logic extraction, React Query, Zustand"
-  brand_color: "#61DAFB"
-  default_prompt: "$react-refactor-patterns"
-
-policy:
-  allow_implicit_invocation: true
+  short_description: "Split React components into utils, hooks, stores"
+  default_prompt: "Use $react-refactor-patterns to split the checkout component into a service, query hook, and util."

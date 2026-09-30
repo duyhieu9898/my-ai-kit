@@ -1,172 +1,99 @@
 ---
 name: code-review-checklist
 description: >-
-  Use when reviewing code for quality, analyzing PRs/diffs, or establishing team style guides.
-  Comprehensive code review guidelines covering correctness, security, performance, code quality, testing, and documentation.
-  NOT for direct code editing or building test pipelines.
-allowed-tools:
-  - Read
-  - Glob
-  - Grep
+  Reviews a diff, pull request, or set of files for correctness and security
+  problems and reports only confident findings, each with file:line and a
+  severity. Use when asked to review code, a PR, or changes before merge. Not
+  for a dedicated security audit or threat model (use security-auditor).
 ---
 
-# Code Review Checklist
+# Code Review
 
-> Structured review guidance for correctness, security, performance, maintainability, tests, and documentation.
+A review is useful when every finding is real, placed, and ranked. Ten
+confident findings beat forty guesses: each false positive costs the author
+time and teaches them to skim the rest.
 
----
+## Scope the review
 
-## 📑 Content Map
+1. Get the change, not the whole repository:
+   - local work: `git diff` and `git diff --staged`;
+   - a branch: `git diff <base>...HEAD` (three dots: changes since the
+     merge base);
+   - a GitHub PR: `gh pr diff <number>` and `gh pr view <number>` for the
+     description and linked issue.
+2. Read the intent: PR description, linked story or acceptance criteria, and
+   the commit messages. Review against what the change claims to do.
+3. Read beyond the diff where it matters: callers of a changed function, the
+   type or schema a change relies on, and the tests that cover it.
+4. Skip generated files, lockfiles, snapshots, and vendored code unless the
+   change is about them.
 
-| File | Description | When to Read |
-|:---|:---|:---|
-| No supplementary files | This skill is self-contained | Use the procedures below directly |
+## Review in this order
 
----
+1. **Correctness.** Does it do what it claims? Off-by-one and boundary cases,
+   null or empty inputs, error paths that swallow or mis-handle failures,
+   unawaited promises, wrong `await` inside loops, state changed on one path
+   and not another, a changed contract whose callers were not updated.
+2. **Security.** Untrusted input reaching SQL, shell, HTML, file paths, URLs
+   (SSRF), redirects, or deserialisation; missing authorisation on a new
+   route or action; secrets in code or logs. Treat model (LLM) output as
+   untrusted input too when it reaches any of those sinks or a tool call.
+   Hand a deep or cross-cutting concern to `security-auditor`.
+3. **Data and concurrency.** Migrations that lock or lose data, missing
+   transactions around multi-step writes, races on read-modify-write, cache
+   invalidation.
+4. **Performance, with a cause.** N+1 queries, unbounded loops or result
+   sets, work repeated per request or per render. Report only when the
+   input size or call frequency makes it matter.
+5. **Tests.** Does a test fail if the change is reverted? Is the failure path
+   covered? Missing tests for risky logic are a finding; missing tests for a
+   rename are not.
 
-## 🔗 Related Skills
+Style, naming, and formatting are findings only when they hide a bug or break
+a documented project convention. Leave what the linter or formatter already
+enforces to the linter.
 
-| Need | Skill |
-|:---|:---|
-| Standard clean code formatting practices | [`clean-code`](../clean-code/SKILL.md) |
-| Security-focused review | [`security-auditor`](../security-auditor/SKILL.md) |
-| Lint, type, test, and build validation | [`lint-and-validate`](../lint-and-validate/SKILL.md) |
+## Confidence threshold
 
----
+Report a finding only when you can name the input, path, or sequence that
+triggers it, or point to the line that breaks a stated requirement. When you
+suspect a problem but cannot show it, either read more code until you can,
+or list it as a question. Do not report something as a bug because a pattern
+looks unusual.
 
-## 🛠️ Instructions / Procedures
+## Severity
 
-When tasked with reviewing code for quality, parsing dynamic diff files, or drafting team styling guides, strictly follow this step-by-step procedure:
+- **Blocker:** wrong behaviour, data loss, a security hole, or a broken
+  contract. Must be fixed before merge.
+- **Major:** likely bug on a less common path, or a missing test for risky
+  logic. Should be fixed in this change.
+- **Minor:** a real but low-impact issue. Fine to fix later.
+- **Question:** something that looks wrong but may be intended; ask.
 
-### Step 1: Scan Target Differences
-1. Read the PR diff, commit logs, or specific codebase target files using your search/read tools.
-2. Formulate a summary of changed logic.
+## Report format
 
-### Step 2: Audit Core Metrics (Correctness, Security, Performance)
-1. Run target correctness, security, and performance checks (Quick Review Checklist).
-2. Validate inputs, sanitize query parameters (anti-SQL injection), and analyze dynamic performance impacts (N+1 query checks).
+Start with a one-line verdict (ready to merge, merge after blockers, or needs
+rework), then findings ordered by severity:
 
-### Step 3: Run AI/LLM Logic Audits
-1. Audit AI model integration prompts for prompt injection vulnerabilities and schema strictness (Prompt Engineering Review).
-2. Verify that raw AI outputs are fully sanitized before being written into critical file or rendering sinks.
-
-### Step 4: Generate Structured Feedback Comments
-1. Draft code comments detailing blocking issues, improvements, and style suggestions.
-2. Label blocking issues with 🔴, helpful suggestions with 🟡, minor stylistic nits with 🟢, and speculative questions with ❓.
-3. Confirm final compliance using the **Quality Audit Checklist** before completing.
-
----
-
-## Quick Review Checklist
-
-### Correctness
-- [ ] Code does what it's supposed to do
-- [ ] Edge cases handled
-- [ ] Error handling in place
-- [ ] No obvious bugs
-
-### Security
-- [ ] Input validated and sanitized
-- [ ] No SQL/NoSQL injection vulnerabilities
-- [ ] No XSS or CSRF vulnerabilities
-- [ ] No hardcoded secrets or sensitive credentials
-- [ ] **AI-Specific:** Protection against Prompt Injection (if applicable)
-- [ ] **AI-Specific:** Outputs are sanitized before being used in critical sinks
-
-### Performance
-- [ ] No N+1 queries
-- [ ] No unnecessary loops
-- [ ] Appropriate caching
-- [ ] Bundle size impact considered
-
-### Code Quality
-- [ ] Clear naming
-- [ ] DRY - no duplicate code
-- [ ] SOLID principles followed
-- [ ] Appropriate abstraction level
-
-### Testing
-- [ ] Unit tests for new code
-- [ ] Edge cases tested
-- [ ] Tests readable and maintainable
-
-### Documentation
-- [ ] Complex logic commented
-- [ ] Public APIs documented
-- [ ] README updated if needed
-
-## AI & LLM Review Patterns (2025)
-
-### Logic & Hallucinations
-- [ ] **Chain of Thought:** Does the logic follow a verifiable path?
-- [ ] **Edge Cases:** Did the AI account for empty states, timeouts, and partial failures?
-- [ ] **External State:** Is the code making safe assumptions about file systems or networks?
-
-### Prompt Engineering Review
 ```markdown
-// ❌ Vague prompt in code
-const response = await ai.generate(userInput);
-
-// ✅ Structured & Safe prompt
-const response = await ai.generate({
-  system: "You are a specialized parser...",
-  input: sanitize(userInput),
-  schema: ResponseSchema
-});
+**Blocker** `src/billing/invoice.ts:88`
+Refunds are subtracted twice when `partial` is true: `applyRefund` already
+adjusts `total` at :61. Repro: refund 10 of 100 with partial=true, total is 80.
+Fix: drop the second subtraction or pass the unadjusted total.
 ```
 
-## ❌ Anti-Patterns
+Each finding: severity, `file:line`, what goes wrong and when, and a concrete
+fix. Group repeated instances of one issue into a single finding with all
+locations. If there are no findings above the threshold, say so plainly.
 
-```typescript
-// ❌ Magic numbers
-if (status === 3) { ... }
+## Boundaries
 
-// ✅ Named constants
-if (status === Status.ACTIVE) { ... }
+- Do not edit code during a review unless asked; propose the fix.
+- Claims about test results need a run. If asked to confirm the change works,
+  hand off to `verify-changes` and report what was actually executed.
 
-// ❌ Deep nesting
-if (a) { if (b) { if (c) { ... } } }
+## Done when
 
-// ✅ Early returns
-if (!a) return;
-if (!b) return;
-if (!c) return;
-// do work
-
-// ❌ Long functions (100+ lines)
-// ✅ Small, focused functions
-
-// ❌ any type
-const data: any = ...
-
-// ✅ Proper types
-const data: UserData = ...
-```
-
-## Review Comments Guide
-
-```
-// Blocking issues use 🔴
-🔴 BLOCKING: SQL injection vulnerability here
-
-// Important suggestions use 🟡
-🟡 SUGGESTION: Consider using useMemo for performance
-
-// Minor nits use 🟢
-🟢 NIT: Prefer const over let for immutable variable
-
-// Questions use ❓
-❓ QUESTION: What happens if user is null here?
-```
-
----
-
-## ✅ Quality Audit Checklist
-
-Before concluding a Code Review task, verify compliance with the following:
-
-- [ ] **Sanitized Inputs**: All user inputs in the review targets are fully validated and sanitized against SQL/NoSQL/XSS vulnerabilities.
-- [ ] **AI Sinks Sanitized**: AI model prompts use strict structured inputs and sanitize model output text before using it in critical DOM/eval sinks.
-- [ ] **No Magic Constants**: Named constants or enum definitions replace raw numbers and magic strings.
-- [ ] **Early Returns Applied**: Nested condition branches are refactored using early return guards.
-- [ ] **Blocking labeled**: Feedback comments clearly label blocking issues with 🔴, suggestions with 🟡, nits with 🟢, and questions with ❓.
+Every reported finding has a severity, a `file:line`, a trigger or evidence,
+and a proposed fix; uncertain items are listed as questions; and the verdict
+matches the worst finding.

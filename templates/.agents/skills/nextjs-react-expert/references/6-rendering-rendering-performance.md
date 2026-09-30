@@ -9,14 +9,22 @@
 
 This section contains **9 rules** focused on rendering performance.
 
+- 6.1 Animate SVG Wrapper Instead of SVG Element
+- 6.2 CSS content-visibility for Long Lists
+- 6.3 Hoist Static JSX Elements
+- 6.4 Optimize SVG Precision
+- 6.5 Prevent Hydration Mismatch Without Flickering
+- 6.6 Suppress Expected Hydration Mismatches
+- 6.7 Use Activity Component for Show/Hide
+- 6.8 Use Explicit Conditional Rendering
+- 6.9 Use useTransition Over Manual Loading States
+
 ---
 
 ## Rule 6.1: Animate SVG Wrapper Instead of SVG Element
 
 **Impact:** LOW  
 **Tags:** rendering, svg, css, animation, performance  
-
-## Animate SVG Wrapper Instead of SVG Element
 
 Many browsers don't have hardware acceleration for CSS3 animations on SVG elements. Wrap SVG in a `<div>` and animate the wrapper instead.
 
@@ -64,8 +72,6 @@ This applies to all CSS transforms and transitions (`transform`, `opacity`, `tra
 **Impact:** HIGH  
 **Tags:** rendering, css, content-visibility, long-lists  
 
-## CSS content-visibility for Long Lists
-
 Apply `content-visibility: auto` to defer off-screen rendering.
 
 **CSS:**
@@ -102,8 +108,6 @@ For 1000 messages, browser skips layout/paint for ~990 off-screen items (10× fa
 
 **Impact:** LOW  
 **Tags:** rendering, jsx, static, optimization  
-
-## Hoist Static JSX Elements
 
 Extract static JSX outside components to avoid re-creation.
 
@@ -150,8 +154,6 @@ This is especially helpful for large and static SVG nodes, which can be expensiv
 **Impact:** LOW  
 **Tags:** rendering, svg, optimization, svgo  
 
-## Optimize SVG Precision
-
 Reduce SVG coordinate precision to decrease file size. The optimal precision depends on the viewBox size, but in general reducing precision should be considered.
 
 **Incorrect (excessive precision):**
@@ -178,8 +180,6 @@ npx svgo --precision=1 --multipass icon.svg
 
 **Impact:** MEDIUM  
 **Tags:** rendering, ssr, hydration, localStorage, flicker  
-
-## Prevent Hydration Mismatch Without Flickering
 
 When rendering content that depends on client-side storage (localStorage, cookies), avoid both SSR breakage and post-hydration flickering by injecting a synchronous script that updates the DOM before React hydrates.
 
@@ -262,8 +262,6 @@ This pattern is especially useful for theme toggles, user preferences, authentic
 **Impact:** LOW-MEDIUM  
 **Tags:** rendering, hydration, ssr, nextjs  
 
-## Suppress Expected Hydration Mismatches
-
 In SSR frameworks (e.g., Next.js), some values are intentionally different on server vs client (random IDs, dates, locale/timezone formatting). For these *expected* mismatches, wrap the dynamic text in an element with `suppressHydrationWarning` to prevent noisy warnings. Do not use this to hide real bugs. Don’t overuse it.
 
 **Incorrect (known mismatch warnings):**
@@ -293,9 +291,7 @@ function Timestamp() {
 **Impact:** MEDIUM  
 **Tags:** rendering, activity, visibility, state-preservation  
 
-## Use Activity Component for Show/Hide
-
-Use React's `<Activity>` to preserve state/DOM for expensive components that frequently toggle visibility.
+Use React's `<Activity>` (stable in React 19.2+) to preserve state/DOM for expensive components that frequently toggle visibility. Hidden content stays in the DOM with `display: none` and its Effects are cleaned up until it becomes visible again.
 
 **Usage:**
 
@@ -319,8 +315,6 @@ Avoids expensive re-renders and state loss.
 
 **Impact:** LOW  
 **Tags:** rendering, conditional, jsx, falsy-values  
-
-## Use Explicit Conditional Rendering
 
 Use explicit ternary operators (`? :`) instead of `&&` for conditional rendering when the condition can be `0`, `NaN`, or other falsy values that render.
 
@@ -360,8 +354,6 @@ function Badge({ count }: { count: number }) {
 
 **Impact:** LOW  
 **Tags:** rendering, transitions, useTransition, loading, state  
-
-## Use useTransition Over Manual Loading States
 
 Use `useTransition` instead of manual `useState` for loading states. This provides built-in `isPending` state and automatically manages transitions.
 

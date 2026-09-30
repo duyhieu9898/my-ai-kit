@@ -1,68 +1,34 @@
-# Pattern Selection Guidelines
+# Pattern Selection
 
-> Decision trees for choosing architectural patterns.
+Read this when the decision is about a structural pattern (service split,
+data access layer, domain model, events, CQRS). Each pattern below earns its
+cost only when its condition holds; otherwise take the simpler default.
 
-## Main Decision Tree
+## Conditions before adding a pattern
 
-```
-START: What's your MAIN concern?
+| Pattern | Adopt only when | Simpler default |
+|---|---|---|
+| Microservices | Clear domain boundaries, separate teams owning them, and components that must scale or deploy independently. All three. | Modular monolith with enforced module boundaries; extract a service later |
+| Event-driven / message queue | Work can be eventually consistent, and producers must not wait for or know about consumers | Direct call, or a background job table |
+| Event sourcing | The history of changes is itself a product requirement (audit, replay, temporal queries) | Append-only audit log next to normal tables |
+| CQRS | Read and write models diverge in shape or load enough that one model hurts both | One model, plus read-optimised views or indexes |
+| Saga | A business transaction spans services with separate databases | Keep the steps in one database transaction |
+| Repository + unit of work | Several data sources, or domain logic that must be tested without the database | ORM or query builder used directly in a service layer |
+| Full DDD (aggregates, value objects) | Complex, changing business rules and access to people who own them | Rich entities with clear module boundaries |
+| Hexagonal / clean layers | Several real adapters for one port (e.g. two payment providers) exist or are committed | Concrete code first; extract the interface when the second adapter arrives |
 
-┌─ Data Access Complexity?
-│  ├─ HIGH (complex queries, testing needed)
-│  │  → Repository Pattern + Unit of Work
-│  │  VALIDATE: Will data source change frequently?
-│  │     ├─ YES → Repository worth the indirection
-│  │     └─ NO  → Consider simpler ORM direct access
-│  └─ LOW (simple CRUD, single database)
-│     → ORM directly (Prisma, Drizzle)
-│     Simpler = Better, Faster
-│
-├─ Business Rules Complexity?
-│  ├─ HIGH (domain logic, rules vary by context)
-│  │  → Domain-Driven Design
-│  │  VALIDATE: Do you have domain experts on team?
-│  │     ├─ YES → Full DDD (Aggregates, Value Objects)
-│  │     └─ NO  → Partial DDD (rich entities, clear boundaries)
-│  └─ LOW (mostly CRUD, simple validation)
-│     → Transaction Script pattern
-│     Simpler = Better, Faster
-│
-├─ Independent Scaling Needed?
-│  ├─ YES (different components scale differently)
-│  │  → Microservices WORTH the complexity
-│  │  REQUIREMENTS (ALL must be true):
-│  │    - Clear domain boundaries
-│  │    - Team > 10 developers
-│  │    - Different scaling needs per service
-│  │  IF NOT ALL MET → Modular Monolith instead
-│  └─ NO (everything scales together)
-│     → Modular Monolith
-│     Can extract services later when proven needed
-│
-└─ Real-time Requirements?
-   ├─ HIGH (immediate updates, multi-user sync)
-   │  → Event-Driven Architecture
-   │  → Message Queue (RabbitMQ, Redis, Kafka)
-   │  VALIDATE: Can you handle eventual consistency?
-   │     ├─ YES → Event-driven valid
-   │     └─ NO  → Synchronous with polling
-   └─ LOW (eventual consistency acceptable)
-      → Synchronous (REST/GraphQL)
-      Simpler = Better, Faster
-```
+## Questions for any pattern
 
-## The 3 Questions (Before ANY Pattern)
+1. What specific problem in this codebase does it solve today?
+2. What is the simplest option that solves the same problem?
+3. What does it cost to add later instead of now? If adding later is cheap,
+   defer it.
 
-1. **Problem Solved**: What SPECIFIC problem does this pattern solve?
-2. **Simpler Alternative**: Is there a simpler solution?
-3. **Deferred Complexity**: Can we add this LATER when needed?
+## Red flags in a proposal
 
-## Red Flags (Anti-patterns)
-
-| Pattern | Anti-pattern | Simpler Alternative |
-|---------|-------------|-------------------|
-| Microservices | Premature splitting | Start monolith, extract later |
-| Clean/Hexagonal | Over-abstraction | Concrete first, interfaces later |
-| Event Sourcing | Over-engineering | Append-only audit log |
-| CQRS | Unnecessary complexity | Single model |
-| Repository | YAGNI for simple CRUD | ORM direct access |
+- The justification is future scale with no current measurement.
+- The team is smaller than the number of proposed services.
+- Two "independent" services share a database or must deploy together.
+- An abstraction has exactly one implementation and no committed second one.
+- Consistency requirements were not stated, so eventual consistency was
+  assumed.

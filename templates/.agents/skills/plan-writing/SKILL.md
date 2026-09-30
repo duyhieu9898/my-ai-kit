@@ -1,11 +1,11 @@
 ---
 name: plan-writing
 description: >-
-  Create bounded implementation plans for known features, bug fixes, and
-  multi-file refactors. Produce small file-aware tasks with explicit
-  verification criteria. Use after scope and architecture are sufficiently
-  understood. NOT for trivial edits, executing an existing plan, new-product
-  roadmaps, or cross-workstream initiatives that belong in project-planner.
+  Writes a bounded implementation plan for a known feature, bug fix, or
+  multi-file refactor to docs/PLAN-{task-slug}.md, as small file-named tasks
+  that each carry a Verify line. Use when the scope is understood and the
+  change needs a written plan before coding. Not for multi-stream roadmaps
+  (use project-planner).
 ---
 
 # Plan Writing
@@ -110,12 +110,13 @@ claiming they have already passed.
 
 Add risks, rollback, or dependency sections only when they materially help.
 
-## Quality Checklist
+## Done when
 
-- [ ] The change is bounded and understood.
-- [ ] Tasks name concrete affected surfaces.
-- [ ] Every task has an actionable `Verify:` criterion.
-- [ ] Hard dependencies and parallel work are clear.
-- [ ] Verification matches the project and changed behavior.
-- [ ] The plan stays within the requested scope.
-- [ ] No implementation task was executed or marked complete.
+- the plan is saved at the repository's plan location or
+  `docs/PLAN-{task-slug}.md`;
+- the change is bounded and every task names a concrete affected surface;
+- every task has an actionable `Verify:` line that matches the project and
+  the changed behaviour;
+- hard dependencies and parallel work are clear;
+- the plan stays within the requested scope, and no task was executed or
+  marked complete.

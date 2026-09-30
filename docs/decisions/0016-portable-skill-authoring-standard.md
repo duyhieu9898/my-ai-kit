@@ -81,6 +81,6 @@ Tradeoffs:
 
 ## Follow-Up
 
-- Rewrite and merge skills in the batches of the 2026-09-30 audit.
-- Make `--strict` the default in `npm run check:templates` after the last
-  batch.
+- Done 2026-09-30: the audit's rewrite batches reduced the kit to 26 skills
+  that pass every rule, and strict checking is now the default
+  (`--lenient` reports kit rules without failing).

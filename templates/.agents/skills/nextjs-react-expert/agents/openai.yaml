@@ -1,8 +1,4 @@
 interface:
-  display_name: "Next.js & React Expert"
-  short_description: "Next.js and React waterfalls, bundles, rendering, and caching."
-  brand_color: "#000000"
-  default_prompt: "$nextjs-react-expert"
-
-policy:
-  allow_implicit_invocation: true
+  display_name: "Next.js & React Performance"
+  short_description: "Fix Next.js waterfalls, bundles, renders, caching"
+  default_prompt: "Use $nextjs-react-expert to remove the data waterfall on the product page."

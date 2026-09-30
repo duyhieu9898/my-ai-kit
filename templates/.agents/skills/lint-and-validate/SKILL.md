@@ -1,104 +1,83 @@
 ---
 name: lint-and-validate
 description: >-
-  Use when code has been modified and must be checked for syntax correctness, type safety, and project standards.
-  Automatic quality control and static analysis procedures covering linting and type checking.
-  NOT for local environment configuration or dependency management.
-allowed-tools:
-  - Read
-  - Glob
-  - Grep
-  - Bash
+  Runs the kit's lint runner (lint script or ESLint, tsc, Ruff, mypy) and a
+  type-annotation heuristic, and explains their output. Use when a lint or
+  type check is wanted and the project has no command of its own. Not for
+  choosing which checks to run (use verify-changes).
 ---
 
-# Lint and Validate Skill
+# Lint and Validate
 
-> **MANDATORY:** Run appropriate validation tools after EVERY code change. Do not finish a task until the code is error-free.
+Two bundled scripts wrap the usual static checks. Which checks a change
+needs, and when, is decided by `verify-changes`; this skill only says what
+each script runs and how to read it. If the project has its own lint or
+typecheck command (`package.json` scripts, `Makefile`, CI workflow), prefer
+that.
 
----
+## Lint runner
 
-## 📑 Content Map
+`python3 .agents/skills/lint-and-validate/scripts/lint_runner.py [project_path]`
 
-| File | Description | When to Read |
-|:---|:---|:---|
-| [scripts/lint_runner.py](scripts/lint_runner.py) | Unified lint runner | Running local lint validation |
-| [scripts/type_coverage.py](scripts/type_coverage.py) | Annotation and unsafe `Any` heuristic | Reviewing annotation usage after compiler checks |
+Run it; do not read the source. It takes one positional path (default `.`)
+and has no `--help`: any argument, including `--help`, is taken as the path.
 
----
+It looks only at the given directory, not at workspace packages below it:
 
-## 🔗 Related Skills
+| Found at the root | Runs |
+|---|---|
+| `package.json` with a `lint` script | `npm run lint` |
+| otherwise `eslint` in dependencies | `npx eslint .` |
+| `typescript` in dependencies, or `tsconfig.json` | `npx tsc --noEmit` |
+| `pyproject.toml` or `requirements.txt` | `ruff check .` |
+| `pyproject.toml` or `mypy.ini` | `mypy .` |
 
-| Need | Skill |
-|:---|:---|
-| Validating functional system test cases | [`verify-changes`](../verify-changes/SKILL.md) |
-| Code quality linting in Node.js backends | [`backend-specialist`](../backend-specialist/SKILL.md) |
+- Each command has a 120 s timeout. Output is cut to 2,000 chars of stdout
+  and 500 of stderr, so rerun a failing command directly to see everything.
+- Exit 1 if any command fails, including "Command not found" for a missing
+  `ruff` or `mypy`. Exit 0 when all pass, and also when nothing was detected
+  (`"message": "No linters configured"`), which is not evidence that the code
+  is clean.
+- **Network and installs:** `npx` runs the local binary when dependencies are
+  installed. If they are not, `npx` may download the package, and `npx tsc`
+  then fetches the unrelated `tsc` package instead of TypeScript. Install
+  dependencies first, or run the project's own script.
+- It never passes `--fix`. Apply autofixes only when the user wants them,
+  and review the diff, because they can touch files outside the change.
+- In a monorepo, run it per package path, or use the workspace command
+  (`pnpm -r lint`, `turbo run lint`).
 
----
+## Type annotation heuristic
 
-## 🛠️ Instructions / Procedures
+`python3 .agents/skills/lint-and-validate/scripts/type_coverage.py [project_path]`
 
-When tasked with checking syntax correctness, verifying type definitions, or running project quality sweeps, strictly follow this step-by-step procedure:
+Run it; do not read the source. Same argument handling as the lint runner.
 
-### Step 1: Detect Root Configurations
-1. Identify project root descriptors (e.g. tsconfig.json, .eslintrc, pyproject.toml).
-2. If none exist, suggest creating appropriate syntax/compilation profiles.
+- Scans up to 200 `.ts`/`.tsx` files (not `.d.ts`; skips `node_modules`,
+  `.next`, `dist`, `build`, `.git`, `.agents`) and up to 200 `.py` files.
+- Counts `: any` / `: Any` annotations and functions without explicit
+  types, by regex. PascalCase functions in `.tsx` count as covered, since
+  React components rely on the inferred JSX return type.
+- Exit 1 (`[X]`) for more than 5 `: any` in TypeScript, or Python hint
+  coverage below 40% or more than 3 `Any`. `[!]` lines are advisory.
+- It is not a type checker. TypeScript inference makes low "coverage"
+  normal; `tsc --noEmit` passing is what matters. Use it to spot new `any`
+  in a review, not as a gate.
 
-### Step 2: Trigger Style Linters
-1. Run target ecosystem styles linters (ESLint `--fix` for Node/TS vs Ruff for Python).
-2. Correct formatting discrepancies.
+## Reading failures
 
-### Step 3: Verify Type Safety
-1. Run standard compiler verification parameters (`npx tsc --noEmit` vs `mypy`).
-2. Correct argument typing mismatches and signature returns.
+- Fix errors in the files the change touched first. Pre-existing errors
+  elsewhere are reported, not silently fixed, unless the user asks.
+- Do not silence a rule with `eslint-disable`, `@ts-ignore`, or `# type:
+  ignore` to get a pass; if a suppression is justified, scope it to one line
+  and say why (`@ts-expect-error` over `@ts-ignore`).
+- `tsc` errors in generated files (`.next/types`, Supabase or Prisma
+  generated types) usually mean the generator needs to run again, not a code
+  change.
 
-### Step 4: Execute Security Scanners
-1. Run local dependencies auditing parameters (`npm audit` vs `bandit`).
-2. Ensure zero high-risk warnings remain.
+## Done when
 
-### Step 5: Execute Unified Scans & Verify Checklist
-1. Trigger unified validation checkers (`python3 scripts/lint_runner.py <project_path>`).
-2. Confirm compliance against the **Quality Audit Checklist** before completing.
-
----
-
-### Procedures by Ecosystem
-
-#### Node.js / TypeScript
-1. **Lint/Fix:** `npm run lint` or `npx eslint "path" --fix`
-2. **Types:** `npx tsc --noEmit`
-3. **Security:** `npm audit --audit-level=high`
-
-#### Python
-1. **Linter (Ruff):** `ruff check "path" --fix` (Fast & Modern)
-2. **Security (Bandit):** `bandit -r "path" -ll`
-3. **Types (MyPy):** `mypy "path"`
-
-## ❌ Anti-Patterns
-
-- Reporting code changes as complete without running the relevant validation commands.
-- Running only formatter checks when type checks or security scans are required.
-- Ignoring high-severity audit results because they are outside the edited file.
-- Using project-agnostic commands before checking the repository's package scripts and config files.
-
-## ✅ Quality Audit Checklist
-
-Before concluding any code edit, script modification, or task completion, verify compliance with the following:
-
-- [ ] **Linter Executed**: Run the appropriate static analysis commands (ESLint/Ruff) and confirmed zero style or syntax violations remain.
-- [ ] **Types Checked Clean**: Verified TypeScript compile parameters (`tsc --noEmit`) or Python type signatures (`mypy`) return error-free.
-- [ ] **Unified Runner Run**: Executed local project scanners (`python3 scripts/lint_runner.py <project_path>`) and documented outputs.
-- [ ] **No High Security Alerts**: Confirmed `npm audit` or `bandit` returns zero critical or high-severity vulnerabilities.
-- [ ] **Zero Failures Policy**: Resolved all warning states before considering the current modification complete.
-
----
-
-## Scripts
-
-| Script | Purpose | Command |
-|--------|---------|---------|
-| [scripts/lint_runner.py](scripts/lint_runner.py) | Unified lint check | `python3 scripts/lint_runner.py <project_path>` |
-| [scripts/type_coverage.py](scripts/type_coverage.py) | Advisory annotation analysis; not a compiler substitute | `python3 scripts/type_coverage.py <project_path>` |
-
----
-
-**Strict Rule:** No code should be committed or reported as "done" without passing these checks.
+The commands that `verify-changes` or the user selected have run, their
+result (pass, fail with the relevant errors, or not detected) is reported
+with the command used, and no new lint or type errors remain in the changed
+files.

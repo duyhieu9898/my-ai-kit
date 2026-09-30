@@ -9,14 +9,16 @@
 
 This section contains **3 rules** focused on advanced patterns.
 
+- 8.1 Initialize App Once, Not Per Mount
+- 8.2 Store Event Handlers in Refs
+- 8.3 useEffectEvent for Stable Callback Refs
+
 ---
 
 ## Rule 8.1: Initialize App Once, Not Per Mount
 
 **Impact:** LOW-MEDIUM  
 **Tags:** initialization, useEffect, app-startup, side-effects  
-
-## Initialize App Once, Not Per Mount
 
 Do not put app-wide initialization that must run once per app load inside `useEffect([])` of a component. Components can remount and effects will re-run. Use a module-level guard or top-level init in the entry module instead.
 
@@ -59,8 +61,6 @@ Reference: [Initializing the application](https://react.dev/learn/you-might-not-
 **Impact:** LOW  
 **Tags:** advanced, hooks, refs, event-handlers, optimization  
 
-## Store Event Handlers in Refs
-
 Store callbacks in refs when used in effects that shouldn't re-subscribe on callback changes.
 
 **Incorrect (re-subscribes on every render):**
@@ -91,7 +91,7 @@ function useWindowEvent(event: string, handler: (e) => void) {
 }
 ```
 
-**Alternative: use `useEffectEvent` if you're on latest React:**
+**Alternative: use `useEffectEvent` on React 19.2+:**
 
 ```tsx
 import { useEffectEvent } from 'react'
@@ -106,7 +106,7 @@ function useWindowEvent(event: string, handler: (e) => void) {
 }
 ```
 
-`useEffectEvent` provides a cleaner API for the same pattern: it creates a stable function reference that always calls the latest version of the handler.
+`useEffectEvent` provides a cleaner API for the same pattern: the Effect Event always calls the latest handler. Its identity is not stable, so keep it out of dependency arrays, call it only from inside Effects, and never pass it to children or other hooks. For callbacks passed as props, keep the ref pattern above or use `useCallback`.
 
 ---
 
@@ -114,8 +114,6 @@ function useWindowEvent(event: string, handler: (e) => void) {
 
 **Impact:** LOW  
 **Tags:** advanced, hooks, useEffectEvent, refs, optimization  
-
-## useEffectEvent for Stable Callback Refs
 
 Access latest values in callbacks without adding them to dependency arrays. Prevents effect re-runs while avoiding stale closures.
 
@@ -132,7 +130,7 @@ function SearchInput({ onSearch }: { onSearch: (q: string) => void }) {
 }
 ```
 
-**Correct (using React's useEffectEvent):**
+**Correct (using React's useEffectEvent, React 19.2+):**
 
 ```tsx
 import { useEffectEvent } from 'react';

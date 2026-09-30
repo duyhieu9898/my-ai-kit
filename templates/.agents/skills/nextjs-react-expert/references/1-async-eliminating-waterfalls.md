@@ -7,7 +7,14 @@
 
 ## Overview
 
-This section contains **6 rules** focused on eliminating waterfalls, now including Next.js 16 `after()` and `connection()` patterns.
+This section contains **6 rules** focused on eliminating waterfalls, including the Next.js `after()` and `connection()` patterns.
+
+- 1.1 Defer Await Until Needed
+- 1.2 Dependency-Based Parallelization
+- 1.3 Prevent Waterfall Chains in API Routes
+- 1.4 Promise.all() for Independent Operations
+- 1.5 Strategic Suspense Boundaries
+- 1.6 Use `after()` and `connection()` (Next.js 15+)
 
 ---
 
@@ -15,8 +22,6 @@ This section contains **6 rules** focused on eliminating waterfalls, now includi
 
 **Impact:** HIGH  
 **Tags:** async, await, conditional, optimization  
-
-## Defer Await Until Needed
 
 Move `await` operations into the branches where they're actually used to avoid blocking code paths that don't need them.
 
@@ -97,8 +102,6 @@ This optimization is especially valuable when the skipped branch is frequently t
 **Impact:** CRITICAL  
 **Tags:** async, parallelization, dependencies, better-all  
 
-## Dependency-Based Parallelization
-
 For operations with partial dependencies, use `better-all` to maximize parallelism. It automatically starts each task at the earliest possible moment.
 
 **Incorrect (profile waits for config unnecessarily):**
@@ -149,8 +152,6 @@ Reference: [https://github.com/shuding/better-all](https://github.com/shuding/be
 **Impact:** CRITICAL  
 **Tags:** api-routes, server-actions, waterfalls, parallelization  
 
-## Prevent Waterfall Chains in API Routes
-
 In API routes and Server Actions, start independent operations immediately, even if you don't await them yet.
 
 **Incorrect (config waits for auth, data waits for both):**
@@ -188,8 +189,6 @@ For operations with more complex dependency chains, use `better-all` to automati
 **Impact:** CRITICAL  
 **Tags:** async, parallelization, promises, waterfalls  
 
-## Promise.all() for Independent Operations
-
 When async operations have no interdependencies, execute them concurrently using `Promise.all()`.
 
 **Incorrect (sequential execution, 3 round trips):**
@@ -216,8 +215,6 @@ const [user, posts, comments] = await Promise.all([
 
 **Impact:** HIGH  
 **Tags:** async, suspense, streaming, layout-shift  
-
-## Strategic Suspense Boundaries
 
 Instead of awaiting data in async components before returning JSX, use Suspense boundaries to show the wrapper UI faster while data loads.
 
@@ -313,12 +310,14 @@ Both components share the same promise, so only one fetch occurs. Layout renders
 
 ---
 
-## Rule 1.6: Use `after()` and `connection()` (Next.js 16+)
+## Rule 1.6: Use `after()` and `connection()` (Next.js 15+)
 
 **Impact:** HIGH  
-**Tags:** nextjs16, async, runtime, performance
+**Tags:** nextjs, async, runtime, performance
 
-Next.js 16 introduced APIs to prevent "Blocking the Main Thread" and ensure "Dynamic Runtime" awareness.
+`after()` (stable since Next.js 15.1) runs work after the response is sent, so
+it does not delay the response. `connection()` (stable since Next.js 15.0)
+marks the code after it as request-time only.
 
 ### 1. `after()` for Non-Blocking Logic
 Avoid `await` on logic that doesn't affect the initial UI (logging, analytics, emails).
@@ -338,8 +337,16 @@ export default async function Page() {
 }
 ```
 
+In a Server Component, the `after()` callback cannot call `cookies()` or
+`headers()`. Read them before calling `after()` and pass the values in. Route
+Handlers and Server Actions may call them inside the callback (see Rule 3.7).
+
 ### 2. `connection()` for Dynamic Intent
-Use `connection()` to signal that a component is dynamic and should not be pre-rendered as static, allowing other parts of the page to stream independently.
+Use `connection()` when a component produces per-request output without
+reading `cookies()` or `headers()` (random values, `Date.now()`, a synchronous
+database driver). Prerendering stops at the call. With `cacheComponents`
+enabled, wrap that component in `<Suspense>` so the rest of the page can still
+be prerendered.
 
 ```tsx
 import { connection } from 'next/server'

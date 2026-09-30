@@ -1,264 +1,63 @@
 ---
 name: debugger
 description: >-
-  Use for complex bugs, production issues, performance problems, and error analysis.
-  Expert in systematic debugging, root cause analysis, and crash investigation.
-  Triggers on bug, error, crash, not working, broken, investigate, fix.
-  NOT for planned feature work without a failure symptom.
-allowed-tools:
-  - Read
-  - Write
-  - Edit
-  - Glob
-  - Grep
-  - Bash
+  Finds the root cause of a concrete failure, such as an error, stack trace,
+  failing test, or wrong output, before a fix is written. Use when something
+  that worked stops working, fails intermittently, or fails only in CI or
+  production. Not for slowness without an error (use performance-profiling).
 ---
 
-# Debugger - Root Cause Analysis Expert
+# Debugger
 
-> Systematic bug investigation, root cause analysis, crash diagnosis, and regression prevention.
+Find the cause before changing code. A fix that no cause explains is a guess,
+and guesses tend to land as extra conditionals that hide the next bug.
 
-## 📑 Content Map
+## Procedure
 
-| File | Description | When to Read |
-|:---|:---|:---|
-| No supplementary files | This skill is self-contained | Use the procedures below directly |
+1. **Reproduce.** Write down the exact command or steps, expected and actual
+   output, and how often it fails. If it cannot be reproduced, say so and
+   collect evidence (logs, versions, environment diff) instead of fixing
+   blind.
+2. **Isolate.** Narrow with one tool at a time: a focused test, a log line, a
+   breakpoint (`node --inspect`), halving the input, or
+   `git bisect run <cmd>` for a regression with a known good commit. Revert
+   each experiment that did not confirm a hypothesis before trying the next.
+3. **Explain.** State the cause in one sentence that accounts for both the
+   symptom and the trigger ("fails only on CI because X"). If the sentence
+   needs "maybe", keep isolating.
+4. **Fix the cause** with the smallest change. When the project has a test
+   runner, add a regression test that fails before the fix (see
+   `testing-patterns`).
+5. **Prove it** by rerunning the original reproduction, then hand off to
+   `verify-changes` for the proportional checks.
 
-## 🔗 Related Skills
+## Where to look first
 
-| Skill | Relationship | When to Use Together |
-|:---|:---|:---|
-| [`testing-patterns`](../testing-patterns/SKILL.md) | Regression and reproduction tests | When a bug fix needs test coverage |
-| [`performance-profiling`](../performance-profiling/SKILL.md) | Profiling and performance diagnosis | When symptoms involve latency, memory, or throughput |
-| [`backend-specialist`](../backend-specialist/SKILL.md) | Server-side root-cause context | When errors involve APIs, services, or data flow |
-| [`devops-engineer`](../devops-engineer/SKILL.md) | Production incident response | When bugs affect deployments, servers, or live operations |
+- **Stack trace:** start at the first frame in project code, not the top
+  frame inside a library. Read the whole error, including `cause` chains.
+- **Regression:** `git log --oneline <good>..HEAD -- <paths>` and the diff of
+  the lockfile often name the change before any code is read.
+- **Works locally, fails in CI or production:** diff the Node or runtime
+  version, environment variables, lockfile, build flags, and timezone or
+  locale before reading code.
+- **Intermittent:** look for shared state between tests, unawaited promises,
+  test order, and real time or randomness before adding retries or sleeps.
+- **Wrong data:** trace the value backwards from where it is wrong to where
+  it was last right; check the write path, not just the read path.
+- **Only after deploy:** check migrations, feature flags, caches, and
+  environment config; `devops-engineer` covers the release side.
 
-## Core Philosophy
+## Pitfalls
 
-> "Don't guess. Investigate systematically. Fix the root cause, not the symptom."
+- Silencing the error (empty `catch`, `?.` chains, `|| []`, a broader type)
+  is not a fix; it moves the failure somewhere harder to see.
+- Changing several things at once makes a passing result unexplainable.
+- Remove temporary logging and debug flags before handing off.
+- When the same cause can occur elsewhere (same pattern, copied code), search
+  for it with `rg` and report the other sites instead of silently widening
+  the fix.
 
-## Your Mindset
+## Done when
 
-- **Reproduce first**: Can't fix what you can't see
-- **Evidence-based**: Follow the data, not assumptions
-- **Root cause focus**: Symptoms hide the real problem
-- **One change at a time**: Multiple changes = confusion
-- **Regression prevention**: Every bug needs a test
-
----
-
-## 🛠️ Instructions / Procedures
-
-## 4-Phase Debugging Process
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│  PHASE 1: REPRODUCE                                         │
-│  • Get exact reproduction steps                              │
-│  • Determine reproduction rate (100%? intermittent?)         │
-│  • Document expected vs actual behavior                      │
-└───────────────────────────┬─────────────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────────────┐
-│  PHASE 2: ISOLATE                                            │
-│  • When did it start? What changed?                          │
-│  • Which component is responsible?                           │
-│  • Create minimal reproduction case                          │
-└───────────────────────────┬─────────────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────────────┐
-│  PHASE 3: UNDERSTAND (Root Cause)                            │
-│  • Apply "5 Whys" technique                                  │
-│  • Trace data flow                                           │
-│  • Identify the actual bug, not the symptom                  │
-└───────────────────────────┬─────────────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────────────┐
-│  PHASE 4: FIX & VERIFY                                       │
-│  • Fix the root cause                                        │
-│  • Verify fix works                                          │
-│  • Add regression test                                       │
-│  • Check for similar issues                                  │
-└─────────────────────────────────────────────────────────────┘
-```
-
----
-
-## Bug Categories & Investigation Strategy
-
-### By Error Type
-
-| Error Type | Investigation Approach |
-|------------|----------------------|
-| **Runtime Error** | Read stack trace, check types and nulls |
-| **Logic Bug** | Trace data flow, compare expected vs actual |
-| **Performance** | Profile first, then optimize |
-| **Intermittent** | Look for race conditions, timing issues |
-| **Memory Leak** | Check event listeners, closures, caches |
-
-### By Symptom
-
-| Symptom | First Steps |
-|---------|------------|
-| "It crashes" | Get stack trace, check error logs |
-| "It's slow" | Profile, don't guess |
-| "Sometimes works" | Race condition? Timing? External dependency? |
-| "Wrong output" | Trace data flow step by step |
-| "Works locally, fails in prod" | Environment diff, check configs |
-
----
-
-## Investigation Principles
-
-### Strict Debugging Protocol
-
-For complex or intermittent bugs, do not move to a fix until these are true:
-
-1. Reproduction steps, expected behavior, actual behavior, and reproduction rate are documented.
-2. The suspect area is isolated with logs, tests, debugger breakpoints, binary search, or a minimal reproduction.
-3. The root cause explains the symptom and the trigger.
-4. The fix is the smallest change that addresses the cause.
-5. Verification includes the original reproduction and a regression test or focused executable check when feasible.
-
-### The 5 Whys Technique
-
-```
-WHY is the user seeing an error?
-→ Because the API returns 500.
-
-WHY does the API return 500?
-→ Because the database query fails.
-
-WHY does the query fail?
-→ Because the table doesn't exist.
-
-WHY doesn't the table exist?
-→ Because migration wasn't run.
-
-WHY wasn't migration run?
-→ Because deployment script skips it. ← ROOT CAUSE
-```
-
-### Binary Search Debugging
-
-When unsure where the bug is:
-1. Find a point where it works
-2. Find a point where it fails
-3. Check the middle
-4. Repeat until you find the exact location
-
-### Git Bisect Strategy
-
-Use `git bisect` to find regression:
-1. Mark current as bad
-2. Mark known-good commit
-3. Git helps you binary search through history
-
----
-
-## Tool Selection Principles
-
-### Browser Issues
-
-| Need | Tool |
-|------|------|
-| See network requests | Network tab |
-| Inspect DOM state | Elements tab |
-| Debug JavaScript | Sources tab + breakpoints |
-| Performance analysis | Performance tab |
-| Memory investigation | Memory tab |
-
-### Backend Issues
-
-| Need | Tool |
-|------|------|
-| See request flow | Logging |
-| Debug step-by-step | Debugger (--inspect) |
-| Find slow queries | Query logging, EXPLAIN |
-| Memory issues | Heap snapshots |
-| Find regression | git bisect |
-
-### Database Issues
-
-| Need | Approach |
-|------|----------|
-| Slow queries | EXPLAIN ANALYZE |
-| Wrong data | Check constraints, trace writes |
-| Connection issues | Check pool, logs |
-
----
-
-## Error Analysis Template
-
-### When investigating any bug:
-
-1. **What is happening?** (exact error, symptoms)
-2. **What should happen?** (expected behavior)
-3. **When did it start?** (recent changes?)
-4. **Can you reproduce?** (steps, rate)
-5. **What have you tried?** (rule out)
-
-### Root Cause Documentation
-
-After finding the bug:
-1. **Root cause:** (one sentence)
-2. **Why it happened:** (5 whys result)
-3. **Fix:** (what you changed)
-4. **Prevention:** (regression test, process change)
-
----
-
-## ❌ Anti-Patterns
-
-| ❌ Anti-Pattern | ✅ Correct Approach |
-|-----------------|---------------------|
-| Random changes hoping to fix | Systematic investigation |
-| Ignoring stack traces | Read every line carefully |
-| "Works on my machine" | Reproduce in same environment |
-| Fixing symptoms only | Find and fix root cause |
-| No regression test | Always add test for the bug |
-| Multiple changes at once | One change, then verify |
-| Guessing without data | Profile and measure first |
-
----
-
-## ✅ Quality Audit Checklist
-
-### Before Starting
-- [ ] Can reproduce consistently
-- [ ] Have error message/stack trace
-- [ ] Know expected behavior
-- [ ] Checked recent changes
-
-### During Investigation
-- [ ] Added strategic logging
-- [ ] Traced data flow
-- [ ] Used debugger/breakpoints
-- [ ] Checked relevant logs
-
-### After Fix
-- [ ] Root cause documented
-- [ ] Fix verified
-- [ ] Regression test added
-- [ ] Similar code checked
-- [ ] Debug logging removed
-
----
-
-## When You Should Be Used
-
-- Complex multi-component bugs
-- Race conditions and timing issues
-- Memory leaks investigation
-- Production error analysis
-- Performance bottleneck identification
-- Intermittent/flaky issues
-- "It works on my machine" problems
-- Regression investigation
-
----
-
-> **Remember:** Debugging is detective work. Follow the evidence, not your assumptions.
+The report names the cause, the change, the rerun result of the original
+reproduction, and the regression test, or why none was feasible.

@@ -9,14 +9,17 @@
 
 This section contains **4 rules** focused on client-side data fetching.
 
+- 4.1 Deduplicate Global Event Listeners
+- 4.2 Use Passive Event Listeners for Scrolling Performance
+- 4.3 Use SWR for Automatic Deduplication
+- 4.4 Version and Minimize localStorage Data
+
 ---
 
 ## Rule 4.1: Deduplicate Global Event Listeners
 
 **Impact:** LOW  
 **Tags:** client, swr, event-listeners, subscription  
-
-## Deduplicate Global Event Listeners
 
 Use `useSWRSubscription()` to share global event listeners across component instances.
 
@@ -91,8 +94,6 @@ function Profile() {
 **Impact:** MEDIUM  
 **Tags:** client, event-listeners, scrolling, performance, touch, wheel  
 
-## Use Passive Event Listeners for Scrolling Performance
-
 Add `{ passive: true }` to touch and wheel event listeners to enable immediate scrolling. Browsers normally wait for listeners to finish to check if `preventDefault()` is called, causing scroll delay.
 
 **Incorrect:**
@@ -140,9 +141,9 @@ useEffect(() => {
 **Impact:** MEDIUM-HIGH  
 **Tags:** client, swr, deduplication, data-fetching  
 
-## Use SWR for Automatic Deduplication
-
 SWR enables request deduplication, caching, and revalidation across component instances.
+
+Follow the project's existing data library. If it already uses TanStack Query (React Query), the same rule applies with `useQuery` and a shared `queryKey`; do not add SWR next to it.
 
 **Incorrect (no deduplication, each instance fetches):**
 
@@ -196,8 +197,6 @@ Reference: [https://swr.vercel.app](https://swr.vercel.app)
 
 **Impact:** MEDIUM  
 **Tags:** client, localStorage, storage, versioning, data-minimization  
-
-## Version and Minimize localStorage Data
 
 Add version prefix to keys and store only needed fields. Prevents schema conflicts and accidental storage of sensitive data.
 

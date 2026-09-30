@@ -1,207 +1,135 @@
 ---
 name: security-auditor
 description: >-
-  Use for security code reviews, vulnerability assessments, supply chain audits, or threat modeling.
-  Elite cybersecurity expert defending via OWASP 2025 and Zero Trust.
-  NOT for authorized exploit validation or red team execution beyond defensive review.
-allowed-tools:
-  - Read
-  - Bash
-  - Grep
-  - Glob
+  Audits code for exploitable flaws against the OWASP Top 10:2025, including
+  secrets, access control, injection, and supply chain, and ranks findings
+  with fixes. Use when asked for a security review, threat model, or
+  pre-release audit. Not for general code review (use code-review-checklist).
 ---
 
 # Security Auditor
 
-Elite cybersecurity expert: Think like an attacker, defend like an expert.
+A security audit is only useful if each finding is real, reachable, and
+ranked. Start from what an attacker can reach, confirm each suspicion in the
+code, and report fewer, proven findings rather than a pattern dump. The
+work is defensive: review code and configuration, and do not run exploits
+against systems the user does not own.
 
----
+## Procedure
 
-## 📑 Content Map
-
-| File | Description | When to Read |
-|:---|:---|:---|
-| [references/checklists.md](references/checklists.md) | OWASP, authentication, API, data protection, and headers checklist | Checking audit coverage |
-| [scripts/security_scan.py](scripts/security_scan.py) | Automated repository security scan utility | Execute when scanning local code |
-
----
-
-## 🔗 Related Skills
-
-| Need | Skill |
-|:---|:---|
-| Production deployment and rollback safety | [`devops-engineer`](../devops-engineer/SKILL.md) |
-
----
-
-## 🛠️ Instructions / Procedures
-
-When tasked with security code reviews, vulnerability assessments, or threat modeling exercises, strictly follow this step-by-step procedure:
-
-### Step 1: Map Assets & Boundaries
-1. Identify primary database/application assets, data privacy scopes, and external exposures.
-2. Outline key API entries and trust partitions.
-
-### Step 2: Scan Code for Red Flags
-1. Check for core injection vectors (string query concatenation, dynamic executes), XSS patterns, and disabled SSL flags.
-2. Search files for high-entropy secrets and exposed credentials.
-
-### Step 3: Perform Supply Chain Audits
-1. Audit package dependencies to discover public CVE hazards.
-2. Confirm dependency lock files are present and match checksums.
-
-### Step 4: Map Risk Prioritizations
-1. Apply the CVSS/EPSS scoring decision trees to isolate CRITICAL vulnerabilities.
-2. Classify bugs based on clear business outcomes and security damage bounds.
-
-### Step 5: Validate and Audit checklist
-1. Trigger validation scripts (`python3 .agents/skills/security-auditor/scripts/security_scan.py <project_path>`) against the codebase path.
-2. Confirm compliance against the **Quality Audit Checklist** before completing.
-
----
-
-## Core Philosophy
-
-> "Assume breach. Trust nothing. Verify everything. Defense in depth."
-
-## Your Mindset
-
-- **Assume Breach**: Design as if attacker already inside
-- **Zero Trust**: Never trust, always verify
-- **Defense in Depth**: Multiple layers, no single point of failure
-- **Least Privilege**: Minimum required access only
-- **Fail Secure**: On error, deny access
-
----
-
-## How You Approach Security
-
-### Before Any Review
-
-Ask yourself:
-1. **What are we protecting?** (Assets, data, secrets)
-2. **Who would attack?** (Threat actors, motivation)
-3. **How would they attack?** (Attack vectors)
-4. **What's the impact?** (Business risk)
-
-### Your Workflow
-
-```
-1. UNDERSTAND
-   └── Map attack surface, identify assets
-
-2. ANALYZE
-   └── Think like attacker, find weaknesses
-
-3. PRIORITIZE
-   └── Risk = Likelihood × Impact
-
-4. REPORT
-   └── Clear findings with remediation
-
-5. VERIFY
-   └── Run skill validation script
-```
-
----
+1. **Map the surface.** List entry points (route handlers, server actions,
+   webhooks, queue consumers, MCP tools, cron jobs), the data each touches,
+   and where trust changes (browser to server, server to database, server
+   to third party). For a threat model, record assets, actors, and entry
+   points in the report.
+2. **Run the scanner** (below) for leads, then confirm or discard each lead
+   by reading the code.
+3. **Review by category** using the OWASP list and the stack pitfalls.
+   Follow data from each entry point to its sink; check authorization at the
+   object level, not only the route.
+4. **Rank** each confirmed finding (below) and write the report.
 
 ## OWASP Top 10:2025
 
-| Rank | Category | Your Focus |
-|------|----------|------------|
-| **A01** | Broken Access Control | Authorization gaps, IDOR, SSRF |
-| **A02** | Security Misconfiguration | Cloud configs, headers, defaults |
-| **A03** | Software Supply Chain 🆕 | Dependencies, CI/CD, lock files |
-| **A04** | Cryptographic Failures | Weak crypto, exposed secrets |
-| **A05** | Injection | SQL, command, XSS patterns |
-| **A06** | Insecure Design | Architecture flaws, threat modeling |
-| **A07** | Authentication Failures | Sessions, MFA, credential handling |
-| **A08** | Integrity Failures | Unsigned updates, tampered data |
-| **A09** | Logging & Alerting | Blind spots, insufficient monitoring |
-| **A10** | Exceptional Conditions 🆕 | Error handling, fail-open states |
+| ID | Category | Look for |
+|---|---|---|
+| A01 | Broken Access Control | IDOR / missing per-object checks, SSRF (now part of A01), CORS with credentials |
+| A02 | Security Misconfiguration | Debug on, default credentials, missing headers, verbose errors |
+| A03 | Software Supply Chain Failures (new) | Missing or ignored lockfile, install scripts, unpinned CI actions, typosquats |
+| A04 | Cryptographic Failures | Weak hashing, secrets in code, tokens in `localStorage`, no TLS |
+| A05 | Injection | SQL/NoSQL string building, shell commands, XSS, template injection |
+| A06 | Insecure Design | Missing rate limits on costly flows, trust in client-side checks |
+| A07 | Authentication Failures | Weak session handling, no brute-force limit, unsafe JWT verification |
+| A08 | Software or Data Integrity Failures | Unsigned webhooks, unsafe deserialization, unverified updates |
+| A09 | Security Logging and Alerting Failures | No audit trail for auth and admin actions, secrets in logs |
+| A10 | Mishandling of Exceptional Conditions (new) | Fail-open `catch`, unchecked errors that skip auth, leaked stack traces |
 
----
+Read [references/checklists.md](references/checklists.md) when a report
+needs a per-category checklist, or for the authentication, API, data
+protection, and header checklists.
 
-## Risk Prioritization
+## Stack pitfalls (Next.js, Node, Supabase, MongoDB)
 
-### Decision Framework
+- **Server actions** are public POST endpoints reachable without the UI.
+  Each one validates input and checks the session and the object owner.
+- **Middleware-only auth** is not enough: check authorization again where
+  data is read. Next.js before 15.2.3 (and matching 14.x/13.x/12.x patches)
+  let the `x-middleware-subrequest` header skip middleware
+  (CVE-2025-29927).
+- **`NEXT_PUBLIC_*`** variables are compiled into the browser bundle. Any
+  secret with that prefix is leaked.
+- **Supabase:** tables in an exposed schema without RLS are readable with the
+  anon key; the `service_role` key must never reach the client; RLS
+  policies using `user_metadata` trust data the user can edit.
+- **MongoDB operator injection:** a body like `{"password": {"$ne": null}}`
+  passes into a query unless input is schema-validated to scalar types.
+- **JWT:** verify with a library and a fixed algorithm list; never decode
+  without verifying.
+- **Webhooks:** verify the signature over the raw body before parsing.
+- **Outbound fetch of a user-supplied URL** (previews, imports, webhooks):
+  allow-list hosts and block private and metadata addresses
+  (`169.254.169.254`), including after redirects.
+- **Install scripts:** npm packages run lifecycle scripts on install, the
+  route used by the 2025 npm worm attacks. pnpm 10+ blocks dependency
+  scripts unless allow-listed (`onlyBuiltDependencies`); with npm, CI
+  installs should use `npm ci`.
 
-```
-Is it actively exploited (EPSS >0.5)?
-├── YES → CRITICAL: Immediate action
-└── NO → Check CVSS
-         ├── CVSS ≥9.0 → HIGH
-         ├── CVSS 7.0-8.9 → Consider asset value
-         └── CVSS <7.0 → Schedule for later
-```
+## Scanner
 
-### Severity Classification
+`python3 .agents/skills/security-auditor/scripts/security_scan.py [project_path] [--scan-type all|deps|secrets|patterns|config] [--output json|summary]`
 
-| Severity | Criteria |
-|----------|----------|
-| **Critical** | RCE, auth bypass, mass data exposure |
-| **High** | Data exposure, privilege escalation |
-| **Medium** | Limited scope, requires conditions |
-| **Low** | Informational, best practice |
+Run it; do not read the source. Defaults: `.`, `all`, `json`. Use
+`--output summary` for a short readout.
 
----
+- **`secrets`:** regexes for API keys, tokens, passwords, AWS keys,
+  connection strings, private keys, and JWTs in code and config files. It
+  reports file, type, and count, not the value. It skips files named `.env`
+  or `.env.local` (their suffix does not match), so check those and git
+  history separately.
+- **`patterns`:** line regexes for `eval`, `exec`, `child_process.exec`,
+  `execSync`, `os.system`, `shell=True`, `dangerouslySetInnerHTML`,
+  `innerHTML`, SQL string building, `verify=False`, `pickle`, and unsafe
+  `yaml.load`. Expect false positives such as `regex.exec(` and sanitized
+  HTML.
+- **`config`:** debug flags, `NODE_ENV=development`, CORS wildcards, and
+  whether a header config (`next.config.*`, `middleware.ts`, `nginx.conf`)
+  exists at the root.
+- **`deps`:** lockfile presence at the project root only, then
+  `npm audit --json` when `package.json` exists. **This part needs network
+  access** to the npm registry; offline, or after the 60 s timeout, it is
+  skipped silently. It checks each package manager separately, so a pnpm
+  project also gets "npm/yarn: no lock file" findings; ignore those for
+  managers the project does not use. For pnpm or yarn, run `pnpm audit` or
+  `yarn npm audit` yourself if network use is acceptable.
 
-## What You Look For
+The scanner exits 0 whatever it finds (1 only if the path is not a
+directory). Read `summary.overall_status` and the per-scan `findings`; they
+are leads, not confirmed vulnerabilities.
 
-### Code Patterns (Red Flags)
+## Ranking
 
-| Pattern | Risk |
-|---------|------|
-| String concat in queries | SQL Injection |
-| `eval()`, `exec()`, `Function()` | Code Injection |
-| `dangerouslySetInnerHTML` | XSS |
-| Hardcoded secrets | Credential exposure |
-| `verify=False`, SSL disabled | MITM |
-| Unsafe deserialization | RCE |
+- **Critical:** exploitable remotely without authentication, or leading to
+  code execution, auth bypass, or bulk data exposure.
+- **High:** exploitable by any logged-in user against other users' data, or
+  a leaked live secret.
+- **Medium:** needs unusual conditions or gives limited data.
+- **Low:** hardening or defense in depth.
 
-### Supply Chain (A03)
+For a dependency CVE, raise priority when it is in the CISA KEV catalog or
+has a high EPSS score, and lower it when the vulnerable function is not
+reachable from this code. A dev-only dependency is rarely above Medium.
 
-| Check | Risk |
-|-------|------|
-| Missing lock files | Integrity attacks |
-| Unaudited dependencies | Malicious packages |
-| Outdated packages | Known CVEs |
-| No SBOM | Visibility gap |
+## Report
 
-### Configuration (A02)
+For each finding: title, severity, `file:line`, how an attacker reaches it
+(one concrete request or input), impact, and the fix. List what was reviewed
+and what was not (for example, "infrastructure and git history not
+reviewed"). A leaked secret must be rotated, not only removed from code.
 
-| Check | Risk |
-|-------|------|
-| Debug mode enabled | Information leak |
-| Missing security headers | Various attacks |
-| CORS misconfiguration | Cross-origin attacks |
-| Default credentials | Easy compromise |
+## Done when
 
----
-
-## ❌ Anti-Patterns
-
-| ❌ Don't | ✅ Do |
-|----------|-------|
-| Scan without understanding | Map attack surface first |
-| Alert on every CVE | Prioritize by exploitability |
-| Fix symptoms | Address root causes |
-| Trust third-party blindly | Verify integrity, audit code |
-| Security through obscurity | Real security controls |
-
----
-
-## ✅ Quality Audit Checklist
-
-Before concluding a security audit, threat model review, or OWASP compliance check, verify compliance with the following:
-
-- [ ] **Threat Surface Mapped**: Defined primary assets, exposure factors, and data flow threat vectors.
-- [ ] **OWASP Top 10 Checked**: Audited broken access controls, supply chain dependencies, and input validation fields.
-- [ ] **Secrets & Keys Inspected**: Searched codebase for hardcoded credentials, JWT variables, or private keys.
-- [ ] **Lock Files Validated**: Verified that package manager lock files exist and hold correct integrity hash signatures.
-- [ ] **Vulnerabilities Prioritized**: Classified findings strictly using CVSS and EPSS decision frameworks.
-- [ ] **Scan Script Executed**: Triggered security scan validation utilities (`python3 .agents/skills/security-auditor/scripts/security_scan.py <project_path> --output summary`) and recorded results.
-
----
-
-> **Remember:** You are not just a scanner. You THINK like a security expert. Every system has weaknesses - your job is to find them before attackers do.
+Every entry point in scope was checked for authentication, per-object
+authorization, and input validation; each reported finding was confirmed in
+the code and ranked; scanner leads were confirmed or dismissed; and the
+report states its coverage and the dependency-audit result or why it was
+not run.

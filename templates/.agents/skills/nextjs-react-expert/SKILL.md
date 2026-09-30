@@ -1,270 +1,92 @@
 ---
 name: nextjs-react-expert
 description: >-
-  Use when building React components, optimizing Next.js routing/fetching, diagnosing UI lag, or configuring Next.js 16+ caching/PPR.
-  Next.js and React performance optimization rules covering waterfalls, bundle size, and memoization.
-  NOT for basic HTML templates.
-allowed-tools:
-  - Read
-  - Write
-  - Edit
-  - Glob
-  - Grep
-  - Bash
+  Applies 58 prioritized Next.js and React performance rules and Next.js 16
+  Cache Components guidance. Use when fixing request waterfalls, a large
+  client bundle, slow server rendering, or excess re-renders, or when writing
+  use cache or cacheTag. Not for profiling (use performance-profiling).
 ---
 
-# Next.js & React Performance Expert
-
-> **From Vercel Engineering** - 57 optimization rules prioritized by impact
-> **Philosophy:** Eliminate waterfalls first, optimize bundles second, then micro-optimize.
-
----
-
-## 📑 Content Map
-
-| File | Impact | Rules | When to Read |
-|------|--------|-------|--------------|
-| [references/1-async-eliminating-waterfalls.md](references/1-async-eliminating-waterfalls.md) | 🔴 **CRITICAL** | 5 rules | Slow page loads, sequential API calls, data fetching waterfalls |
-| [references/2-bundle-bundle-size-optimization.md](references/2-bundle-bundle-size-optimization.md) | 🔴 **CRITICAL** | 5 rules | Large bundle size, slow Time to Interactive, First Load issues |
-| [references/3-server-server-side-performance.md](references/3-server-server-side-performance.md) | 🟠 **HIGH** | 7 rules | Slow SSR, API route optimization, server-side waterfalls |
-| [references/4-client-client-side-data-fetching.md](references/4-client-client-side-data-fetching.md) | 🟡 **MEDIUM-HIGH** | 4 rules | Client data management, SWR patterns, deduplication |
-| [references/5-rerender-re-render-optimization.md](references/5-rerender-re-render-optimization.md) | 🟡 **MEDIUM** | 12 rules | Excessive re-renders, React performance, memoization |
-| [references/6-rendering-rendering-performance.md](references/6-rendering-rendering-performance.md) | 🟡 **MEDIUM** | 9 rules | Rendering bottlenecks, virtualization, image optimization |
-| [references/7-js-javascript-performance.md](references/7-js-javascript-performance.md) | ⚪ **LOW-MEDIUM** | 12 rules | Micro-optimizations, caching, loop performance |
-| [references/8-advanced-advanced-patterns.md](references/8-advanced-advanced-patterns.md) | 🔵 **VARIABLE** | 3 rules | Advanced React patterns, useLatest, init-once |
-| [references/9-cache-components.md](references/9-cache-components.md) | 🔴 **CRITICAL** | 4 sections | **Next.js 16+ Only**: `use cache`, `cacheLife`, PPR, `cacheTag` |
-
----
-
-## 🔗 Related Skills
-
-| Need | Skill |
-|------|-------|
-| API design patterns | [`api-patterns`](../api-patterns/SKILL.md) |
-| Database optimization | [`database-design`](../database-design/SKILL.md) |
-| Testing strategies | [`testing-patterns`](../testing-patterns/SKILL.md) |
-| UI/UX design principles | [`frontend-design`](../frontend-design/SKILL.md) |
-
----
-
-## 🛠️ Instructions / Procedures
-
-When tasked with building React components, diagnosing UI lag, or optimizing caching structures, strictly follow this step-by-step procedure:
-
-### Step 1: Detect Performance Bottleneck
-1. Audit page performance using Chrome DevTools or React Profiler profiles.
-2. Locate issue category (e.g. dynamic rendering slow-downs, barrel exports, rendering waterfalls, memory leaks).
-
-### Step 2: Query the Decision Tree
-1. Query the **Quick Decision Tree** to map the issue to the appropriate optimization category.
-2. If slow load or waterfall latency is present, **you must prioritize Critical references** (Waterfalls and Bundle size) before optimizing minor details.
-
-### Step 3: Confirm Suspects in Code
-1. Search the affected routes for the Critical patterns: independent sequential `await` calls, imports from barrel `index` files or icon/UI libraries, and raw `<img>` tags.
-2. Confirm each hit against the matching reference before changing it; dependent awaits and small barrels are often fine.
-
-### Step 4: Refactor and Eliminate Bottlenecks
-1. Apply targeted optimization principles (Promise.all Parallel fetches, Suspense streaming boundaries, next/image wrappers).
-2. Remove nested un-memoized loops and configure caching strategies if Next.js 16+ is used (`use cache`).
-
-### Step 5: Validate Suite & Audit checklist
-1. Verify bundle sizes and run lint/testing actions.
-2. Confirm compliance against the **Quality Audit Checklist** before completing.
-
----
-
-## 🎯 Selective Reading Rule (MANDATORY)
-
-**Read ONLY sections relevant to your task!** Check the content map above and load what you need.
-
-> 🔴 **For performance reviews: Start with CRITICAL sections (1-2), then move to HIGH/MEDIUM.**
-
-## 🚀 Quick Decision Tree
-
-**What's your performance issue?**
-
-```
-🐌 Slow page loads / Long Time to Interactive
-  → Read Section 1: Eliminating Waterfalls
-  → Read Section 2: Bundle Size Optimization
-
-📦 Large bundle size (> 200KB)
-  → Read Section 2: Bundle Size Optimization
-  → Check: Dynamic imports, barrel imports, tree-shaking
-
-🖥️ Slow Server-Side Rendering
-  → Read Section 3: Server-Side Performance
-  → Check: Parallel data fetching, streaming
-
-🔄 Too many re-renders / UI lag
-  → Read Section 5: Re-render Optimization
-  → Check: React.memo, useMemo, useCallback
-
-🎨 Rendering performance issues
-  → Read Section 6: Rendering Performance
-  → Check: Virtualization, layout thrashing
-
-🌐 Client-side data fetching problems
-  → Read Section 4: Client-Side Data Fetching
-  → Check: SWR deduplication, localStorage
-
-✨ Need advanced patterns
-  → Read Section 8: Advanced Patterns
-
-🚀 **Next.js 16+ Performance (Caching & PPR)**
-  → Read Section 9: Cache Components
-```
-
----
-
-## 📊 Impact Priority Guide
-
-**Use this order when doing comprehensive optimization:**
-
-```
-1️⃣ CRITICAL (Biggest Gains - Do First):
-   ├─ Section 1: Eliminating Waterfalls
-   │  └─ Each waterfall adds full network latency (100-500ms+)
-   └─ Section 2: Bundle Size Optimization
-      └─ Affects Time to Interactive and Largest Contentful Paint
-
-2️⃣ HIGH (Significant Impact - Do Second):
-   └─ Section 3: Server-Side Performance
-      └─ Eliminates server-side waterfalls, faster response times
-
-3️⃣ MEDIUM (Moderate Gains - Do Third):
-   ├─ Section 4: Client-Side Data Fetching
-   ├─ Section 5: Re-render Optimization
-   └─ Section 6: Rendering Performance
-
-4️⃣ LOW (Polish - Do Last):
-   ├─ Section 7: JavaScript Performance
-   └─ Section 8: Advanced Patterns
-
-🔥 **MODERN (Next.js 16+):**
-   └─ Section 9: Cache Components (Replaces most traditional revalidation)
-```
-
----
-
-## ❌ Anti-Patterns (Common Mistakes)
-
-**DON'T:**
-
-- ❌ Use sequential `await` for independent operations
-- ❌ Import entire libraries when you need one function
-- ❌ Use barrel exports (`index.ts` re-exports) in app code
-- ❌ Skip dynamic imports for large components/libraries
-- ❌ Fetch data in useEffect without deduplication
-- ❌ Forget to memoize expensive computations
-- ❌ Use client components when server components work
-
-**DO:**
-
-- ✅ Fetch data in parallel with `Promise.all()`
-- ✅ Use dynamic imports: `const Comp = dynamic(() => import('./Heavy'))`
-- ✅ Import directly: `import { specific } from 'library/specific'`
-- ✅ Use Suspense boundaries for better UX
-- ✅ Leverage React Server Components
-- ✅ Measure performance before optimizing
-- ✅ Use Next.js built-in optimizations (next/image, next/font)
-
----
-
-## 📚 Learning Path
-
-**Beginner (Focus on Critical):**
-→ Section 1: Eliminating Waterfalls
-→ Section 2: Bundle Size Optimization
-
-**Intermediate (Add High Priority):**
-→ Section 3: Server-Side Performance
-→ Section 5: Re-render Optimization
-
-**Advanced (Focus on Full Optimization):**
-→ All sections + Section 8: Advanced Patterns
-
----
-
-## ✅ Quality Audit Checklist
-
-Before concluding Next.js or React UI optimization tasks, verify compliance with the following:
-
-- [ ] **Sequential Calls Eliminated**: Independent queries are executed in parallel (`Promise.all()`) to prevent rendering waterfalls.
-- [ ] **Bundle Constraint Met**: Main bundle footprint remains strictly <200KB.
-- [ ] **Direct Imports Configured**: Zero barrel re-exports (`index.ts`) are used in critical app module paths.
-- [ ] **Dynamic Load Bound**: Heavy subcomponents and dynamic libraries load via `dynamic()` or React lazy bounds.
-- [ ] **Server Optimization Priority**: React Server Components execute static data fetches by default.
-- [ ] **Memoization Active**: Heavy loop operations or complex mappings are memoized via `useMemo` or `useCallback`.
-- [ ] **Modern Caching Leveraged**: Caching APIs (`use cache` or Suspense streaming boundaries) are utilized if Next.js 16+ is detected.
-
----
-
-## 📖 Section Details
-
-### Section 1: Eliminating Waterfalls (CRITICAL)
-
-**Impact:** Each waterfall adds 100-500ms+ latency
-**Key Concepts:** Parallel fetching, Promise.all(), Suspense boundaries, preloading
-
-### Section 2: Bundle Size Optimization (CRITICAL)
-
-**Impact:** Directly affects Time to Interactive, Largest Contentful Paint
-**Key Concepts:** Dynamic imports, tree-shaking, barrel import avoidance
-
-### Section 3: Server-Side Performance (HIGH)
-
-**Impact:** Faster server responses, better SEO
-**Key Concepts:** Parallel server fetching, streaming, API route optimization
-
-### Section 4: Client-Side Data Fetching (MEDIUM-HIGH)
-
-**Impact:** Reduces redundant requests, better UX
-**Key Concepts:** SWR deduplication, localStorage caching, event listeners
-
-### Section 5: Re-render Optimization (MEDIUM)
-
-**Impact:** Smoother UI, less wasted computation
-**Key Concepts:** React.memo, useMemo, useCallback, component structure
-
-### Section 6: Rendering Performance (MEDIUM)
-
-**Impact:** Better rendering efficiency
-**Key Concepts:** Virtualization, image optimization, layout thrashing
-
-### Section 7: JavaScript Performance (LOW-MEDIUM)
-
-**Impact:** Incremental improvements in hot paths
-**Key Concepts:** Loop optimization, caching, RegExp hoisting
-
-### Section 8: Advanced Patterns (VARIABLE)
-
-**Impact:** Specific use cases
-**Key Concepts:** useLatest hook, init-once patterns, event handler refs
-
----
-
-## 🎓 Best Practices Summary
-
-**Golden Rules:**
-
-1. **Measure first** - Use React DevTools Profiler, Chrome DevTools
-2. **Biggest impact first** - Waterfalls → Bundle → Server → Micro
-3. **Don't over-optimize** - Focus on real bottlenecks
-4. **Use platform features** - Next.js has optimizations built-in
-5. **Think about users** - Real-world conditions matter
-
-**Performance Mindset:**
-
-- Every `await` in sequence = potential waterfall
-- Every `import` = potential bundle bloat
-- Every re-render = wasted computation (if unnecessary)
-- Server components = less JavaScript to ship
-- Measure, don't guess
-
----
-
-**Source:** Vercel Engineering
-**Date:** January 2026
-**Version:** 1.0.0
-**Total Rules:** 57 across 8 categories
+# Next.js and React Performance
+
+The rules live in `references/`, one file per category, each rule with an
+incorrect and a correct example. Read only the file that matches the problem.
+Measuring (Lighthouse, traces, bundle analysis) belongs to
+`performance-profiling`; this skill is for the fix.
+
+## Before changing anything
+
+1. **Check versions** in `package.json`: Next.js major, React major and minor,
+   and whether `next.config.*` sets `cacheComponents: true`. Several rules
+   depend on them (see Pitfalls).
+2. **Follow the project's data library.** If it uses TanStack Query, SWR, or
+   plain Server Components, keep that. The SWR examples in
+   `references/4-...` translate directly to `useQuery`.
+3. **Check for React Compiler** (`babel-plugin-react-compiler` or
+   `reactCompiler` in the Next config). With it on, skip manual `useMemo`,
+   `useCallback`, and `memo` rules unless a profile shows the compiler
+   bailed out.
+
+## Priority order
+
+Fix in this order, because the earlier categories cost the most:
+
+1. **Waterfalls:** each sequential await adds a full network round trip.
+   Read [references/1-async-eliminating-waterfalls.md](references/1-async-eliminating-waterfalls.md)
+   for sequential `await`s, slow API routes, or missing Suspense boundaries.
+2. **Bundle size:** read
+   [references/2-bundle-bundle-size-optimization.md](references/2-bundle-bundle-size-optimization.md)
+   for a large First Load JS, barrel imports, heavy editors, charts, or
+   third-party scripts.
+3. **Server:** read
+   [references/3-server-server-side-performance.md](references/3-server-server-side-performance.md)
+   for Server Actions, RSC props serialization, `React.cache()`, LRU caching,
+   or `after()`.
+4. **Client data:** read
+   [references/4-client-client-side-data-fetching.md](references/4-client-client-side-data-fetching.md)
+   for duplicate client requests, global event listeners, or `localStorage`.
+5. **Re-renders:** read
+   [references/5-rerender-re-render-optimization.md](references/5-rerender-re-render-optimization.md)
+   when typing or scrolling lags, or the React Profiler shows repeated renders.
+6. **Rendering:** read
+   [references/6-rendering-rendering-performance.md](references/6-rendering-rendering-performance.md)
+   for hydration mismatches, long lists, SVG animation, or show/hide state.
+7. **JavaScript hot paths:** read
+   [references/7-js-javascript-performance.md](references/7-js-javascript-performance.md)
+   only when a profile points at a loop, lookup, or layout thrashing.
+8. **Advanced patterns:** read
+   [references/8-advanced-advanced-patterns.md](references/8-advanced-advanced-patterns.md)
+   for init-once code and stable handler refs.
+
+For caching on Next.js 16 with `cacheComponents`, read
+[references/9-cache-components.md](references/9-cache-components.md) before
+writing `use cache`, `cacheLife`, `cacheTag`, `updateTag`, or `revalidateTag`.
+
+## Pitfalls
+
+- **`revalidateTag` changed in Next.js 16.** The one-argument form is
+  deprecated. Use `updateTag(tag)` in Server Actions for read-your-own-writes,
+  or `revalidateTag(tag, 'max')` in Route Handlers and webhooks.
+- **Cache Components break old segment config.** With `cacheComponents: true`,
+  `export const revalidate`, `dynamic`, and `fetchCache` are build errors, and
+  uncached data outside `<Suspense>` fails the build.
+- **Request APIs inside `use cache`** (`cookies()`, `headers()`,
+  `searchParams`) throw at request time, and may pass `next build`. Read them
+  outside and pass the value as an argument.
+- **Barrel imports in Next.js:** `lucide-react`, `@mui/material`, `date-fns`,
+  `lodash-es`, and similar packages are already in Next's default
+  `optimizePackageImports` list. Do not rewrite their imports by hand. Do
+  handle internal workspace packages.
+- **Server Actions are public endpoints.** Authenticate and authorize inside
+  every action (Rule 3.1), even if the page that calls it is protected.
+- **Version-gated APIs:** `after()` needs Next.js 15.1+; `<Activity>` and
+  `useEffectEvent` need React 19.2+.
+- **Dependent awaits are not waterfalls.** Parallelize only independent work;
+  a small barrel file in app code is usually fine.
+
+## Done when
+
+The fix matches a rule in the relevant reference, independent requests run in
+parallel, no new client bundle weight was added without a dynamic import, and
+the project's build and type checks pass. For before/after numbers, hand off
+to `performance-profiling`; for the wider checks, `verify-changes`.

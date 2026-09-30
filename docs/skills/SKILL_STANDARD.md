@@ -221,8 +221,8 @@ skills.
 ## 8. Validation
 
 ```bash
-npm run check:templates                                   # warnings for this standard
-node scripts/check-template-consistency.mjs --strict      # warnings become failures
+npm run check:templates                                   # fails on any rule of this standard
+node scripts/check-template-consistency.mjs --lenient     # reports kit-rule findings as warnings only
 ```
 
 `check-template-consistency.mjs` enforces the automatable parts of this
@@ -236,11 +236,10 @@ standard and of the description guide:
 - empty or cache folders
 - `openai.yaml` fields
 
-Some checks are hard failures: missing frontmatter, a name that differs from
-its folder, a missing description, a description over 1,024 chars, a missing
-`openai.yaml`, and broken links. Every other check of this standard reports a
-warning until the audit's rewrite batches finish, and then `--strict` becomes
-the default.
+Every check fails the run by default. Use `--lenient` while a skill is being
+rewritten: spec violations (missing frontmatter, a name that differs from its
+folder, a missing description, a description over 1,024 chars, a missing
+`openai.yaml`, broken links) still fail, and the kit rules are only reported.
 
 Checks that stay manual:
 

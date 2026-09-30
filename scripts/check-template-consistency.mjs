@@ -7,7 +7,8 @@ import { lintSkill } from "./skill-standard.mjs";
 
 const args = process.argv.slice(2);
 const verbose = args.includes("--verbose");
-const strict = args.includes("--strict");
+// Skill-standard warnings fail by default; --lenient reports them without failing.
+const strict = !args.includes("--lenient");
 const rootArg = args.find((arg) => !arg.startsWith("--")) ?? ".";
 const repoRoot = path.resolve(rootArg);
 
@@ -366,7 +367,7 @@ if (!strict && warnings.length > 0) {
   for (const [rule, count] of [...byRule].sort((a, b) => b[1] - a[1])) {
     console.warn(`  ${String(count).padStart(3)}  ${rule}`);
   }
-  if (!verbose) console.warn("  Run with --verbose to list them, or --strict to fail on them.");
+  if (!verbose) console.warn("  Run with --verbose to list them; they fail the check without --lenient.");
 }
 
 if (failed.length > 0) {
