@@ -1,8 +1,4 @@
 interface:
-  display_name: "Webapp Testing"
-  short_description: "Systematic E2E web application browser testing using Playwright"
-  brand_color: "#10B981"
-  default_prompt: "$webapp-testing"
-
-policy:
-  allow_implicit_invocation: true
+  display_name: "Web App Testing"
+  short_description: "Write and stabilize Playwright E2E tests"
+  default_prompt: "Use $webapp-testing to add an E2E test for the checkout flow."

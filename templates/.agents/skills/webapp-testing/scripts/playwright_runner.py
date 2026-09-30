@@ -50,7 +50,11 @@ def run_basic_test(url: str, take_screenshot: bool = False) -> dict:
                 user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
             )
             page = context.new_page()
-            
+
+            # Capture console errors before navigating so load-time errors are included
+            console_errors = []
+            page.on("console", lambda msg: console_errors.append(msg.text) if msg.type == "error" else None)
+
             # Navigate
             response = page.goto(url, wait_until="load", timeout=30000)
             
@@ -69,10 +73,6 @@ def run_basic_test(url: str, take_screenshot: bool = False) -> dict:
                 "has_links": page.locator("a").count() > 0,
                 "has_images": page.locator("img").count() > 0
             }
-            
-            # Console errors
-            console_errors = []
-            page.on("console", lambda msg: console_errors.append(msg.text) if msg.type == "error" else None)
             
             # Performance metrics
             result["performance"] = {
@@ -99,6 +99,8 @@ def run_basic_test(url: str, take_screenshot: bool = False) -> dict:
                 "forms": page.locator("form").count()
             }
             
+            result["console_errors"] = console_errors[:20]
+
             browser.close()
             
             result["status"] = "success" if result["health"]["loaded"] else "failed"

@@ -11,7 +11,7 @@ Codex Kit is a modular toolkit organized around a unified, composable
 model with skill directories that can be loaded on demand.
 
 The kit contains:
-- **43 Composable Skills** - Direct domain-specific knowledge packages and expert personas under `skills/`.
+- **38 Composable Skills** - Direct domain-specific knowledge packages and expert personas under `skills/`.
 - **4 Master Scripts** - System-level automation and validation scripts under `scripts/`.
 
 ---
@@ -34,7 +34,7 @@ AGENTS.md                     # Repository-wide workflow and skill rules
 │   └── hooks/
 │       ├── harness_guard.py # Shared warning-only Harness policy
 │       └── claude_adapter.py # Claude payload and response adapter
-├── skills/                  # 43 Composable Skills (Expert Personas + Domain Knowledge)
+├── skills/                  # 38 Composable Skills (Expert Personas + Domain Knowledge)
 │   ├── {skill-name}/
 │   │   ├── SKILL.md         # Metadata, triggers, and prompt guidelines
 │   │   ├── agents/
@@ -71,11 +71,11 @@ lost.
 
 ---
 
-## 🧩 The 43 Composable Skills
+## 🧩 The 38 Composable Skills
 
 In Codex, the boundary between "agents" and "skills" is dissolved. Every specialist capability or expert persona is implemented as a **Skill** that the unified AI engine can dynamically load into its context.
 
-### 🎭 Expert Persona Skills (13)
+### 🎭 Expert Persona Skills (11)
 These skills contain specialized persona prompts, deep domain methodologies, and dynamic color branding for the Codex UI.
 
 | Skill | Focus | Primary Invocation / Triggers |
@@ -86,24 +86,22 @@ These skills contain specialized persona prompts, deep domain methodologies, and
 | `database-architect` | High-efficiency database & schemas | Prisma, Drizzle, migrations, query performance |
 | `devops-engineer` | CI/CD, containerization & cloud infra | Docker, PM2, deployment pipelines, Nginx |
 | `security-auditor` | Security compliance & vulnerabilities | OWASP, auth audits, static analysis review |
-| `test-engineer` | Testing architectures & coverage | Vitest, E2E testing, TDD workflow, Jest |
 | `debugger` | Systematic root-cause analysis | Complex bug investigation, system crashes |
 | `performance-optimizer` | Web speed & Core Web Vitals | Lighthouse audits, bundle size optimization |
 | `seo-specialist` | Page ranking & search visibility | SEO tags, structured data, web vitals |
 | `documentation-writer` | Professional documentation & guides | API docs, user guides, README files |
 | `product-manager` | Business logic, user stories & backlog/MVP | Feature specifications, user flows, RICE prioritization |
-| `qa-automation-engineer` | E2E automation & regression pipelines| Playwright runners, visual regression |
 
 ---
 
-### 🧩 Domain Knowledge Skills (30)
+### 🧩 Domain Knowledge Skills (27)
 These skills provide specific instructions and toolsets to guide implementation in target technologies and patterns.
 
 | Domain Category | Skills Included |
 | :--- | :--- |
-| **Frontend & UI** | `react-refactor-patterns`, `web-design-guidelines`, `tailwind-patterns`, `frontend-design`, `seo-fundamentals`, `i18n-localization`, `playwright-pitfalls`, `playwright-pro-patterns`, `webapp-testing`, `nextjs-react-expert` |
+| **Frontend & UI** | `react-refactor-patterns`, `web-design-guidelines`, `tailwind-patterns`, `frontend-design`, `seo-fundamentals`, `i18n-localization`, `webapp-testing`, `nextjs-react-expert` |
 | **Backend & API** | `api-patterns`, `nodejs-best-practices`, `python-patterns`, `database-design`, `mcp-builder` |
-| **Testing & QA** | `testing-patterns`, `tdd-workflow`, `verify-changes`, `lint-and-validate`, `clean-code`, `performance-profiling` |
+| **Testing & QA** | `testing-patterns`, `verify-changes`, `lint-and-validate`, `clean-code`, `performance-profiling` |
 | **Security & Audits** | `code-review-checklist`, `code-review-graph` |
 | **Planning & Design** | `app-builder`, `architecture`, `plan-writing`, `brainstorming` |
 | **System Operations** | `simplify-code`, `code-archaeologist`, `explorer-agent` |

@@ -1,8 +1,0 @@
-interface:
-  display_name: "Test Engineer"
-  short_description: "Write tests, improve coverage, debug failures, and automate suites."
-  brand_color: "#10B981"
-  default_prompt: "$test-engineer"
-
-policy:
-  allow_implicit_invocation: true

@@ -637,6 +637,8 @@ class ValidatorRegressionTests(unittest.TestCase):
 
                 self.assertNotIn("networkidle", source)
                 self.assertNotIn("maestro", source)
+                self.assertLess(source.index('page.on("console"'), source.index("page.goto("))
+                self.assertIn('result["console_errors"]', source)
 
 
 if __name__ == "__main__":

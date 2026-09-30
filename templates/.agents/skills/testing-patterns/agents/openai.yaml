@@ -1,8 +1,4 @@
 interface:
   display_name: "Testing Patterns"
-  short_description: "Unit, integration, and E2E testing strategies, mocking, and test pyramid."
-  brand_color: "#10B981"
-  default_prompt: "$testing-patterns"
-
-policy:
-  allow_implicit_invocation: true
+  short_description: "Write unit and integration tests and test-first fixes"
+  default_prompt: "Use $testing-patterns to add a failing test that reproduces this bug, then fix it."

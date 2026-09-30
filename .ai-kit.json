@@ -37,26 +37,21 @@
     "performance-optimizer": {},
     "performance-profiling": {},
     "plan-writing": {},
-    "playwright-pitfalls": {},
-    "playwright-pro-patterns": {},
     "product-manager": {},
     "project-planner": {},
     "python-patterns": {},
-    "qa-automation-engineer": {},
     "react-refactor-patterns": {},
     "security-auditor": {},
     "seo-fundamentals": {},
     "seo-specialist": {},
     "simplify-code": {},
     "tailwind-patterns": {},
-    "tdd-workflow": {},
-    "test-engineer": {},
     "testing-patterns": {},
     "verify-changes": {},
     "web-design-guidelines": {},
     "webapp-testing": {}
   },
-  "installedAt": "2026-09-29T10:57:30.167Z",
+  "installedAt": "2026-09-30T08:51:21.599Z",
   "harness": {
     "enabled": true,
     "source": "repository-harness"
@@ -71,7 +66,7 @@
     ".agents/scripts/checklist.py": "sha256:3b66ad00a5496cd001a4ff9ee2a25d9637a5e9c35a17867fa4c5b32fed91d66d",
     ".agents/scripts/session_manager.py": "sha256:275e1af4c7f0ec378b0ffb98fce1068088702c602d7cd16ca3cb7f5d200e1ee2",
     ".agents/scripts/verify_all.py": "sha256:70bfa1d47e21edc9c320d169c3a747e5e695f14c50e008dc2ab27484422563b8",
-    ".agents/ARCHITECTURE.md": "sha256:6bf213ed0eb974d67cffc2d903d5306f7a81d194a0958087f7e72ea46157a887",
+    ".agents/ARCHITECTURE.md": "sha256:82fc9356b15b106ce643e1f7b975457a564a504605f0bcd2940bcd248b833cec",
     ".agents/ux_audit.json": "sha256:7468e8453200e680ced0339d9c412af1587d6f53d7464a4fa02142c5eafdf67f"
   }
 }

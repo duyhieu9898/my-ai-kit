@@ -1,248 +1,75 @@
 ---
 name: testing-patterns
 description: >-
-  Use ONLY when writing unit/integration test code, designing mock boundaries, or configuring test data factories.
-  NOT for framework setup or running test CLIs.
-allowed-tools:
-  - Read
-  - Write
-  - Edit
-  - Glob
-  - Grep
-  - Bash
+  Writes and fixes unit and integration tests, including mocks, fixtures, and
+  test-first bug fixes. Use when adding tests for new or changed code,
+  reproducing a bug with a failing test, or deciding what to mock. Not for
+  browser end-to-end tests (use webapp-testing).
 ---
 
 # Testing Patterns
 
-> Principles for reliable test suites.
-
----
-
-## 📑 Content Map
-
-| File | Description | When to Read |
-|:---|:---|:---|
-| [scripts/test_runner.py](scripts/test_runner.py) | Python test runner execution utility | Execute when verifying/running tests |
-
----
-
-## 🔗 Related Skills
-
-| Need | Skill |
-|:---|:---|
-| General QA automation architectures | [`test-engineer`](../test-engineer/SKILL.md) |
-| Specific Playwright E2E browser creations | [`playwright-pro-patterns`](../playwright-pro-patterns/SKILL.md) |
-
----
-
-## 🛠️ Instructions / Procedures
-
-When tasked with writing unit/integration tests or designing mock boundaries, strictly follow this step-by-step procedure:
-
-### Step 1: Analyze Context & Test Target
-1. Review target functions, logic engines, or system integrations.
-2. Determine appropriate test scope (Pyramid Rule) using the Test Type Selection criteria.
-
-### Step 2: Design Assertions using AAA Pattern
-1. Draft the test framework layout (AAA Pattern).
-2. Configure **Arrange** steps: Prepare mock models, parameters, inputs, or database records.
-3. Configure **Act** steps: Execute the specific function or endpoint under test.
-4. Configure **Assert** steps: Verify outcome metrics, status codes, payload contracts, or exceptions.
-
-### Step 3: Configure Isolation & Mocking Boundaries
-1. Isolate test layers. Mock external endpoints, system databases (for unit tests), and random math functions (When to Mock).
-2. Employ distinct mock strategies (Stubs for static data, Spies to track invocations, Fakes for lightweight implementations).
-3. Ensure no module-level variable leakage occurs during parallel runner iterations.
-
-### Step 4: Validate Suite & State Teardowns
-1. Program required `afterEach`/`afterAll` hooks to purge mutated data files, drop database tables, and shut down mock ports.
-2. Verify all test files follow naming standards and pass run loops. Confirm compliance against the **Quality Audit Checklist**.
-
----
-
-## 1. Testing Pyramid
-
-```
-        /\          E2E (Few)
-       /  \         Critical flows
-      /----\
-     /      \       Integration (Some)
-    /--------\      API, DB queries
-   /          \
-  /------------\    Unit (Many)
-                    Functions, classes
-```
-
----
-
-## 2. AAA Pattern
-
-| Step | Purpose |
-|------|---------|
-| **Arrange** | Set up test data |
-| **Act** | Execute code under test |
-| **Assert** | Verify outcome |
-
----
-
-## 3. Test Type Selection
-
-### When to Use Each
-
-| Type | Best For | Speed |
-|------|----------|-------|
-| **Unit** | Pure functions, logic | Fast (<50ms) |
-| **Integration** | API, DB, services | Medium |
-| **E2E** | Critical user flows | Slow |
-
----
-
-## 4. Unit Test Principles
-
-### Good Unit Tests
-
-| Principle | Meaning |
-|-----------|---------|
-| Fast | < 100ms each |
-| Isolated | No external deps |
-| Repeatable | Same result always |
-| Self-checking | No manual verification |
-| Timely | Written with code |
-
-### What to Unit Test
-
-| Test | Don't Test |
-|------|------------|
-| Business logic | Framework code |
-| Edge cases | Third-party libs |
-| Error handling | Simple getters |
-
----
-
-## 5. Integration Test Principles
-
-### What to Test
-
-| Area | Focus |
-|------|-------|
-| API endpoints | Request/response |
-| Database | Queries, transactions |
-| External services | Contracts |
-
-### Setup/Teardown
-
-| Phase | Action |
-|-------|--------|
-| Before All | Connect resources |
-| Before Each | Reset state |
-| After Each | Clean up |
-| After All | Disconnect |
-
----
-
-## 6. Mocking Principles
-
-### When to Mock
-
-| Mock | Don't Mock |
-|------|------------|
-| External APIs | The code under test |
-| Database (unit) | Simple dependencies |
-| Time/random | Pure functions |
-| Network | In-memory stores |
-
-### Mock Types
-
-| Type | Use |
-|------|-----|
-| Stub | Return fixed values |
-| Spy | Track calls |
-| Mock | Set expectations |
-| Fake | Simplified implementation |
-
----
-
-## 7. Test Organization
-
-### Naming
-
-| Pattern | Example |
-|---------|---------|
-| Should behavior | "should return error when..." |
-| When condition | "when user not found..." |
-| Given-when-then | "given X, when Y, then Z" |
-
-### Grouping
-
-| Level | Use |
-|-------|-----|
-| describe | Group related tests |
-| it/test | Individual case |
-| beforeEach | Common setup |
-
----
-
-## 8. Test Data
-
-### Strategies
-
-| Approach | Use |
-|----------|-----|
-| Factories | Generate test data |
-| Fixtures | Predefined datasets |
-| Builders | Fluent object creation |
-
-### Principles
-
-- Use realistic data
-- Randomize non-essential values (faker)
-- Share common fixtures
-- Keep data minimal
-
----
-
-## 9. Best Practices
-
-| Practice | Why |
-|----------|-----|
-| One assert per test | Clear failure reason |
-| Independent tests | No order dependency |
-| Fast tests | Run frequently |
-| Descriptive names | Self-documenting |
-| Clean up | Avoid side effects |
-
----
-
-## ❌ Anti-Patterns
-
-| ❌ Don't | ✅ Do |
-|----------|-------|
-| Test implementation | Test behavior |
-| Duplicate test code | Use factories |
-| Complex test setup | Simplify or split |
-| Ignore flaky tests | Fix root cause |
-| Skip cleanup | Reset state |
-
----
-
-## Script
-
-| Script | Purpose | Command |
-|--------|---------|---------|
-| [scripts/test_runner.py](scripts/test_runner.py) | Python test running utility | `python3 scripts/test_runner.py` |
-
----
-
-> **Remember:** Tests are documentation. If someone can't understand what the code does from the tests, rewrite them.
-
----
-
-## ✅ Quality Audit Checklist
-
-Before concluding testing tasks or completing test coverage updates, verify compliance with the following:
-
-- [ ] **AAA Structure Applied**: Every test clearly structures code block setups using Arrange-Act-Assert separators.
-- [ ] **Unit Test Speed**: Fast unit assertions complete in <100ms and operate entirely free of external dependencies.
-- [ ] **Explicit Mocking Boundaries**: Stub/Spy mock components are confined to external network resources, database integrations, or random timers; core business algorithms are never mocked.
-- [ ] **Data Cleanup & Isolation**: Database mutations, fixtures, and file modifications are completely purged after test runs to ensure state isolation.
-- [ ] **No Implementation Testing**: Asserts verify expected behavioral contract outcomes rather than internal private method implementation details.
+Tests here exist to catch regressions in behaviour a caller depends on. A test
+that breaks on every refactor, or passes whether the code works or not, is a
+cost, not coverage.
+
+## Defaults
+
+- **Runner and layout:** follow the project: `package.json` scripts, the
+  existing config (`vitest.config.*`, `jest.config.*`, `pytest.ini`), and
+  where existing tests live. With no runner yet, use Vitest for TypeScript,
+  Node, and React, and pytest for Python.
+- **React components:** Testing Library, querying by role, label, or text.
+  Mock HTTP at the network layer with MSW rather than mocking `fetch` or the
+  API client module.
+- **What to mock:** only what you do not own or cannot control: network,
+  clock, randomness, third-party SDKs, email or payment providers. Do not mock
+  the module under test or your own pure helpers.
+- **Integration tests** use the real database the project already provides
+  for tests (a local Supabase or Postgres, a test container,
+  `mongodb-memory-server`). Do not replace it with mocks to make a test pass.
+- **Test data:** factories with valid defaults and per-test overrides; unique
+  ids per test; no mutable module-level state; clean up in `afterEach`.
+- **Assertions:** assert what a caller observes: return values, thrown errors,
+  HTTP status and body, rendered text. Assert an internal call only when the
+  call is the behaviour (an email was sent, an event was emitted).
+
+## Test-first bug fix
+
+1. Write a test that reproduces the report.
+2. Run it and read the failure. It must fail **for the reported reason**. A
+   test that passes before the fix does not reproduce the bug; keep looking.
+3. Fix the code, rerun the test, then run the rest of that file or module.
+
+## Running tests
+
+- **Run the narrowest scope first:**
+  - `npx vitest run <file> -t "<name>"`
+  - `npx jest <file> -t "<name>"`
+  - `pytest <file>::<test>`
+- **Then the project's own command** (`npm test`, `pnpm test`…).
+- **When the project's command is unknown:**
+  `python3 .agents/skills/testing-patterns/scripts/test_runner.py <project> [--coverage]`
+  detects Vitest, Jest, `npm test`, or pytest and prints a JSON summary. It
+  runs the whole suite. Run it; do not read the source.
+
+## Pitfalls
+
+- **Vitest mocking:** `vi.mock()` is hoisted above imports, so variables it
+  uses must be created with `vi.hoisted()`. `jest.*` globals do not exist in
+  Vitest unless the project enables the compat globals.
+- **Fake timers:** they must be restored in `afterEach`, or later tests in the
+  file hang or pass for the wrong reason.
+- **Snapshots:** large snapshot tests of whole trees get approved blindly.
+  Prefer targeted assertions, with a small snapshot only for stable,
+  serialisable output.
+- **Coverage:** the percentage is not the goal. Cover the branches the change
+  touched, including the error path.
+- **Flaky tests:** look for shared state, unawaited promises, or real time and
+  ordering. Do not add retries or sleeps to make them pass.
+
+## Done when
+
+The changed behaviour, and the bug case if there is one, have tests that
+failed before the change and pass after it, and the affected suite passes.
+Hand off to `verify-changes` for the wider checks.

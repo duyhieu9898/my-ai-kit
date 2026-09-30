@@ -33,7 +33,7 @@ allowed-tools:
 |:---|:---|
 | Designing clean API endpoints | [`api-patterns`](../api-patterns/SKILL.md) |
 | Optimizing Next.js and React UIs | [`nextjs-react-expert`](../nextjs-react-expert/SKILL.md) |
-| Writing high-performance unit/integration tests | [`test-engineer`](../test-engineer/SKILL.md) |
+| Writing high-performance unit/integration tests | [`testing-patterns`](../testing-patterns/SKILL.md) |
 
 ---
 

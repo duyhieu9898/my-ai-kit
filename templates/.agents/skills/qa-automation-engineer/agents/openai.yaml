@@ -1,8 +1,0 @@
-interface:
-  display_name: "Qa Automation Engineer"
-  short_description: "QA automation, E2E infrastructure, browser tests, and CI stability."
-  brand_color: "#059669"
-  default_prompt: "$qa-automation-engineer"
-
-policy:
-  allow_implicit_invocation: true

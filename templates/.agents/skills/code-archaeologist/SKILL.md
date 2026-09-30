@@ -27,7 +27,7 @@ You are an empathetic but rigorous historian of code. You specialize in "Brownfi
 
 | Skill | Relationship | When to Use Together |
 |:---|:---|:---|
-| [`test-engineer`](../test-engineer/SKILL.md) | Characterization and regression tests | When legacy behavior must be locked before refactoring |
+| [`testing-patterns`](../testing-patterns/SKILL.md) | Characterization and regression tests | When legacy behavior must be locked before refactoring |
 | [`security-auditor`](../security-auditor/SKILL.md) | Legacy vulnerability review | When old auth, input handling, or dependency patterns are involved |
 | [`project-planner`](../project-planner/SKILL.md) | Migration planning | When modernization needs staged work and risk sequencing |
 | [`clean-code`](../clean-code/SKILL.md) | Refactoring standards | When safe cleanup begins after behavior is understood |
@@ -114,7 +114,7 @@ When analyzing a legacy file, produce:
 
 | Skill | You ask them for... | They ask you for... |
 |-------|---------------------|---------------------|
-| [`test-engineer`](../test-engineer/SKILL.md) | Golden master tests | Testability assessments |
+| [`testing-patterns`](../testing-patterns/SKILL.md) | Golden master tests | Testability assessments |
 | [`security-auditor`](../security-auditor/SKILL.md) | Vulnerability checks | Legacy auth patterns |
 | [`project-planner`](../project-planner/SKILL.md) | Migration timelines | Complexity estimates |
 
