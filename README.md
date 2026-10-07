@@ -37,7 +37,7 @@ các phần tích hợp theo tool. CLI **không** tự sửa `.gitignore` — b�
 `.agents/skills/` là bộ skill gọn dùng chung: Codex đọc trực tiếp, Claude Code
 đọc qua symlink. `.agent/skills/` chứa skill chỉ dành cho Gemini — các việc mà
 Claude Code và Codex đã tự làm tốt (review code, khám phá codebase, debug, test,
-lint, deploy, MCP server, viết tài liệu, clean code). Codex không đọc `.agent/skills/`; Antigravity đọc cả hai thư mục và ưu
+lint, deploy, MCP server, viết tài liệu, clean code, verify). Codex không đọc `.agent/skills/`; Antigravity đọc cả hai thư mục và ưu
 tiên bản trong `.agent/skills/` khi trùng tên, nên có thể viết một bản riêng cho
 Gemini mà không ảnh hưởng Codex.
 Với Codex, `.codex/hooks.json` được merge với hooks hiện có thay vì thay thế
@@ -96,14 +96,14 @@ npx -y hieund-ai-kit status
 
 ## Profile
 
-Kit có 21 skill: 12 skill dùng chung và 9 skill chỉ dành cho Gemini (đánh
+Kit có 21 skill: 11 skill dùng chung và 10 skill chỉ dành cho Gemini (đánh
 dấu *). Cài theo profile để agent chỉ thấy các skill cần cho project;
 description của mọi skill đã cài đều được nạp vào context, nên cài thừa vừa tốn
 token vừa dễ làm agent chọn nhầm skill.
 
 | Profile | Skill |
 |:---|:---|
-| `core` | `clean-code`*, `verify-changes`, `debugger`*, `explorer-agent`*, `lint-and-validate`*, `code-review-checklist`*, `security-auditor` |
+| `core` | `clean-code`*, `verify-changes`*, `debugger`*, `explorer-agent`*, `lint-and-validate`*, `code-review-checklist`*, `security-auditor` |
 | `web` | `frontend-design`, `web-design-guidelines`, `react-refactor-patterns`, `performance-profiling` |
 | `backend` | `backend-specialist`, `api-patterns`, `database-design` |
 | `testing` | `testing-patterns`*, `webapp-testing` |
@@ -111,7 +111,7 @@ token vừa dễ làm agent chọn nhầm skill.
 | `ops` | `devops-engineer`* |
 | `mcp` | `mcp-builder`* |
 | `docs` | `documentation-writer`* |
-| `starter` | `clean-code`*, `debugger`*, `verify-changes` |
+| `starter` | `clean-code`*, `debugger`*, `verify-changes`* |
 
 Ví dụ:
 
@@ -133,7 +133,7 @@ Bản 5.0 tinh giản skill cho Claude Code và Codex. Chạy `update` bằng CL
 
 | Skill | Thay đổi |
 |:---|:---|
-| `code-review-checklist`, `explorer-agent`, `debugger`, `testing-patterns`, `lint-and-validate`, `devops-engineer`, `mcp-builder`, `documentation-writer`, `clean-code` | Chuyển từ `.agents/skills/` sang `.agent/skills/` (chỉ Gemini); symlink Claude bị gỡ |
+| `code-review-checklist`, `explorer-agent`, `debugger`, `testing-patterns`, `lint-and-validate`, `devops-engineer`, `mcp-builder`, `documentation-writer`, `clean-code`, `verify-changes` | Chuyển từ `.agents/skills/` sang `.agent/skills/` (chỉ Gemini); symlink Claude bị gỡ |
 | `plan-writing`, `project-planner`, `product-manager` | Bỏ hẳn; dùng plan mode có sẵn của tool |
 | `architecture` | Bỏ hẳn; profile `planning` cũng bị bỏ |
 | `nextjs-react-expert` | Gộp vào `performance-profiling` (rule Next.js/React nằm trong `references/`) |

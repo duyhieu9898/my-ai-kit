@@ -21,11 +21,10 @@
     "react-refactor-patterns": {},
     "security-auditor": {},
     "seo-fundamentals": {},
-    "verify-changes": {},
     "web-design-guidelines": {},
     "webapp-testing": {}
   },
-  "installedAt": "2026-10-07T02:49:20.319Z",
+  "installedAt": "2026-10-07T02:53:23.320Z",
   "harness": {
     "enabled": true,
     "source": "repository-harness"
@@ -40,7 +39,7 @@
     ".agents/scripts/checklist.py": "sha256:146480fb35b5083431a62d72aadd07785e898609b4a2a8febf7d1786efc4552d",
     ".agents/scripts/session_manager.py": "sha256:275e1af4c7f0ec378b0ffb98fce1068088702c602d7cd16ca3cb7f5d200e1ee2",
     ".agents/scripts/verify_all.py": "sha256:ca8ca5154664d0dcd02635d87f14cdc5b364410faa30df83c7c716111b4f34bb",
-    ".agents/ARCHITECTURE.md": "sha256:4ea1835702e5e121fea9162be71e03182e97c5242dc07cc01746da53e475c5c1",
+    ".agents/ARCHITECTURE.md": "sha256:0c2024716658e0ac4bf3ce248d2b9e4f6bfd0eeb35f5d7acee2197a6ae70fbc6",
     ".agents/ux_audit.json": "sha256:7468e8453200e680ced0339d9c412af1587d6f53d7464a4fa02142c5eafdf67f"
   },
   "managedGeminiSkills": {
@@ -52,6 +51,7 @@
     "devops-engineer": {},
     "mcp-builder": {},
     "documentation-writer": {},
-    "clean-code": {}
+    "clean-code": {},
+    "verify-changes": {}
   }
 }

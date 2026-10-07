@@ -171,4 +171,4 @@ follow its existing names first. Otherwise: `use<Name>.ts`,
 Rendered output and the props contract are unchanged, the existing and new
 tests pass, `utils/` has no React imports, no server data is copied into a
 store, no token is persisted to web storage, and each touched component is
-under about 150 lines. Use `verify-changes` for the wider checks.
+under about 150 lines.

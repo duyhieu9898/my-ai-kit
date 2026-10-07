@@ -146,5 +146,4 @@ writing `use cache`, `cacheLife`, `cacheTag`, `updateTag`, or `revalidateTag`.
 The targeted metric improved between two comparable runs (or, for a
 code-level fix, the change matches a rule in the relevant reference), the
 change is the one that caused it, no client bundle weight was added without a
-dynamic import, and the build and type checks pass. Hand off to
-`verify-changes` for the wider checks.
+dynamic import, and the build and type checks pass.

@@ -1,4 +1,0 @@
-interface:
-  display_name: "Verify Changes"
-  short_description: "Prove a change with proportional project checks"
-  default_prompt: "Use $verify-changes to prove this change with the project's own checks."

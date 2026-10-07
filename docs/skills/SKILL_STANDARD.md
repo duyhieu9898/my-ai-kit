@@ -113,8 +113,8 @@ or `CLAUDE.md`. That means:
 - no rule to run every validator after every change;
 - no hard-coded `npm run …` when the project's own commands differ.
 
-Verification is delegated to `verify-changes` instead of each skill carrying
-its own "Quality Control Loop".
+Verification is left to the project's own checks (and `verify-changes` on
+Gemini) instead of each skill carrying its own "Quality Control Loop".
 
 **Portable Markdown only.** Do not use `$ARGUMENTS`, `` !`cmd` ``, or
 `${CLAUDE_SKILL_DIR}`. They work only in Claude Code; Codex reads them as

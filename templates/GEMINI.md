@@ -59,7 +59,7 @@ Ask only when missing information makes the next action ambiguous, risky, or des
 ### 1. Proof Ladder
 *   **Documentation (Docs):** Run `git diff --check`.
 *   **Source Code:** Run linters, type checks, or unit tests matching the modified files.
-*   **Toolkit or skill changes:** Validate frontmatter, links, scripts, and changed skill paths. See `.agents/skills/verify-changes/SKILL.md`.
+*   **Toolkit or skill changes:** Validate frontmatter, links, scripts, and changed skill paths. See `.agent/skills/verify-changes/SKILL.md`.
 
 ### 2. Checklist Priority (Final verification request)
 Run the project audit command `python3 .agents/scripts/checklist.py .`, and fix findings in this order: Security → Lint → Schema → Tests → UX → SEO → E2E.

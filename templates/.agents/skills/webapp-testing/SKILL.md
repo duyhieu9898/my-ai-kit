@@ -66,4 +66,4 @@ do not read the source.
 ## Done when
 
 The new or fixed test passes three repeats locally, uses no fixed sleeps, and
-leaves no data behind. Hand off to `verify-changes` for the wider checks.
+leaves no data behind.

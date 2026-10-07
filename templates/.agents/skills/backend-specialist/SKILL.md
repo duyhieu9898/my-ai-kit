@@ -80,4 +80,4 @@ follows is about those failure modes, not about architecture taste.
 
 The changed endpoint validates input, checks authorization for the specific
 resource, handles errors in the project's response shape, and puts a timeout
-on every outbound call. Hand off to `verify-changes` for tests and checks.
+on every outbound call, and the project's tests and checks pass.
