@@ -1,4 +1,0 @@
-interface:
-  display_name: "Code Review"
-  short_description: "Review a diff for correctness and security bugs"
-  default_prompt: "Use $code-review-checklist to review this branch against main before I merge it."

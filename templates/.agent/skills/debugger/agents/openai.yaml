@@ -1,4 +1,0 @@
-interface:
-  display_name: "Debugger"
-  short_description: "Find the root cause of a failure before fixing it"
-  default_prompt: "Use $debugger to find why the checkout test fails only on CI."

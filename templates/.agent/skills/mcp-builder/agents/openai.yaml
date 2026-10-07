@@ -1,4 +1,0 @@
-interface:
-  display_name: "MCP Builder"
-  short_description: "Build MCP servers with typed tools in TypeScript"
-  default_prompt: "Use $mcp-builder to add a read-only get_issue tool to my Backlog MCP server."

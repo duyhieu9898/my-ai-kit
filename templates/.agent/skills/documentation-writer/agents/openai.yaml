@@ -1,6 +1,0 @@
-interface:
-  display_name: "Documentation Writer"
-  short_description: "Write READMEs, API docs, and changelogs on request"
-  default_prompt: "Use $documentation-writer to rewrite the README quick start from the current scripts."
-policy:
-  allow_implicit_invocation: false

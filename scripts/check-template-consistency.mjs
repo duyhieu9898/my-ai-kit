@@ -90,7 +90,7 @@ function strayPaths(relativePath) {
     });
 }
 
-function checkSkillStandard(targetName, skillsPath, skillNames) {
+function checkSkillStandard(targetName, skillsPath, skillNames, { requireOpenAiYaml = true } = {}) {
   for (const skillName of immediateDirectories(skillsPath)) {
     const skillDir = `${skillsPath}/${skillName}`;
     const skillMd = `${skillDir}/SKILL.md`;
@@ -101,6 +101,7 @@ function checkSkillStandard(targetName, skillsPath, skillNames) {
       openAiYaml: exists(openAiYamlPath) ? readText(openAiYamlPath) : null,
       skillNames,
       strayPaths: strayPaths(skillDir).filter((stray) => stray !== skillDir),
+      requireOpenAiYaml,
     });
 
     for (const finding of findings) {
@@ -284,7 +285,8 @@ if (exists(codexHarnessGuardPath) && exists(geminiHarnessGuardPath) && exists(cl
   );
 }
 checkSkillStandard("codex", sharedSkillsPath, sharedSkillNames);
-checkSkillStandard("gemini", geminiSkillsPath, geminiSkillNames);
+// Codex UI metadata is useless where Codex never looks.
+checkSkillStandard("gemini", geminiSkillsPath, geminiSkillNames, { requireOpenAiYaml: false });
 const kitRegistry = JSON.parse(readText("templates/kit.json"));
 record(
   "templates/kit.json declares formatVersion 2",

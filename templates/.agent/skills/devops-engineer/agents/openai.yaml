@@ -1,4 +1,0 @@
-interface:
-  display_name: "DevOps Engineer"
-  short_description: "Deploy, roll back, and operate production safely"
-  default_prompt: "Use $devops-engineer to deploy this release to staging with a rollback plan."

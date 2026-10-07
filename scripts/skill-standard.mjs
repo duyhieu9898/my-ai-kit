@@ -52,8 +52,9 @@ const CLAUDE_ONLY_BODY = /\$ARGUMENTS|\$\{CLAUDE_SKILL_DIR\}|!`/;
 * @param {string|null} skill.openAiYaml agents/openai.yaml contents, or null
 * @param {Set<string>} skill.skillNames every skill folder in the kit
 * @param {string[]} [skill.strayPaths] empty folders or cache paths inside the skill
+* @param {boolean} [skill.requireOpenAiYaml] false for skills Codex never reads (Gemini-only)
 */
-export const lintSkill = ({ name, skillMd, openAiYaml, skillNames, strayPaths = [] }) => {
+export const lintSkill = ({ name, skillMd, openAiYaml, skillNames, strayPaths = [], requireOpenAiYaml = true }) => {
   const findings = [];
   const add = (level, rule, detail = "") => findings.push({ rule, level, detail });
 
@@ -68,8 +69,9 @@ export const lintSkill = ({ name, skillMd, openAiYaml, skillNames, strayPaths = 
   if (declaredName !== name) add("error", "name differs from folder", `got ${declaredName ?? "missing"}`);
 
   const extraKeys = frontmatterKeys(frontmatter).filter((key) => !ALLOWED_KEYS.has(key));
+  // Without openai.yaml there is no Codex policy to pair the key with.
   const explicitOnly = extraKeys.includes(EXPLICIT_ONLY_KEY) &&
-    /allow_implicit_invocation:\s*false/.test(openAiYaml ?? "");
+    (!requireOpenAiYaml || /allow_implicit_invocation:\s*false/.test(openAiYaml ?? ""));
   const unexpected = extraKeys.filter((key) => !(explicitOnly && key === EXPLICIT_ONLY_KEY));
   if (unexpected.length) add("warn", "frontmatter has keys other than name and description", unexpected.join(", "));
   if (extraKeys.includes(EXPLICIT_ONLY_KEY) && !explicitOnly) {
@@ -106,7 +108,7 @@ export const lintSkill = ({ name, skillMd, openAiYaml, skillNames, strayPaths = 
   for (const strayPath of strayPaths) add("warn", "empty or cache folder", strayPath);
 
   if (openAiYaml === null) {
-    add("error", "missing agents/openai.yaml");
+    if (requireOpenAiYaml) add("error", "missing agents/openai.yaml");
   } else {
     const shortDescription = yamlValue(openAiYaml, "short_description");
     const [min, max] = SHORT_DESCRIPTION_RANGE;

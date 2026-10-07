@@ -173,7 +173,9 @@ documentation here.
 
 This file is Codex UI metadata. Claude Code, Gemini, and Antigravity ignore
 it. It does not affect skill selection, which uses `name` and `description`.
-Every skill keeps one, so the Codex skill list looks consistent:
+Every shared skill keeps one, so the Codex skill list looks consistent.
+Gemini-only skills under `.agent/skills/` have none, because Codex never reads
+that folder:
 
 ```yaml
 interface:

@@ -1,4 +1,0 @@
-interface:
-  display_name: "Testing Patterns"
-  short_description: "Write unit and integration tests and test-first fixes"
-  default_prompt: "Use $testing-patterns to add a failing test that reproduces this bug, then fix it."

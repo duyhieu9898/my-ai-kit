@@ -33,6 +33,12 @@ test('a skill that follows the standard has no findings', () => {
     assert.deepEqual(lint(), []);
 });
 
+test('a Gemini-only skill needs no openai.yaml', () => {
+    assert.deepEqual(lint({ skill: { openAiYaml: null, requireOpenAiYaml: false } }), []);
+    const frontmatter = ['disable-model-invocation: true'];
+    assert.deepEqual(lint({ frontmatter, skill: { openAiYaml: null, requireOpenAiYaml: false } }), []);
+});
+
 test('frontmatterScalar folds block scalars into one line', () => {
     assert.equal(frontmatterScalar('description: >-\n  One\n  two.\nname: x', 'description'), 'One two.');
     assert.equal(frontmatterScalar('name: "x"', 'name'), 'x');
