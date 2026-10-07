@@ -239,6 +239,10 @@ templates/.agents/skills/<skill-name>/references/
 templates/.agents/skills/<skill-name>/scripts/
 ```
 
+Skill đang viết hoặc thử nghiệm nằm ở [`skills-dev/`](skills-dev/README.md):
+installer không đọc và npm không đóng gói thư mục này, nên chúng không được
+cài vào project nào.
+
 Viết và review skill theo [`docs/skills/SKILL_STANDARD.md`](docs/skills/SKILL_STANDARD.md)
 và [`docs/skills/DESCRIPTION_GUIDE.md`](docs/skills/DESCRIPTION_GUIDE.md).
 `npm run check:templates` fail khi skill vi phạm chuẩn; dùng
