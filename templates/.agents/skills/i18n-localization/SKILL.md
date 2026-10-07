@@ -2,7 +2,7 @@
 name: i18n-localization
 description: >-
   Internationalizes web apps with next-intl or react-i18next: locale routing,
-  message files, ICU plurals, Intl formatting, and RTL layout. Use when adding
+  message files, plurals, Intl formatting, and RTL layout. Use when adding
   a language, extracting hardcoded UI strings, or fixing missing translation
   keys. Not for hreflang or localized SEO metadata (use seo-fundamentals).
 ---
@@ -10,67 +10,27 @@ description: >-
 # i18n and Localization
 
 Follow the project's existing i18n library and message layout. If there is
-none: next-intl for Next.js App Router, react-i18next elsewhere, and one JSON
-file per locale (`messages/en.json`) with top-level keys per feature
-(`"Checkout": {...}`).
+none: next-intl for Next.js App Router, react-i18next elsewhere, with
+top-level keys per feature (`"Checkout": {...}`).
 
-## next-intl setup (v4, App Router)
+Read the reference for the library in use before changing setup or message
+syntax; the two differ in plural and interpolation format:
 
-1. **Routing:** `src/i18n/routing.ts` exports
-   `defineRouting({ locales: ['en', 'vi'], defaultLocale: 'en' })`. Every
-   other file imports `routing`; do not repeat the locale list.
-2. **Proxy:** `src/proxy.ts` (Next.js 16; `middleware.ts` on 15) exports
-   `createMiddleware(routing)` from `next-intl/middleware` with
-   `matcher: '/((?!api|trpc|_next|_vercel|.*\\..*).*)'`. A matcher that is too
-   narrow leaves pages without a locale; one that is too wide rewrites API and
-   static-file requests.
-3. **Request config:** `src/i18n/request.ts` uses
-   `getRequestConfig(async ({ requestLocale }) => ...)`. Narrow the value with
-   `hasLocale(routing.locales, requested)`, fall back to `defaultLocale`, and
-   return `{ locale, messages }`.
-4. **Plugin:** wrap `next.config.ts` with `createNextIntlPlugin()` from
-   `next-intl/plugin`.
-5. **Layout:** `app/[locale]/layout.tsx` calls `notFound()` when
-   `hasLocale` fails, sets `<html lang={locale} dir={...}>`, and wraps children
-   in `<NextIntlClientProvider>`. In v4 it inherits messages from
-   `request.ts`; do not pass `messages` again.
-6. **Static rendering:** add `generateStaticParams` returning
-   `routing.locales`, and call `setRequestLocale(locale)` in each layout and
-   page before any next-intl call. Without it the route turns dynamic.
-7. **Navigation:** import `Link`, `redirect`, `useRouter`, and `usePathname`
-   from `src/i18n/navigation.ts` (`createNavigation(routing)`), not from
-   `next/link` or `next/navigation`, or links drop the locale prefix.
-
-## Typed messages (next-intl)
-
-Declare the default locale's messages once, for example in `global.d.ts`:
-
-```ts
-import messages from './messages/en.json';
-import { routing } from '@/i18n/routing';
-
-declare module 'next-intl' {
-  interface AppConfig {
-    Messages: typeof messages;
-    Locale: (typeof routing.locales)[number];
-  }
-}
-```
-
-Unknown keys in `t('...')` then fail type checking. For typed ICU arguments
-too, set `experimental: { createMessagesDeclaration: './messages/en.json' }`
-in `createNextIntlPlugin` and `"allowArbitraryExtensions": true` in
-`tsconfig.json`. Git-ignore the generated `.d.json.ts`.
+| Library | Reference | Plural | Variable |
+|---|---|---|---|
+| next-intl | [references/next-intl.md](references/next-intl.md) | ICU `{count, plural, one {...} other {...}}` | `{name}` |
+| i18next / react-i18next | [references/react-i18next.md](references/react-i18next.md) | Key suffixes `item_one`, `item_other` | `{{name}}` |
 
 ## Messages and formatting
 
-- ICU plurals and `select`, never `count === 1 ? ...` in code. Vietnamese has
-  only `other`; Arabic and Polish need more categories.
-- One message per whole sentence with values passed in; `t.rich` for inline
-  links or bold. Keys are stable names (`Checkout.submit`), not English text.
-- Dates, numbers, and currency through `Intl` or next-intl's `useFormatter()`
-  / `getFormatter()`. Set `timeZone` in `request.ts` so server and client
-  output match.
+- Plurals through the library's plural format, never `count === 1 ? ...` in
+  code. Vietnamese and Japanese have only `other`; Arabic and Polish need
+  more categories.
+- One message per whole sentence with values passed in, and rich-text
+  helpers (`t.rich`, `<Trans>`) for inline links or bold. Keys are stable
+  names (`Checkout.submit`), not English text.
+- Dates, numbers, and currency through `Intl` or the library's formatter,
+  never formatted by hand.
 - RTL locales: `dir="rtl"` on `<html>` and logical properties only (Tailwind
   `ms-*`, `pe-*`, `start-*`, `text-start`, `rtl:` for exceptions).
 
@@ -98,5 +58,6 @@ python3 .agents/skills/i18n-localization/scripts/i18n_checker.py [path]
 ## Done when
 
 Every user-facing string in the changed code comes from a message key, all
-locales have the same keys, plurals and dates use ICU and `Intl`, RTL
+locales have the same keys, plurals and dates use the library's plural format
+and `Intl`, RTL
 locales render with logical properties, and the checker exits 0.
