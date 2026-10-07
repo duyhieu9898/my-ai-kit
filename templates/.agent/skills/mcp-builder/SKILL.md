@@ -153,7 +153,7 @@ per request, so keep no per-client state in it.
 - Put the server command before any flag in `--cli` mode; flags placed
   first make the Inspector drop the target. Pass env with
   `-e KEY=value -- node dist/index.js`.
-- Unit-test handlers as plain functions; use `testing-patterns` for that.
+- Unit-test handlers as plain functions.
 
 ## Register with clients
 

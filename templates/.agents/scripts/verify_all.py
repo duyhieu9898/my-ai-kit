@@ -165,8 +165,8 @@ VERIFICATION_SUITE = [
     {
         "category": "Code Quality",
         "checks": [
-            ("Lint Check", ".agents/skills/lint-and-validate/scripts/lint_runner.py", True),
-            ("Type Coverage", ".agents/skills/lint-and-validate/scripts/type_coverage.py", False),
+            ("Lint Check", ".agent/skills/lint-and-validate/scripts/lint_runner.py", True),
+            ("Type Coverage", ".agent/skills/lint-and-validate/scripts/type_coverage.py", False),
         ]
     },
     
@@ -182,7 +182,7 @@ VERIFICATION_SUITE = [
     {
         "category": "Testing",
         "checks": [
-            ("Test Suite", ".agents/skills/testing-patterns/scripts/test_runner.py", False),
+            ("Test Suite", ".agent/skills/testing-patterns/scripts/test_runner.py", False),
         ]
     },
     

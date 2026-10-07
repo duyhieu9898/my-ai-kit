@@ -4,7 +4,7 @@ description: >-
   Writes and updates project documentation such as READMEs, API reference
   pages, changelogs, llms.txt files, and doc comments, using facts taken from
   the code. Use when the user explicitly asks to write or change
-  documentation. Not for architecture decision records (use architecture).
+  documentation.
 disable-model-invocation: true
 ---
 
@@ -12,8 +12,7 @@ disable-model-invocation: true
 
 This skill runs only when documentation is explicitly requested. Do not start
 it, or add documentation edits, during ordinary coding, debugging, or
-refactoring. It is explicit-only in Claude Code and Codex; on tools that
-still auto-load it, this rule is the gate.
+refactoring. Antigravity may still auto-load it, so this rule is the gate.
 
 ## Defaults
 
@@ -29,7 +28,7 @@ still auto-load it, this rule is the gate.
   value.
 - **Run what you document** when it is safe (install, build, test, a CLI
   `--help`). Say which commands were not run.
-- **ADRs** belong to the `architecture` skill, which owns their template and
+- **ADRs** follow the project's existing decision-record template and
   location.
 
 ## README

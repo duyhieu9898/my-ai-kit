@@ -64,27 +64,15 @@ in `createNextIntlPlugin` and `"allowArbitraryExtensions": true` in
 
 ## Messages and formatting
 
-- **Plurals:** ICU, never `count === 1 ? ... : ...` in code:
-  `"{count, plural, =0 {No items} one {# item} other {# items}}"`.
-  Vietnamese has only `other`; Arabic and Polish need more categories.
-  Use `select` for gender or status.
-- **Whole sentences:** pass values into one message instead of joining
-  fragments, since word order differs. Use `t.rich` for inline links or bold.
-- **Keys:** stable and descriptive (`Checkout.submit`), not the English text.
-- **Dates, numbers, currency:** `Intl.DateTimeFormat`, `Intl.NumberFormat`
-  (`style: 'currency'`), `Intl.RelativeTimeFormat`, `Intl.ListFormat`, or
-  next-intl's `useFormatter()` / `getFormatter()`. Never format by hand.
-  Set `timeZone` in `request.ts` so server and client output match.
-
-## RTL
-
-- Logical properties only: `margin-inline-start`, `padding-inline-end`,
-  `inset-inline-start`, `text-align: start`; in Tailwind `ms-*`, `me-*`,
-  `ps-*`, `pe-*`, `start-*`, `end-*`, `text-start`, plus `rtl:` for
-  exceptions.
-- `dir="rtl"` on `<html>` for Arabic, Hebrew, Persian, and Urdu.
-- Mirror directional icons (`rtl:-scale-x-100`), not logos or media controls.
-- Leave room for text 30-40% longer than English (German, Finnish).
+- ICU plurals and `select`, never `count === 1 ? ...` in code. Vietnamese has
+  only `other`; Arabic and Polish need more categories.
+- One message per whole sentence with values passed in; `t.rich` for inline
+  links or bold. Keys are stable names (`Checkout.submit`), not English text.
+- Dates, numbers, and currency through `Intl` or next-intl's `useFormatter()`
+  / `getFormatter()`. Set `timeZone` in `request.ts` so server and client
+  output match.
+- RTL locales: `dir="rtl"` on `<html>` and logical properties only (Tailwind
+  `ms-*`, `pe-*`, `start-*`, `text-start`, `rtl:` for exceptions).
 
 ## Check
 
@@ -97,10 +85,12 @@ python3 .agents/skills/i18n-localization/scripts/i18n_checker.py [path]
 - It compares keys across locales. It supports `locales/<lang>/<ns>.json`
   and flat `messages/<lang>.json` layouts, and reports keys that any locale
   is missing.
-- It also flags likely hardcoded UI strings in `.tsx`, `.jsx`, `.ts`, `.js`,
-  `.vue`, and `.py` files, skipping paths containing `test`, `spec`, `dist`,
-  or `build`. It scans at most 50 files, and a file that uses any i18n call is
-  not flagged, so it is a smoke test, not proof of full coverage.
+- It also flags likely hardcoded UI strings in any script, Vietnamese and CJK
+  included, in `.tsx`, `.jsx`, `.ts`, `.js`, `.vue`, and `.py` files,
+  skipping paths containing `test`, `spec`, `dist`, or `build`. A file that
+  uses any i18n call is not flagged, and text starting with an ASCII
+  lowercase letter is ignored, so it is a smoke test, not proof of full
+  coverage.
 - It exits 1 on missing keys, or on hardcoded strings when locale files exist.
   In a project with no locale files, hardcoded strings are only warnings and
   it exits 0.

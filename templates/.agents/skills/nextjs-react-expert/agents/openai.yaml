@@ -1,4 +1,0 @@
-interface:
-  display_name: "Next.js & React Performance"
-  short_description: "Fix Next.js waterfalls, bundles, renders, caching"
-  default_prompt: "Use $nextjs-react-expert to remove the data waterfall on the product page."

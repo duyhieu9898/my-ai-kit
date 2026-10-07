@@ -90,10 +90,8 @@ function strayPaths(relativePath) {
     });
 }
 
-function checkSkillStandard(targetName, skillsPath) {
-  const skillNames = new Set(immediateDirectories(skillsPath));
-
-  for (const skillName of skillNames) {
+function checkSkillStandard(targetName, skillsPath, skillNames) {
+  for (const skillName of immediateDirectories(skillsPath)) {
     const skillDir = `${skillsPath}/${skillName}`;
     const skillMd = `${skillDir}/SKILL.md`;
     const openAiYamlPath = `${skillDir}/agents/openai.yaml`;
@@ -142,9 +140,7 @@ function checkRelativeLinks(relativePath) {
   }
 }
 
-function checkSkillReferenceLinks(targetName, skillsPath, markdownPaths) {
-  const skillNames = new Set(immediateDirectories(skillsPath));
-
+function checkSkillReferenceLinks(targetName, skillNames, markdownPaths) {
   for (const relativePath of markdownPaths) {
     for (const target of markdownRelativeLinks(relativePath)) {
       const match = target.match(/(?:^|\/)([a-z0-9-]+)\/SKILL\.md$/);
@@ -161,17 +157,15 @@ function checkSkillReferenceLinks(targetName, skillsPath, markdownPaths) {
 
 const toolkitDocs = readText("docs/product/toolkits.md");
 const codexArchitecture = readText("templates/.agents/ARCHITECTURE.md");
-const projectPlannerPath =
-  "templates/.agents/skills/project-planner/SKILL.md";
-const planWritingPath = "templates/.agents/skills/plan-writing/SKILL.md";
-const projectPlannerOpenAiPath =
-  "templates/.agents/skills/project-planner/agents/openai.yaml";
-const projectPlanner = readText(projectPlannerPath);
-const planWriting = readText(planWritingPath);
-const projectPlannerOpenAi = readText(projectPlannerOpenAiPath);
+const sharedSkillsPath = "templates/.agents/skills";
+const geminiSkillsPath = "templates/.agent/skills";
+const sharedSkillNames = new Set(immediateDirectories(sharedSkillsPath));
+// Antigravity reads both folders; Codex and Claude see only the shared one.
+const geminiSkillNames = new Set([...sharedSkillNames, ...immediateDirectories(geminiSkillsPath)]);
 
-const codexSkillCount = immediateDirectories("templates/.agents/skills").length;
-const codexOpenAiCount = immediateDirectories("templates/.agents/skills").filter(
+const codexSkillCount = sharedSkillNames.size;
+const geminiOnlySkillCount = immediateDirectories(geminiSkillsPath).length;
+const codexOpenAiCount = [...sharedSkillNames].filter(
   (skillName) =>
     exists(`templates/.agents/skills/${skillName}/agents/openai.yaml`),
 ).length;
@@ -186,8 +180,9 @@ const claudeRootInstructionPath = "templates/CLAUDE.md";
 const claudeSettingsPath = "templates/.claude/settings.json";
 const claudeHarnessGuardPath = "templates/.agents/claude/hooks/harness_guard.py";
 const claudeHookAdapterPath = "templates/.agents/claude/hooks/claude_adapter.py";
-const codexSkillMarkdownPaths = recursiveFiles("templates/.agents/skills", ".md");
-const templateMarkdownPaths = codexSkillMarkdownPaths;
+const codexSkillMarkdownPaths = recursiveFiles(sharedSkillsPath, ".md");
+const geminiSkillMarkdownPaths = recursiveFiles(geminiSkillsPath, ".md");
+const templateMarkdownPaths = [...codexSkillMarkdownPaths, ...geminiSkillMarkdownPaths];
 
 const docsCodexSkillCount = requireMatch(
   toolkitDocs,
@@ -199,6 +194,16 @@ record(
   "docs/product/toolkits.md Codex skill count matches template",
   docsCodexSkillCount === codexSkillCount,
   `docs=${docsCodexSkillCount}, actual=${codexSkillCount}`,
+);
+const docsGeminiOnlySkillCount = requireMatch(
+  toolkitDocs,
+  /ships (\d+) Gemini-only\s+skill directories/,
+  "Gemini-only skill count in docs/product/toolkits.md",
+);
+record(
+  "docs/product/toolkits.md Gemini-only skill count matches template",
+  docsGeminiOnlySkillCount === geminiOnlySkillCount,
+  `docs=${docsGeminiOnlySkillCount}, actual=${geminiOnlySkillCount}`,
 );
 
 record(
@@ -278,19 +283,19 @@ if (exists(codexHarnessGuardPath) && exists(geminiHarnessGuardPath) && exists(cl
     `${codexHarnessGuardPath}, ${geminiHarnessGuardPath}, ${claudeHarnessGuardPath}`,
   );
 }
-checkSkillStandard("codex", "templates/.agents/skills");
+checkSkillStandard("codex", sharedSkillsPath, sharedSkillNames);
+checkSkillStandard("gemini", geminiSkillsPath, geminiSkillNames);
 const kitRegistry = JSON.parse(readText("templates/kit.json"));
-const codexSkillNames = new Set(immediateDirectories("templates/.agents/skills"));
 record(
-  "templates/kit.json declares formatVersion 1",
-  kitRegistry.formatVersion === 1,
+  "templates/kit.json declares formatVersion 2",
+  kitRegistry.formatVersion === 2,
   `formatVersion=${kitRegistry.formatVersion}`,
 );
 for (const [profileName, skillNames] of Object.entries(kitRegistry.profiles ?? {})) {
   for (const skillName of skillNames) {
     record(
       `kit.json profile ${profileName} references existing skill ${skillName}`,
-      codexSkillNames.has(skillName),
+      geminiSkillNames.has(skillName),
       skillName,
     );
   }
@@ -298,46 +303,9 @@ for (const [profileName, skillNames] of Object.entries(kitRegistry.profiles ?? {
 for (const markdownPath of templateMarkdownPaths) {
   checkRelativeLinks(markdownPath);
 }
-checkSkillReferenceLinks(
-  "codex",
-  "templates/.agents/skills",
-  codexSkillMarkdownPaths,
-);
+checkSkillReferenceLinks("codex", sharedSkillNames, codexSkillMarkdownPaths);
+checkSkillReferenceLinks("gemini", geminiSkillNames, geminiSkillMarkdownPaths);
 
-record(
-  "project-planner uses one canonical default plan path",
-  projectPlanner.includes("docs/PLAN-{task-slug}.md") &&
-    !projectPlanner.includes("./{task-slug}.md (project root)"),
-  projectPlannerPath,
-);
-record(
-  "project-planner does not require removed specialist skills",
-  !/\b(orchestrator|mobile-developer|coordinator-mode|context-compression)\b/.test(
-    projectPlanner,
-  ),
-  projectPlannerPath,
-);
-record(
-  "project-planner verification remains stack-neutral",
-  projectPlanner.includes("Select Proportional Verification") &&
-    !projectPlanner.includes("npm run build") &&
-    !projectPlanner.includes("verify_all.py"),
-  projectPlannerPath,
-);
-record(
-  "project-planner default prompt is actionable",
-  /default_prompt:\s*"Use \$project-planner .+"/.test(projectPlannerOpenAi),
-  projectPlannerOpenAiPath,
-);
-record(
-  "plan-writing stays bounded and planning-only",
-  planWriting.includes("bounded, understood change") &&
-    planWriting.includes("../project-planner/SKILL.md") &&
-    !planWriting.includes("For NEW PROJECT") &&
-    !planWriting.includes("Execute tasks step-by-step") &&
-    !planWriting.includes("Phase X"),
-  planWritingPath,
-);
 if (strict) {
   for (const warning of warnings) record(warning.name, false, warning.detail);
 }

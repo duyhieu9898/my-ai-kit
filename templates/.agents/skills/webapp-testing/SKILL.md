@@ -3,8 +3,7 @@ name: webapp-testing
 description: >-
   Writes, debugs, and stabilizes Playwright end-to-end tests for web apps. Use
   when adding a browser test for a user flow, fixing a flaky or failing E2E
-  run, or reviewing a Playwright suite. Not for unit or integration tests (use
-  testing-patterns).
+  run, or reviewing a Playwright suite.
 ---
 
 # Web App Testing (Playwright)

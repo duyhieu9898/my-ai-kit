@@ -21,7 +21,10 @@ TARGETS = ("codex",)
 
 
 def script_path(target: str, relative_path: str) -> Path:
-    return REPO_ROOT / "templates" / ".agents" / "skills" / relative_path
+    shared = REPO_ROOT / "templates" / ".agents" / "skills" / relative_path
+    if shared.exists():
+        return shared
+    return REPO_ROOT / "templates" / ".agent" / "skills" / relative_path
 
 
 def agent_script_path(target: str, script_name: str) -> Path:
@@ -641,6 +644,29 @@ class ValidatorRegressionTests(unittest.TestCase):
 
                 self.assertIn("[X] de/messages: Missing 1 keys (Home.sub)", result["issues"])
                 self.assertFalse(any(issue.startswith("[X] en/") for issue in result["issues"]))
+
+    def test_i18n_checker_flags_non_ascii_hardcoded_strings(self):
+        for target in TARGETS:
+            with self.subTest(target=target), tempfile.TemporaryDirectory() as temp_dir:
+                project = Path(temp_dir)
+                for index, text in enumerate(["Lưu thay đổi", "Đăng nhập", "ログイン"]):
+                    (project / f"Page{index}.tsx").write_text(
+                        f"export const Page = () => <button title=\"{text}\">{text}</button>;\n",
+                        encoding="utf-8",
+                    )
+                (project / "Ok.tsx").write_text("export const Ok = () => <div>{count}</div>;\n", encoding="utf-8")
+                (project / "Split.tsx").write_text(
+                    "const parts = value.split(',');\nexport const Split = () => <h1>Tiến độ</h1>;\n",
+                    encoding="utf-8",
+                )
+
+                module = load_module(target, "i18n_unicode", "i18n-localization/scripts/i18n_checker.py")
+                result = module.check_hardcoded_strings(project)
+
+                # split(',') must not count as a t('...') call that hides the file.
+                self.assertIn("[X] 4 files may have hardcoded strings", result["issues"])
+                for text in ["Lưu thay đổi", "Đăng nhập", "ログイン"]:
+                    self.assertTrue(any(text in issue for issue in result["issues"]), text)
 
     def test_security_scan_flags_shell_command_execution(self):
         for target in TARGETS:

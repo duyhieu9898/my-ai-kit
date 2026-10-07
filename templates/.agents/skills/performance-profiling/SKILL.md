@@ -1,10 +1,11 @@
 ---
 name: performance-profiling
 description: >-
-  Measures and fixes web performance problems with Lighthouse, traces, and
-  bundle analysis. Use when a page loads or responds slowly, Core Web Vitals
-  regress, or the JavaScript bundle grows. Not for an error or crash without
-  slowness (use debugger).
+  Measures web performance with Lighthouse, traces, and bundle analysis, then
+  fixes the cause with 46 prioritized Next.js and React rules and Next.js 16
+  Cache Components guidance. Use when a page loads or responds slowly, Core
+  Web Vitals regress, the bundle grows, requests waterfall, or re-renders lag,
+  or when writing use cache or cacheTag.
 ---
 
 # Performance Profiling
@@ -40,13 +41,16 @@ with a Performance-panel trace of the slow interaction.
      five opportunities by estimated savings.
    - It fetches Lighthouse with `npx -y`, so it needs Node and network access.
    - Run it; do not read the source.
-2. **Find the cause** with the tree below. Confirm the cause in a trace or a
-   bundle report before changing code.
-3. **Fix one cause.** For Next.js and React fixes, read
-   `nextjs-react-expert` and its references.
+2. **Find the cause** with the tree below. Confirm it in a trace or a bundle
+   report before changing code.
+3. **Fix one cause.** For Next.js and React, read the matching rule file
+   below.
 4. **Re-measure** with the same command and conditions, and report both runs.
    Lab numbers vary between runs, so treat differences under about 10% as
    noise.
+
+Skip the baseline only for a known code-level pattern, such as a sequential
+`await` on independent requests or a `use cache` change; still run the build.
 
 ## What is slow?
 
@@ -74,17 +78,73 @@ Memory
 Look for duplicated libraries, a whole icon or UI library imported through a
 barrel file, and server-only code in client bundles.
 
+## Next.js and React fixes
+
+Before changing code, check `package.json` for the Next.js and React
+versions and `next.config.*` for `cacheComponents: true` and React Compiler
+(`reactCompiler` or `babel-plugin-react-compiler`). With the compiler on, skip
+manual `useMemo`, `useCallback`, and `memo` rules unless a profile shows it
+bailed out. Keep the project's data library; the SWR examples translate
+directly to TanStack Query.
+
+Each file holds rules with an incorrect and a correct example. Read only the
+one that matches the cause, in this priority order:
+
+1. **Waterfalls:** [references/1-async-eliminating-waterfalls.md](references/1-async-eliminating-waterfalls.md)
+   for sequential `await`s, slow API routes, or missing Suspense boundaries.
+2. **Bundle size:** [references/2-bundle-bundle-size-optimization.md](references/2-bundle-bundle-size-optimization.md)
+   for a large First Load JS, barrel imports, heavy editors, charts, or
+   third-party scripts.
+3. **Server:** [references/3-server-server-side-performance.md](references/3-server-server-side-performance.md)
+   for Server Actions, RSC props serialization, `React.cache()`, LRU caching,
+   or `after()`.
+4. **Client data:** [references/4-client-client-side-data-fetching.md](references/4-client-client-side-data-fetching.md)
+   for duplicate client requests, global event listeners, or `localStorage`.
+5. **Re-renders:** [references/5-rerender-re-render-optimization.md](references/5-rerender-re-render-optimization.md)
+   when typing or scrolling lags, or the Profiler shows repeated renders.
+6. **Rendering:** [references/6-rendering-rendering-performance.md](references/6-rendering-rendering-performance.md)
+   for hydration mismatches, long lists, SVG animation, or show/hide state.
+7. **Advanced patterns:** [references/8-advanced-advanced-patterns.md](references/8-advanced-advanced-patterns.md)
+   for init-once code and stable handler refs.
+
+For caching on Next.js 16 with `cacheComponents`, read
+[references/9-cache-components.md](references/9-cache-components.md) before
+writing `use cache`, `cacheLife`, `cacheTag`, `updateTag`, or `revalidateTag`.
+
 ## Pitfalls
 
-- A dev server hides or exaggerates problems. Always profile a production
-  build.
-- Throttling changes the results; keep the same device and network profile
-  across runs.
+- A dev server hides or exaggerates problems, and throttling changes results.
+  Profile a production build with the same device and network profile.
 - A higher Lighthouse score does not guarantee better field metrics. Report
   the metric that regressed, not only the score.
+- **`revalidateTag` changed in Next.js 16.** The one-argument form is
+  deprecated. Use `updateTag(tag)` in Server Actions for read-your-own-writes,
+  or `revalidateTag(tag, 'max')` in Route Handlers and webhooks.
+- **Cache Components break old segment config.** With `cacheComponents: true`,
+  `export const revalidate`, `dynamic`, and `fetchCache` are build errors, and
+  uncached data outside `<Suspense>` fails the build.
+- **Request APIs inside `use cache`** (`cookies()`, `headers()`,
+  `searchParams`) throw at request time and may pass `next build`. Read them
+  outside and pass the value as an argument.
+- **Barrel imports:** `lucide-react`, `@mui/material`, `date-fns`, `lodash-es`,
+  and similar packages are already in Next's default `optimizePackageImports`
+  list. Do not rewrite their imports by hand; do handle internal workspace
+  packages.
+- **Server Actions are public endpoints.** Authenticate and authorize inside
+  every action (Rule 3.1), even if the calling page is protected.
+- **Version-gated APIs:** `after()` needs Next.js 15.1+; `<Activity>` and
+  `useEffectEvent` need React 19.2+.
+- **Dependent awaits are not waterfalls.** Parallelize only independent work.
+- **Layout thrashing:** in a loop, read all layout values (`offsetHeight`,
+  `getBoundingClientRect()`) before writing styles; interleaving forces a
+  reflow per iteration.
+- **`sort()` mutates props and state.** Use `toSorted()` (or copy first)
+  inside render and `useMemo`.
 
 ## Done when
 
-The targeted metric improved between two comparable runs, the change is the
-one that caused it, and nothing else regressed. Hand off to `verify-changes`
-for the wider checks.
+The targeted metric improved between two comparable runs (or, for a
+code-level fix, the change matches a rule in the relevant reference), the
+change is the one that caused it, no client bundle weight was added without a
+dynamic import, and the build and type checks pass. Hand off to
+`verify-changes` for the wider checks.

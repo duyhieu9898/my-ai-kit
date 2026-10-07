@@ -5,7 +5,7 @@ description: >-
   hooks, custom hooks, and Zustand stores. Use when a component mixes
   fetching, logic, and rendering, grows too long, drills props, or when moving
   Context state to a store. Not for render performance (use
-  nextjs-react-expert).
+  performance-profiling).
 ---
 
 # React Refactor Patterns
@@ -20,7 +20,7 @@ the same tiers with those. Add a new library only when asked.
 1. Read the component, its callers, and its tests. Note the props contract
    and the rendered output you must preserve.
 2. If there are no tests, add a render test for the current behaviour first
-   (see `testing-patterns`), so the refactor can be checked.
+   so the refactor can be checked.
 3. Refactor in small steps (extract util, then service, then hook), running
    the tests after each.
 

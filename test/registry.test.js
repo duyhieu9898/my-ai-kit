@@ -11,7 +11,14 @@ test('loadRegistry lists skill directories and profiles', () => {
     const registry = loadRegistry(templateDir);
     assert.deepEqual(registry.skills, ['a-skill', 'b-skill']);
     assert.deepEqual(registry.profiles, { starter: ['a-skill'] });
-    assert.ok(path.isAbsolute(registry.skillsDir));
+    assert.ok(registry.scopes.every((scope) => path.isAbsolute(scope.skillsDir)));
+});
+
+test('loadRegistry merges shared and Gemini-only skills, keeping each scope listed', () => {
+    const { templateDir } = makeKit({ skills: ['a', 'b'], geminiSkills: ['b', 'g'] });
+    const registry = loadRegistry(templateDir);
+    assert.deepEqual(registry.skills, ['a', 'b', 'g']);
+    assert.deepEqual(registry.scopes.map((scope) => [scope.id, scope.skills]), [['shared', ['a', 'b']], ['gemini', ['b', 'g']]]);
 });
 
 test('loadRegistry rejects a directory without kit.json', () => {
@@ -21,8 +28,8 @@ test('loadRegistry rejects a directory without kit.json', () => {
 });
 
 test('loadRegistry rejects a newer formatVersion', () => {
-    const { templateDir } = makeKit({ formatVersion: 2 });
-    assert.throws(() => loadRegistry(templateDir), { name: 'KitError', message: /formatVersion 2 .*Upgrade/ });
+    const { templateDir } = makeKit({ formatVersion: 3 });
+    assert.throws(() => loadRegistry(templateDir), { name: 'KitError', message: /formatVersion 3 .*Upgrade/ });
 });
 
 test('loadRegistry reports a malformed kit.json with its path', () => {

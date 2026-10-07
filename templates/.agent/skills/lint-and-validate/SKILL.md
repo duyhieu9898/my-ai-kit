@@ -17,7 +17,7 @@ that.
 
 ## Lint runner
 
-`python3 .agents/skills/lint-and-validate/scripts/lint_runner.py [project_path]`
+`python3 .agent/skills/lint-and-validate/scripts/lint_runner.py [project_path]`
 
 Run it; do not read the source. It takes one positional path (default `.`)
 and has no `--help`: any argument, including `--help`, is taken as the path.
@@ -49,7 +49,7 @@ It looks only at the given directory, not at workspace packages below it:
 
 ## Type annotation heuristic
 
-`python3 .agents/skills/lint-and-validate/scripts/type_coverage.py [project_path]`
+`python3 .agent/skills/lint-and-validate/scripts/type_coverage.py [project_path]`
 
 Run it; do not read the source. Same argument handling as the lint runner.
 

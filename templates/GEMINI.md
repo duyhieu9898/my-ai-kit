@@ -11,7 +11,7 @@ trigger: always_on
 
 ## 🚀 DEVELOPMENT PROTOCOL
 
-> Read the relevant skill in `.agents/skills/<name>/SKILL.md` before implementation. Priority of rules: P0 (this file and the project's own conventions) > P1 (the active SKILL.md) > P2 (the skill's references).
+> Read the relevant skill in `.agents/skills/<name>/SKILL.md` or `.agent/skills/<name>/SKILL.md` before implementation. Priority of rules: P0 (this file and the project's own conventions) > P1 (the active SKILL.md) > P2 (the skill's references).
 
 1. **Modular Skill Loading:** Read the index file `SKILL.md` first, then only read specific sections directly related to the task.
 2. **Read -> Understand -> Apply:** Identify the goal of the skill and its project-specific rules before writing code.
@@ -39,7 +39,7 @@ Classify the user request before execution to select the correct operation mode:
 
 ## 🛑 CLARIFY MINIMALLY
 
-Ask only when missing information makes the next action ambiguous, risky, or destructive. Proceed when intent is clear, including direct requests such as "continue" or "fix it". For broad work, state a short plan before editing. When a question is needed, give a default so work can continue (see the `product-manager` skill).
+Ask only when missing information makes the next action ambiguous, risky, or destructive. Proceed when intent is clear, including direct requests such as "continue" or "fix it". For broad work, state a short plan before editing. When a question is needed, give a default so work can continue.
 
 ---
 
@@ -72,7 +72,7 @@ $$\text{Security} \rightarrow \text{Lint} \rightarrow \text{Schema} \rightarrow 
 *   **Main Verification Scripts:**
     *   *Verify All:* `.agents/scripts/verify_all.py`
     *   *Security Scan:* `.agents/skills/security-auditor/scripts/security_scan.py`
-    *   *Linter:* `.agents/skills/lint-and-validate/scripts/lint_runner.py`
-    *   *Unit Tests:* `.agents/skills/testing-patterns/scripts/test_runner.py`
+    *   *Linter:* `.agent/skills/lint-and-validate/scripts/lint_runner.py`
+    *   *Unit Tests:* `.agent/skills/testing-patterns/scripts/test_runner.py`
 *   **UI Styling Rules:** Read `.agents/skills/frontend-design/SKILL.md` before restyling or theming UI (tokens first, then component variants).
 <!-- KIT:END -->

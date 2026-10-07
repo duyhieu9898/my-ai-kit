@@ -28,11 +28,18 @@ Kết quả cài đặt:
 | Tool | Skills | Integration Config | Root Instruction |
 |:---|:---|:---|:---|
 | Codex | `.agents/skills/` | `.codex/hooks.json` + `.codex/hooks/` | `AGENTS.md` |
-| Gemini Antigravity | `.agents/skills/` | `.agents/hooks.json` + `.agents/gemini/hooks/` | `GEMINI.md` |
+| Gemini Antigravity | `.agents/skills/` + `.agent/skills/` | `.agents/hooks.json` + `.agents/gemini/hooks/` | `GEMINI.md` |
 | Claude Code | `.claude/skills/<name>` → `../../.agents/skills/<name>` | `.claude/settings.json` | `CLAUDE.md` |
 
 `.agents/` chứa `skills/`, `scripts/`, các tài nguyên runtime dùng chung, và
 các phần tích hợp theo tool. CLI **không** tự sửa `.gitignore` — bạn tự quản lý.
+
+`.agents/skills/` là bộ skill gọn dùng chung: Codex đọc trực tiếp, Claude Code
+đọc qua symlink. `.agent/skills/` chứa skill chỉ dành cho Gemini — các việc mà
+Claude Code và Codex đã tự làm tốt (review code, khám phá codebase, debug, test,
+lint, deploy, MCP server, viết tài liệu). Codex không đọc `.agent/skills/`; Antigravity đọc cả hai thư mục và ưu
+tiên bản trong `.agent/skills/` khi trùng tên, nên có thể viết một bản riêng cho
+Gemini mà không ảnh hưởng Codex.
 Với Codex, `.codex/hooks.json` được merge với hooks hiện có thay vì thay thế
 toàn bộ cấu hình `.codex/`. Codex sẽ yêu cầu review/trust hook mới hoặc hook đã
 thay đổi trước khi chạy.
@@ -89,35 +96,50 @@ npx -y hieund-ai-kit status
 
 ## Profile
 
-Kit có 26 skill. Cài theo profile để agent chỉ thấy các skill cần cho project;
+Kit có 21 skill: 13 skill dùng chung và 8 skill chỉ dành cho Gemini (đánh
+dấu *). Cài theo profile để agent chỉ thấy các skill cần cho project;
 description của mọi skill đã cài đều được nạp vào context, nên cài thừa vừa tốn
 token vừa dễ làm agent chọn nhầm skill.
 
 | Profile | Skill |
 |:---|:---|
-| `core` | `clean-code`, `verify-changes`, `debugger`, `explorer-agent`, `lint-and-validate`, `code-review-checklist`, `security-auditor` |
-| `web` | `frontend-design`, `web-design-guidelines`, `nextjs-react-expert`, `react-refactor-patterns`, `performance-profiling` |
+| `core` | `clean-code`, `verify-changes`, `debugger`*, `explorer-agent`*, `lint-and-validate`*, `code-review-checklist`*, `security-auditor` |
+| `web` | `frontend-design`, `web-design-guidelines`, `react-refactor-patterns`, `performance-profiling` |
 | `backend` | `backend-specialist`, `api-patterns`, `database-design` |
-| `testing` | `testing-patterns`, `webapp-testing` |
-| `planning` | `plan-writing`, `project-planner`, `product-manager`, `architecture` |
+| `testing` | `testing-patterns`*, `webapp-testing` |
 | `growth` | `seo-fundamentals`, `i18n-localization` |
-| `ops` | `devops-engineer` |
-| `mcp` | `mcp-builder` |
-| `docs` | `documentation-writer` |
-| `starter` | `clean-code`, `debugger`, `verify-changes` |
+| `ops` | `devops-engineer`* |
+| `mcp` | `mcp-builder`* |
+| `docs` | `documentation-writer`* |
+| `starter` | `clean-code`, `debugger`*, `verify-changes` |
 
 Ví dụ:
 
 ```bash
-# Fullstack Next.js + Node (17 skill)
+# Fullstack Next.js + Node (16 skill)
 npx -y hieund-ai-kit install --profile core,web,backend,testing
-# Landing page / marketing (14 skill)
+# Landing page / marketing (13 skill)
 npx -y hieund-ai-kit install --profile core,web,growth
 # MCP server (13 skill)
 npx -y hieund-ai-kit install --profile core,backend,mcp,testing
 ```
 
-`install` không kèm profile hay tên skill sẽ cài toàn bộ 26 skill.
+`install` không kèm profile hay tên skill sẽ cài toàn bộ 21 skill.
+
+## Nâng Cấp Từ 4.x
+
+Bản 5.0 tinh giản skill cho Claude Code và Codex. Chạy `update` bằng CLI 5.x
+(CLI 4.x sẽ báo cần nâng cấp vì `kit.json` lên `formatVersion` 2):
+
+| Skill | Thay đổi |
+|:---|:---|
+| `code-review-checklist`, `explorer-agent`, `debugger`, `testing-patterns`, `lint-and-validate`, `devops-engineer`, `mcp-builder`, `documentation-writer` | Chuyển từ `.agents/skills/` sang `.agent/skills/` (chỉ Gemini); symlink Claude bị gỡ |
+| `plan-writing`, `project-planner`, `product-manager` | Bỏ hẳn; dùng plan mode có sẵn của tool |
+| `architecture` | Bỏ hẳn; profile `planning` cũng bị bỏ |
+| `nextjs-react-expert` | Gộp vào `performance-profiling` (rule Next.js/React nằm trong `references/`) |
+
+Bản bị sửa cục bộ trong `.agents/skills/` được giữ lại (kèm cảnh báo) cho tới khi
+chạy `update --force`.
 
 ## Nâng Cấp Từ 3.x
 
@@ -135,10 +157,7 @@ bản bị sửa cục bộ thì được giữ lại. Nội dung của skill c�
 | `database-architect` | `database-design` |
 | `simplify-code` | `clean-code` |
 | `code-archaeologist` | `explorer-agent` |
-| `brainstorming` | `product-manager` |
-| `python-patterns`, `app-builder`, `code-review-graph` | Bỏ, không có skill thay thế |
-
-Plan mặc định lưu ở `docs/PLAN-{task-slug}.md`, ADR ở `docs/decisions/`.
+| `python-patterns`, `app-builder`, `code-review-graph`, `brainstorming` | Bỏ, không có skill thay thế |
 
 ## Phát Triển Skill Với `--link`
 
@@ -194,18 +213,24 @@ templates/
 ├── kit.json                 # Registry: formatVersion + profiles
 ├── .codex/                  # Codex hooks → merge vào project/.codex/
 ├── .claude/                 # Claude settings → merge vào project/.claude/
+├── .agent/skills/<name>/    # Skill chỉ dành cho Gemini → project/.agent/skills/
 └── .agents/                 # Shared install folder → project/.agents/
     ├── ARCHITECTURE.md
     ├── scripts/
-    ├── skills/<skill-name>/ # Skill nguồn duy nhất, Codex + Antigravity đọc trực tiếp
+    ├── skills/<skill-name>/ # Skill dùng chung: Codex, Antigravity, Claude (qua symlink)
     ├── claude/hooks/         # Claude hook adapter/runtime files
     └── gemini/hooks/         # Gemini hook adapter/runtime files
 ```
 
 ## Phát Triển Skill
 
-Một skill có một nguồn duy nhất; cả Codex, Gemini Antigravity, và Claude Code
-đều đọc từ đây (Claude Code qua symlink `.claude/skills/<name>`):
+Skill dùng chung nằm ở `templates/.agents/skills/`; cả Codex, Gemini
+Antigravity, và Claude Code đều đọc (Claude Code qua symlink
+`.claude/skills/<name>`). Skill chỉ dành cho Gemini nằm ở
+`templates/.agent/skills/` với cùng cấu trúc; đặt một skill cùng tên ở đây để
+Gemini dùng bản riêng thay cho bản dùng chung. Skill dùng chung chỉ được trỏ
+`(use <skill>)` tới skill dùng chung khác, vì Codex và Claude không thấy
+`.agent/skills/`.
 
 ```text
 templates/.agents/skills/<skill-name>/SKILL.md

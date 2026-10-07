@@ -4,8 +4,7 @@ description: >-
   Maps an unfamiliar or legacy codebase: entry points, module boundaries, data
   flow, conventions, and the history behind odd code. Use when starting in a
   new repository, explaining how a feature works end to end, or preparing a
-  refactor of code nobody understands. Not for writing the refactor plan (use
-  plan-writing).
+  refactor of code nobody understands.
 ---
 
 # Explorer

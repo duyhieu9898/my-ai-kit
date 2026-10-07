@@ -4,8 +4,7 @@ description: >-
   Picks and runs the smallest project-native checks that prove a change,
   following Harness risk lanes, story proof, and the kit's checklist.py when
   present, and reports the evidence. Use when a change is ready to hand off
-  or the user asks to test or verify it. Not for writing new tests (use
-  testing-patterns).
+  or the user asks to test or verify it.
 ---
 
 # Verify Changes
@@ -76,7 +75,7 @@ silently skipped or "fixed" out of scope.
 
 - Run a focused executable smoke or reproduction command.
 - Add a regression test when the behaviour matters and test work is in scope
-  (see `testing-patterns`, or `webapp-testing` for browser flows).
+  (`webapp-testing` covers browser flows).
 - Otherwise report the gap and what remains unverified.
 
 ## Report
@@ -99,8 +98,7 @@ it was run in this session.
 - Inventing commands (`npm run test:unit`) without reading the project's
   configuration.
 - Skipping verification because a change looks small.
-- Stopping at a failing check without reading the failure; hand it to
-  `debugger` when fixing is in scope.
+- Stopping at a failing check without reading the failure.
 
 ## Done when
 

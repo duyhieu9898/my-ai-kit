@@ -1,4 +1,0 @@
-interface:
-  display_name: "Plan Writing"
-  short_description: "File-aware task plans with explicit verification"
-  default_prompt: "Use $plan-writing to turn this bounded change into a file-aware implementation plan."

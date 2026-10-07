@@ -57,9 +57,9 @@ def print_error(text: str):
 # Define priority-ordered checks
 CORE_CHECKS = [
     ("Security Scan", ".agents/skills/security-auditor/scripts/security_scan.py", True),
-    ("Lint Check", ".agents/skills/lint-and-validate/scripts/lint_runner.py", True),
+    ("Lint Check", ".agent/skills/lint-and-validate/scripts/lint_runner.py", True),
     ("Schema Validation", ".agents/skills/database-design/scripts/schema_validator.py", False),
-    ("Test Runner", ".agents/skills/testing-patterns/scripts/test_runner.py", False),
+    ("Test Runner", ".agent/skills/testing-patterns/scripts/test_runner.py", False),
     ("UX Audit", ".agents/skills/frontend-design/scripts/ux_audit.py", False),
     ("SEO Check", ".agents/skills/seo-fundamentals/scripts/seo_checker.py", False),
 ]

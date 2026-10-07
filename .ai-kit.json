@@ -1,5 +1,5 @@
 {
-  "formatVersion": 1,
+  "formatVersion": 2,
   "source": {
     "type": "local",
     "path": "/home/hieund/Documents/MY_PROJECT/DEVELOP_MAINTAIN/hieund-ai-kit-cli",
@@ -13,33 +13,20 @@
   },
   "managedSkills": {
     "api-patterns": {},
-    "architecture": {},
     "backend-specialist": {},
     "clean-code": {},
-    "code-review-checklist": {},
     "database-design": {},
-    "debugger": {},
-    "devops-engineer": {},
-    "documentation-writer": {},
-    "explorer-agent": {},
     "frontend-design": {},
     "i18n-localization": {},
-    "lint-and-validate": {},
-    "mcp-builder": {},
-    "nextjs-react-expert": {},
     "performance-profiling": {},
-    "plan-writing": {},
-    "product-manager": {},
-    "project-planner": {},
     "react-refactor-patterns": {},
     "security-auditor": {},
     "seo-fundamentals": {},
-    "testing-patterns": {},
     "verify-changes": {},
     "web-design-guidelines": {},
     "webapp-testing": {}
   },
-  "installedAt": "2026-09-30T10:19:57.855Z",
+  "installedAt": "2026-10-07T02:18:56.275Z",
   "harness": {
     "enabled": true,
     "source": "repository-harness"
@@ -51,10 +38,20 @@
   },
   "managedFiles": {
     ".agents/scripts/auto_preview.py": "sha256:c5a8e400f892493d29df11d96a3c3370b7f8bf54e2e0dfc83650a98db823b4cd",
-    ".agents/scripts/checklist.py": "sha256:3b66ad00a5496cd001a4ff9ee2a25d9637a5e9c35a17867fa4c5b32fed91d66d",
+    ".agents/scripts/checklist.py": "sha256:146480fb35b5083431a62d72aadd07785e898609b4a2a8febf7d1786efc4552d",
     ".agents/scripts/session_manager.py": "sha256:275e1af4c7f0ec378b0ffb98fce1068088702c602d7cd16ca3cb7f5d200e1ee2",
-    ".agents/scripts/verify_all.py": "sha256:70bfa1d47e21edc9c320d169c3a747e5e695f14c50e008dc2ab27484422563b8",
-    ".agents/ARCHITECTURE.md": "sha256:eee160c3da5f34565d79e1bd19b39a0062777e5cd194e76bfa42cd93fde877c3",
+    ".agents/scripts/verify_all.py": "sha256:ca8ca5154664d0dcd02635d87f14cdc5b364410faa30df83c7c716111b4f34bb",
+    ".agents/ARCHITECTURE.md": "sha256:b10ed957d0f4db31e7841cfb3a131fdfe333e5bbb4ba456c5fb861f2f12f47ea",
     ".agents/ux_audit.json": "sha256:7468e8453200e680ced0339d9c412af1587d6f53d7464a4fa02142c5eafdf67f"
+  },
+  "managedGeminiSkills": {
+    "code-review-checklist": {},
+    "debugger": {},
+    "explorer-agent": {},
+    "lint-and-validate": {},
+    "testing-patterns": {},
+    "devops-engineer": {},
+    "mcp-builder": {},
+    "documentation-writer": {}
   }
 }

@@ -4,7 +4,7 @@ description: >-
   Audits code for exploitable flaws against the OWASP Top 10:2025, including
   secrets, access control, injection, and supply chain, and ranks findings
   with fixes. Use when asked for a security review, threat model, or
-  pre-release audit. Not for general code review (use code-review-checklist).
+  pre-release audit.
 ---
 
 # Security Auditor

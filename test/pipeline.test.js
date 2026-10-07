@@ -76,7 +76,7 @@ test('legacy install is adopted and project-owned skills survive', async () => {
     fs.writeFileSync(path.join(projectDir, '.agents', 'skills', 'a', 'SKILL.md'), 'old\n');
     fs.mkdirSync(path.join(projectDir, '.agents', 'skills', 'mine'), { recursive: true });
     const { manifest } = await run('update');
-    assert.equal(manifest.formatVersion, 1);
+    assert.equal(manifest.formatVersion, 2);
     assert.notEqual(fs.readFileSync(path.join(projectDir, '.agents', 'skills', 'a', 'SKILL.md'), 'utf8'), 'old\n');
     assert.ok(exists(projectDir, '.agents', 'skills', 'mine'));
     assert.ok(!('mine' in manifest.managedSkills));
@@ -114,8 +114,63 @@ test('rerun converges after a partial failure', async () => {
 
 const dropFromKit = (kit, { skills = [], profiles = {} }) => {
     for (const name of skills) fs.rmSync(path.join(kit.skillsDir, name), { recursive: true });
-    fs.writeFileSync(path.join(kit.templateDir, 'kit.json'), JSON.stringify({ formatVersion: 1, profiles }));
+    fs.writeFileSync(path.join(kit.templateDir, 'kit.json'), JSON.stringify({ formatVersion: 2, profiles }));
 };
+
+const geminiSetup = () => {
+    const kit = makeKit({ skills: ['a', 'b'], geminiSkills: ['b', 'g'], profiles: { p: ['a', 'g'] } });
+    const projectDir = makeProject();
+    const run = (command, extra = {}) => runPipeline({
+        projectDir, command, add: { all: false, profiles: [], skills: [] }, remove: [], ...extra,
+        options: { source: kit.root, ...(extra.options ?? {}) },
+    });
+    return { kit, projectDir, run };
+};
+
+test('Gemini-only skills install into .agent/skills without a Claude link', async () => {
+    const { projectDir, run } = geminiSetup();
+    const { manifest, plan } = await run('install');
+    assert.deepEqual(Object.keys(manifest.managedSkills).sort(), ['a', 'b']);
+    assert.deepEqual(Object.keys(manifest.managedGeminiSkills).sort(), ['b', 'g']);
+    assert.ok(exists(projectDir, '.agent', 'skills', 'g', 'SKILL.md'));
+    assert.ok(!exists(projectDir, '.agents', 'skills', 'g'));
+    assert.ok(!exists(projectDir, '.claude', 'skills', 'g'));
+    assert.ok(exists(projectDir, '.claude', 'skills', 'b', 'SKILL.md'), 'a Gemini override keeps the shared copy linked');
+    assert.deepEqual(plan.filter((item) => item.scope === 'gemini').map((item) => item.name), ['b', 'g']);
+    assert.ok(collectStatus(projectDir).managed.includes('g (gemini)'));
+});
+
+test('a profile installs each skill only into the scopes that ship it', async () => {
+    const { projectDir, run } = geminiSetup();
+    await run('install', { add: { all: false, profiles: ['p'], skills: [] } });
+    assert.deepEqual(fs.readdirSync(path.join(projectDir, '.agents', 'skills')), ['a']);
+    assert.deepEqual(fs.readdirSync(path.join(projectDir, '.agent', 'skills')), ['g']);
+});
+
+test('update moves a skill that became Gemini-only out of .agents/skills and .claude/skills', async () => {
+    const { kit, projectDir, run } = setup();
+    await run('install');
+    fs.mkdirSync(path.join(kit.templateDir, '.agent', 'skills'), { recursive: true });
+    fs.renameSync(path.join(kit.skillsDir, 'c'), path.join(kit.templateDir, '.agent', 'skills', 'c'));
+
+    const { manifest } = await run('update');
+    assert.deepEqual(Object.keys(manifest.managedSkills).sort(), ['a', 'b']);
+    assert.deepEqual(Object.keys(manifest.managedGeminiSkills), ['c']);
+    assert.ok(!exists(projectDir, '.agents', 'skills', 'c'));
+    assert.equal(fs.lstatSync(path.join(projectDir, '.claude', 'skills', 'c'), { throwIfNoEntry: false }), undefined);
+    assert.ok(exists(projectDir, '.agent', 'skills', 'c', 'SKILL.md'));
+    assert.deepEqual(collectStatus(projectDir).brokenLinks, []);
+});
+
+test('a project-owned .agent/skills folder conflicts like a shared one', async () => {
+    const { projectDir, run } = geminiSetup();
+    fs.mkdirSync(path.join(projectDir, '.agent', 'skills', 'g'), { recursive: true });
+    await assert.rejects(run('install'), { name: 'KitError', message: /g \(gemini\).*--force/ });
+    fs.mkdirSync(path.join(projectDir, '.agent', 'skills', 'mine'));
+    fs.rmSync(path.join(projectDir, '.agent', 'skills', 'g'), { recursive: true });
+    await run('install');
+    assert.deepEqual(collectStatus(projectDir).projectOwned, ['mine (gemini)']);
+});
 
 test('update drops skills and profiles that vanished from the kit, with a warning', async () => {
     const { kit, projectDir, run } = setup();

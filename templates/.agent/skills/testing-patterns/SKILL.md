@@ -49,7 +49,7 @@ cost, not coverage.
   - `pytest <file>::<test>`
 - **Then the project's own command** (`npm test`, `pnpm test`…).
 - **When the project's command is unknown:**
-  `python3 .agents/skills/testing-patterns/scripts/test_runner.py <project> [--coverage]`
+  `python3 .agent/skills/testing-patterns/scripts/test_runner.py <project> [--coverage]`
   detects Vitest, Jest, `npm test`, or pytest and prints a JSON summary. It
   runs the whole suite. Run it; do not read the source.
 

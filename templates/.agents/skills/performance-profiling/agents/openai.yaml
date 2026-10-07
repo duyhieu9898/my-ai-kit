@@ -1,4 +1,4 @@
 interface:
   display_name: "Performance Profiling"
-  short_description: "Measure and fix slow pages and Core Web Vitals"
+  short_description: "Measure and fix slow pages, bundles, and re-renders"
   default_prompt: "Use $performance-profiling to find why the product page has a slow LCP."

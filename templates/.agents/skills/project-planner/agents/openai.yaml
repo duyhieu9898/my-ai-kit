@@ -1,4 +1,0 @@
-interface:
-  display_name: "Project Planner"
-  short_description: "Roadmaps, dependencies, risks, and verification"
-  default_prompt: "Use $project-planner to create a repository-aware roadmap for this initiative."

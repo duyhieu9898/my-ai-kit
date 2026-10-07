@@ -24,10 +24,11 @@ test('legacy manifest migrates to select all with unknown managed skills', () =>
         features: { backlog: false, claudeCode: true },
     }));
     const manifest = readManifest(projectDir);
-    assert.equal(manifest.formatVersion, 1);
+    assert.equal(manifest.formatVersion, 2);
     assert.deepEqual(manifest.source, { type: 'github', ref: 'v2' });
     assert.equal(manifest.selection.all, true);
     assert.equal(manifest.managedSkills, null);
+    assert.deepEqual(manifest.managedGeminiSkills, {});
     assert.equal(manifest.managedFiles, null);
     assert.equal(manifest.features.backlog, false);
 });
@@ -38,6 +39,15 @@ test('a formatVersion 1 manifest without managedFiles asks to adopt shared files
     assert.equal(readManifest(projectDir).managedFiles, null);
 });
 
+test('a formatVersion 1 manifest upgrades with no Gemini-only skills', () => {
+    const projectDir = makeProject();
+    fs.writeFileSync(path.join(projectDir, '.ai-kit.json'), JSON.stringify({ formatVersion: 1, managedSkills: { a: {} } }));
+    const manifest = readManifest(projectDir);
+    assert.equal(manifest.formatVersion, 2);
+    assert.deepEqual(manifest.managedSkills, { a: {} });
+    assert.deepEqual(manifest.managedGeminiSkills, {});
+});
+
 test('unparseable manifest fails with the file path', () => {
     const projectDir = makeProject();
     fs.writeFileSync(path.join(projectDir, '.ai-kit.json'), '{oops');
@@ -46,8 +56,8 @@ test('unparseable manifest fails with the file path', () => {
 
 test('a manifest from a newer CLI asks the user to upgrade', () => {
     const projectDir = makeProject();
-    fs.writeFileSync(path.join(projectDir, '.ai-kit.json'), JSON.stringify({ formatVersion: 2, managedSkills: {} }));
-    assert.throws(() => readManifest(projectDir), { name: 'KitError', message: /formatVersion 2\b.*Upgrade the CLI/ });
+    fs.writeFileSync(path.join(projectDir, '.ai-kit.json'), JSON.stringify({ formatVersion: 3, managedSkills: {} }));
+    assert.throws(() => readManifest(projectDir), { name: 'KitError', message: /formatVersion 3\b.*Upgrade the CLI/ });
 });
 
 test('a formatVersion 1 manifest without managedSkills is rejected', () => {

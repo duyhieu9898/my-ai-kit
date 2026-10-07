@@ -7,6 +7,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { KitError } from '../lib/errors.js';
 import { loadCatalog, runPipeline } from '../lib/pipeline.js';
+import { skillLabel } from '../lib/skills.js';
 import { collectStatus } from '../lib/status.js';
 
 const CLI_VERSION = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8')).version;
@@ -27,7 +28,7 @@ const formatSelection = (selection) => {
 const report = ({ plan, warnings, dryRun }) => {
     console.log(chalk.blueBright(dryRun ? '\nPlanned skill changes (dry run):' : '\nSkill changes:'));
     for (const action of ACTION_ORDER) {
-        const names = plan.filter((item) => item.action === action).map((item) => item.name);
+        const names = plan.filter((item) => item.action === action).map((item) => skillLabel(item.name, item.scope));
         if (names.length) console.log(`  ${action.padEnd(14)} ${String(names.length).padStart(3)}  ${chalk.gray(names.join(', '))}`);
     }
     for (const warning of warnings) console.log(chalk.yellow(`⚠️  ${warning}`));
@@ -77,11 +78,14 @@ const updateAction = async (options) => {
 const listAction = async (options) => {
     const catalog = await loadCatalog({ projectDir: projectDirOf(options), options });
     const installed = new Set(catalog.installed);
+    const geminiSkills = new Set(catalog.geminiSkills);
     console.log(chalk.blueBright(`\nSource: ${formatSource(catalog.source)}`));
     console.log(chalk.blueBright('\nProfiles:'));
     for (const [name, skills] of Object.entries(catalog.profiles)) console.log(`  ${name.padEnd(16)} ${chalk.gray(skills.join(', '))}`);
     console.log(chalk.blueBright(`\nSkills (${catalog.skills.length}):`));
-    for (const name of catalog.skills) console.log(`  ${installed.has(name) ? chalk.green('✓') : ' '} ${name}`);
+    for (const name of catalog.skills) {
+        console.log(`  ${installed.has(name) ? chalk.green('✓') : ' '} ${name}${geminiSkills.has(name) ? chalk.gray(' (gemini)') : ''}`);
+    }
 };
 
 const statusAction = (options) => {

@@ -14,8 +14,8 @@
   `.agents/AGENTS.md`.
 - Skills use `SKILL.md`, required `agents/openai.yaml`, optional `references/`,
   `scripts/`, and `assets/`.
-- The current template ships 26 skill directories and four top-level runtime
-  scripts.
+- The current template ships 13 skill directories and four top-level runtime
+  scripts. Codex does not read `.agent/skills/`.
 
 ## Gemini Antigravity
 
@@ -29,8 +29,10 @@
   adapter maps Antigravity payloads and returns an allow decision with warning
   context. Context-read warnings run at `PreToolUse` because Antigravity's
   `PostToolUse` payload does not include tool arguments.
-- Skills: Antigravity discovers the shared `.agents/skills/` directory; the kit
-  ships no Gemini-specific skills, agents, or workflows.
+- Skills: Antigravity discovers the shared `.agents/skills/` directory and the
+  Gemini-only `.agent/skills/` directory, preferring `.agent/skills/` on a name
+  clash. Source: `templates/.agent/skills/`; the template ships 8 Gemini-only
+  skill directories for work Claude Code and Codex already cover natively.
 
 ## Claude Code
 
@@ -43,8 +45,9 @@
 - Hook policy: generated from `shared/hooks/harness_guard.py`; the Claude
   adapter maps Claude Code hook payloads and injects warning context without
   blocking tool calls.
-- Skills: each managed skill is exposed as `.claude/skills/<name>`, a relative
-  symlink to `../../.agents/skills/<name>`.
+- Skills: each managed shared skill is exposed as `.claude/skills/<name>`, a
+  relative symlink to `../../.agents/skills/<name>`. Gemini-only skills are not
+  linked.
 - The current template ships Claude hook files under `.agents/claude/hooks/`.
 
 ## Shared Rules

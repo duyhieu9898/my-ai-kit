@@ -6,6 +6,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { hashSkillDir } from "../lib/hash.js";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const binDir = fs.mkdtempSync(path.join(os.tmpdir(), "hieund-ai-kit-bin-"));
@@ -31,7 +32,11 @@ const cliFails = (...args) => {
 };
 
 const kitSkills = fs.readdirSync(path.join(repoRoot, "templates", ".agents", "skills")).sort();
+const geminiSkills = fs.readdirSync(path.join(repoRoot, "templates", ".agent", "skills")).sort();
 const starter = readJson(path.join(repoRoot, "templates", "kit.json")).profiles.starter;
+const sharedStarter = starter.filter((name) => kitSkills.includes(name)).sort();
+const geminiStarter = starter.filter((name) => geminiSkills.includes(name)).sort();
+assert.ok(geminiStarter.includes("debugger"), "tests below rely on debugger being a Gemini-only starter skill");
 
 try {
   fs.symlinkSync(path.join(repoRoot, "bin", "index.js"), binLinkPath);
@@ -55,12 +60,14 @@ try {
 
   cli("install", "--path", full, "--source", repoRoot);
 
-  assert.deepEqual(fs.readdirSync(path.join(full, ".agents", "skills")).sort(), kitSkills, "all kit skills installed");
+  assert.deepEqual(fs.readdirSync(path.join(full, ".agents", "skills")).sort(), kitSkills, "all shared skills installed");
+  assert.deepEqual(fs.readdirSync(path.join(full, ".agent", "skills")).sort(), geminiSkills, "all Gemini-only skills installed");
+  assert.deepEqual(fs.readdirSync(path.join(full, ".claude", "skills")).sort(), kitSkills, "Claude links only shared skills");
   const fullManifest = readJson(path.join(full, ".ai-kit.json"));
   assert.equal(fullManifest.selection.all, true);
   assert.deepEqual(fullManifest.source, { type: "local", path: repoRoot, mode: "copy" });
-  assert.equal(fs.readlinkSync(path.join(full, ".claude", "skills", "debugger")), "../../.agents/skills/debugger");
-  assert.ok(fs.existsSync(path.join(full, ".claude", "skills", "debugger", "SKILL.md")), "Claude link resolves");
+  assert.equal(fs.readlinkSync(path.join(full, ".claude", "skills", "clean-code")), "../../.agents/skills/clean-code");
+  assert.ok(fs.existsSync(path.join(full, ".claude", "skills", "clean-code", "SKILL.md")), "Claude link resolves");
   assert.ok(!fs.existsSync(path.join(full, ".agents", "gemini", "skills")), "no Gemini skill copy");
   assert.ok(fs.existsSync(path.join(full, ".agents", "gemini", "hooks", "gemini_adapter.py")), "Gemini hooks installed");
   assert.ok(fs.existsSync(path.join(full, ".codex", "hooks", "codex_adapter.py")), "Codex hook scripts installed");
@@ -94,15 +101,15 @@ try {
   // --- Profile, add, remove ------------------------------------------------
   const prof = newDir("kit-profile-");
   cli("install", "--path", prof, "--source", repoRoot, "--profile", "starter");
-  assert.deepEqual(fs.readdirSync(path.join(prof, ".agents", "skills")).sort(), [...starter].sort());
+  assert.deepEqual(fs.readdirSync(path.join(prof, ".agents", "skills")).sort(), sharedStarter);
+  assert.deepEqual(fs.readdirSync(path.join(prof, ".agent", "skills")).sort(), geminiStarter);
   cli("install", "security-auditor", "--path", prof);
   assert.ok(fs.existsSync(path.join(prof, ".agents", "skills", "security-auditor", "SKILL.md")));
   cli("remove", "debugger", "--path", prof);
-  assert.ok(!fs.existsSync(path.join(prof, ".agents", "skills", "debugger")));
-  assert.equal(fs.lstatSync(path.join(prof, ".claude", "skills", "debugger"), { throwIfNoEntry: false }), undefined);
+  assert.ok(!fs.existsSync(path.join(prof, ".agent", "skills", "debugger")));
   assert.deepEqual(readJson(path.join(prof, ".ai-kit.json")).selection.exclude, ["debugger"]);
   cli("update", "--path", prof);
-  assert.ok(!fs.existsSync(path.join(prof, ".agents", "skills", "debugger")), "update respects exclude");
+  assert.ok(!fs.existsSync(path.join(prof, ".agent", "skills", "debugger")), "update respects exclude");
   assert.match(cliFails("install", "debuger", "--path", prof), /did you mean: debugger/);
   const dropProfile = newDir("kit-drop-profile-");
   cli("install", "security-auditor", "--path", dropProfile, "--source", repoRoot, "--profile", "starter");
@@ -135,10 +142,11 @@ try {
   fs.cpSync(path.join(repoRoot, "templates"), path.join(kitCopy, "templates"), { recursive: true });
   const linked = newDir("kit-link-");
   cli("install", "--path", linked, "--source", kitCopy, "--link", "--profile", "starter");
-  const linkedSkill = path.join(linked, ".agents", "skills", "debugger");
+  const linkedSkill = path.join(linked, ".agents", "skills", "clean-code");
   assert.ok(fs.lstatSync(linkedSkill).isSymbolicLink());
-  fs.appendFileSync(path.join(kitCopy, "templates", ".agents", "skills", "debugger", "SKILL.md"), "LIVE EDIT\n");
-  assert.ok(readText(path.join(linked, ".claude", "skills", "debugger", "SKILL.md")).includes("LIVE EDIT"), "edits visible without reinstall");
+  assert.ok(fs.lstatSync(path.join(linked, ".agent", "skills", "debugger")).isSymbolicLink(), "Gemini-only skills link too");
+  fs.appendFileSync(path.join(kitCopy, "templates", ".agents", "skills", "clean-code", "SKILL.md"), "LIVE EDIT\n");
+  assert.ok(readText(path.join(linked, ".claude", "skills", "clean-code", "SKILL.md")).includes("LIVE EDIT"), "edits visible without reinstall");
   cli("update", "--path", linked, "--source", kitCopy);
   assert.ok(fs.lstatSync(linkedSkill).isDirectory(), "update without --link switches to copies");
   assert.match(cliFails("install", "--path", linked, "--link"), /--link requires --source/);
@@ -154,12 +162,40 @@ try {
   assert.ok(cli("status", "--path", legacy).includes("Legacy install detected"));
   cli("update", "--path", legacy, "--source", repoRoot);
   const migrated = readJson(path.join(legacy, ".ai-kit.json"));
-  assert.equal(migrated.formatVersion, 1);
+  assert.equal(migrated.formatVersion, 2);
   assert.equal(migrated.selection.all, true);
   assert.ok(!fs.existsSync(path.join(legacy, ".agents", "gemini", "skills")), "legacy Gemini skills removed");
   assert.ok(!fs.existsSync(path.join(legacy, ".agents", "gemini", "agents")), "legacy Gemini agents removed");
-  assert.notEqual(readText(path.join(legacy, ".agents", "skills", "debugger", "SKILL.md")), "old\n");
+  assert.ok(!fs.existsSync(path.join(legacy, ".agents", "skills", "debugger")), "skill that became Gemini-only leaves .agents/skills");
+  assert.ok(fs.existsSync(path.join(legacy, ".agent", "skills", "debugger", "SKILL.md")), "and lands in .agent/skills");
   assert.ok(fs.existsSync(path.join(legacy, ".agents", "skills", "my-own")), "project-owned skill kept");
+
+  // --- Upgrade from a 4.x install -----------------------------------------
+  const v4 = newDir("kit-v4-");
+  const v4Managed = {};
+  fs.mkdirSync(path.join(v4, ".claude", "skills"), { recursive: true });
+  for (const name of ["debugger", "plan-writing"]) {
+    const dir = path.join(v4, ".agents", "skills", name);
+    fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(path.join(dir, "SKILL.md"), `---\nname: ${name}\n---\n`);
+    v4Managed[name] = { hash: hashSkillDir(dir) };
+    fs.symlinkSync(`../../.agents/skills/${name}`, path.join(v4, ".claude", "skills", name));
+  }
+  writeJson(path.join(v4, ".ai-kit.json"), {
+    formatVersion: 1,
+    source: { type: "local", path: repoRoot, mode: "copy" },
+    selection: { all: true, profiles: [], skills: [], exclude: [] },
+    managedSkills: v4Managed,
+    managedFiles: {},
+  });
+  cli("update", "--path", v4);
+  const v4Manifest = readJson(path.join(v4, ".ai-kit.json"));
+  assert.equal(v4Manifest.formatVersion, 2);
+  assert.ok(!("debugger" in v4Manifest.managedSkills) && "debugger" in v4Manifest.managedGeminiSkills);
+  assert.ok(!fs.existsSync(path.join(v4, ".agents", "skills", "plan-writing")), "deleted skill removed");
+  assert.equal(fs.lstatSync(path.join(v4, ".claude", "skills", "debugger"), { throwIfNoEntry: false }), undefined, "Claude link to a moved skill removed");
+  assert.equal(fs.lstatSync(path.join(v4, ".claude", "skills", "plan-writing"), { throwIfNoEntry: false }), undefined);
+  assert.ok(cli("status", "--path", v4).includes("AI Kit: HEALTHY"));
 
   // --- Dry run and status --------------------------------------------------
   const dry = newDir("kit-dry-");

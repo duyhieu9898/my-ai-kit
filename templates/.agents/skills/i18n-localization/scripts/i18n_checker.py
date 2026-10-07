@@ -16,32 +16,35 @@ try:
 except AttributeError:
     pass  # Python < 3.7
 
+# Text starts with a letter in any script (Vietnamese, CJK, ...) that is not an
+# ASCII lowercase letter, which skips most code fragments.
+TEXT_START = r"(?![a-z])[^\W\d_]"
+TEXT_CHAR = r"(?:[^\W\d_]|[\s!?.,'’:-])"
+
 # Patterns that indicate hardcoded strings (should be translated)
 HARDCODED_PATTERNS = {
     'jsx': [
         # Text directly in JSX: <div>Hello World</div>
-        r'>\s*[A-Z][a-zA-Z\s]{3,30}\s*</',
+        rf'>\s*{TEXT_START}{TEXT_CHAR}{{2,60}}\s*</',
         # JSX attribute strings: title="Welcome"
-        r'(title|placeholder|label|alt|aria-label)="[A-Z][a-zA-Z\s]{2,}"',
-        # Button/heading text
-        r'<(button|h[1-6]|p|span|label)[^>]*>\s*[A-Z][a-zA-Z\s!?.,]{3,}\s*</',
+        rf'(?:title|placeholder|label|alt|aria-label)="{TEXT_START}{TEXT_CHAR}{{1,60}}"',
     ],
     'vue': [
         # Vue template text
-        r'>\s*[A-Z][a-zA-Z\s]{3,30}\s*</',
-        r'(placeholder|label|title)="[A-Z][a-zA-Z\s]{2,}"',
+        rf'>\s*{TEXT_START}{TEXT_CHAR}{{2,60}}\s*</',
+        rf'(?:placeholder|label|title)="{TEXT_START}{TEXT_CHAR}{{1,60}}"',
     ],
     'python': [
         # print/raise with string literals
-        r'(print|raise\s+\w+)\s*\(\s*["\'][A-Z][^"\']{5,}["\']',
+        rf'(?:print|raise\s+\w+)\s*\(\s*["\']{TEXT_START}[^"\']{{5,}}["\']',
         # Flask flash messages
-        r'flash\s*\(\s*["\'][A-Z][^"\']{5,}["\']',
+        rf'flash\s*\(\s*["\']{TEXT_START}[^"\']{{5,}}["\']',
     ]
 }
 
 # Patterns that indicate proper i18n usage
 I18N_PATTERNS = [
-    r't\(["\']',           # t('key') - react-i18next
+    r'\bt\(["\']',         # t('key') - react-i18next, not split('/test('
     r'useTranslation',     # React hook
     r'\$t\(',              # Vue i18n
     r'_\(["\']',           # Python gettext
@@ -155,7 +158,7 @@ def check_hardcoded_strings(project_path: Path) -> dict:
     files_with_hardcoded = 0
     hardcoded_examples = []
 
-    for file_path in code_files[:50]:  # Limit
+    for file_path in code_files:
         try:
             content = file_path.read_text(encoding='utf-8', errors='ignore')
             ext = file_path.suffix
@@ -171,15 +174,16 @@ def check_hardcoded_strings(project_path: Path) -> dict:
             hardcoded_found = False
 
             for pattern in patterns:
-                matches = re.findall(pattern, content)
-                if matches and not has_i18n:
+                match = None if has_i18n else re.search(pattern, content)
+                if match:
                     hardcoded_found = True
                     if len(hardcoded_examples) < 5:
                         try:
                             rel_path = file_path.relative_to(project_path)
                         except ValueError:
                             rel_path = file_path.name
-                        hardcoded_examples.append(f"{rel_path}: {str(matches[0])[:40]}...")
+                        hardcoded_examples.append(f"{rel_path}: {' '.join(match.group(0).split())[:60]}")
+                    break
 
             if hardcoded_found:
                 files_with_hardcoded += 1

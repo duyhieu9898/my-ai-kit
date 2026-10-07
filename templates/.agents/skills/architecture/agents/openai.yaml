@@ -1,4 +1,0 @@
-interface:
-  display_name: "Architecture"
-  short_description: "Compare design options and record the decision as an ADR"
-  default_prompt: "Use $architecture to decide whether to split the billing module into a service and write the ADR."
