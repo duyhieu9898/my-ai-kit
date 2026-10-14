@@ -7,6 +7,7 @@ project, Claude Code, Codex, or Gemini.
 | Skill | Status |
 |---|---|
 | `jev` | Waiting for an OpenRouter key; runner tested only against a local mock |
+| `doc-distill` | Script tested on generated files only; see `doc-distill/STATUS.md` |
 
 ## Try a skill locally
 
