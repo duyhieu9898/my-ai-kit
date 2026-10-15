@@ -11,7 +11,7 @@ Codex Kit is a modular toolkit organized around a unified, composable
 model with skill directories that can be loaded on demand.
 
 The kit contains:
-- **11 Composable Skills** - Task-focused knowledge, procedures, and scripts under `skills/`.
+- **12 Composable Skills** - Task-focused knowledge, procedures, and scripts under `skills/`.
 - **Gemini-only skills** - Extra skills under the project's `.agent/skills/`, read only by Antigravity.
 - **4 Master Scripts** - System-level automation and validation scripts under `scripts/`.
 
@@ -35,7 +35,7 @@ AGENTS.md                     # Repository-wide workflow and skill rules
 │   └── hooks/
 │       ├── harness_guard.py # Shared warning-only Harness policy
 │       └── claude_adapter.py # Claude payload and response adapter
-├── skills/                  # 11 Composable Skills
+├── skills/                  # 12 Composable Skills
 │   ├── {skill-name}/
 │   │   ├── SKILL.md         # name + description frontmatter, then instructions
 │   │   ├── agents/
@@ -72,7 +72,7 @@ lost.
 
 ---
 
-## 🧩 The 11 Composable Skills
+## 🧩 The 12 Composable Skills
 
 Every capability is a skill: a folder with a `SKILL.md` that the agent loads
 when its `description` matches the task. Skills follow
@@ -82,7 +82,7 @@ when its `description` matches the task. Skills follow
 Codex and Claude Code see only these shared skills. Antigravity also reads
 `.agent/skills/`, which holds Gemini-only skills for work the other tools cover
 natively: `clean-code`, `verify-changes`, `code-review-checklist`, `explorer-agent`, `debugger`,
-`testing-patterns`, `lint-and-validate`, `devops-engineer`, `mcp-builder`, and
+`lint-and-validate`, `devops-engineer`, `mcp-builder`, and
 `documentation-writer`. A skill there with the same name as
 a shared skill replaces it for Gemini only.
 
@@ -91,7 +91,7 @@ a shared skill replaces it for Gemini only.
 | **Core workflow** | `security-auditor` |
 | **Web frontend** | `frontend-design`, `web-design-guidelines`, `react-refactor-patterns`, `performance-profiling`, `seo-fundamentals`, `i18n-localization` |
 | **Backend and data** | `backend-specialist`, `api-patterns`, `database-design` |
-| **Testing** | `webapp-testing` |
+| **Testing** | `risk-based-testing`, `webapp-testing` |
 
 ---
 

@@ -27,7 +27,7 @@ and guesses tend to land as extra conditionals that hide the next bug.
    needs "maybe", keep isolating.
 4. **Fix the cause** with the smallest change. When the project has a test
    runner, add a regression test that fails before the fix (see
-   `testing-patterns`).
+   `risk-based-testing`).
 5. **Prove it** by rerunning the original reproduction, then hand off to
    `verify-changes` for the proportional checks.
 

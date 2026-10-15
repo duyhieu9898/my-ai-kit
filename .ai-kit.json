@@ -22,9 +22,10 @@
     "security-auditor": {},
     "seo-fundamentals": {},
     "web-design-guidelines": {},
-    "webapp-testing": {}
+    "webapp-testing": {},
+    "risk-based-testing": {}
   },
-  "installedAt": "2026-10-07T02:53:23.320Z",
+  "installedAt": "2026-10-15T03:05:23.737Z",
   "harness": {
     "enabled": true,
     "source": "repository-harness"
@@ -36,10 +37,10 @@
   },
   "managedFiles": {
     ".agents/scripts/auto_preview.py": "sha256:c5a8e400f892493d29df11d96a3c3370b7f8bf54e2e0dfc83650a98db823b4cd",
-    ".agents/scripts/checklist.py": "sha256:146480fb35b5083431a62d72aadd07785e898609b4a2a8febf7d1786efc4552d",
+    ".agents/scripts/checklist.py": "sha256:766c682f3df76549bc1398fec93cf88fec838935a9db346aa3c5769a1e6a56a0",
     ".agents/scripts/session_manager.py": "sha256:275e1af4c7f0ec378b0ffb98fce1068088702c602d7cd16ca3cb7f5d200e1ee2",
-    ".agents/scripts/verify_all.py": "sha256:ca8ca5154664d0dcd02635d87f14cdc5b364410faa30df83c7c716111b4f34bb",
-    ".agents/ARCHITECTURE.md": "sha256:0c2024716658e0ac4bf3ce248d2b9e4f6bfd0eeb35f5d7acee2197a6ae70fbc6",
+    ".agents/scripts/verify_all.py": "sha256:49a7a642df4fbed785660f14e196e64b0cc3589433ee12c8a9f4b6387da25011",
+    ".agents/ARCHITECTURE.md": "sha256:de05ce39ab8cf8df695c3cd388effaec7710c369370e547223599dff8c9dcc55",
     ".agents/ux_audit.json": "sha256:7468e8453200e680ced0339d9c412af1587d6f53d7464a4fa02142c5eafdf67f"
   },
   "managedGeminiSkills": {
@@ -47,7 +48,6 @@
     "debugger": {},
     "explorer-agent": {},
     "lint-and-validate": {},
-    "testing-patterns": {},
     "devops-engineer": {},
     "mcp-builder": {},
     "documentation-writer": {},

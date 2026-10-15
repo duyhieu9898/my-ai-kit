@@ -5,7 +5,7 @@ import { frontmatterScalar, lintSkill } from '../scripts/skill-standard.mjs';
 const GOOD_DESCRIPTION = [
     'Writes, debugs, and stabilizes Playwright end-to-end tests for web apps.',
     'Use when adding a browser test or fixing a flaky E2E run.',
-    'Not for unit tests (use testing-patterns).',
+    'Not for unit tests (use risk-based-testing).',
 ].join(' ');
 
 const GOOD_YAML = [
@@ -23,7 +23,7 @@ const lint = (overrides = {}) => lintSkill({
     name: 'webapp-testing',
     skillMd: skillMd(overrides),
     openAiYaml: GOOD_YAML,
-    skillNames: new Set(['webapp-testing', 'testing-patterns']),
+    skillNames: new Set(['webapp-testing', 'risk-based-testing']),
     ...overrides.skill,
 });
 
@@ -84,7 +84,7 @@ test('description rules from the description guide are warned', () => {
         ['Runs tests. Use when testing, NEVER in CI.', ['warn: description uses all-caps emphasis']],
         ['Runs tests. Use when testing. Not for units.', ["warn: 'Not for' does not name a sibling as (use <skill>)"]],
         ['Runs tests. Use when testing. Not for units (use nope).', ["warn: 'Not for' names a missing skill"]],
-        ['Runs tests. Use when testing. Not for a (use testing-patterns). Not for b (use testing-patterns).', [
+        ['Runs tests. Use when testing. Not for a (use risk-based-testing). Not for b (use risk-based-testing).', [
             "warn: description has more than one 'Not for'",
         ]],
         [`Runs tests. Use when testing. ${'x'.repeat(400)}`, ['warn: description over 400 chars']],

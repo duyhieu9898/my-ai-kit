@@ -100,7 +100,7 @@ not the procedure.
 
 Add a boundary only when a specific sibling or common request is likely to be
 confused with this skill. Always name where that work goes: `Not for unit
-tests (use testing-patterns).` A boundary without a destination ("NOT for
+tests (use risk-based-testing).` A boundary without a destination ("NOT for
 basic HTML templates") costs budget and helps nothing.
 
 At most one boundary sentence. If a skill needs three exclusions, its scope is
@@ -257,7 +257,7 @@ should not.
   cases that describe the need without naming the domain.
 - **Should not trigger:** use **near-misses from sibling skills**, meaning
   queries that share keywords but belong elsewhere. "Add a Playwright test for
-  login" is a near-miss for `testing-patterns`. Queries with no overlap test
+  login" is a near-miss for `risk-based-testing`. Queries with no overlap test
   nothing.
 
 Store the queries next to the audit that uses them, not inside the skill, so

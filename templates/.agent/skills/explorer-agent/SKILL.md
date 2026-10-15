@@ -41,7 +41,7 @@ Lock the current behaviour first.
 
 - **Characterization tests:** write tests that capture today's outputs,
   including odd ones, and confirm they pass on the unchanged code. Only then
-  change it. See `testing-patterns`.
+  change it. See `risk-based-testing`.
 - **Replacement strategy:** when the code cannot be tested in place, put a
   new interface in front of it and move callers over gradually (strangler
   fig). Do not rewrite it in one step.

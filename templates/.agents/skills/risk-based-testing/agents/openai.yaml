@@ -1,0 +1,4 @@
+interface:
+  display_name: "Risk-Based Testing"
+  short_description: "Write few strong Vitest tests and verify UI in Chrome"
+  default_prompt: "Use $risk-based-testing to decide which tests the cart feature needs and verify it in the browser."

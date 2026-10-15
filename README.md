@@ -96,7 +96,7 @@ npx -y hieund-ai-kit status
 
 ## Profile
 
-Kit có 21 skill: 11 skill dùng chung và 10 skill chỉ dành cho Gemini (đánh
+Kit có 21 skill: 12 skill dùng chung và 9 skill chỉ dành cho Gemini (đánh
 dấu *). Cài theo profile để agent chỉ thấy các skill cần cho project;
 description của mọi skill đã cài đều được nạp vào context, nên cài thừa vừa tốn
 token vừa dễ làm agent chọn nhầm skill.
@@ -106,7 +106,7 @@ token vừa dễ làm agent chọn nhầm skill.
 | `core` | `clean-code`*, `verify-changes`*, `debugger`*, `explorer-agent`*, `lint-and-validate`*, `code-review-checklist`*, `security-auditor` |
 | `web` | `frontend-design`, `web-design-guidelines`, `react-refactor-patterns`, `performance-profiling` |
 | `backend` | `backend-specialist`, `api-patterns`, `database-design` |
-| `testing` | `testing-patterns`*, `webapp-testing` |
+| `testing` | `risk-based-testing`, `webapp-testing` |
 | `growth` | `seo-fundamentals`, `i18n-localization` |
 | `ops` | `devops-engineer`* |
 | `mcp` | `mcp-builder`* |
@@ -133,9 +133,10 @@ Bản 5.0 tinh giản skill cho Claude Code và Codex. Chạy `update` bằng CL
 
 | Skill | Thay đổi |
 |:---|:---|
-| `code-review-checklist`, `explorer-agent`, `debugger`, `testing-patterns`, `lint-and-validate`, `devops-engineer`, `mcp-builder`, `documentation-writer`, `clean-code`, `verify-changes` | Chuyển từ `.agents/skills/` sang `.agent/skills/` (chỉ Gemini); symlink Claude bị gỡ |
+| `code-review-checklist`, `explorer-agent`, `debugger`, `lint-and-validate`, `devops-engineer`, `mcp-builder`, `documentation-writer`, `clean-code`, `verify-changes` | Chuyển từ `.agents/skills/` sang `.agent/skills/` (chỉ Gemini); symlink Claude bị gỡ |
 | `plan-writing`, `project-planner`, `product-manager` | Bỏ hẳn; dùng plan mode có sẵn của tool |
 | `architecture` | Bỏ hẳn; profile `planning` cũng bị bỏ |
+| `testing-patterns` | Thay bằng `risk-based-testing` (dùng chung cho Claude, Codex, Gemini); `test_runner.py` chuyển sang `.agents/skills/risk-based-testing/scripts/` |
 | `nextjs-react-expert` | Gộp vào `performance-profiling` (rule Next.js/React nằm trong `references/`) |
 
 Bản bị sửa cục bộ trong `.agents/skills/` được giữ lại (kèm cảnh báo) cho tới khi
@@ -148,7 +149,7 @@ bản bị sửa cục bộ thì được giữ lại. Nội dung của skill c�
 
 | Skill cũ | Nay nằm trong |
 |:---|:---|
-| `test-engineer`, `tdd-workflow` | `testing-patterns` |
+| `test-engineer`, `tdd-workflow` | `testing-patterns` (từ 5.0 là `risk-based-testing`) |
 | `qa-automation-engineer`, `playwright-pitfalls`, `playwright-pro-patterns` | `webapp-testing` |
 | `frontend-specialist`, `tailwind-patterns` | `frontend-design` |
 | `seo-specialist` | `seo-fundamentals` |

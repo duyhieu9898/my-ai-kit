@@ -182,7 +182,7 @@ VERIFICATION_SUITE = [
     {
         "category": "Testing",
         "checks": [
-            ("Test Suite", ".agent/skills/testing-patterns/scripts/test_runner.py", False),
+            ("Test Suite", ".agents/skills/risk-based-testing/scripts/test_runner.py", False),
         ]
     },
     

@@ -72,7 +72,7 @@ Run the project audit command `python3 .agents/scripts/checklist.py .`, and fix 
     *   *Verify All:* `.agents/scripts/verify_all.py`
     *   *Security Scan:* `.agents/skills/security-auditor/scripts/security_scan.py`
     *   *Linter:* `.agent/skills/lint-and-validate/scripts/lint_runner.py`
-    *   *Unit Tests:* `.agent/skills/testing-patterns/scripts/test_runner.py`
+    *   *Unit Tests:* `.agents/skills/risk-based-testing/scripts/test_runner.py`
 *   **UI Styling Rules:** Read `.agents/skills/frontend-design/SKILL.md` before restyling or theming UI (tokens first, then component variants).
 <!-- KIT:END -->
 

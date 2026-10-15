@@ -14,7 +14,7 @@
   `.agents/AGENTS.md`.
 - Skills use `SKILL.md`, required `agents/openai.yaml`, optional `references/`,
   `scripts/`, and `assets/`.
-- The current template ships 11 skill directories and four top-level runtime
+- The current template ships 12 skill directories and four top-level runtime
   scripts. Codex does not read `.agent/skills/`.
 
 ## Gemini Antigravity
@@ -31,7 +31,7 @@
   `PostToolUse` payload does not include tool arguments.
 - Skills: Antigravity discovers the shared `.agents/skills/` directory and the
   Gemini-only `.agent/skills/` directory, preferring `.agent/skills/` on a name
-  clash. Source: `templates/.agent/skills/`; the template ships 10 Gemini-only
+  clash. Source: `templates/.agent/skills/`; the template ships 9 Gemini-only
   skill directories for work Claude Code and Codex already cover natively.
 
 ## Claude Code
