@@ -32,6 +32,27 @@ renamed label. Assert the value the user should see.
 `*-mock` test id. It proves the mock exists. Assert the real effect, or delete
 the test.
 
+**Rejection that fails for another reason.** An invalid input that breaks two
+rules, or misses an unrelated required field, so it is rejected whatever the
+rule under test does.
+
+```ts
+// Bad: no visibilityRules, so this fails even with no price rule at all
+expect(partnerSchema.safeParse({ ...base, price: -1 }).success).toBe(false);
+// Good: valid except for the one rule, and the issue points at that field
+const r = partnerSchema.safeParse({ ...validPartner, price: -1 });
+expect(r.error?.issues.map((i) => i.path.join('.'))).toEqual(['price']);
+```
+
+Start every rejection case from a fully valid fixture, change one field, and
+assert the issue path or error code.
+
+**Vacuous absence check.** `expect(queryByText('Error')).toBeNull()` right
+after render, before the async flow could show it; inside `waitFor`, where it
+passes on the first tick; or for text that appears in no source file or
+dictionary. Wait for the positive outcome first (`await findByText(...)`),
+then assert the absence, and check the string actually exists in the code.
+
 **Never seen failing.** A test written after the code and passing on the
 first run may be testing nothing. Break the code once and watch it fail.
 
@@ -62,8 +83,18 @@ a big `beforeEach` that later tests mutate, nested `describe` blocks layering
 setup. Tests pass alone and fail together, or the reverse. Use factories and
 reset stores in `afterEach`.
 
+**Look-alike fixture values.** `projected = accrued = claimable = 1600`, or
+the same id for user and partner. The test cannot tell which field the code
+reads, so swapping them passes. Give every field the test distinguishes a
+different value.
+
 **Real time and order.** `Date.now()`, timeouts, or relying on test order. Use
 fake timers or inject the clock; never add retries or sleeps to make it pass.
+
+**Timezone not pinned.** Local-time logic (date pickers, "start of day",
+schedules) passes trivially when the machine runs in UTC or UTC+7. Set `TZ`
+for the test run to a negative offset (e.g. `America/Los_Angeles` in the
+test script or config) and use dates near midnight.
 
 ## 3. Mocking mistakes
 
@@ -75,6 +106,13 @@ not an edge: use the real one (`mongodb-memory-server`).
 
 **Mocking `fetch` or the API client** instead of the network. Use MSW, so the
 real request code, headers, and error mapping run.
+
+**Testing the dev mock.** An "API contract" test that runs against the MSW
+handlers the app uses for local development (often with
+`onUnhandledRequest: 'bypass'`). It checks the mock's own rules, so it passes
+whatever the real backend does. Give each test its own handlers that return
+the documented responses, and test how the app reacts; check the contract
+itself against the OpenAPI spec or the real backend.
 
 **Asserting calls on a stub.** `expect(getUser).toHaveBeenCalledWith(1)` when
 `getUser` only feeds data in. Assert the outcome. Check calls only for
@@ -115,6 +153,11 @@ checks only that the result reaches the screen.
 **Snapshot spam.** `toMatchSnapshot()` of whole trees gets approved without
 reading. Assert specific text and roles; keep snapshots for small, stable,
 serialisable output.
+
+**Name promises more than the test asserts.** "Sends exactly once" with no
+count, "saves history" in code that has no history, "rejects X and Y" where
+only X is checked. Readers trust the name and skip the case. Assert what the
+name says, or rename the test to what it checks.
 
 **Coverage chasing.** Tests added to lift a percentage. Cover the branches the
 change touched, including the error path, and stop.
