@@ -18,6 +18,8 @@ sys.dont_write_bytecode = True
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 TARGETS = ("codex",)
+# The script `npm init -y` writes when a project has no tests.
+NPM_PLACEHOLDER_TEST = 'echo "Error: no test specified" && exit 1'
 
 
 def script_path(target: str, relative_path: str) -> Path:
@@ -754,12 +756,56 @@ class ValidatorRegressionTests(unittest.TestCase):
                         ["npm", "test"],
                     ),
                     ({"scripts": {"test": "node t.js"}}, "npm test", ["npm", "test"]),
+                    (
+                        {"scripts": {"test": NPM_PLACEHOLDER_TEST}, "devDependencies": {"vitest": "4"}},
+                        "vitest",
+                        ["npx", "vitest", "run"],
+                    ),
+                    ({"scripts": {"test": NPM_PLACEHOLDER_TEST}}, None, None),
                     ({}, None, None),
                 ]
                 for pkg, framework, cmd in cases:
                     package_json.write_text(json.dumps(pkg), encoding="utf-8")
                     info = module.detect_test_framework(project)
                     self.assertEqual((info["framework"], info["cmd"]), (framework, cmd), pkg)
+
+    def test_test_runner_prefers_the_node_suite_over_a_stray_python_file(self):
+        for target in TARGETS:
+            with self.subTest(target=target), tempfile.TemporaryDirectory() as temp_dir:
+                module = load_module(
+                    target,
+                    "test_runner_python_marker",
+                    "risk-based-testing/scripts/test_runner.py",
+                )
+                project = Path(temp_dir)
+                (project / "requirements.txt").write_text("requests\n", encoding="utf-8")
+                (project / "package.json").write_text(
+                    json.dumps({"devDependencies": {"vitest": "4"}}), encoding="utf-8"
+                )
+                self.assertEqual(module.detect_test_framework(project)["framework"], "vitest")
+
+                (project / "package.json").write_text("{}", encoding="utf-8")
+                self.assertEqual(module.detect_test_framework(project)["framework"], "pytest")
+
+    def test_test_runner_counts_tests_from_the_summary_line(self):
+        for target in TARGETS:
+            with self.subTest(target=target):
+                module = load_module(
+                    target,
+                    "test_runner_counts",
+                    "risk-based-testing/scripts/test_runner.py",
+                )
+                cases = [
+                    (" Test Files  2 failed | 2 passed (4)\n      Tests  1 failed | 5 passed (6)\n", (5, 1)),
+                    (" Test Files  1 passed (1)\n      Tests  3 passed (3)\n", (3, 0)),
+                    ("\x1b[2m      Tests \x1b[22m \x1b[1m\x1b[32m3 passed\x1b[39m\x1b[22m\x1b[90m (3)\x1b[39m\n", (3, 0)),
+                    ("Test Suites: 1 failed, 1 passed, 2 total\nTests:       2 failed, 7 passed, 9 total\n", (7, 2)),
+                    ("      Tests  4 passed (4)\n      Tests  1 failed | 2 passed (3)\n", (6, 1)),
+                    ("========== 1 failed, 4 passed in 0.31s ==========\n", (4, 1)),
+                    ("no summary here\n", (0, 0)),
+                ]
+                for output, counts in cases:
+                    self.assertEqual(module.parse_counts(output), counts, output)
 
     def test_test_runner_exit_code_follows_the_suite(self):
         for target in TARGETS:

@@ -8,15 +8,23 @@ Usage:
 
 Supports:
     - Node.js: npm test, jest, vitest
-    - Python: pytest, unittest
+    - Python: pytest (only when package.json defines no test command)
 """
 
 import argparse
+import re
 import subprocess
 import sys
 import json
 from pathlib import Path
 from datetime import datetime
+
+ANSI_ESCAPE = re.compile(r"\x1b\[[0-9;]*m")
+# Vitest "Tests  1 failed | 5 passed (6)", Jest "Tests:  1 failed, 5 passed, 6 total".
+# "Test Files" and "Test Suites" count files, so they must not match.
+NODE_SUMMARY = re.compile(r"^[ \t]*Tests:?[ \t]+(.*)$", re.MULTILINE)
+# pytest "===== 1 failed, 4 passed in 0.31s ====="
+PYTEST_SUMMARY = re.compile(r"^=+ (.*\b(?:passed|failed)\b.*) =+$", re.MULTILINE)
 
 # Fix Windows console encoding
 try:
@@ -43,8 +51,8 @@ def detect_test_framework(project_path: Path) -> dict:
             scripts = pkg.get("scripts", {})
             deps = {**pkg.get("dependencies", {}), **pkg.get("devDependencies", {})}
             
-            # Check for test script
-            if "test" in scripts:
+            # Check for test script; `npm init -y` writes a placeholder that runs nothing
+            if "test" in scripts and "no test specified" not in scripts["test"]:
                 result["framework"] = "npm test"
                 result["cmd"] = ["npm", "test"]
                 
@@ -67,14 +75,27 @@ def detect_test_framework(project_path: Path) -> dict:
         except:
             pass
     
-    # Python project
-    if (project_path / "pyproject.toml").exists() or (project_path / "requirements.txt").exists():
+    # Python project, unless package.json already gave a test command
+    has_python_marker = (project_path / "pyproject.toml").exists() or (project_path / "requirements.txt").exists()
+    if result["cmd"] is None and has_python_marker:
         result["type"] = "python"
         result["framework"] = "pytest"
         result["cmd"] = [sys.executable, "-m", "pytest", "-v"]
         result["coverage_cmd"] = [sys.executable, "-m", "pytest", "--cov", "--cov-report=term-missing"]
     
     return result
+
+
+def parse_counts(output: str) -> tuple:
+    """Return (passed, failed) summed over the runner's summary lines, or (0, 0)."""
+    text = ANSI_ESCAPE.sub("", output)
+    for pattern in (NODE_SUMMARY, PYTEST_SUMMARY):
+        lines = pattern.findall(text)
+        if lines:
+            passed = sum(int(m) for line in lines for m in re.findall(r"(\d+) passed", line))
+            failed = sum(int(m) for line in lines for m in re.findall(r"(\d+) failed", line))
+            return passed, failed
+    return 0, 0
 
 
 def run_tests(cmd: list, cwd: Path) -> dict:
@@ -103,31 +124,11 @@ def run_tests(cmd: list, cwd: Path) -> dict:
         result["error"] = proc.stderr[:500] if proc.stderr else ""
         result["passed"] = proc.returncode == 0
         
-        # Try to parse test counts from output
-        output = proc.stdout or ""
-        
-        # Jest/Vitest pattern: "Tests: X passed, Y failed, Z total"
-        if "passed" in output.lower() and "failed" in output.lower():
-            import re
-            match = re.search(r'(\d+)\s+passed', output, re.IGNORECASE)
-            if match:
-                result["tests_passed"] = int(match.group(1))
-            match = re.search(r'(\d+)\s+failed', output, re.IGNORECASE)
-            if match:
-                result["tests_failed"] = int(match.group(1))
-            result["tests_run"] = result["tests_passed"] + result["tests_failed"]
-        
-        # Pytest pattern: "X passed, Y failed"
-        if "pytest" in str(cmd):
-            import re
-            match = re.search(r'(\d+)\s+passed', output)
-            if match:
-                result["tests_passed"] = int(match.group(1))
-            match = re.search(r'(\d+)\s+failed', output)
-            if match:
-                result["tests_failed"] = int(match.group(1))
-            result["tests_run"] = result["tests_passed"] + result["tests_failed"]
-        
+        passed, failed = parse_counts(proc.stdout or "")
+        result["tests_passed"] = passed
+        result["tests_failed"] = failed
+        result["tests_run"] = passed + failed
+
     except FileNotFoundError:
         result["error"] = f"Command not found: {cmd[0]}"
     except subprocess.TimeoutExpired:
