@@ -735,6 +735,73 @@ class ValidatorRegressionTests(unittest.TestCase):
                 self.assertLess(source.index('page.on("console"'), source.index("page.goto("))
                 self.assertIn('result["console_errors"]', source)
 
+    def test_test_runner_picks_the_runner_from_package_json(self):
+        for target in TARGETS:
+            with self.subTest(target=target), tempfile.TemporaryDirectory() as temp_dir:
+                module = load_module(
+                    target,
+                    "test_runner_detect",
+                    "risk-based-testing/scripts/test_runner.py",
+                )
+                project = Path(temp_dir)
+                package_json = project / "package.json"
+                cases = [
+                    ({"devDependencies": {"vitest": "4"}}, "vitest", ["npx", "vitest", "run"]),
+                    ({"devDependencies": {"jest": "30"}}, "jest", ["npx", "jest"]),
+                    (
+                        {"scripts": {"test": "vitest"}, "devDependencies": {"vitest": "4"}},
+                        "vitest",
+                        ["npm", "test"],
+                    ),
+                    ({"scripts": {"test": "node t.js"}}, "npm test", ["npm", "test"]),
+                    ({}, None, None),
+                ]
+                for pkg, framework, cmd in cases:
+                    package_json.write_text(json.dumps(pkg), encoding="utf-8")
+                    info = module.detect_test_framework(project)
+                    self.assertEqual((info["framework"], info["cmd"]), (framework, cmd), pkg)
+
+    def test_test_runner_exit_code_follows_the_suite(self):
+        for target in TARGETS:
+            runner = script_path(target, "risk-based-testing/scripts/test_runner.py")
+            for exit_code, expected in ((0, 0), (3, 1)):
+                with self.subTest(target=target, exit_code=exit_code), tempfile.TemporaryDirectory() as temp_dir:
+                    project = Path(temp_dir)
+                    (project / "package.json").write_text(
+                        json.dumps({"scripts": {"test": f'node -e "process.exit({exit_code})"'}}),
+                        encoding="utf-8",
+                    )
+                    result = subprocess.run(
+                        [sys.executable, str(runner), str(project)],
+                        check=False,
+                        capture_output=True,
+                        text=True,
+                    )
+                    self.assertEqual(result.returncode, expected, result.stdout + result.stderr)
+                    self.assertIn('"script": "test_runner"', result.stdout)
+
+    def test_test_runner_rejects_a_missing_project_and_answers_help(self):
+        for target in TARGETS:
+            with self.subTest(target=target):
+                runner = script_path(target, "risk-based-testing/scripts/test_runner.py")
+                missing = subprocess.run(
+                    [sys.executable, str(runner), "/nonexistent-kit-project"],
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                )
+                self.assertEqual(missing.returncode, 2)
+                self.assertIn("Project directory not found", missing.stderr)
+
+                help_run = subprocess.run(
+                    [sys.executable, str(runner), "--help"],
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                )
+                self.assertEqual(help_run.returncode, 0)
+                self.assertIn("usage:", help_run.stdout)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

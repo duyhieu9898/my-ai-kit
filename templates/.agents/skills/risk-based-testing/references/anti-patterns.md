@@ -133,7 +133,7 @@ the success and the error expectation. Give each branch its own response.
 ## 4. Redundancy and noise
 
 **One test per method instead of per behaviour.** Seven tests for seven
-one-line Zustand setters. Test the actions that hold a rule (merging a
+one-line store setters. Test the actions that hold a rule (merging a
 duplicate SKU, removing at qty 0) and leave plain assignments to the browser
 check.
 

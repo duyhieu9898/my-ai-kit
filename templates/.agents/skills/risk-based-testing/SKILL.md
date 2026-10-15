@@ -3,9 +3,9 @@ name: risk-based-testing
 description: >-
   Picks which behaviours of a change deserve a Vitest test, writes few strong
   ones, and checks the rest in the browser via Chrome DevTools MCP. Use when
-  about to write tests, including while implementing a feature or fix, when
-  reviewing weak tests, or when confirming a UI change works. Not for
-  Playwright suites (use webapp-testing).
+  writing tests, even mid-feature or mid-fix, reviewing weak tests, or
+  confirming a UI change works. Not for Playwright suites (use
+  webapp-testing).
 ---
 
 # Risk-Based Testing
@@ -31,7 +31,7 @@ List the behaviours the change adds or alters, then classify each one:
 
 | Code | Example in this stack | Action |
 |---|---|---|
-| Domain logic, calculations, validation, permission checks | pricing utils, Zustand actions with rules, Zod schemas with refinements, Express auth middleware | Unit test: boundaries and every branch |
+| Domain logic, calculations, validation, permission checks | pricing utils, token amount and decimals conversion, Zod schemas with refinements, store actions with rules, Express auth middleware | Unit test: boundaries and every branch |
 | Glue with many collaborators | Express route + Mongoose, component + query hook + store | One or two integration tests at the seam: supertest with a real DB, or RTL with a real QueryClient, real store, MSW |
 | Logic tangled with I/O or JSX | a component that computes totals inline | Extract it to a pure function first (see `react-refactor-patterns`), then unit-test that |
 | Trivial or framework behaviour | setters, one-line formatters over `Intl`, static markup, styling, "useQuery caches", "Mongoose enforces `required`", type-only code | No test. Check visible effects in the browser |
@@ -57,7 +57,8 @@ in the browser instead.
 Read [references/anti-patterns.md](references/anti-patterns.md) before
 writing or reviewing tests. Read
 [references/stack-setup.md](references/stack-setup.md) when you set up
-Vitest, MSW, TanStack Query, Zustand, or supertest, or when a test misbehaves.
+Vitest, MSW, TanStack Query, forms and schemas, web3 hooks, client stores, or
+supertest, or when a test misbehaves.
 
 - **Follow the project:** existing config, setup files, helpers, file
   placement, and the installed versions in `package.json`. Do not add
@@ -86,7 +87,7 @@ Vitest, MSW, TanStack Query, Zustand, or supertest, or when a test misbehaves.
    must fail for the reported reason; a test that passes before the fix does
    not reproduce the bug, so keep looking. Then fix and rerun.
 
-## Running tests
+## 4. Run the tests
 
 - Narrowest scope first: `npx vitest run <file>` (add `-t "<name>"` for one
   test), then the project's own test command.
@@ -95,7 +96,7 @@ Vitest, MSW, TanStack Query, Zustand, or supertest, or when a test misbehaves.
   detects Vitest, Jest, `npm test`, or pytest, runs the whole suite, and
   prints a JSON summary. Run it; do not read the source.
 
-## 4. Verify in the browser
+## 5. Verify in the browser
 
 Read [references/browser-verification.md](references/browser-verification.md)
 before driving the app. Use whichever Chrome DevTools MCP server is installed

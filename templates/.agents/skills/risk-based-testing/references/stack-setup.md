@@ -1,8 +1,19 @@
 # Stack Setup and Pitfalls
 
-Vitest, React Testing Library, MSW, TanStack Query, Zustand, and Express with
-Mongoose. Check the installed versions in `package.json` first: several
-defaults changed in recent majors.
+Check the installed versions in `package.json` first: several defaults
+changed in recent majors.
+
+## Contents
+
+1. Vitest
+2. React Testing Library
+3. MSW
+4. TanStack Query
+5. Forms and schemas (Zod, React Hook Form)
+6. Web3 (wagmi, viem, Solana)
+7. Client stores (Zustand, Redux, Jotai)
+8. Express, Mongoose, supertest
+9. Running
 
 ## Vitest
 
@@ -55,15 +66,38 @@ defaults changed in recent majors.
 - Assert through the UI with `findBy*`. With `renderHook`, use
   `await waitFor(() => expect(result.current.isSuccess).toBe(true))`.
 
-## Zustand
+## Forms and schemas (Zod, React Hook Form)
+
+- Test validation rules on the schema itself, not through the form. Start each
+  rejection case from a valid fixture, break one field, and assert the issue
+  `path` (see "Rejection that fails for another reason" in the anti-patterns).
+- Test the form only for wiring: the error appears on the right field at the
+  right time (the RHF `mode` decides blur vs submit), the submit payload
+  reaches the API (MSW), and submit is disabled while pending. Do not repeat
+  every schema rule through the UI.
+- Drive inputs with `userEvent` and wait with `findBy*` after blur or submit;
+  RHF validates asynchronously.
+
+## Web3 (wagmi, viem, Solana)
+
+- Mock at the wallet and RPC edge: wagmi's `useAccount` or a mock connector,
+  a fake Solana `Connection` or wallet adapter. Keep the project's own
+  selection, lifecycle, and verification hooks real; mocking them hides the
+  wiring that decides which account signs.
+- Amounts: use `bigint` literals, and cover decimals (6 vs 18), zero,
+  negative, non-numeric input, and the maximum (`maxUint256`, u64). Assert the
+  error code, never a bare `toThrow()`.
+- Polling, resend, and confirmation intervals run on fake timers; a test that
+  sleeps through a real 2 s interval is slow and still racy.
+- Cover double submit and an account switch mid-flow for every write path.
+- Never sign or send against a real network in unit tests.
+
+## Client stores (Zustand, Redux, Jotai)
 
 - Use the real store; do not mock it.
-- Reset between tests. The official approach mocks `zustand` so each store
-  records its initial state and resets it in `afterEach`; in Vitest, call
-  `vi.mock('zustand')` in the setup file with a `__mocks__/zustand.ts` (see
-  the Zustand testing guide). A simpler option for a few stores:
-  `useCartStore.setState(useCartStore.getInitialState(), true)` in
-  `afterEach`.
+- Reset it between tests, e.g. for Zustand
+  `useStore.setState(useStore.getInitialState(), true)` in `afterEach`.
+- Test only actions that hold a rule; plain setters are not worth a test.
 
 ## Express, Mongoose, supertest
 

@@ -11,6 +11,7 @@ Supports:
     - Python: pytest, unittest
 """
 
+import argparse
 import subprocess
 import sys
 import json
@@ -137,9 +138,23 @@ def run_tests(cmd: list, cwd: Path) -> dict:
     return result
 
 
+def parse_args(argv=None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Detect the project's test runner (Vitest, Jest, npm test, pytest), "
+        "run the whole suite, and print a JSON summary. Exits 1 when tests fail.",
+    )
+    parser.add_argument("project_path", nargs="?", default=".", help="project root (default: .)")
+    parser.add_argument("--coverage", action="store_true", help="run with coverage when supported")
+    return parser.parse_args(argv)
+
+
 def main():
-    project_path = Path(sys.argv[1] if len(sys.argv) > 1 else ".").resolve()
-    with_coverage = "--coverage" in sys.argv
+    args = parse_args()
+    project_path = Path(args.project_path).resolve()
+    with_coverage = args.coverage
+    if not project_path.is_dir():
+        print(f"Project directory not found: {project_path}", file=sys.stderr)
+        sys.exit(2)
     
     print(f"\n{'='*60}")
     print(f"[TEST RUNNER] Unified Test Execution")
