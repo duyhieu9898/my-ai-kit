@@ -75,6 +75,14 @@ test('a manifest with agents keeps them', () => {
     assert.equal(manifest.legacyAgents, undefined);
 });
 
+test('a manifest whose skill names are not single path segments is rejected', () => {
+    for (const records of [{ managedSkills: { '../../etc': {} } }, { managedSkills: {}, managedGeminiSkills: { 'a/b': {} } }]) {
+        const projectDir = makeProject();
+        fs.writeFileSync(path.join(projectDir, '.ai-kit.json'), JSON.stringify({ formatVersion: 2, ...records }));
+        assert.throws(() => readManifest(projectDir), { name: 'KitError', message: /invalid skill names/ });
+    }
+});
+
 test('unparseable manifest fails with the file path', () => {
     const projectDir = makeProject();
     fs.writeFileSync(path.join(projectDir, '.ai-kit.json'), '{oops');
