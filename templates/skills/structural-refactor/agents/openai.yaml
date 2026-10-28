@@ -1,0 +1,4 @@
+interface:
+  display_name: "Structural Refactor"
+  short_description: "Restructure code across files and remove the old path"
+  default_prompt: "Use $structural-refactor to move all API calls onto the shared apiClient."

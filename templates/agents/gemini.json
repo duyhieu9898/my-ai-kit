@@ -1,0 +1,13 @@
+{
+  "instruction": { "src": "instructions/GEMINI.md", "dest": "GEMINI.md" },
+  "hooks": { "src": "hooks/gemini.json", "dest": ".agents/hooks.json" },
+  "files": [
+    { "src": "hooks/harness_guard.py", "dest": ".agents/gemini/hooks/harness_guard.py" },
+    { "src": "hooks/gemini_adapter.py", "dest": ".agents/gemini/hooks/gemini_adapter.py" },
+    { "src": "rules/", "dest": ".agents/rules/" }
+  ],
+  "exclusiveSkills": [
+    "clean-code", "code-review-checklist", "debugger", "devops-engineer", "documentation-writer",
+    "explorer-agent", "lint-and-validate", "mcp-builder", "verify-changes"
+  ]
+}

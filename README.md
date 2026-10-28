@@ -2,17 +2,24 @@
 
 CLI cài đặt bộ skill và rule cho AI coding agents vào repository hiện tại.
 
-CLI cài đồng thời runtime và rule cho Codex, Gemini Antigravity, và Claude
-Code vào cùng một repository.
+CLI cài runtime và rule cho các agent bạn chọn (Codex, Gemini Antigravity,
+Claude Code) vào cùng một repository; mỗi agent chỉ nhận phần của nó.
 
 ## Cài Đặt Nhanh
 
 Không cần cài global — dùng `npx` (khuyến nghị):
 
-Codex + Gemini + Claude Code:
+Claude Code + Codex (mặc định):
 
 ```bash
 npx -y hieund-ai-kit init
+```
+
+Chọn agent khác, hoặc thêm agent vào project đã cài:
+
+```bash
+npx -y hieund-ai-kit init --agent claude,codex,gemini
+npx -y hieund-ai-kit install --agent gemini
 ```
 
 Hoặc trỏ thẳng repo GitHub:
@@ -23,23 +30,25 @@ npx -y github:duyhieu9898/my-ai-kit init
 
 > **Lưu ý:** Lệnh `hieund-ai-kit init` (không có `npx`) chỉ chạy được sau khi bạn `npm link` hoặc `npm install -g` trong repo CLI. Nếu terminal báo `command not found`, dùng các lệnh `npx` ở trên.
 
-Kết quả cài đặt:
+Mỗi agent được khai báo trong `templates/agents/<agent>.json`; project chỉ
+nhận file của các agent đã chọn:
 
 | Tool | Skills | Integration Config | Root Instruction |
 |:---|:---|:---|:---|
 | Codex | `.agents/skills/` | `.codex/hooks.json` + `.codex/hooks/` | `AGENTS.md` |
-| Gemini Antigravity | `.agents/skills/` + `.agent/skills/` | `.agents/hooks.json` + `.agents/gemini/hooks/` | `GEMINI.md` |
+| Gemini Antigravity | `.agents/skills/` | `.agents/hooks.json` + `.agents/gemini/hooks/` | `GEMINI.md` |
 | Claude Code | `.claude/skills/<name>` → `../../.agents/skills/<name>` | `.claude/settings.json` | `CLAUDE.md` |
 
-`.agents/` chứa `skills/`, `scripts/`, các tài nguyên runtime dùng chung, và
-các phần tích hợp theo tool. CLI **không** tự sửa `.gitignore` — bạn tự quản lý.
+`.agents/` chứa `skills/`, `scripts/`, `ARCHITECTURE.md` (agent nào cũng
+nhận), và các phần tích hợp của agent đã chọn. CLI **không** tự sửa `.gitignore` — bạn tự quản lý.
 
-`.agents/skills/` là bộ skill gọn dùng chung: Codex đọc trực tiếp, Claude Code
-đọc qua symlink. `.agent/skills/` chứa skill chỉ dành cho Gemini — các việc mà
-Claude Code và Codex đã tự làm tốt (review code, khám phá codebase, debug, test,
-lint, deploy, MCP server, viết tài liệu, clean code, verify). Codex không đọc `.agent/skills/`; Antigravity đọc cả hai thư mục và ưu
-tiên bản trong `.agent/skills/` khi trùng tên, nên có thể viết một bản riêng cho
-Gemini mà không ảnh hưởng Codex.
+`.agents/skills/` chứa mọi skill kit cài: Codex và Antigravity đọc trực tiếp
+([docs Antigravity](https://antigravity.google/docs/skills/)), Claude Code chỉ
+symlink các skill dùng chung. 9 skill chỉ dành cho Gemini (đánh dấu *) lo các
+việc Claude Code và Codex đã tự làm tốt (review code, khám phá codebase, debug,
+lint, deploy, MCP server, viết tài liệu, clean code, verify), nên chỉ được cài
+khi project chọn agent `gemini`. Project chọn cả Codex lẫn Gemini thì Codex cũng
+thấy các skill này, vì hai tool dùng chung `.agents/skills/`.
 Với Codex, `.codex/hooks.json` được merge với hooks hiện có thay vì thay thế
 toàn bộ cấu hình `.codex/`. Codex sẽ yêu cầu review/trust hook mới hoặc hook đã
 thay đổi trước khi chạy.
@@ -68,10 +77,12 @@ Thay `hieund-ai-kit` bằng `npx -y hieund-ai-kit` nếu chưa cài global.
 
 | Lệnh | Mô tả |
 |:---|:---|
-| `install` | Cài tất cả skill, hooks, và root instructions (alias: `init`) |
+| `install` | Cài tất cả skill, hooks, và root instructions cho Claude Code + Codex (alias: `init`) |
+| `install --agent a,b` | Thêm agent (`claude`, `codex`, `gemini`) cùng file và skill của nó |
 | `install --profile a,b` | Thêm skill theo profile khai báo trong `templates/kit.json` |
-| `install <skill...>` | Thêm từng skill |
+| `install <skill...>` | Thêm từng skill (skill chỉ dành cho Gemini cần agent `gemini`) |
 | `remove <skill...>` | Bỏ skill khỏi lựa chọn và khỏi project |
+| `remove --agent a` | Gỡ agent: block `KIT`, hook, file chưa sửa, và skill chỉ dành cho nó |
 | `update` | Cập nhật skill do kit quản lý, hooks, và block `KIT` |
 | `list` | Liệt kê skill và profile có sẵn |
 | `status` | Kiểm tra trạng thái (không cần mạng) |
@@ -96,35 +107,36 @@ npx -y hieund-ai-kit status
 
 ## Profile
 
-Kit có 21 skill: 12 skill dùng chung và 9 skill chỉ dành cho Gemini (đánh
-dấu *). Cài theo profile để agent chỉ thấy các skill cần cho project;
+Kit có 23 skill: 14 skill dùng chung và 9 skill chỉ dành cho Gemini (đánh
+dấu *, chỉ được cài khi project chọn agent `gemini`). Cài theo profile để agent chỉ thấy các skill cần cho project;
 description của mọi skill đã cài đều được nạp vào context, nên cài thừa vừa tốn
 token vừa dễ làm agent chọn nhầm skill.
 
 | Profile | Skill |
 |:---|:---|
-| `core` | `clean-code`*, `verify-changes`*, `debugger`*, `explorer-agent`*, `lint-and-validate`*, `code-review-checklist`*, `security-auditor` |
-| `web` | `frontend-design`, `web-design-guidelines`, `react-refactor-patterns`, `performance-profiling` |
+| `core` | `clean-code`*, `verify-changes`*, `debugger`*, `explorer-agent`*, `lint-and-validate`*, `code-review-checklist`*, `security-auditor`, `ambiguity-decisions`, `structural-refactor` |
+| `main` | `frontend-design`, `web-design-guidelines`, `react-refactor-patterns`, `performance-profiling`, `risk-based-testing`, `webapp-testing` |
 | `backend` | `backend-specialist`, `api-patterns`, `database-design` |
-| `testing` | `risk-based-testing`, `webapp-testing` |
-| `growth` | `seo-fundamentals`, `i18n-localization` |
-| `ops` | `devops-engineer`* |
-| `mcp` | `mcp-builder`* |
-| `docs` | `documentation-writer`* |
-| `starter` | `clean-code`*, `debugger`*, `verify-changes`* |
+| `growth` | `seo-fundamentals`, `performance-profiling`, `i18n-localization` |
+| `starter` | Toàn bộ skill của `core`, `main` và `backend` (12 skill; 18 khi có agent `gemini`) |
 
 Ví dụ:
 
 ```bash
-# Fullstack Next.js + Node (16 skill)
-npx -y hieund-ai-kit install --profile core,web,backend,testing
-# Landing page / marketing (13 skill)
-npx -y hieund-ai-kit install --profile core,web,growth
-# MCP server (13 skill)
-npx -y hieund-ai-kit install --profile core,backend,mcp,testing
+# Fullstack Next.js + Node (12 skill; 18 khi có agent gemini)
+npx -y hieund-ai-kit install --profile core,main,backend
+# Landing page / marketing (11 skill; 17 khi có agent gemini)
+npx -y hieund-ai-kit install --profile core,main,growth
+# MCP server (8 skill; 15 khi thêm agent gemini và mcp-builder)
+npx -y hieund-ai-kit install --profile core,backend risk-based-testing webapp-testing
+# mcp-builder* cần agent gemini: install --agent gemini mcp-builder
 ```
 
-`install` không kèm profile hay tên skill sẽ cài toàn bộ 21 skill.
+`devops-engineer`*, `mcp-builder`* và `documentation-writer`* không thuộc
+profile nào; cài bằng tên khi đã có agent `gemini`, ví dụ `install devops-engineer`.
+
+`install` không kèm profile hay tên skill sẽ cài toàn bộ 14 skill dùng chung;
+thêm agent `gemini` thì cài đủ 23 skill.
 
 ## Nâng Cấp Từ 4.x
 
@@ -133,14 +145,16 @@ Bản 5.0 tinh giản skill cho Claude Code và Codex. Chạy `update` bằng CL
 
 | Skill | Thay đổi |
 |:---|:---|
-| `code-review-checklist`, `explorer-agent`, `debugger`, `lint-and-validate`, `devops-engineer`, `mcp-builder`, `documentation-writer`, `clean-code`, `verify-changes` | Chuyển từ `.agents/skills/` sang `.agent/skills/` (chỉ Gemini); symlink Claude bị gỡ |
+| `code-review-checklist`, `explorer-agent`, `debugger`, `lint-and-validate`, `devops-engineer`, `mcp-builder`, `documentation-writer`, `clean-code`, `verify-changes` | Thành skill chỉ dành cho Gemini: symlink Claude bị gỡ. Project 4.x được giữ đủ 3 agent nên skill vẫn còn; không dùng Gemini thì chạy `remove --agent gemini` |
 | `plan-writing`, `project-planner`, `product-manager` | Bỏ hẳn; dùng plan mode có sẵn của tool |
 | `architecture` | Bỏ hẳn; profile `planning` cũng bị bỏ |
 | `testing-patterns` | Thay bằng `risk-based-testing` (dùng chung cho Claude, Codex, Gemini); `test_runner.py` chuyển sang `.agents/skills/risk-based-testing/scripts/` |
 | `nextjs-react-expert` | Gộp vào `performance-profiling` (rule Next.js/React nằm trong `references/`) |
 
 Bản bị sửa cục bộ trong `.agents/skills/` được giữ lại (kèm cảnh báo) cho tới khi
-chạy `update --force`.
+chạy `update --force`. Project 4.x chưa lưu agent nên lần `update` đầu tiên chọn
+cả `claude`, `codex`, `gemini` (đúng như những gì 4.x đã cài); gỡ agent không dùng
+bằng `remove --agent <tên>`.
 
 ## Nâng Cấp Từ 3.x
 
@@ -208,36 +222,34 @@ không compose skill trong lúc cài; các bản generated phải được commi
 
 ```text
 templates/
-├── AGENTS.md                # Codex root instruction → project/AGENTS.md
-├── GEMINI.md                # Gemini root instruction → project/GEMINI.md
-├── CLAUDE.md                # Claude Code root instruction → project/CLAUDE.md
 ├── kit.json                 # Registry: formatVersion + profiles
-├── .codex/                  # Codex hooks → merge vào project/.codex/
-├── .claude/                 # Claude settings → merge vào project/.claude/
-├── .agent/skills/<name>/    # Skill chỉ dành cho Gemini → project/.agent/skills/
-└── .agents/                 # Shared install folder → project/.agents/
-    ├── ARCHITECTURE.md
-    ├── scripts/
-    ├── skills/<skill-name>/ # Skill dùng chung: Codex, Antigravity, Claude (qua symlink)
-    ├── claude/hooks/         # Claude hook adapter/runtime files
-    └── gemini/hooks/         # Gemini hook adapter/runtime files
+├── agents/
+│   ├── shared.json          # File agent nào cũng nhận (scripts, ARCHITECTURE.md, ux_audit.json)
+│   ├── claude.json          # File, hook, root instruction, symlink skill của Claude Code
+│   ├── codex.json           # ... của Codex
+│   └── gemini.json          # ... của Gemini, và exclusiveSkills (skill chỉ dành cho Gemini)
+├── skills/<skill-name>/     # Mọi skill → project/.agents/skills/
+├── instructions/            # AGENTS.md, CLAUDE.md, GEMINI.md → root của project
+├── hooks/                   # Đăng ký hook theo định dạng từng tool + guard/adapter (một bản)
+├── rules/                   # Rule Antigravity (testing-workflow.md) → project/.agents/rules/
+├── scripts/                 # → project/.agents/scripts/
+├── ARCHITECTURE.md
+└── ux_audit.json
 ```
 
 ## Phát Triển Skill
 
-Skill dùng chung nằm ở `templates/.agents/skills/`; cả Codex, Gemini
-Antigravity, và Claude Code đều đọc (Claude Code qua symlink
-`.claude/skills/<name>`). Skill chỉ dành cho Gemini nằm ở
-`templates/.agent/skills/` với cùng cấu trúc; đặt một skill cùng tên ở đây để
-Gemini dùng bản riêng thay cho bản dùng chung. Skill dùng chung chỉ được trỏ
-`(use <skill>)` tới skill dùng chung khác, vì Codex và Claude không thấy
-`.agent/skills/`.
+Mọi skill nằm ở `templates/skills/`; cả Codex, Gemini Antigravity, và Claude
+Code đều đọc (Claude Code qua symlink `.claude/skills/<name>`). Skill chỉ dành
+cho Gemini là skill có tên trong `exclusiveSkills` của
+`templates/agents/gemini.json`. Skill dùng chung chỉ được trỏ `(use <skill>)`
+tới skill dùng chung khác, vì skill Gemini thường không được cài.
 
 ```text
-templates/.agents/skills/<skill-name>/SKILL.md
-templates/.agents/skills/<skill-name>/agents/openai.yaml
-templates/.agents/skills/<skill-name>/references/
-templates/.agents/skills/<skill-name>/scripts/
+templates/skills/<skill-name>/SKILL.md
+templates/skills/<skill-name>/agents/openai.yaml
+templates/skills/<skill-name>/references/
+templates/skills/<skill-name>/scripts/
 ```
 
 Skill đang viết hoặc thử nghiệm nằm ở [`skills-dev/`](skills-dev/README.md):

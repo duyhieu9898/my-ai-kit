@@ -89,8 +89,11 @@ config files and per-skill actions (add/keep/update/skip/conflict) for
 
 - Treat `templates/` as package data; preserve relative paths during
   publication and installation.
-- Edit a skill directly under `templates/.agents/skills/<name>/`; it is the
-  single source Codex, Gemini Antigravity, and Claude Code all read from.
+- Edit a skill directly under `templates/skills/<name>/`; it is the single
+  source Codex, Gemini Antigravity, and Claude Code all read from.
+- Declare what each agent installs in `templates/agents/<agent>.json` and what
+  every install gets in `templates/agents/shared.json`; keep agent-specific
+  paths out of `lib/`.
 - Edit and test the Backlog integration under `../hieund-backlog-mcp/`. It is not copied
   into target templates or included in the npm package.
 - Keep tool-specific metadata such as `SKILL.md`, Codex `agents/openai.yaml`,
@@ -100,7 +103,7 @@ config files and per-skill actions (add/keep/update/skip/conflict) for
 - `install`/`update` skip a managed skill that was modified locally unless
   `--force` is supplied; `--force` never overwrites root instructions, since
   those are always block-merged.
-- `update` refreshes managed skills, kit-managed Codex/Gemini/Claude hooks
+- `update` refreshes managed skills, the selected agents' kit-managed hooks
   through structured merges, and the `KIT` block in root instructions, leaving
   the rest of each root instruction file and every project-owned skill
   untouched.
@@ -109,28 +112,28 @@ config files and per-skill actions (add/keep/update/skip/conflict) for
 ## Instruction Hierarchy
 
 ```text
-templates/AGENTS.md
-  repository-wide workflow and skill loading
+templates/instructions/AGENTS.md
+  repository-wide workflow and skill loading (Codex)
 
-templates/GEMINI.md
+templates/instructions/GEMINI.md
   Gemini-specific workflow and skill loading
 
-templates/CLAUDE.md
+templates/instructions/CLAUDE.md
   Claude Code workflow and skill loading
 
-templates/.codex/hooks.json
+templates/hooks/codex.json
   warning-only lifecycle guardrails merged with project hooks
 
-templates/.agents/hooks.json
+templates/hooks/gemini.json
   Gemini Antigravity lifecycle adapter using the same shared guard policy
 
-templates/.claude/settings.json
+templates/hooks/claude.json
   Claude Code lifecycle adapter using the same shared guard policy
 
-templates/.agents/ARCHITECTURE.md
+templates/ARCHITECTURE.md
   maintenance rules scoped to the installed toolkit
 
-templates/.agents/skills/*/SKILL.md
+templates/skills/*/SKILL.md
   domain-specific procedures loaded on demand
 ```
 
@@ -144,11 +147,11 @@ When changing installer behavior, inspect together:
 
 - `bin/index.js`
 - `README.md`
-- the affected generated template paths under `templates/`
+- the affected template paths under `templates/` and `templates/agents/*.json`
 - `package.json` package inclusion rules
 
 When changing skill discovery or toolkit structure, update
-`templates/.agents/ARCHITECTURE.md`.
+`templates/ARCHITECTURE.md`.
 
 ## Validation Ladder
 

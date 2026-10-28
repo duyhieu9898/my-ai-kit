@@ -1,14 +1,10 @@
 {
   "formatVersion": 2,
   "profiles": {
-    "core": ["clean-code", "verify-changes", "debugger", "explorer-agent", "lint-and-validate", "code-review-checklist", "security-auditor"],
-    "web": ["frontend-design", "web-design-guidelines", "react-refactor-patterns", "performance-profiling"],
+    "core": ["clean-code", "verify-changes", "debugger", "explorer-agent", "lint-and-validate", "code-review-checklist", "security-auditor", "ambiguity-decisions", "structural-refactor"],
+    "main": ["frontend-design", "web-design-guidelines", "react-refactor-patterns", "performance-profiling", "risk-based-testing", "webapp-testing"],
     "backend": ["backend-specialist", "api-patterns", "database-design"],
-    "testing": ["risk-based-testing", "webapp-testing"],
-    "growth": ["seo-fundamentals", "i18n-localization"],
-    "ops": ["devops-engineer"],
-    "mcp": ["mcp-builder"],
-    "docs": ["documentation-writer"],
-    "starter": ["clean-code", "debugger", "verify-changes"]
+    "growth": ["seo-fundamentals", "performance-profiling", "i18n-localization"],
+    "starter": ["clean-code", "verify-changes", "debugger", "explorer-agent", "lint-and-validate", "code-review-checklist", "security-auditor", "ambiguity-decisions", "structural-refactor", "frontend-design", "web-design-guidelines", "react-refactor-patterns", "performance-profiling", "risk-based-testing", "webapp-testing", "backend-specialist", "api-patterns", "database-design"]
   }
 }

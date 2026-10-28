@@ -1,6 +1,6 @@
 # Kit Skill Standard
 
-The authoring standard for every skill in `templates/.agents/skills/`. It
+The authoring standard for every skill in `templates/skills/`. It
 replaces `CODEX_SKILL_STANDARD.md`, `ANTIGRAVITY_SKILL_STANDARD.md`, and
 `ANTIGRAVITY_CODEX_SKILL_CONVERSION.md`, which predate the single skill source
 (ADR 0015). The decision is recorded in ADR 0016.
@@ -23,7 +23,7 @@ has its own guide: [DESCRIPTION_GUIDE.md](DESCRIPTION_GUIDE.md).
 ## 2. Folder layout
 
 ```text
-templates/.agents/skills/<name>/
+templates/skills/<name>/
 ├── SKILL.md            # required
 ├── agents/openai.yaml  # Codex UI metadata (section 6)
 ├── references/         # optional: material needed for one branch of the work
@@ -174,8 +174,9 @@ documentation here.
 This file is Codex UI metadata. Claude Code, Gemini, and Antigravity ignore
 it. It does not affect skill selection, which uses `name` and `description`.
 Every shared skill keeps one, so the Codex skill list looks consistent.
-Gemini-only skills under `.agent/skills/` have none, because Codex never reads
-that folder:
+Gemini-only skills (listed in `exclusiveSkills` of
+`templates/agents/gemini.json`) have none; Codex sees them only in projects
+that also select Gemini:
 
 ```yaml
 interface:
@@ -208,11 +209,11 @@ Removing or renaming a skill is a breaking change for installed projects:
 
 In the same change, update every caller:
 
-- `templates/.agents/ARCHITECTURE.md`: the skill count, which the checker
+- `templates/ARCHITECTURE.md`: the skill count, which the checker
   compares with the number of skill folders, and the skill list.
-- `templates/AGENTS.md`, `templates/CLAUDE.md`, `templates/GEMINI.md`
-- `templates/kit.json` profiles
-- script paths in `.agents/scripts/checklist.py` and `verify_all.py`
+- `templates/instructions/AGENTS.md`, `CLAUDE.md`, and `GEMINI.md`
+- `templates/kit.json` profiles and `exclusiveSkills` in `templates/agents/*.json`
+- script paths in `templates/scripts/checklist.py` and `verify_all.py`
 - `scripts/test-installer.mjs` and `test/` fixtures
 - links from other skills
 

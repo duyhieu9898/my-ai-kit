@@ -11,6 +11,8 @@ Project-specific accepted decisions:
 - `0011-scoped-clean-code-guidance.md`
 - `0015-single-skill-source-and-manifest-installer.md`
 - `0016-portable-skill-authoring-standard.md`
+- `0017-gemini-only-skills-opt-in.md` (superseded by 0018)
+- `0018-per-agent-install-configs.md`
 
 The earlier `0001` through `0007` records describe the installed Harness
 framework itself.

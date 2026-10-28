@@ -31,9 +31,9 @@ const cliFails = (...args) => {
   return result.stderr;
 };
 
-const kitSkills = fs.readdirSync(path.join(repoRoot, "templates", ".agents", "skills")).sort();
-const geminiSkills = fs.readdirSync(path.join(repoRoot, "templates", ".agent", "skills")).sort();
-// The core profile mixes scopes: security-auditor is shared, debugger is Gemini-only.
+const geminiSkills = readJson(path.join(repoRoot, "templates", "agents", "gemini.json")).exclusiveSkills.sort();
+const kitSkills = fs.readdirSync(path.join(repoRoot, "templates", "skills")).filter((name) => !geminiSkills.includes(name)).sort();
+// The core profile mixes skills for every agent (security-auditor) and Gemini-only ones (debugger).
 const core = readJson(path.join(repoRoot, "templates", "kit.json")).profiles.core;
 const sharedCore = core.filter((name) => kitSkills.includes(name)).sort();
 const geminiCore = core.filter((name) => geminiSkills.includes(name)).sort();
@@ -59,19 +59,24 @@ try {
     fs.writeFileSync(path.join(full, file), `# Project ${file}\n\n<!-- HARNESS:BEGIN -->\n## Harness\n<!-- HARNESS:END -->\n`);
   }
 
-  cli("install", "--path", full, "--source", repoRoot);
+  cli("install", "--path", full, "--source", repoRoot, "--agent", "claude,codex,gemini");
 
-  assert.deepEqual(fs.readdirSync(path.join(full, ".agents", "skills")).sort(), kitSkills, "all shared skills installed");
-  assert.deepEqual(fs.readdirSync(path.join(full, ".agent", "skills")).sort(), geminiSkills, "all Gemini-only skills installed");
+  assert.deepEqual(fs.readdirSync(path.join(full, ".agents", "skills")).sort(), [...kitSkills, ...geminiSkills].sort(), "every skill with all agents");
+  assert.ok(!fs.existsSync(path.join(full, ".agent")), "nothing is written to the legacy .agent folder");
   assert.deepEqual(fs.readdirSync(path.join(full, ".claude", "skills")).sort(), kitSkills, "Claude links only shared skills");
   const fullManifest = readJson(path.join(full, ".ai-kit.json"));
   assert.equal(fullManifest.selection.all, true);
+  assert.deepEqual(fullManifest.selection.agents, ["claude", "codex", "gemini"]);
   assert.deepEqual(fullManifest.source, { type: "local", path: repoRoot, mode: "copy" });
   assert.equal(fs.readlinkSync(path.join(full, ".claude", "skills", "security-auditor")), "../../.agents/skills/security-auditor");
   assert.ok(fs.existsSync(path.join(full, ".claude", "skills", "security-auditor", "SKILL.md")), "Claude link resolves");
   assert.ok(!fs.existsSync(path.join(full, ".agents", "gemini", "skills")), "no Gemini skill copy");
   assert.ok(fs.existsSync(path.join(full, ".agents", "gemini", "hooks", "gemini_adapter.py")), "Gemini hooks installed");
+  assert.ok(fs.existsSync(path.join(full, ".agents", "rules", "testing-workflow.md")), "Antigravity rules installed");
+  assert.ok(".agents/rules/testing-workflow.md" in fullManifest.managedFiles, "rules tracked as managed files");
   assert.ok(fs.existsSync(path.join(full, ".codex", "hooks", "codex_adapter.py")), "Codex hook scripts installed");
+  assert.ok(fs.existsSync(path.join(full, ".agents", "claude", "hooks", "harness_guard.py")), "Claude hook scripts installed");
+  assert.ok(".codex/hooks/harness_guard.py" in fullManifest.managedFiles, "hook scripts tracked as managed files");
 
   const codexHooks = readJson(path.join(full, ".codex", "hooks.json"));
   assert.ok(codexHooks.hooks.PreToolUse.some((h) => h.matcher === "custom_tool"), "custom Codex hooks preserved");
@@ -99,18 +104,42 @@ try {
   assert.equal(claudePost.hooks.PreToolUse.filter((h) => h.hooks.some((hook) => hook.command.includes("claude_adapter.py"))).length, 1, "Claude hooks not duplicated");
   assert.ok(cli("status", "--path", full).includes("AI Kit: HEALTHY"));
 
+  // --- One agent at a time ------------------------------------------------
+  const solo = newDir("kit-solo-");
+  cli("install", "--path", solo, "--source", repoRoot, "--agent", "claude");
+  assert.deepEqual(fs.readdirSync(solo).sort(), [".agents", ".ai-kit.json", ".claude", "CLAUDE.md"], "Claude alone gets only its files");
+  assert.deepEqual(fs.readdirSync(path.join(solo, ".agents")).sort(), ["ARCHITECTURE.md", "claude", "scripts", "skills", "ux_audit.json"]);
+  assert.deepEqual(fs.readdirSync(path.join(solo, ".agents", "skills")).sort(), kitSkills);
+  assert.match(cliFails("install", "debugger", "--path", solo), /only for gemini: add --agent gemini/);
+
   // --- Profile, add, remove ------------------------------------------------
   const prof = newDir("kit-profile-");
   cli("install", "--path", prof, "--source", repoRoot, "--profile", "core");
   assert.deepEqual(fs.readdirSync(path.join(prof, ".agents", "skills")).sort(), sharedCore);
-  assert.deepEqual(fs.readdirSync(path.join(prof, ".agent", "skills")).sort(), geminiCore);
+  assert.ok(!fs.existsSync(path.join(prof, "GEMINI.md")), "Gemini is not installed by default");
+  cli("install", "--agent", "gemini", "--path", prof);
+  assert.deepEqual(fs.readdirSync(path.join(prof, ".agents", "skills")).sort(), [...sharedCore, ...geminiCore].sort(), "--agent gemini adds the profile's Gemini-only skills");
+  assert.deepEqual(fs.readdirSync(path.join(prof, ".claude", "skills")).sort(), sharedCore, "Claude links only skills it may use");
+  assert.ok(fs.existsSync(path.join(prof, "GEMINI.md")) && fs.existsSync(path.join(prof, ".agents", "rules", "testing-workflow.md")), "Gemini files added");
+  const profStatus = cli("status", "--path", prof);
+  assert.ok(profStatus.includes("profile:core") && profStatus.includes("Agents:         claude, codex, gemini"));
   cli("install", "api-patterns", "--path", prof);
   assert.ok(fs.existsSync(path.join(prof, ".agents", "skills", "api-patterns", "SKILL.md")));
   cli("remove", "debugger", "--path", prof);
-  assert.ok(!fs.existsSync(path.join(prof, ".agent", "skills", "debugger")));
+  assert.ok(!fs.existsSync(path.join(prof, ".agents", "skills", "debugger")));
   assert.deepEqual(readJson(path.join(prof, ".ai-kit.json")).selection.exclude, ["debugger"]);
   cli("update", "--path", prof);
-  assert.ok(!fs.existsSync(path.join(prof, ".agent", "skills", "debugger")), "update respects exclude");
+  assert.ok(!fs.existsSync(path.join(prof, ".agents", "skills", "debugger")), "update respects exclude");
+  cli("remove", "--agent", "gemini", "--path", prof);
+  assert.deepEqual(fs.readdirSync(path.join(prof, ".agents", "skills")).sort(), [...sharedCore, "api-patterns"].sort(), "remove --agent gemini drops Gemini-only skills");
+  for (const relPath of ["GEMINI.md", ".agents/hooks.json", ".agents/gemini", ".agents/rules"]) {
+    assert.ok(!fs.existsSync(path.join(prof, relPath)), `remove --agent gemini deletes ${relPath}`);
+  }
+  assert.ok(fs.existsSync(path.join(prof, "AGENTS.md")), "other agents keep their files");
+  cli("remove", "--agent", "claude", "--path", prof);
+  assert.ok(!fs.existsSync(path.join(prof, ".claude")) && !fs.existsSync(path.join(prof, "CLAUDE.md")), "remove --agent claude leaves no Claude files");
+  assert.ok(!fs.existsSync(path.join(prof, ".agents", "claude")), "Claude hook scripts removed");
+  cli("install", "--agent", "claude", "--path", prof);
   assert.match(cliFails("install", "debuger", "--path", prof), /did you mean: debugger/);
   const dropProfile = newDir("kit-drop-profile-");
   cli("install", "security-auditor", "--path", dropProfile, "--source", repoRoot, "--profile", "starter");
@@ -142,11 +171,11 @@ try {
   const kitCopy = newDir("kit-checkout-");
   fs.cpSync(path.join(repoRoot, "templates"), path.join(kitCopy, "templates"), { recursive: true });
   const linked = newDir("kit-link-");
-  cli("install", "--path", linked, "--source", kitCopy, "--link", "--profile", "core");
+  cli("install", "--path", linked, "--source", kitCopy, "--link", "--profile", "core", "--agent", "claude,gemini");
   const linkedSkill = path.join(linked, ".agents", "skills", "security-auditor");
   assert.ok(fs.lstatSync(linkedSkill).isSymbolicLink());
-  assert.ok(fs.lstatSync(path.join(linked, ".agent", "skills", "debugger")).isSymbolicLink(), "Gemini-only skills link too");
-  fs.appendFileSync(path.join(kitCopy, "templates", ".agents", "skills", "security-auditor", "SKILL.md"), "LIVE EDIT\n");
+  assert.ok(fs.lstatSync(path.join(linked, ".agents", "skills", "debugger")).isSymbolicLink(), "Gemini-only skills link too");
+  fs.appendFileSync(path.join(kitCopy, "templates", "skills", "security-auditor", "SKILL.md"), "LIVE EDIT\n");
   assert.ok(readText(path.join(linked, ".claude", "skills", "security-auditor", "SKILL.md")).includes("LIVE EDIT"), "edits visible without reinstall");
   cli("update", "--path", linked, "--source", kitCopy);
   assert.ok(fs.lstatSync(linkedSkill).isDirectory(), "update without --link switches to copies");
@@ -165,10 +194,10 @@ try {
   const migrated = readJson(path.join(legacy, ".ai-kit.json"));
   assert.equal(migrated.formatVersion, 2);
   assert.equal(migrated.selection.all, true);
+  assert.deepEqual(migrated.selection.agents, ["claude", "codex", "gemini"], "an install without agents keeps every agent");
   assert.ok(!fs.existsSync(path.join(legacy, ".agents", "gemini", "skills")), "legacy Gemini skills removed");
   assert.ok(!fs.existsSync(path.join(legacy, ".agents", "gemini", "agents")), "legacy Gemini agents removed");
-  assert.ok(!fs.existsSync(path.join(legacy, ".agents", "skills", "debugger")), "skill that became Gemini-only leaves .agents/skills");
-  assert.ok(fs.existsSync(path.join(legacy, ".agent", "skills", "debugger", "SKILL.md")), "and lands in .agent/skills");
+  assert.notEqual(readText(path.join(legacy, ".agents", "skills", "debugger", "SKILL.md")), "old\n", "adopted skill refreshed");
   assert.ok(fs.existsSync(path.join(legacy, ".agents", "skills", "my-own")), "project-owned skill kept");
 
   // --- Upgrade from a 4.x install -----------------------------------------
@@ -189,10 +218,17 @@ try {
     managedSkills: v4Managed,
     managedFiles: {},
   });
-  cli("update", "--path", v4);
+  // 4.x copied hook scripts without recording hashes.
+  fs.mkdirSync(path.join(v4, ".codex", "hooks"), { recursive: true });
+  fs.writeFileSync(path.join(v4, ".codex", "hooks", "codex_adapter.py"), "# 4.x adapter\n");
+  const v4Update = cli("update", "--path", v4);
+  assert.ok(!v4Update.includes("Kept locally modified"), "unrecorded 4.x hook scripts are adopted");
+  assert.notEqual(readText(path.join(v4, ".codex", "hooks", "codex_adapter.py")), "# 4.x adapter\n");
   const v4Manifest = readJson(path.join(v4, ".ai-kit.json"));
   assert.equal(v4Manifest.formatVersion, 2);
-  assert.ok(!("debugger" in v4Manifest.managedSkills) && "debugger" in v4Manifest.managedGeminiSkills);
+  assert.deepEqual(v4Manifest.selection.agents, ["claude", "codex", "gemini"]);
+  assert.deepEqual(v4Manifest.managedSkills.debugger.agents, ["gemini"]);
+  assert.ok(!("managedGeminiSkills" in v4Manifest));
   assert.ok(!fs.existsSync(path.join(v4, ".agents", "skills", "plan-writing")), "deleted skill removed");
   assert.equal(fs.lstatSync(path.join(v4, ".claude", "skills", "debugger"), { throwIfNoEntry: false }), undefined, "Claude link to a moved skill removed");
   assert.equal(fs.lstatSync(path.join(v4, ".claude", "skills", "plan-writing"), { throwIfNoEntry: false }), undefined);

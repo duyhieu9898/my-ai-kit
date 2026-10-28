@@ -15,7 +15,7 @@ sys.dont_write_bytecode = True
 
 ROOT = Path(__file__).resolve().parents[1]
 VALIDATORS = (
-    ROOT / "templates/.agents/skills/api-patterns/scripts/api_validator.py",
+    ROOT / "templates/skills/api-patterns/scripts/api_validator.py",
 )
 
 

@@ -11,37 +11,42 @@ Codex Kit is a modular toolkit organized around a unified, composable
 model with skill directories that can be loaded on demand.
 
 The kit contains:
-- **12 Composable Skills** - Task-focused knowledge, procedures, and scripts under `skills/`.
-- **Gemini-only skills** - Extra skills under the project's `.agent/skills/`, read only by Antigravity.
+- **14 Composable Skills** - Task-focused knowledge, procedures, and scripts under `skills/`.
+- **Gemini-only skills** - Extra skills in `skills/`, installed only when the project selects the Gemini agent.
 - **4 Master Scripts** - System-level automation and validation scripts under `scripts/`.
 
 ---
 
 ## 🏗️ Directory Structure
 
+Each agent's files exist only when the project selects that agent
+(`install --agent claude,codex,gemini`; the default is `claude,codex`).
+
 ```plaintext
-AGENTS.md                     # Repository-wide workflow and skill rules
-.codex/
-├── hooks.json               # Codex lifecycle hook registration
+AGENTS.md                     # Codex: repository-wide workflow and skill rules
+CLAUDE.md                     # Claude Code: the same rules
+GEMINI.md                     # Gemini: the same rules plus Gemini-only skill notes
+.codex/                       # Codex
+├── hooks.json               # Lifecycle hook registration
 └── hooks/
     ├── harness_guard.py     # Shared warning-only Harness policy
     └── codex_adapter.py     # Codex payload and response adapter
-.claude/
-└── settings.json            # Claude Code lifecycle hook registration
+.claude/                      # Claude Code
+├── settings.json            # Lifecycle hook registration
+└── skills/                  # Links to .agents/skills/<name>
 .agents/
-├── AGENTS.md                # Rules scoped to shared toolkit maintenance
 ├── ARCHITECTURE.md          # This file (Human-developer map)
-├── claude/
-│   └── hooks/
-│       ├── harness_guard.py # Shared warning-only Harness policy
-│       └── claude_adapter.py # Claude payload and response adapter
-├── skills/                  # 12 Composable Skills
+├── hooks.json               # Gemini lifecycle hook registration
+├── claude/hooks/            # Claude guard and adapter
+├── gemini/hooks/            # Gemini guard and adapter
+├── skills/                  # 14 Composable Skills, plus Gemini-only ones with Gemini
 │   ├── {skill-name}/
 │   │   ├── SKILL.md         # name + description frontmatter, then instructions
 │   │   ├── agents/
 │   │   │   └── openai.yaml  # Codex UI metadata
 │   │   ├── references/      # Deep domain documentation
 │   │   └── scripts/         # Skill-level utility scripts
+├── rules/                   # Gemini: Antigravity workspace rules
 └── scripts/                 # Master validation and automation scripts
 ```
 
@@ -50,45 +55,35 @@ canonical source. Edit that source and run `npm run sync:shared-hooks`.
 
 ## Instruction Scope
 
-Codex reads the root `AGENTS.md` for repository-wide workflow and skill-loading
-rules. When changing files under `.agents/`, the nested `.agents/AGENTS.md`
-adds toolkit-maintenance constraints without duplicating the root rules.
+Each agent reads its own root instruction for repository-wide workflow and
+skill-loading rules. The kit owns only the `KIT` block in each of them.
 
-The CLI sources these files separately:
-
-- `templates/AGENTS.md` installs as root `AGENTS.md`.
-- `templates/GEMINI.md` installs as root `GEMINI.md`.
-- `templates/CLAUDE.md` installs as root `CLAUDE.md`.
-- `templates/.codex/` merges into root `.codex/` without replacing
-  unrelated project configuration or custom hooks.
-- `templates/.claude/settings.json` merges into root `.claude/settings.json`
-  without replacing unrelated Claude settings or custom hooks.
-- `templates/.agents/AGENTS.md` installs as `.agents/AGENTS.md`.
-
-Kit updates refresh runtime folders, merge kit-managed `.codex/`,
-`.agents/hooks.json`, and `.claude/settings.json` hooks, and preserve existing
-root instructions so project-specific rules and external Harness blocks are not
-lost.
+Kit updates refresh the selected agents' files, merge kit-managed hook entries
+into `.codex/hooks.json`, `.agents/hooks.json`, and `.claude/settings.json`,
+and preserve the rest of each root instruction so project-specific rules and
+external Harness blocks are not lost. Removing an agent
+(`remove --agent <name>`) takes out its block, hook entries, and unmodified
+files.
 
 ---
 
-## 🧩 The 12 Composable Skills
+## 🧩 The 14 Composable Skills
 
 Every capability is a skill: a folder with a `SKILL.md` that the agent loads
 when its `description` matches the task. Skills follow
 `docs/skills/SKILL_STANDARD.md` in the kit repository. Named profiles in
 `kit.json` install a subset.
 
-Codex and Claude Code see only these shared skills. Antigravity also reads
-`.agent/skills/`, which holds Gemini-only skills for work the other tools cover
+Codex and Antigravity read `skills/`; Claude Code links the skills that are
+not Gemini-only. Gemini-only skills cover work Claude Code and Codex already handle
 natively: `clean-code`, `verify-changes`, `code-review-checklist`, `explorer-agent`, `debugger`,
 `lint-and-validate`, `devops-engineer`, `mcp-builder`, and
-`documentation-writer`. A skill there with the same name as
-a shared skill replaces it for Gemini only.
+`documentation-writer`. They install into `skills/` only when the project
+selects Gemini, so Codex sees them only in those projects.
 
 | Area | Skills |
 | :--- | :--- |
-| **Core workflow** | `security-auditor` |
+| **Core workflow** | `security-auditor`, `ambiguity-decisions`, `structural-refactor` |
 | **Web frontend** | `frontend-design`, `web-design-guidelines`, `react-refactor-patterns`, `performance-profiling`, `seo-fundamentals`, `i18n-localization` |
 | **Backend and data** | `backend-specialist`, `api-patterns`, `database-design` |
 | **Testing** | `risk-based-testing`, `webapp-testing` |

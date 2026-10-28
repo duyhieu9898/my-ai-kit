@@ -3,8 +3,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import test from 'node:test';
 import { runPipeline } from '../lib/pipeline.js';
+import { hashSkillDir } from '../lib/hash.js';
 import { collectStatus } from '../lib/status.js';
-import { makeKit, makeProject } from './helpers.js';
+import { makeKit, makeProject, writeAgentConfig } from './helpers.js';
 
 const setup = () => {
     const kit = makeKit({ skills: ['a', 'b', 'c'], profiles: { p: ['a', 'b'] } });
@@ -21,10 +22,11 @@ const setup = () => {
 
 const exists = (...parts) => fs.existsSync(path.join(...parts));
 
-test('first install without arguments selects all and links Claude', async () => {
+test('first install without arguments selects all skills for Claude and Codex and links Claude', async () => {
     const { projectDir, run } = setup();
     const { manifest } = await run('install');
     assert.equal(manifest.selection.all, true);
+    assert.deepEqual(manifest.selection.agents, ['claude', 'codex']);
     assert.deepEqual(Object.keys(manifest.managedSkills).sort(), ['a', 'b', 'c']);
     assert.ok(exists(projectDir, '.claude', 'skills', 'c', 'SKILL.md'));
     assert.ok(exists(projectDir, '.ai-kit.json'));
@@ -118,7 +120,7 @@ const dropFromKit = (kit, { skills = [], profiles = {} }) => {
 };
 
 const geminiSetup = () => {
-    const kit = makeKit({ skills: ['a', 'b'], geminiSkills: ['b', 'g'], profiles: { p: ['a', 'g'] } });
+    const kit = makeKit({ skills: ['a', 'b'], geminiSkills: ['g', 'h'], profiles: { p: ['a', 'g'] } });
     const projectDir = makeProject();
     const run = (command, extra = {}) => runPipeline({
         projectDir, command, add: { all: false, profiles: [], skills: [] }, remove: [], ...extra,
@@ -127,49 +129,106 @@ const geminiSetup = () => {
     return { kit, projectDir, run };
 };
 
-test('Gemini-only skills install into .agent/skills without a Claude link', async () => {
+const addAgents = (agents, rest = {}) => ({ add: { agents, all: false, profiles: [], skills: [], ...rest } });
+
+test('adding the Gemini agent installs its exclusive skills into .agents/skills without a Claude link', async () => {
     const { projectDir, run } = geminiSetup();
-    const { manifest, plan } = await run('install');
-    assert.deepEqual(Object.keys(manifest.managedSkills).sort(), ['a', 'b']);
-    assert.deepEqual(Object.keys(manifest.managedGeminiSkills).sort(), ['b', 'g']);
-    assert.ok(exists(projectDir, '.agent', 'skills', 'g', 'SKILL.md'));
-    assert.ok(!exists(projectDir, '.agents', 'skills', 'g'));
+    const first = await run('install');
+    assert.deepEqual(Object.keys(first.manifest.managedSkills).sort(), ['a', 'b']);
+
+    const { manifest, plan } = await run('install', addAgents(['gemini']));
+    assert.deepEqual(manifest.selection.agents, ['claude', 'codex', 'gemini']);
+    assert.deepEqual(Object.keys(manifest.managedSkills).sort(), ['a', 'b', 'g', 'h']);
+    assert.deepEqual(manifest.managedSkills.g, { hash: manifest.managedSkills.g.hash, agents: ['gemini'] });
+    assert.ok(exists(projectDir, '.agents', 'skills', 'g', 'SKILL.md'));
+    assert.ok(!exists(projectDir, '.agent'));
     assert.ok(!exists(projectDir, '.claude', 'skills', 'g'));
-    assert.ok(exists(projectDir, '.claude', 'skills', 'b', 'SKILL.md'), 'a Gemini override keeps the shared copy linked');
-    assert.deepEqual(plan.filter((item) => item.scope === 'gemini').map((item) => item.name), ['b', 'g']);
-    assert.ok(collectStatus(projectDir).managed.includes('g (gemini)'));
+    assert.deepEqual(
+        plan.filter((item) => item.agents.length).map((item) => [item.name, item.action, item.agents]),
+        [['g', 'add', ['gemini']], ['h', 'add', ['gemini']]],
+    );
+    const status = collectStatus(projectDir);
+    assert.ok(status.managed.includes('g (gemini)'));
+    assert.deepEqual(status.brokenLinks, []);
+    assert.deepEqual(status.projectOwned, []);
 });
 
-test('a profile installs each skill only into the scopes that ship it', async () => {
+test('a Gemini-only install links nothing for Claude', async () => {
     const { projectDir, run } = geminiSetup();
-    await run('install', { add: { all: false, profiles: ['p'], skills: [] } });
-    assert.deepEqual(fs.readdirSync(path.join(projectDir, '.agents', 'skills')), ['a']);
-    assert.deepEqual(fs.readdirSync(path.join(projectDir, '.agent', 'skills')), ['g']);
-});
-
-test('update moves a skill that became Gemini-only out of .agents/skills and .claude/skills', async () => {
-    const { kit, projectDir, run } = setup();
-    await run('install');
-    fs.mkdirSync(path.join(kit.templateDir, '.agent', 'skills'), { recursive: true });
-    fs.renameSync(path.join(kit.skillsDir, 'c'), path.join(kit.templateDir, '.agent', 'skills', 'c'));
-
-    const { manifest } = await run('update');
-    assert.deepEqual(Object.keys(manifest.managedSkills).sort(), ['a', 'b']);
-    assert.deepEqual(Object.keys(manifest.managedGeminiSkills), ['c']);
-    assert.ok(!exists(projectDir, '.agents', 'skills', 'c'));
-    assert.equal(fs.lstatSync(path.join(projectDir, '.claude', 'skills', 'c'), { throwIfNoEntry: false }), undefined);
-    assert.ok(exists(projectDir, '.agent', 'skills', 'c', 'SKILL.md'));
+    const { manifest } = await run('install', addAgents(['gemini']));
+    assert.deepEqual(manifest.selection.agents, ['gemini']);
+    assert.deepEqual(Object.keys(manifest.managedSkills).sort(), ['a', 'b', 'g', 'h']);
+    assert.ok(!exists(projectDir, '.claude'));
     assert.deepEqual(collectStatus(projectDir).brokenLinks, []);
 });
 
-test('a project-owned .agent/skills folder conflicts like a shared one', async () => {
+test('an exclusive skill needs its agent, and removing the agent removes the skill', async () => {
     const { projectDir, run } = geminiSetup();
-    fs.mkdirSync(path.join(projectDir, '.agent', 'skills', 'g'), { recursive: true });
-    await assert.rejects(run('install'), { name: 'KitError', message: /g \(gemini\).*--force/ });
-    fs.mkdirSync(path.join(projectDir, '.agent', 'skills', 'mine'));
-    fs.rmSync(path.join(projectDir, '.agent', 'skills', 'g'), { recursive: true });
+    await run('install', { add: { all: false, profiles: ['p'], skills: [] } });
+    await assert.rejects(
+        run('install', { add: { all: false, profiles: [], skills: ['h'] } }),
+        { name: 'KitError', message: 'Skill "h" is only for gemini: add --agent gemini' },
+    );
+    await run('install', addAgents(['gemini'], { skills: ['h'] }));
+    assert.deepEqual(fs.readdirSync(path.join(projectDir, '.agents', 'skills')).sort(), ['a', 'g', 'h']);
+
+    const { manifest } = await run('remove', { removeAgents: ['gemini'] });
+    assert.deepEqual(manifest.selection.agents, ['claude', 'codex']);
+    assert.deepEqual(manifest.selection.skills, ['h']);
+    assert.deepEqual(fs.readdirSync(path.join(projectDir, '.agents', 'skills')).sort(), ['a']);
+});
+
+test('remove --agent claude takes out the kit links and keeps the skills for Codex', async () => {
+    const { projectDir, run } = setup();
     await run('install');
-    assert.deepEqual(collectStatus(projectDir).projectOwned, ['mine (gemini)']);
+    const { manifest } = await run('remove', { removeAgents: ['claude'] });
+    assert.deepEqual(manifest.selection.agents, ['codex']);
+    assert.deepEqual(Object.keys(manifest.managedSkills).sort(), ['a', 'b', 'c']);
+    assert.ok(!exists(projectDir, '.claude'));
+    await assert.rejects(run('remove', { removeAgents: ['codex'] }), { name: 'KitError', message: /keep at least one/ });
+    await assert.rejects(run('install', addAgents(['cursor'])), { name: 'KitError', message: /Unknown agent "cursor"/ });
+});
+
+test('update drops the Claude link of a skill that became exclusive to Gemini', async () => {
+    const { kit, projectDir, run } = setup();
+    await run('install', addAgents(['claude', 'gemini']));
+    writeAgentConfig(kit.templateDir, 'gemini', { exclusiveSkills: ['c'] });
+
+    const { manifest } = await run('update');
+    assert.deepEqual(manifest.managedSkills.c.agents, ['gemini']);
+    assert.ok(exists(projectDir, '.agents', 'skills', 'c', 'SKILL.md'));
+    assert.equal(fs.lstatSync(path.join(projectDir, '.claude', 'skills', 'c'), { throwIfNoEntry: false }), undefined);
+    assert.deepEqual(collectStatus(projectDir).brokenLinks, []);
+});
+
+test('a project-owned folder conflicts with a Gemini-only skill', async () => {
+    const { projectDir, run } = geminiSetup();
+    fs.mkdirSync(path.join(projectDir, '.agents', 'skills', 'g'), { recursive: true });
+    await assert.rejects(run('install', addAgents(['gemini'])), { name: 'KitError', message: /g \(gemini\).*--force/ });
+});
+
+test('update gives an install without agents every agent and moves skills out of .agent/skills', async () => {
+    const { kit, projectDir, run } = geminiSetup();
+    await run('install');
+    const legacyDir = path.join(projectDir, '.agent', 'skills');
+    fs.mkdirSync(legacyDir, { recursive: true });
+    fs.cpSync(path.join(kit.skillsDir, 'g'), path.join(legacyDir, 'g'), { recursive: true });
+    fs.cpSync(path.join(kit.skillsDir, 'h'), path.join(legacyDir, 'h'), { recursive: true });
+    fs.appendFileSync(path.join(legacyDir, 'h', 'SKILL.md'), 'local edit\n');
+    const manifestPath = path.join(projectDir, '.ai-kit.json');
+    const stored = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+    delete stored.selection.agents;
+    stored.managedGeminiSkills = { g: { hash: hashSkillDir(path.join(kit.skillsDir, 'g')) }, h: { hash: 'before-edit' } };
+    fs.writeFileSync(manifestPath, JSON.stringify(stored));
+
+    const { manifest, warnings } = await run('update');
+    assert.deepEqual(manifest.selection.agents, ['claude', 'codex', 'gemini']);
+    assert.ok(!('managedGeminiSkills' in manifest));
+    assert.ok(!('legacyAgents' in JSON.parse(fs.readFileSync(manifestPath, 'utf8'))));
+    assert.ok(exists(projectDir, '.agents', 'skills', 'g', 'SKILL.md'));
+    assert.ok(exists(projectDir, '.agents', 'skills', 'h', 'SKILL.md'));
+    assert.deepEqual(fs.readdirSync(legacyDir), ['h']);
+    assert.deepEqual(warnings, [`Left locally modified ${path.join('.agent', 'skills', 'h')} in place; the kit now installs it in ${path.join('.agents', 'skills')}`]);
 });
 
 test('update drops skills and profiles that vanished from the kit, with a warning', async () => {
@@ -180,7 +239,7 @@ test('update drops skills and profiles that vanished from the kit, with a warnin
 
     const { manifest, warnings } = await run('update');
 
-    assert.deepEqual(manifest.selection, { all: false, profiles: [], skills: [], exclude: [] });
+    assert.deepEqual(manifest.selection, { agents: ['claude', 'codex'], all: false, profiles: [], skills: [], exclude: [] });
     assert.deepEqual(warnings.sort(), [
         'Dropped "b" from the selection: it no longer exists in the kit',
         'Dropped "c" from the selection: it no longer exists in the kit',

@@ -28,7 +28,8 @@ test('legacy manifest migrates to select all with unknown managed skills', () =>
     assert.deepEqual(manifest.source, { type: 'github', ref: 'v2' });
     assert.equal(manifest.selection.all, true);
     assert.equal(manifest.managedSkills, null);
-    assert.deepEqual(manifest.managedGeminiSkills, {});
+    assert.deepEqual(manifest.selection.agents, ['claude', 'codex', 'gemini']);
+    assert.equal(manifest.legacyAgents, true);
     assert.equal(manifest.managedFiles, null);
     assert.equal(manifest.features.backlog, false);
 });
@@ -39,13 +40,39 @@ test('a formatVersion 1 manifest without managedFiles asks to adopt shared files
     assert.equal(readManifest(projectDir).managedFiles, null);
 });
 
-test('a formatVersion 1 manifest upgrades with no Gemini-only skills', () => {
+test('a manifest without agents gets every agent and asks to adopt their files', () => {
     const projectDir = makeProject();
-    fs.writeFileSync(path.join(projectDir, '.ai-kit.json'), JSON.stringify({ formatVersion: 1, managedSkills: { a: {} } }));
+    fs.writeFileSync(path.join(projectDir, '.ai-kit.json'), JSON.stringify({
+        formatVersion: 1, selection: { all: true, gemini: false, profiles: [], skills: [], exclude: [] }, managedSkills: { a: {} },
+    }));
     const manifest = readManifest(projectDir);
     assert.equal(manifest.formatVersion, 2);
     assert.deepEqual(manifest.managedSkills, { a: {} });
-    assert.deepEqual(manifest.managedGeminiSkills, {});
+    assert.deepEqual(manifest.selection, { agents: ['claude', 'codex', 'gemini'], all: true, profiles: [], skills: [], exclude: [] });
+    assert.equal(manifest.legacyAgents, true);
+    writeManifest(projectDir, manifest);
+    assert.equal(JSON.parse(fs.readFileSync(path.join(projectDir, '.ai-kit.json'), 'utf8')).legacyAgents, undefined);
+});
+
+test('a pre-release 5.0 manifest keeps .agent/skills records for cleanup and marks Gemini-only skills', () => {
+    const projectDir = makeProject();
+    fs.writeFileSync(path.join(projectDir, '.ai-kit.json'), JSON.stringify({
+        formatVersion: 2, selection: { all: true, profiles: [], skills: [], exclude: [] },
+        managedSkills: { a: {}, d: { hash: 'h', scope: 'gemini' } }, managedGeminiSkills: { g: { hash: 'x' } },
+    }));
+    const manifest = readManifest(projectDir);
+    assert.deepEqual(manifest.managedSkills, { a: {}, d: { hash: 'h', agents: ['gemini'] } });
+    assert.deepEqual(manifest.managedGeminiSkills, { g: { hash: 'x' } });
+});
+
+test('a manifest with agents keeps them', () => {
+    const projectDir = makeProject();
+    fs.writeFileSync(path.join(projectDir, '.ai-kit.json'), JSON.stringify({
+        formatVersion: 2, selection: { agents: ['codex'], all: true, profiles: [], skills: [], exclude: [] }, managedSkills: {},
+    }));
+    const manifest = readManifest(projectDir);
+    assert.deepEqual(manifest.selection.agents, ['codex']);
+    assert.equal(manifest.legacyAgents, undefined);
 });
 
 test('unparseable manifest fails with the file path', () => {

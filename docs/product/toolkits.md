@@ -1,62 +1,76 @@
 # Toolkit Contract
 
+Each agent's install is declared in `templates/agents/<agent>.json`; files every
+install gets are in `templates/agents/shared.json`. A project installs only the
+agents in `selection.agents` (`install --agent`, default `claude,codex`).
+
 ## Codex
 
-- Source: `templates/`.
-- Runtime destination: `.agents/`.
-- Repository instruction: `templates/AGENTS.md` to root `AGENTS.md`.
-- Lifecycle integration: `templates/.codex/` merges into root `.codex/`.
+- Config: `templates/agents/codex.json`.
+- Repository instruction: `templates/instructions/AGENTS.md` merges its `KIT`
+  block into root `AGENTS.md`.
+- Lifecycle integration: `templates/hooks/codex.json` merges into
+  `.codex/hooks.json`, and the guard and adapter install to `.codex/hooks/`.
   Preserve unrelated project config and custom hooks while updating the
   kit-managed Harness guard.
 - Hook policy: generated from `shared/hooks/harness_guard.py`; the Codex
   adapter maps native lifecycle payloads and warning output.
-- Nested instruction: `templates/.agents/AGENTS.md` to
-  `.agents/AGENTS.md`.
-- Skills use `SKILL.md`, required `agents/openai.yaml`, optional `references/`,
-  `scripts/`, and `assets/`.
-- The current template ships 12 skill directories and four top-level runtime
-  scripts. Codex does not read `.agent/skills/`.
+- Skills: Codex reads `.agents/skills/` directly. Skills use `SKILL.md`,
+  required `agents/openai.yaml`, optional `references/`, `scripts/`, and
+  `assets/`.
+- The current template ships 14 skill directories for every agent and four
+  top-level runtime scripts. In projects that also select Gemini, Codex sees
+  the Gemini-only skills too, because they share `.agents/skills/`.
 
 ## Gemini Antigravity
 
-- Source: `templates/`.
-- Runtime destination: `.agents/`.
-- Repository instruction: `templates/GEMINI.md` to root `GEMINI.md`.
-- Lifecycle integration: `templates/.agents/hooks.json` and
-  `.agents/hooks/` install warning-only Antigravity guards. Preserve unrelated
-  hook entries and scripts while updating the kit-managed entry.
+- Config: `templates/agents/gemini.json`.
+- Repository instruction: `templates/instructions/GEMINI.md` merges its `KIT`
+  block into root `GEMINI.md`.
+- Lifecycle integration: `templates/hooks/gemini.json` merges into
+  `.agents/hooks.json`, and the guard and adapter install to
+  `.agents/gemini/hooks/`. Preserve unrelated hook entries while updating the
+  kit-managed entry.
 - Hook policy: generated from `shared/hooks/harness_guard.py`; the Gemini
   adapter maps Antigravity payloads and returns an allow decision with warning
   context. Context-read warnings run at `PreToolUse` because Antigravity's
   `PostToolUse` payload does not include tool arguments.
-- Skills: Antigravity discovers the shared `.agents/skills/` directory and the
-  Gemini-only `.agent/skills/` directory, preferring `.agent/skills/` on a name
-  clash. Source: `templates/.agent/skills/`; the template ships 9 Gemini-only
-  skill directories for work Claude Code and Codex already cover natively.
+- Skills: Antigravity reads `.agents/skills/` (it still reads the legacy
+  `.agent/skills/`, which the kit no longer writes). The config's
+  `exclusiveSkills` lists the 9 Gemini-only
+  skill directories, which install only when the project selects Gemini; they
+  cover work Claude Code and Codex already handle natively.
+- Rules: `templates/rules/` installs to `.agents/rules/`, which Antigravity
+  loads in every session. It ships `testing-workflow.md`. Project-owned rule
+  files are left alone.
 
 ## Claude Code
 
-- Source: `templates/`.
-- Runtime destination: `.agents/`.
-- Repository instruction: `templates/CLAUDE.md` to root `CLAUDE.md`.
-- Lifecycle integration: `templates/.claude/settings.json` merges into root
-  `.claude/settings.json`. Preserve unrelated Claude settings and custom hooks
+- Config: `templates/agents/claude.json`.
+- Repository instruction: `templates/instructions/CLAUDE.md` merges its `KIT`
+  block into root `CLAUDE.md`.
+- Lifecycle integration: `templates/hooks/claude.json` merges into
+  `.claude/settings.json`, and the guard and adapter install to
+  `.agents/claude/hooks/`. Preserve unrelated Claude settings and custom hooks
   while updating hook groups that call the kit-managed Claude adapter.
 - Hook policy: generated from `shared/hooks/harness_guard.py`; the Claude
   adapter maps Claude Code hook payloads and injects warning context without
   blocking tool calls.
-- Skills: each managed shared skill is exposed as `.claude/skills/<name>`, a
-  relative symlink to `../../.agents/skills/<name>`. Gemini-only skills are not
-  linked.
-- The current template ships Claude hook files under `.agents/claude/hooks/`.
+- Skills: each installed skill that is not exclusive to another agent is
+  exposed as `.claude/skills/<name>`, a relative symlink to
+  `../../.agents/skills/<name>`.
 
 ## Shared Rules
 
-- Preserve relative paths within each toolkit.
-- Skill scripts live directly inside each skill directory under
-  `templates/.agents/skills/`; there is no generated copy.
+- Every template file exists once. Skills live in `templates/skills/<name>/`,
+  with their scripts inside; there is no generated copy.
+- Every file an agent config lists is hash-managed: `update` keeps a locally
+  modified file unless `--force`, and deletes an unmodified kit file once no
+  selected agent wants it.
+- Removing an agent strips its `KIT` block and kit hook entries, deleting the
+  file only when nothing else is left in it.
 - Shared lifecycle policy and target adapters have canonical sources under
-  `shared/hooks/` and committed generated copies in each target template.
+  `shared/hooks/`, synced once into `templates/hooks/`.
 - Canonical source and sync tooling are development-only; npm installation
   ships the generated target templates without extra shared-source payload.
 - Use `npm run sync:shared-hooks`, `npm run check:shared-hooks`, and

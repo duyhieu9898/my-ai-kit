@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import test from 'node:test';
 import { hashSkillDir } from '../lib/hash.js';
-import { adoptLegacySkills, applySkillPlan, syncClaudeLinks } from '../lib/skills.js';
+import { adoptLegacySkills, applySkillPlan, syncSkillLinks } from '../lib/skills.js';
 import { makeKit, makeProject } from './helpers.js';
 
 const setup = () => {
@@ -67,7 +67,7 @@ test('conflict is checked before any filesystem writes, across the whole plan', 
     assert.ok(!fs.existsSync(path.join(projectSkillsDir, 'a')));
 });
 
-test('syncClaudeLinks links managed skills and removes links of previously managed skills only', () => {
+test('syncSkillLinks links managed skills and removes links of previously managed skills only', () => {
     const { projectDir, apply } = setup();
     apply([{ name: 'a', action: 'add' }]);
     const claudeDir = path.join(projectDir, '.claude', 'skills');
@@ -76,7 +76,7 @@ test('syncClaudeLinks links managed skills and removes links of previously manag
     fs.symlinkSync('../../.agents/skills/my-own', path.join(claudeDir, 'my-own'));
     fs.symlinkSync('/elsewhere/other', path.join(claudeDir, 'other'));
 
-    const warnings = syncClaudeLinks({ projectDir, managedNames: ['a'], previousManagedNames: ['a', 'gone', 'other'] });
+    const warnings = syncSkillLinks({ projectDir, managedNames: ['a'], previousManagedNames: ['a', 'gone', 'other'] });
 
     assert.equal(fs.readlinkSync(path.join(claudeDir, 'a')), '../../.agents/skills/a');
     assert.ok(fs.existsSync(path.join(claudeDir, 'a', 'SKILL.md')));
@@ -86,15 +86,29 @@ test('syncClaudeLinks links managed skills and removes links of previously manag
     assert.deepEqual(warnings, []);
 });
 
-test('syncClaudeLinks leaves a foreign entry with a managed name alone', () => {
+test('syncSkillLinks leaves a foreign entry with a managed name alone', () => {
     const { projectDir } = setup();
     const claudeDir = path.join(projectDir, '.claude', 'skills');
     fs.mkdirSync(claudeDir, { recursive: true });
     fs.symlinkSync('/elsewhere/a', path.join(claudeDir, 'a'));
-    const warnings = syncClaudeLinks({ projectDir, managedNames: ['a'], previousManagedNames: [] });
+    const warnings = syncSkillLinks({ projectDir, managedNames: ['a'], previousManagedNames: [] });
     assert.equal(fs.readlinkSync(path.join(claudeDir, 'a')), '/elsewhere/a');
     assert.equal(warnings.length, 1);
     assert.match(warnings[0], /\.claude\/skills\/a/);
+});
+
+test('syncSkillLinks removes kit links and empty folders when no skill is linked any more', () => {
+    const { projectDir, apply } = setup();
+    apply([{ name: 'a', action: 'add' }]);
+    syncSkillLinks({ projectDir, managedNames: ['a'], previousManagedNames: [] });
+    syncSkillLinks({ projectDir, managedNames: [], previousManagedNames: ['a'] });
+    assert.equal(fs.existsSync(path.join(projectDir, '.claude')), false);
+});
+
+test('syncSkillLinks creates no folder when there is nothing to link', () => {
+    const { projectDir } = setup();
+    syncSkillLinks({ projectDir, managedNames: [], previousManagedNames: [] });
+    assert.equal(fs.existsSync(path.join(projectDir, '.claude')), false);
 });
 
 test('adoptLegacySkills records existing kit-named directories only', () => {

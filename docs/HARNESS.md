@@ -151,14 +151,14 @@ product docs plus executable tests become the living contract.
 Skills follow the open Agent Skills format and the kit standard in
 `docs/skills/SKILL_STANDARD.md` (ADR 0016). Descriptions follow
 `docs/skills/DESCRIPTION_GUIDE.md`. One `SKILL.md` under
-`templates/.agents/skills/` serves Claude Code, Codex, and Antigravity; keep
+`templates/skills/` serves Claude Code, Codex, and Antigravity; keep
 frontmatter to `name` and `description`, and put Codex UI metadata in
 `agents/openai.yaml`.
 
 Use `skills-ref` as the upstream structural validator when it is available:
 
 ```bash
-skills-ref validate templates/.agents/skills/<skill-name>
+skills-ref validate templates/skills/<skill-name>
 ```
 
 For bulk template work, validate each affected skill with `skills-ref` before

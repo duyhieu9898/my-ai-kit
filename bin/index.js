@@ -25,10 +25,11 @@ const formatSelection = (selection) => {
     return selection.exclude.length ? `${text} (excluding ${selection.exclude.join(', ')})` : text;
 };
 
-const report = ({ plan, warnings, dryRun }) => {
+const report = ({ plan, warnings, dryRun, manifest }) => {
+    console.log(`\nAgents: ${manifest.selection.agents.join(', ')}`);
     console.log(chalk.blueBright(dryRun ? '\nPlanned skill changes (dry run):' : '\nSkill changes:'));
     for (const action of ACTION_ORDER) {
-        const names = plan.filter((item) => item.action === action).map((item) => skillLabel(item.name, item.scope));
+        const names = plan.filter((item) => item.action === action).map((item) => skillLabel(item.name, item.agents));
         if (names.length) console.log(`  ${action.padEnd(14)} ${String(names.length).padStart(3)}  ${chalk.gray(names.join(', '))}`);
     }
     for (const warning of warnings) console.log(chalk.yellow(`⚠️  ${warning}`));
@@ -58,17 +59,25 @@ const installAction = async (skills, options) => {
     report(await runPipeline({
         projectDir: projectDirOf(options),
         command: 'install',
-        add: { all: Boolean(options.all), profiles: options.profile ? splitList(options.profile) : [], skills },
+        add: {
+            agents: options.agent ? splitList(options.agent) : [],
+            all: Boolean(options.all),
+            profiles: options.profile ? splitList(options.profile) : [],
+            skills,
+        },
         options,
     }));
 };
 
 const removeAction = async (skills, options) => {
     const removeProfiles = options.profile ? splitList(options.profile) : [];
-    if (skills.length === 0 && removeProfiles.length === 0) {
-        throw new KitError('Nothing to remove: pass skill names and/or --profile <names>');
+    const removeAgents = options.agent ? splitList(options.agent) : [];
+    if (skills.length === 0 && removeProfiles.length === 0 && removeAgents.length === 0) {
+        throw new KitError('Nothing to remove: pass skill names, --profile <names>, and/or --agent <names>');
     }
-    report(await runPipeline({ projectDir: projectDirOf(options), command: 'remove', remove: skills, removeProfiles, options }));
+    report(await runPipeline({
+        projectDir: projectDirOf(options), command: 'remove', remove: skills, removeProfiles, removeAgents, options,
+    }));
 };
 
 const updateAction = async (options) => {
@@ -78,13 +87,14 @@ const updateAction = async (options) => {
 const listAction = async (options) => {
     const catalog = await loadCatalog({ projectDir: projectDirOf(options), options });
     const installed = new Set(catalog.installed);
-    const geminiSkills = new Set(catalog.geminiSkills);
     console.log(chalk.blueBright(`\nSource: ${formatSource(catalog.source)}`));
+    console.log(chalk.blueBright(`\nAgents: ${catalog.agents.join(', ')}`));
     console.log(chalk.blueBright('\nProfiles:'));
     for (const [name, skills] of Object.entries(catalog.profiles)) console.log(`  ${name.padEnd(16)} ${chalk.gray(skills.join(', '))}`);
     console.log(chalk.blueBright(`\nSkills (${catalog.skills.length}):`));
     for (const name of catalog.skills) {
-        console.log(`  ${installed.has(name) ? chalk.green('✓') : ' '} ${name}${geminiSkills.has(name) ? chalk.gray(' (gemini)') : ''}`);
+        const owners = catalog.exclusiveOwners[name];
+        console.log(`  ${installed.has(name) ? chalk.green('✓') : ' '} ${name}${owners.length ? chalk.gray(` (${owners.join(', ')} only)`) : ''}`);
     }
 };
 
@@ -97,6 +107,7 @@ const statusAction = (options) => {
     }
     console.log(chalk.blueBright('\n📊 AI Kit Status\n'));
     console.log(`Source:         ${formatSource(status.source)}`);
+    console.log(`Agents:         ${status.selection.agents.join(', ')}`);
     console.log(`Selection:      ${formatSelection(status.selection)}`);
     console.log(`Managed skills: ${status.managed.length}`);
     if (status.legacy) console.log(chalk.yellow('Legacy install detected: run `hieund-ai-kit update` to migrate.'));
@@ -129,16 +140,18 @@ program
     .version(CLI_VERSION, '-v, --version', 'Display version number');
 
 withSource(program.command('install').alias('init'))
-    .description('Install skills (all by default) plus hooks and root instructions')
+    .description('Install skills (all by default) plus each agent\'s hooks and root instructions')
     .argument('[skills...]', 'Skill names to add')
+    .option('--agent <names>', 'Comma-separated agents to add: claude, codex, gemini (first install: claude,codex)')
     .option('--profile <names>', 'Comma-separated profile names to add')
     .option('--all', 'Select every skill', false)
     .action(run(installAction));
 
 withSource(program.command('remove'))
-    .description('Remove skills or profiles from the selection and the project')
+    .description('Remove skills, profiles, or agents from the selection and the project')
     .argument('[skills...]', 'Skill names to remove')
     .option('--profile <names>', 'Comma-separated profile names to remove from the selection')
+    .option('--agent <names>', 'Comma-separated agents to remove, with their files and agent-only skills')
     .action(run(removeAction));
 
 withSource(program.command('update'))

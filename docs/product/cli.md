@@ -5,8 +5,12 @@
 ### `install` (alias `init`)
 
 - Install skills (all by default, or a named profile, or individual skills)
-  plus hooks and root instructions for Codex, Gemini Antigravity, and Claude
-  Code, side-by-side.
+  plus the hooks, root instruction, and files of each selected agent, as
+  declared in `templates/agents/<agent>.json`, and the files in
+  `templates/agents/shared.json`.
+- `--agent <names>` (comma-separated: `claude`, `codex`, `gemini`) adds agents
+  to `selection.agents`. A first install without it selects `claude,codex`;
+  a later install without it keeps the stored agents.
 - Write and maintain `.ai-kit.json` (source, selection, and `managedSkills`
   and `managedFiles` with content hashes).
 - Merge a kit-owned `KIT` block into each root instruction file; the rest of
@@ -17,31 +21,48 @@
   byte-identical is adopted as managed.
 - `install --profile P` keeps earlier explicit excludes for skills in `P`;
   re-add such a skill by name (`install <skill>`).
+- Every skill installs into `.agents/skills/`. A skill listed in an agent's
+  `exclusiveSkills` installs only while that agent is selected; naming one
+  without its agent fails with the `--agent` to add. Its record stores
+  `agents`, and Claude links only skills not exclusive to other agents.
+- A manifest without `selection.agents` (4.x and pre-release 5.0) gets every
+  agent; on that run, existing files the kit installs count as kit-owned even
+  without a recorded hash, and pre-4.0 `.agents/gemini/{skills,agents,workflows}`
+  are deleted.
+- A manifest that still records `managedGeminiSkills` (pre-release builds that
+  used `.agent/skills/`) gets those skills in `.agents/skills/`; the run deletes
+  the kit's unmodified copies under `.agent/skills/` and warns about modified
+  ones.
 - Names stored in the selection that no longer exist in the kit are dropped
   with a warning; names passed on the command line must exist.
 - Support `--path`, `--ref`, `--source`, `--link` (requires `--source`),
-  `--dry-run`, `--force`, and `--profile <names>` / `--all`.
+  `--dry-run`, `--force`, `--profile <names>` / `--all`, and `--agent <names>`.
 
-### `remove [skills...] [--profile <names>]`
+### `remove [skills...] [--profile <names>] [--agent <names>]`
 
 - Remove the named skills from the manifest selection and from the project
   (including their `.claude/skills/<name>` symlink). A skill name is accepted
   when it exists in the kit, in the selection, or in `managedSkills`, so a
   skill deleted upstream can still be removed.
 - `--profile <names>` (comma-separated) drops profiles from the selection; a
-  name that is neither selected nor in the kit fails. Pass skills, `--profile`,
-  or both.
+  name that is neither selected nor in the kit fails.
+- `--agent <names>` drops agents: their `KIT` block and kit hook entries are
+  stripped (a file left empty is deleted), their unmodified kit files and
+  skill links are deleted, and skills exclusive to them are removed. Skills
+  named explicitly stay in the selection and return with the agent. Removing
+  the last agent fails. Pass at least one of skills, `--profile`, or `--agent`.
 - Support the same `--path`, `--ref`, `--source`, `--link`, `--dry-run`, and
   `--force` options as `install`.
 
 ### `update`
 
-- Refresh kit-managed skills, hooks, and settings for Codex, Gemini
-  Antigravity, and Claude Code.
+- Refresh kit-managed skills, hooks, and settings for the selected agents.
 - Skip a managed skill that was modified locally unless `--force` is
   supplied; never touch a skill that is not in `managedSkills`.
-- Update shared `.agents/` scripts and toolkit files that still match their
-  `managedFiles` hash; keep a locally modified one unless `--force`.
+- Update the files of the selected agents that still match their
+  `managedFiles` hash; keep a locally modified one unless `--force`. Delete
+  an unmodified kit file no selected agent wants any more; keep a modified one
+  with a warning.
 - Drop skills and profiles that no longer exist in the kit from the selection
   with a warning, and remove their managed copies (a locally modified copy is
   kept).
@@ -51,15 +72,15 @@
 
 ### `list`
 
-- List the skills available in the resolved template source and the profiles
-  declared in `templates/kit.json`.
+- List the agents, the skills available in the resolved template source (marking
+  agent-exclusive ones), and the profiles declared in `templates/kit.json`.
 - Support `--path`, `--ref`, and `--source`.
 
 ### `status`
 
 - Report installation state from `.ai-kit.json` only (no network access):
-  selected skills, modified or missing managed skills, broken Claude symlinks,
-  and project-owned skills.
+  selected agents and skills, modified or missing managed skills, broken
+  Claude symlinks (when Claude is selected), and project-owned skills.
 - Support `--path`.
 
 ## Options
@@ -82,5 +103,5 @@
 
 - Publish `bin/`, `lib/`, and `templates/` in the npm package.
 - Keep `bin/index.js` executable.
-- Resolve root instruction paths from `templates/`, independently from the
-  skill source installed into `.agents/skills/`.
+- Resolve every template path from `templates/agents/*.json`, independently
+  from the skill source installed into `.agents/skills/`.

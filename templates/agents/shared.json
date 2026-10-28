@@ -1,0 +1,7 @@
+{
+  "files": [
+    { "src": "scripts/", "dest": ".agents/scripts/" },
+    { "src": "ARCHITECTURE.md", "dest": ".agents/ARCHITECTURE.md" },
+    { "src": "ux_audit.json", "dest": ".agents/ux_audit.json" }
+  ]
+}

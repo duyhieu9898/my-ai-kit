@@ -1,0 +1,8 @@
+{
+  "instruction": { "src": "instructions/AGENTS.md", "dest": "AGENTS.md" },
+  "hooks": { "src": "hooks/codex.json", "dest": ".codex/hooks.json" },
+  "files": [
+    { "src": "hooks/harness_guard.py", "dest": ".codex/hooks/harness_guard.py" },
+    { "src": "hooks/codex_adapter.py", "dest": ".codex/hooks/codex_adapter.py" }
+  ]
+}

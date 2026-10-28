@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ambiguity Decisions"
+  short_description: "Decide, ask, or record when a coding task is ambiguous"
+  default_prompt: "Use $ambiguity-decisions to settle the open questions before building the filter panel."

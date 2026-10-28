@@ -5,6 +5,10 @@
   only the references the task needs.
 - Keep changes scoped: no speculative abstractions or unrelated cleanup;
   update affected callers, tests, and contracts in the same task.
+- Before fixing or tuning an existing mechanism, check that it still serves
+  the needed outcome; patch, replace, or remove it, whichever is smallest.
+- Edit docs in place with one home per fact, and delete what your change made
+  stale.
 - Proceed when intent is clear, including `continue`, `fix it`, or
   `sửa toàn bộ`. State a short plan first for broad or risky work. Ask
   before destructive, credential-related, or security-sensitive actions.

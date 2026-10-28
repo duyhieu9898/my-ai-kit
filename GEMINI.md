@@ -11,7 +11,7 @@ trigger: always_on
 
 ## 🚀 DEVELOPMENT PROTOCOL
 
-> Read the relevant skill in `.agents/skills/<name>/SKILL.md` or `.agent/skills/<name>/SKILL.md` before implementation. Priority of rules: P0 (this file and the project's own conventions) > P1 (the active SKILL.md) > P2 (the skill's references).
+> Read the relevant skill in `.agents/skills/<name>/SKILL.md` before implementation. Gemini-only skills such as `clean-code`, `verify-changes`, and `lint-and-validate` install only for Gemini, so other agents do not see them; skip a reference whose skill is missing. Priority of rules: P0 (this file and the project's own conventions) > P1 (the active SKILL.md) > P2 (the skill's references).
 
 1. **Modular Skill Loading:** Read the index file `SKILL.md` first, then only read specific sections directly related to the task.
 2. **Read -> Understand -> Apply:** Identify the goal of the skill and its project-specific rules before writing code.
@@ -46,7 +46,7 @@ Ask only when missing information makes the next action ambiguous, risky, or des
 ## 🧹 UNIVERSAL RULES
 
 *   **Language:** Respond in the user's language (e.g., Vietnamese). Keep all identifiers, variable names, and code comments in English.
-*   **Clean Code:** Follow `.agent/skills/clean-code/SKILL.md`. Write concise, minimalist code, avoid unnecessary abstractions, and do not over-engineer.
+*   **Clean Code:** Follow `.agents/skills/clean-code/SKILL.md`. Write concise, minimalist code, avoid unnecessary abstractions, and do not over-engineer.
 *   **File Dependency:** Before editing, find the callers, imports, tests, and contracts the change affects, and update them in the same task.
 *   **System Map:** Read `.agents/ARCHITECTURE.md` when changing the shared agent toolkit.
 
@@ -59,7 +59,7 @@ Ask only when missing information makes the next action ambiguous, risky, or des
 ### 1. Proof Ladder
 *   **Documentation (Docs):** Run `git diff --check`.
 *   **Source Code:** Run linters, type checks, or unit tests matching the modified files.
-*   **Toolkit or skill changes:** Validate frontmatter, links, scripts, and changed skill paths. See `.agent/skills/verify-changes/SKILL.md`.
+*   **Toolkit or skill changes:** Validate frontmatter, links, scripts, and changed skill paths. See `.agents/skills/verify-changes/SKILL.md`.
 
 ### 2. Checklist Priority (Final verification request)
 Run the project audit command `python3 .agents/scripts/checklist.py .`, and fix findings in this order: Security → Lint → Schema → Tests → UX → SEO → E2E.
@@ -71,7 +71,7 @@ Run the project audit command `python3 .agents/scripts/checklist.py .`, and fix 
 *   **Main Verification Scripts:**
     *   *Verify All:* `.agents/scripts/verify_all.py`
     *   *Security Scan:* `.agents/skills/security-auditor/scripts/security_scan.py`
-    *   *Linter:* `.agent/skills/lint-and-validate/scripts/lint_runner.py`
+    *   *Linter:* `.agents/skills/lint-and-validate/scripts/lint_runner.py`
     *   *Unit Tests:* `.agents/skills/risk-based-testing/scripts/test_runner.py`
 *   **UI Styling Rules:** Read `.agents/skills/frontend-design/SKILL.md` before restyling or theming UI (tokens first, then component variants).
 <!-- KIT:END -->

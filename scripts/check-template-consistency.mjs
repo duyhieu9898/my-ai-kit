@@ -90,8 +90,8 @@ function strayPaths(relativePath) {
     });
 }
 
-function checkSkillStandard(targetName, skillsPath, skillNames, { requireOpenAiYaml = true } = {}) {
-  for (const skillName of immediateDirectories(skillsPath)) {
+function checkSkillStandard(targetName, skillsPath, checkedNames, skillNames, { requireOpenAiYaml = true } = {}) {
+  for (const skillName of checkedNames) {
     const skillDir = `${skillsPath}/${skillName}`;
     const skillMd = `${skillDir}/SKILL.md`;
     const openAiYamlPath = `${skillDir}/agents/openai.yaml`;
@@ -157,32 +157,34 @@ function checkSkillReferenceLinks(targetName, skillNames, markdownPaths) {
 }
 
 const toolkitDocs = readText("docs/product/toolkits.md");
-const codexArchitecture = readText("templates/.agents/ARCHITECTURE.md");
-const sharedSkillsPath = "templates/.agents/skills";
-const geminiSkillsPath = "templates/.agent/skills";
-const sharedSkillNames = new Set(immediateDirectories(sharedSkillsPath));
-// Antigravity reads both folders; Codex and Claude see only the shared one.
-const geminiSkillNames = new Set([...sharedSkillNames, ...immediateDirectories(geminiSkillsPath)]);
+const codexArchitecture = readText("templates/ARCHITECTURE.md");
+const skillsPath = "templates/skills";
+const allSkillNames = immediateDirectories(skillsPath);
+const agentConfig = (name) => JSON.parse(readText(`templates/agents/${name}.json`));
+// Skills exclusive to Gemini install only when a project selects the Gemini agent.
+const geminiOnlyNames = new Set(agentConfig("gemini").exclusiveSkills ?? []);
+const sharedSkillNames = new Set(allSkillNames.filter((name) => !geminiOnlyNames.has(name)));
+const geminiSkillNames = new Set(allSkillNames);
 
 const codexSkillCount = sharedSkillNames.size;
-const geminiOnlySkillCount = immediateDirectories(geminiSkillsPath).length;
+const geminiOnlySkillCount = geminiOnlyNames.size;
 const codexOpenAiCount = [...sharedSkillNames].filter(
   (skillName) =>
-    exists(`templates/.agents/skills/${skillName}/agents/openai.yaml`),
+    exists(`${skillsPath}/${skillName}/agents/openai.yaml`),
 ).length;
-const codexUxAuditConfigPath = "templates/.agents/ux_audit.json";
-const codexHooksConfigPath = "templates/.codex/hooks.json";
-const codexHarnessGuardPath = "templates/.codex/hooks/harness_guard.py";
-const codexHookAdapterPath = "templates/.codex/hooks/codex_adapter.py";
-const geminiHooksConfigPath = "templates/.agents/hooks.json";
-const geminiHarnessGuardPath = "templates/.agents/gemini/hooks/harness_guard.py";
-const geminiHookAdapterPath = "templates/.agents/gemini/hooks/gemini_adapter.py";
-const claudeRootInstructionPath = "templates/CLAUDE.md";
-const claudeSettingsPath = "templates/.claude/settings.json";
-const claudeHarnessGuardPath = "templates/.agents/claude/hooks/harness_guard.py";
-const claudeHookAdapterPath = "templates/.agents/claude/hooks/claude_adapter.py";
-const codexSkillMarkdownPaths = recursiveFiles(sharedSkillsPath, ".md");
-const geminiSkillMarkdownPaths = recursiveFiles(geminiSkillsPath, ".md");
+const codexUxAuditConfigPath = "templates/ux_audit.json";
+const codexHooksConfigPath = "templates/hooks/codex.json";
+const harnessGuardPath = "templates/hooks/harness_guard.py";
+const codexHookAdapterPath = "templates/hooks/codex_adapter.py";
+const geminiHooksConfigPath = "templates/hooks/gemini.json";
+const geminiHookAdapterPath = "templates/hooks/gemini_adapter.py";
+const claudeRootInstructionPath = "templates/instructions/CLAUDE.md";
+const claudeSettingsPath = "templates/hooks/claude.json";
+const claudeHookAdapterPath = "templates/hooks/claude_adapter.py";
+const skillMarkdownPaths = (names) =>
+  [...names].flatMap((name) => recursiveFiles(`${skillsPath}/${name}`, ".md"));
+const codexSkillMarkdownPaths = skillMarkdownPaths(sharedSkillNames);
+const geminiSkillMarkdownPaths = skillMarkdownPaths(geminiOnlyNames);
 const templateMarkdownPaths = [...codexSkillMarkdownPaths, ...geminiSkillMarkdownPaths];
 
 const docsCodexSkillCount = requireMatch(
@@ -198,7 +200,7 @@ record(
 );
 const docsGeminiOnlySkillCount = requireMatch(
   toolkitDocs,
-  /ships (\d+) Gemini-only\s+skill directories/,
+  /(\d+) Gemini-only\s+skill directories/,
   "Gemini-only skill count in docs/product/toolkits.md",
 );
 record(
@@ -226,24 +228,24 @@ record(
 record(
   "Codex lifecycle hook files exist",
   exists(codexHooksConfigPath) &&
-    exists(codexHarnessGuardPath) &&
+    exists(harnessGuardPath) &&
     exists(codexHookAdapterPath),
-  `${codexHooksConfigPath}, ${codexHarnessGuardPath}, ${codexHookAdapterPath}`,
+  `${codexHooksConfigPath}, ${harnessGuardPath}, ${codexHookAdapterPath}`,
 );
 record(
   "Gemini lifecycle hook files exist",
   exists(geminiHooksConfigPath) &&
-    exists(geminiHarnessGuardPath) &&
+    exists(harnessGuardPath) &&
     exists(geminiHookAdapterPath),
-  `${geminiHooksConfigPath}, ${geminiHarnessGuardPath}, ${geminiHookAdapterPath}`,
+  `${geminiHooksConfigPath}, ${harnessGuardPath}, ${geminiHookAdapterPath}`,
 );
 record(
   "Claude Code instruction and hook files exist",
   exists(claudeRootInstructionPath) &&
     exists(claudeSettingsPath) &&
-    exists(claudeHarnessGuardPath) &&
+    exists(harnessGuardPath) &&
     exists(claudeHookAdapterPath),
-  `${claudeRootInstructionPath}, ${claudeSettingsPath}, ${claudeHarnessGuardPath}, ${claudeHookAdapterPath}`,
+  `${claudeRootInstructionPath}, ${claudeSettingsPath}, ${harnessGuardPath}, ${claudeHookAdapterPath}`,
 );
 if (exists(codexHooksConfigPath)) {
   const codexHooksConfig = JSON.parse(readText(codexHooksConfigPath));
@@ -276,17 +278,9 @@ if (exists(claudeSettingsPath)) {
     claudeSettingsPath,
   );
 }
-if (exists(codexHarnessGuardPath) && exists(geminiHarnessGuardPath) && exists(claudeHarnessGuardPath)) {
-  record(
-    "Codex, Gemini, and Claude share the same Harness guard policy",
-    readText(codexHarnessGuardPath) === readText(geminiHarnessGuardPath) &&
-      readText(codexHarnessGuardPath) === readText(claudeHarnessGuardPath),
-    `${codexHarnessGuardPath}, ${geminiHarnessGuardPath}, ${claudeHarnessGuardPath}`,
-  );
-}
-checkSkillStandard("codex", sharedSkillsPath, sharedSkillNames);
-// Codex UI metadata is useless where Codex never looks.
-checkSkillStandard("gemini", geminiSkillsPath, geminiSkillNames, { requireOpenAiYaml: false });
+checkSkillStandard("codex", skillsPath, [...sharedSkillNames], sharedSkillNames);
+// Codex UI metadata is not needed for skills only Gemini is meant to use.
+checkSkillStandard("gemini", skillsPath, [...geminiOnlyNames], geminiSkillNames, { requireOpenAiYaml: false });
 const kitRegistry = JSON.parse(readText("templates/kit.json"));
 record(
   "templates/kit.json declares formatVersion 2",

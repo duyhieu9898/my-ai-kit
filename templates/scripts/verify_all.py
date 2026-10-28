@@ -165,8 +165,9 @@ VERIFICATION_SUITE = [
     {
         "category": "Code Quality",
         "checks": [
-            ("Lint Check", ".agent/skills/lint-and-validate/scripts/lint_runner.py", True),
-            ("Type Coverage", ".agent/skills/lint-and-validate/scripts/type_coverage.py", False),
+            # lint-and-validate is Gemini-only and installs only with the Gemini agent, so a missing runner is skipped.
+            ("Lint Check", ".agents/skills/lint-and-validate/scripts/lint_runner.py", False),
+            ("Type Coverage", ".agents/skills/lint-and-validate/scripts/type_coverage.py", False),
         ]
     },
     

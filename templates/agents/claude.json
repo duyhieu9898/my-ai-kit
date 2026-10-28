@@ -1,0 +1,9 @@
+{
+  "instruction": { "src": "instructions/CLAUDE.md", "dest": "CLAUDE.md" },
+  "hooks": { "src": "hooks/claude.json", "dest": ".claude/settings.json" },
+  "files": [
+    { "src": "hooks/harness_guard.py", "dest": ".agents/claude/hooks/harness_guard.py" },
+    { "src": "hooks/claude_adapter.py", "dest": ".agents/claude/hooks/claude_adapter.py" }
+  ],
+  "skills": { "link": ".claude/skills" }
+}
