@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codebase Health Scan"
+  short_description: "Find hotspots, duplicates, cycles, and mixed libraries"
+  default_prompt: "Use $codebase-health-scan to rank what this frontend should refactor first."
